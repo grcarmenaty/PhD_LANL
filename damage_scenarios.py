@@ -183,6 +183,15 @@ def _pristine_geom() -> BuildingGeometry:
     g.column_factor = _CF_CAL.copy()
     if _DAMP_MODES is not None:
         g.damping_modes = _DAMP_MODES
+    # Calibrated per-plate extra masses (independent of test weights, which
+    # are applied additively below by ``geometry_for_case``).
+    if _CAL_FILE.exists():
+        cal = np.load(_CAL_FILE)
+        for k, key in enumerate(['plate_extra_mass_fl1',
+                                  'plate_extra_mass_fl2',
+                                  'plate_extra_mass_fl3'], start=1):
+            if key in cal.files:
+                g.plate_extra_mass[k] += float(cal[key])
     return g
 
 
