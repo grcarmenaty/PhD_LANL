@@ -381,7 +381,20 @@ def compute_frf_matrix(freq_array: np.ndarray,
     is_elastic = ~is_rigid
 
     n_freq = len(omega)
-    elastic_H = np.zeros((n_freq, C.shape[1], B.shape[1]), dtype=complex)
+    H = np.zeros((n_freq, C.shape[1], B.shape[1]), dtype=complex)
+
+    # ── Rigid-body contribution to accelerance ────────────────────────────
+    # The 3SBB base plate is free to translate in Y on a rail, so the
+    # eigenvalue problem returns one (or more) zero-frequency mode.  In
+    # accelerance form `H_a = -ω² · receptance`, that mode collapses to a
+    # *constant* `(c·φ_R)(b·φ_R)` ≈ 1/M_total — the "rigid-body floor"
+    # that the experiment shows at low frequencies and that the elastic-only
+    # modal sum was dropping (giving |H| → 0 as ω → 0).
+    if is_rigid.any():
+        b_r = bphi[is_rigid]                 # (n_r, n_inputs)
+        c_r = cphi[is_rigid]                 # (n_r, n_outputs)
+        H_rigid = np.einsum('ro,ri->oi', c_r, b_r)   # (n_outputs, n_inputs)
+        H += H_rigid[None, :, :]
 
     if is_elastic.any():
         wn  = omega_n[is_elastic]   # (n_el,)
@@ -411,5 +424,6 @@ def compute_frf_matrix(freq_array: np.ndarray,
 
         # H[freq, out, in] = sum_r  c_e[r,out] * b_e[r,in] * kernel[r,freq]
         elastic_H = np.einsum('ro,ri,rf->foi', c_e, b_e, kernel)
+        H += elastic_H
 
-    return elastic_H
+    return H
