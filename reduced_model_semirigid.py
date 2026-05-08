@@ -127,6 +127,14 @@ class BuildingGeometry:
     # that extends past 95 Hz on floor-3 sensors.
     plate_flex2_freq_hz: float = 0.0
     plate_flex2_mass_per_floor: np.ndarray = field(default=None)
+    # When True, output sensors at the plate's z are wired to the flex
+    # DOF instead of the main plate-Y DOF for plates that have an active
+    # flex set.  Models the physical sensor location: S5/S11 sit on top
+    # of the plate, so they "see" the upper half of a discretised plate
+    # rather than the lower half (where the columns attach).  Removes
+    # the H_yy anti-resonance from the rise band (H_qy has no zero
+    # below its resonance).
+    sensors_on_flex: bool = False
     # Grounded oscillators: each is a hidden mass that lives "outside" the
     # building, connected to ground by its own spring, and coupled to a
     # specific plate's Y DOF only through a dashpot (no spring coupling).
@@ -589,6 +597,19 @@ def point_to_dof_vector(point: Point,
 
     s = plate_idx
     ix, iy, it = geom.upper_dof_slice(s)
+    # If the plate has an active flex set and ``sensors_on_flex`` is on,
+    # redirect Y outputs to the flex (upper-half) DOF.  H from base to q
+    # has no anti-resonance below the new mode (the q-row of the inverse
+    # impedance is constant in the numerator), so the rise band fills
+    # cleanly while the lower-frequency Y modes still come through the
+    # plate-Y → q coupling spring.
+    if (direction == 'Y'
+            and getattr(geom, 'sensors_on_flex', False)
+            and geom._flex_set_active(1)):
+        iq = geom.flex_dof(s, 1)
+        if iq is not None:
+            b[iq] = 1.0
+            return b
     if direction == 'X':
         b[ix] = 1.0
         b[it] = -ry

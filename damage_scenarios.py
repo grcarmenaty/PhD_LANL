@@ -194,6 +194,7 @@ def _pristine_geom() -> BuildingGeometry:
         base_extra_mass       = _M_BASE,
     )
     g.column_factor = _CF_CAL.copy()
+    g.sensors_on_flex = True   # floor-3 sensors live on the flex (upper) DOF
     if _DAMP_MODES is not None:
         g.damping_modes = _DAMP_MODES
     # Calibrated per-plate extra masses (independent of test weights, which
