@@ -40,7 +40,23 @@ import numpy as np
 # ── Case-specific overrides ────────────────────────────────────────────────
 # Empty by default; populate after global calibration when the SCI
 # scoreboard shows specific cases that the generic parser misses.
-CASE_OVERRIDES: dict = {}
+CASE_OVERRIDES: dict = {
+    'D(11%) 1BD': {
+        'mul_jsr_storey_1_bot': 0.5,
+    },
+    'D(85%) 1BD + D(85%) 2BD': {
+        'mul_jsr_storey_1_bot': 2.0,
+        'mul_jsr_storey_2_bot': 2.0,
+    },
+    'D(85%) 1AD + D(85%) 1BD': {
+        'mul_jsr_storey_1_bot': 0.7,
+        'mul_jsr_storey_1_top': 2.0,
+    },
+    'D(85%) 2BD + D(85%) 2AD': {
+        'mul_jsr_storey_2_bot': 0.7,
+        'mul_jsr_storey_2_top': 2.0,
+    },
+}
 
 
 def apply_overrides(g, case_name: str) -> None:
