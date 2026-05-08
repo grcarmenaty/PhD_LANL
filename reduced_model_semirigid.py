@@ -86,14 +86,33 @@ class BuildingGeometry:
     rail_direction: str = P.RAIL_DIRECTION
     column_factor: np.ndarray = field(default=None)
     joint_stiffness_ratio: float = float('inf')  # JSR; inf = fixed-fixed
+    # Optional per-storey JSR override.  When set (length n_stories) it is
+    # used instead of the scalar joint_stiffness_ratio, allowing bolted
+    # connections at different floors to have different effective rotational
+    # stiffness (which is physical: bolt torque history varies floor-to-floor).
+    joint_stiffness_ratio_per_storey: Optional[Sequence[float]] = None
     screw_mass_per_joint: float = 0.0            # kg per joint (2 screws)
     base_extra_mass: float = 0.0                 # kg — shaker + attachment on base plate
+    # Optional per-floor extra mass (length n_stories), kg, lumped at upper-plate
+    # translational DOFs.  Captures cabling, accelerometer mounts, etc.
+    floor_extra_mass: Optional[Sequence[float]] = None
 
     def __post_init__(self):
         if self.column_factor is None:
             self.column_factor = np.ones((self.n_stories, 4), dtype=float)
         else:
             self.column_factor = np.asarray(self.column_factor, dtype=float)
+        if self.joint_stiffness_ratio_per_storey is not None:
+            self.joint_stiffness_ratio_per_storey = np.asarray(
+                self.joint_stiffness_ratio_per_storey, dtype=float).ravel()
+            if self.joint_stiffness_ratio_per_storey.size != self.n_stories:
+                raise ValueError(
+                    f"joint_stiffness_ratio_per_storey must have length {self.n_stories}")
+        if self.floor_extra_mass is not None:
+            self.floor_extra_mass = np.asarray(self.floor_extra_mass, dtype=float).ravel()
+            if self.floor_extra_mass.size != self.n_stories:
+                raise ValueError(
+                    f"floor_extra_mass must have length {self.n_stories}")
 
     # ---- coordinate helpers ------------------------------------------------
     @property
@@ -135,11 +154,13 @@ class BuildingGeometry:
 # ---------------------------------------------------------------------------
 # Stiffness and mass matrices
 # ---------------------------------------------------------------------------
-def _column_lateral_stiffnesses(geom: BuildingGeometry) -> Tuple[float, float]:
+def _column_lateral_stiffnesses(geom: BuildingGeometry,
+                                  storey: Optional[int] = None) -> Tuple[float, float]:
     """Translational stiffness of one nominal (factor=1) column.
 
-    Applies the semi-rigid correction k_eff = k_ff * JSR/(JSR+6) when
-    ``geom.joint_stiffness_ratio`` is finite.
+    Applies the semi-rigid correction k_eff = k_ff * JSR/(JSR+6).  When
+    ``geom.joint_stiffness_ratio_per_storey`` is set and ``storey`` is
+    given, the per-storey JSR is used in place of the scalar value.
     """
     L  = geom.storey_height
     I_yy = geom.col_ly * geom.col_lx ** 3 / 12.0   # deflection in X
@@ -147,7 +168,11 @@ def _column_lateral_stiffnesses(geom: BuildingGeometry) -> Tuple[float, float]:
     kx = 12.0 * geom.young * I_yy / L ** 3
     ky = 12.0 * geom.young * I_xx / L ** 3
 
-    jsr = geom.joint_stiffness_ratio
+    if (geom.joint_stiffness_ratio_per_storey is not None
+            and storey is not None):
+        jsr = float(geom.joint_stiffness_ratio_per_storey[storey])
+    else:
+        jsr = geom.joint_stiffness_ratio
     if not np.isinf(jsr) and jsr > 0.0:
         cf = jsr / (jsr + 6.0)
         kx *= cf
@@ -188,9 +213,9 @@ def stiffness_matrix(geom: BuildingGeometry) -> np.ndarray:
     K     = np.zeros((n_dof, n_dof))
     cx, cy = geom.plate_centroid
     centres = geom.column_attachment_points()
-    kx, ky  = _column_lateral_stiffnesses(geom)
 
     for s in range(n):
+        kx, ky = _column_lateral_stiffnesses(geom, storey=s)
         for c, (xc_abs, yc_abs) in enumerate(centres):
             factor = float(geom.column_factor[s, c])
             if factor <= 0.0:
@@ -277,6 +302,8 @@ def mass_matrix(geom: BuildingGeometry) -> np.ndarray:
     for s in range(1, n + 1):
         ix, iy, it = geom.upper_dof_slice(s)
         m_s = m_plate + _screw_mass_per_plate(geom, s)
+        if geom.floor_extra_mass is not None:
+            m_s += float(geom.floor_extra_mass[s - 1])
         J_s = J_plate + _screw_J_per_plate(geom, s)
         M[ix, ix] = m_s
         M[iy, iy] = m_s

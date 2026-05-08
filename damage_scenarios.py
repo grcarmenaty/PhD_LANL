@@ -76,14 +76,21 @@ if _CAL_FILE.exists():
     # Per-mode damping if available
     _DAMPING_MODES = (np.array(_cal['damping_modes'])
                       if 'damping_modes' in _cal.files else None)
+    # v4 extras
+    _JSR_PER_STOREY  = (np.array(_cal['jsr_per_storey'])
+                        if 'jsr_per_storey' in _cal.files else None)
+    _FLOOR_EXTRA_MASS = (np.array(_cal['floor_extra_mass'])
+                         if 'floor_extra_mass' in _cal.files else None)
 else:
     import warnings
     warnings.warn("calibration_result.npz not found; using nominal JSR=7.9009")
-    _JSR            = 7.9009
-    _M_EXTRA        = 0.0
-    _DAMPING        = 0.005
-    _CF_CAL         = np.ones((3, 4), dtype=float)
-    _DAMPING_MODES  = None
+    _JSR              = 7.9009
+    _M_EXTRA          = 0.0
+    _DAMPING          = 0.005
+    _CF_CAL           = np.ones((3, 4), dtype=float)
+    _DAMPING_MODES    = None
+    _JSR_PER_STOREY   = None
+    _FLOOR_EXTRA_MASS = None
 
 # ── Story stiffness ratio lookup (empirically calibrated) ─────────────────────
 # Key: damage percentage string → story-stiffness ratio k_damaged / k_pristine
@@ -103,10 +110,16 @@ _HOLE_6MM  = 0.97
 
 def _pristine_geom(**kw) -> BuildingGeometry:
     """Calibrated pristine BuildingGeometry (no damage)."""
+    extra = {}
+    if _JSR_PER_STOREY is not None:
+        extra['joint_stiffness_ratio_per_storey'] = _JSR_PER_STOREY.tolist()
+    if _FLOOR_EXTRA_MASS is not None:
+        extra['floor_extra_mass'] = _FLOOR_EXTRA_MASS.tolist()
     g = BuildingGeometry(
         joint_stiffness_ratio = _JSR,
         damping               = _DAMPING,
         base_extra_mass       = _M_EXTRA,
+        **extra,
         **kw,
     )
     g.column_factor = _CF_CAL.copy()

@@ -101,12 +101,19 @@ def pristine_geometry(screw_mass_per_joint=0.0):
     _CAL = _HERE / 'calibration_result.npz'
     if _CAL.exists():
         cal = np.load(_CAL)
-        g = BuildingGeometry(
+        kwargs = dict(
             joint_stiffness_ratio = float(cal['jsr']),
             damping               = float(cal['damping']),
             base_extra_mass       = float(cal['base_extra_mass']),
             screw_mass_per_joint  = screw_mass_per_joint,
         )
+        if 'jsr_per_storey' in cal.files:
+            kwargs['joint_stiffness_ratio_per_storey'] = (
+                np.array(cal['jsr_per_storey']).tolist())
+        if 'floor_extra_mass' in cal.files:
+            kwargs['floor_extra_mass'] = (
+                np.array(cal['floor_extra_mass']).tolist())
+        g = BuildingGeometry(**kwargs)
         g.column_factor = np.array([[float(cal['cf_s1'])] * 4,
                                     [float(cal['cf_s2'])] * 4,
                                     [float(cal['cf_s3'])] * 4], dtype=float)
