@@ -116,6 +116,23 @@ class BuildingGeometry:
     # that extends past 95 Hz on floor-3 sensors.
     plate_flex2_freq_hz: float = 0.0
     plate_flex2_mass_per_floor: np.ndarray = field(default=None)
+    # Grounded oscillators: each is a hidden mass that lives "outside" the
+    # building, connected to ground by its own spring, and coupled to a
+    # specific plate's Y DOF only through a dashpot (no spring coupling).
+    # Solved by the direct-inversion FRF path because the resulting damping
+    # matrix is non-proportional (the modal-superposition path can't see the
+    # cross-mode dissipation).  Each entry is a dict:
+    #   {'plate':         int (1..n_stories),
+    #    'mass':          float (kg),
+    #    'freq_hz':       float (Hz)  → grounded spring k = (2π f)² m,
+    #    'damp_coupling': float (N·s/m, optional, defaults to 0)}
+    grounded_oscillators: list = field(default_factory=list)
+    # Free-form dashpot couplings: list of (dof_a, dof_b, c_val) tuples added
+    # directly to the C matrix (with the standard
+    # `[[+c, -c], [-c, +c]]` sub-block).  Used by the direct-inversion FRF
+    # path when modelling non-proportional damping that doesn't fit the
+    # `grounded_oscillators` shape.
+    dashpot_couplings: list = field(default_factory=list)
 
     def __post_init__(self):
         if self.column_factor is None:
@@ -228,8 +245,20 @@ class BuildingGeometry:
         return 1 + 3 * self.n_stories
 
     @property
+    def n_grounded(self) -> int:
+        """Number of active grounded oscillators."""
+        return sum(1 for go in (self.grounded_oscillators or [])
+                   if float(go.get('mass', 0)) > 0
+                   and float(go.get('freq_hz', 0)) > 0)
+
+    def grounded_dof(self, idx: int) -> int:
+        """Index in the global state vector of the *idx*-th grounded
+        oscillator (0-based, in the order they appear in the list)."""
+        return self.n_dof_base + self.n_flex + idx
+
+    @property
     def n_dof(self) -> int:
-        return self.n_dof_base + self.n_flex
+        return self.n_dof_base + self.n_flex + self.n_grounded
 
     def upper_dof_slice(self, plate_index: int) -> Tuple[int, int, int]:
         if not (1 <= plate_index <= self.n_stories):
@@ -327,6 +356,18 @@ def stiffness_matrix(geom: BuildingGeometry) -> np.ndarray:
                 K[iq, iq] += k_flex
                 K[iy, iq] -= k_flex
                 K[iq, iy] -= k_flex
+
+    # ── Grounded oscillators ────────────────────────────────────────────
+    # Diagonal entry only — each grounded oscillator is connected to
+    # ground (not to the plate) through its own spring.  The plate
+    # coupling is dissipative and lives in the C matrix instead.
+    for idx, go in enumerate(geom.grounded_oscillators or []):
+        m_g = float(go.get('mass', 0.0))
+        f_g = float(go.get('freq_hz', 0.0))
+        if m_g <= 0.0 or f_g <= 0.0:
+            continue
+        ig = geom.grounded_dof(idx)
+        K[ig, ig] += (2.0 * np.pi * f_g) ** 2 * m_g
     cx, cy = geom.plate_centroid
     centres = geom.column_attachment_points()
     kx, ky  = _column_lateral_stiffnesses(geom)
@@ -438,6 +479,14 @@ def mass_matrix(geom: BuildingGeometry) -> np.ndarray:
                     continue
                 M[iq, iq] = float(masses[s - 1])
 
+    # Grounded oscillators
+    for idx, go in enumerate(geom.grounded_oscillators or []):
+        m_g = float(go.get('mass', 0.0))
+        if m_g <= 0.0 or float(go.get('freq_hz', 0.0)) <= 0.0:
+            continue
+        ig = geom.grounded_dof(idx)
+        M[ig, ig] = m_g
+
     return M
 
 
@@ -490,12 +539,142 @@ def point_to_dof_vector(point: Point,
 # FRF computation (modal superposition, accelerance in mm/s²/N)
 # ---------------------------------------------------------------------------
 
+def damping_matrix(geom: BuildingGeometry, damping=None) -> np.ndarray:
+    """Construct a full (n_dof, n_dof) viscous damping matrix.
+
+    Two contributions are summed:
+
+    1. **Modal (proportional) damping** built from the per-mode ratios
+       ``damping`` (scalar or array, same convention as
+       ``compute_frf_matrix``).  Equivalent to the modal-superposition
+       kernel when no other damping source is present, since
+       ``C = M Φ diag(2ζ_r ω_r) Φᵀ M`` with mass-normalised modes Φ
+       reproduces the same per-mode dissipation.
+    2. **Explicit dashpot couplings** from ``geom.dashpot_couplings`` —
+       a list of ``(dof_a, dof_b, c_val)`` triples added as
+       ``[[+c, -c], [-c, +c]]`` sub-blocks — *plus* the dashpot side of
+       any active ``geom.grounded_oscillators`` (each contributes an
+       off-diagonal coupling `c_yg` between its plate's Y DOF and the
+       grounded mass's DOF).
+
+    Building the C matrix lets the direct-inversion FRF path handle
+    non-proportional damping, which is what the grounded-oscillator
+    formulation needs (the modal-superposition path can't see
+    cross-mode dissipation).
+    """
+    if damping is None:
+        damping = geom.damping
+    K = stiffness_matrix(geom)
+    M = mass_matrix(geom)
+    omega2, V = eigh(K, M)
+    omega = np.sqrt(np.clip(omega2, 0.0, None))
+    n_dof = K.shape[0]
+
+    damp_arr = np.atleast_1d(np.asarray(damping, dtype=float)).ravel()
+    if damp_arr.size == 1:
+        zeta_full = np.full(n_dof, float(damp_arr[0]))
+    else:
+        zeta_full = np.full(n_dof, float(damp_arr[-1]))
+        m_fill = min(int(damp_arr.size), n_dof)
+        zeta_full[:m_fill] = damp_arr[:m_fill]
+
+    # zeta_full is indexed by elastic mode order, but eigh returns rigid
+    # modes first.  Skip rigid (omega < 1e-3) and re-align.
+    is_rigid = omega < 1e-3
+    n_rigid = int(is_rigid.sum())
+    diag = np.zeros(n_dof)
+    n_el = n_dof - n_rigid
+    if n_el > 0:
+        zeta_el = np.full(n_el, zeta_full[-1] if zeta_full.size else 0.0)
+        m_fill = min(zeta_full.size, n_el)
+        zeta_el[:m_fill] = zeta_full[:m_fill]
+        diag[~is_rigid] = 2.0 * zeta_el * omega[~is_rigid]
+
+    # C = M V diag V^T M  (mass-normalised modal coordinates)
+    C = M @ V @ np.diag(diag) @ V.T @ M
+
+    # Explicit dashpot couplings
+    for entry in (geom.dashpot_couplings or []):
+        a, b, c_val = entry
+        if c_val == 0.0:
+            continue
+        C[a, a] += c_val
+        C[b, b] += c_val
+        C[a, b] -= c_val
+        C[b, a] -= c_val
+
+    # Grounded-oscillator dashpot side: c_yg between plate Y DOF and the
+    # grounded oscillator's DOF.  (Spring side already lives in K.)
+    for idx, go in enumerate(geom.grounded_oscillators or []):
+        c_val = float(go.get('damp_coupling', 0.0))
+        if c_val <= 0.0:
+            continue
+        plate = int(go.get('plate', 0))
+        if not (1 <= plate <= geom.n_stories):
+            continue
+        _, iy, _ = geom.upper_dof_slice(plate)
+        ig = geom.grounded_dof(idx)
+        C[iy, iy] += c_val
+        C[ig, ig] += c_val
+        C[iy, ig] -= c_val
+        C[ig, iy] -= c_val
+
+    return C
+
+
+def compute_frf_direct(freq_array: np.ndarray,
+                        inputs:  Sequence,
+                        outputs: Sequence,
+                        geom: BuildingGeometry,
+                        damping=None) -> np.ndarray:
+    """Direct frequency-domain accelerance FRF.
+
+    ``H_a(ω) = -ω² · Cᵀ · (-ω²M + jωC + K)⁻¹ · B``
+
+    Handles non-proportional damping (grounded oscillators with dashpot
+    coupling, free-form dashpot couplings) that the modal-superposition
+    path cannot represent.  Singular K at the rigid-body mode is
+    regularised by adding a small grounding stiffness ``ε·M`` so the
+    impedance matrix is invertible at every ω; this puts the rigid mode
+    at ~1/(2π)·√ε ≈ 0.16 Hz when ε = 1, well below the 5 Hz analysis
+    band.
+    """
+    K = stiffness_matrix(geom)
+    M = mass_matrix(geom)
+    Cmat = damping_matrix(geom, damping)
+    n_dof = K.shape[0]
+
+    # Regularise the rigid mode so Z(ω) is invertible at every frequency.
+    omega2_eig, V_eig = eigh(K, M)
+    EPS_GROUND = 1.0     # N·s²·m⁻¹ — gives a ~0.16 Hz rigid-mode pole
+    for r in np.where(omega2_eig < 1e-6)[0]:
+        phi = V_eig[:, r]
+        K = K + EPS_GROUND * np.outer(phi, phi)
+
+    B = np.stack([point_to_dof_vector(p, d, geom) for p, d in inputs],  axis=1)
+    Co = np.stack([point_to_dof_vector(p, d, geom) for p, d in outputs], axis=1)
+
+    omega = 2.0 * np.pi * np.asarray(freq_array, dtype=float).ravel()
+    n_freq = len(omega)
+    H = np.zeros((n_freq, Co.shape[1], B.shape[1]), dtype=complex)
+    for i, w in enumerate(omega):
+        Z = (-w * w) * M + (1j * w) * Cmat + K
+        X = np.linalg.solve(Z, B)
+        H[i] = (-w * w) * (Co.T @ X)
+    return H
+
+
 def compute_frf_matrix(freq_array: np.ndarray,
                         inputs:  Sequence,
                         outputs: Sequence,
                         geom: BuildingGeometry,
                         damping=None) -> np.ndarray:
     """Vectorised (n_freq, n_outputs, n_inputs) accelerance FRF matrix.
+
+    Dispatches to either modal superposition (fast, default) or direct
+    frequency-domain inversion (when non-proportional damping is
+    present — grounded oscillators with dashpot coupling, or any
+    explicit ``geom.dashpot_couplings``).
 
     ``damping`` can be:
       * ``None``  — use ``geom.damping`` (scalar, uniform)
@@ -506,6 +685,16 @@ def compute_frf_matrix(freq_array: np.ndarray,
     """
     if damping is None:
         damping = geom.damping
+
+    # Direct inversion path: needed whenever damping is non-proportional.
+    needs_direct = bool(geom.dashpot_couplings) or any(
+        float(go.get('damp_coupling', 0.0)) > 0.0
+        and float(go.get('mass', 0.0)) > 0.0
+        and float(go.get('freq_hz', 0.0)) > 0.0
+        for go in (geom.grounded_oscillators or [])
+    )
+    if needs_direct:
+        return compute_frf_direct(freq_array, inputs, outputs, geom, damping)
 
     freqs, V, _ = modes(geom)
     omega   = 2.0 * np.pi * np.asarray(freq_array, dtype=float).ravel()
