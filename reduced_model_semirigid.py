@@ -102,14 +102,20 @@ class BuildingGeometry:
     # rigid-plate version.  Captures the experimental rise in floor-3 FRFs
     # near 95 Hz that the rigid-plate Y-chain cannot reach.
     plate_flex_freq_hz: float = 0.0              # natural frequency of the
-                                                 #   plate flexural attachment
-    plate_flex_mass:    float = 0.0              # default modal mass (kg)
+                                                 #   1st plate flexural mode
+    plate_flex_mass:    float = 0.0              # default modal mass for
+                                                 #   1st flex mode (kg)
     # Optional per-plate override (length-n_stories array, ordered fl1..fl_n).
     # Where it is > 0 it replaces ``plate_flex_mass`` on that plate.  Lets
     # the calibrator turn the flex DOF on for one plate (typically floor 3,
     # which is where the experimental rise above 75 Hz lives) without
     # disturbing the other plates' SCI.
     plate_flex_mass_per_floor: np.ndarray = field(default=None)
+    # Second flex mode (one tuned attachment per plate, second resonance
+    # higher than the first).  Captures the broad-band high-frequency rise
+    # that extends past 95 Hz on floor-3 sensors.
+    plate_flex2_freq_hz: float = 0.0
+    plate_flex2_mass_per_floor: np.ndarray = field(default=None)
 
     def __post_init__(self):
         if self.column_factor is None:
@@ -151,36 +157,70 @@ class BuildingGeometry:
         return np.array([(x_lo, 0.0), (x_hi, 0.0),
                          (x_lo, self.plate_ly), (x_hi, self.plate_ly)])
 
-    @property
-    def _flex_mass_per_floor(self) -> np.ndarray:
-        """Length-n_stories vector of flex-attachment mass per upper plate."""
-        if self.plate_flex_mass_per_floor is not None:
-            arr = np.asarray(self.plate_flex_mass_per_floor, dtype=float)
+    def _flex_set_mass_per_floor(self, which: int) -> np.ndarray:
+        """Per-plate mass for flex set 1 (`which=1`) or set 2 (`which=2`)."""
+        if which == 1:
+            arr = self.plate_flex_mass_per_floor
+            scalar = self.plate_flex_mass
+        elif which == 2:
+            arr = self.plate_flex2_mass_per_floor
+            scalar = 0.0
+        else:
+            raise ValueError(f'flex set must be 1 or 2, got {which}')
+        if arr is not None:
+            arr = np.asarray(arr, dtype=float)
             if arr.size != self.n_stories:
                 raise ValueError(
-                    f'plate_flex_mass_per_floor must have length {self.n_stories}'
+                    f'plate_flex{which}_mass_per_floor must have length '
+                    f'{self.n_stories}'
                 )
             return arr
-        return np.full(self.n_stories, float(self.plate_flex_mass))
+        return np.full(self.n_stories, float(scalar))
+
+    @property
+    def _flex_mass_per_floor(self) -> np.ndarray:
+        """Backwards-compat: per-plate mass of the *first* flex mode."""
+        return self._flex_set_mass_per_floor(1)
+
+    def _flex_freq_hz(self, which: int) -> float:
+        return float(self.plate_flex_freq_hz if which == 1
+                     else self.plate_flex2_freq_hz)
+
+    def _flex_set_active(self, which: int) -> bool:
+        return (self._flex_freq_hz(which) > 0.0
+                and bool(np.any(self._flex_set_mass_per_floor(which) > 0.0)))
 
     @property
     def has_plate_flex(self) -> bool:
-        return (self.plate_flex_freq_hz > 0.0
-                and bool(np.any(self._flex_mass_per_floor > 0.0)))
+        return self._flex_set_active(1) or self._flex_set_active(2)
 
     @property
     def n_flex(self) -> int:
-        return int((self._flex_mass_per_floor > 0.0).sum())
+        n = 0
+        if self._flex_set_active(1):
+            n += int((self._flex_set_mass_per_floor(1) > 0.0).sum())
+        if self._flex_set_active(2):
+            n += int((self._flex_set_mass_per_floor(2) > 0.0).sum())
+        return n
 
-    def _flex_index_for_plate(self, plate_index: int):
-        """Internal: position of plate *plate_index* in the active flex list,
-        or None if its flex mass is zero.
+    def _active_count_set1(self) -> int:
+        if not self._flex_set_active(1):
+            return 0
+        return int((self._flex_set_mass_per_floor(1) > 0.0).sum())
+
+    def _flex_index_for_plate(self, plate_index: int, which: int = 1):
+        """Position of plate *plate_index* in the active flex list of
+        ``which`` (1 or 2), or None if its mass is zero.
         """
-        masses = self._flex_mass_per_floor
+        if not self._flex_set_active(which):
+            return None
+        masses = self._flex_set_mass_per_floor(which)
         if masses[plate_index - 1] <= 0.0:
             return None
         active_before = int((masses[:plate_index - 1] > 0.0).sum())
-        return active_before
+        # Set-2 entries live after all set-1 entries
+        offset = self._active_count_set1() if which == 2 else 0
+        return offset + active_before
 
     @property
     def n_dof_base(self) -> int:
@@ -197,13 +237,14 @@ class BuildingGeometry:
         s = plate_index
         return 3 * s - 2, 3 * s - 1, 3 * s
 
-    def flex_dof(self, plate_index: int):
-        """Index of the flexural DOF for plate *plate_index* (1..n_stories),
-        or None when this plate has no flex mass attached.
+    def flex_dof(self, plate_index: int, which: int = 1):
+        """Index of the *which*-th flexural DOF for plate *plate_index*
+        (1..n_stories), or None when this plate has no flex mass attached
+        in that set.
         """
         if not (1 <= plate_index <= self.n_stories):
             raise ValueError('plate_index must be in 1..n_stories')
-        slot = self._flex_index_for_plate(plate_index)
+        slot = self._flex_index_for_plate(plate_index, which)
         if slot is None:
             return None
         return self.n_dof_base + slot
@@ -270,19 +311,22 @@ def stiffness_matrix(geom: BuildingGeometry) -> np.ndarray:
     # k_flex = (2π f)² m_flex to the plate's Y DOF.  Adds a 2×2 sub-matrix
     # `[[k, -k], [-k, k]]` in (y_plate, q_flex) at the appropriate indices.
     if geom.has_plate_flex:
-        omega_f = 2.0 * np.pi * geom.plate_flex_freq_hz
-        masses  = geom._flex_mass_per_floor
-        for s in range(1, n + 1):
-            iq = geom.flex_dof(s)
-            if iq is None:
+        for which in (1, 2):
+            if not geom._flex_set_active(which):
                 continue
-            m_s = float(masses[s - 1])
-            k_flex = omega_f * omega_f * m_s
-            _, iy, _ = geom.upper_dof_slice(s)
-            K[iy, iy] += k_flex
-            K[iq, iq] += k_flex
-            K[iy, iq] -= k_flex
-            K[iq, iy] -= k_flex
+            omega_f = 2.0 * np.pi * geom._flex_freq_hz(which)
+            masses  = geom._flex_set_mass_per_floor(which)
+            for s in range(1, n + 1):
+                iq = geom.flex_dof(s, which)
+                if iq is None:
+                    continue
+                m_s = float(masses[s - 1])
+                k_flex = omega_f * omega_f * m_s
+                _, iy, _ = geom.upper_dof_slice(s)
+                K[iy, iy] += k_flex
+                K[iq, iq] += k_flex
+                K[iy, iq] -= k_flex
+                K[iq, iy] -= k_flex
     cx, cy = geom.plate_centroid
     centres = geom.column_attachment_points()
     kx, ky  = _column_lateral_stiffnesses(geom)
@@ -382,14 +426,17 @@ def mass_matrix(geom: BuildingGeometry) -> np.ndarray:
         M[iy, iy] = m_s
         M[it, it] = J_s
 
-    # Plate flexural DOFs (one extra mass per upper plate, only where active)
+    # Plate flexural DOFs (extra masses per upper plate, only where active)
     if geom.has_plate_flex:
-        masses = geom._flex_mass_per_floor
-        for s in range(1, n + 1):
-            iq = geom.flex_dof(s)
-            if iq is None:
+        for which in (1, 2):
+            if not geom._flex_set_active(which):
                 continue
-            M[iq, iq] = float(masses[s - 1])
+            masses = geom._flex_set_mass_per_floor(which)
+            for s in range(1, n + 1):
+                iq = geom.flex_dof(s, which)
+                if iq is None:
+                    continue
+                M[iq, iq] = float(masses[s - 1])
 
     return M
 
