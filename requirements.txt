@@ -1,0 +1,9 @@
+# Runtime requirements for 3SBB_exploration.ipynb
+# Install with: pip install -r requirements.txt
+
+numpy>=1.24
+scipy>=1.10          # needed by reduced_model.py (model scripts)
+h5py>=3.8
+matplotlib>=3.7
+jupyterlab>=4.0      # Jupyter Lab UI (includes ipykernel)
+ipykernel>=6.0       # kernel registration
