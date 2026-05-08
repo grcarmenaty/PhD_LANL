@@ -239,10 +239,10 @@ def main():
     bounds = [(0.5, 1.5), (0.0, 15.0),
               (0.0, 8.0), (0.0, 8.0), (0.0, 8.0),
               (0.7, 2.0), (0.7, 2.0), (0.7, 2.0),
-              (60.0, 95.0),                              # 1st flex freq
-              (0.0, 3.0), (0.0, 3.0), (0.0, 3.0),        # 1st flex masses
-              (95.0, 160.0),                             # 2nd flex freq
-              (0.0, 3.0), (0.0, 3.0), (0.0, 3.0)]        # 2nd flex masses
+              (110.0, 150.0),                            # 1st flex freq (≥110 Hz)
+              (0.0, 4.0), (0.0, 4.0), (0.0, 4.0),        # 1st flex masses
+              (140.0, 200.0),                            # 2nd flex freq
+              (0.0, 4.0), (0.0, 4.0), (0.0, 4.0)]        # 2nd flex masses
 
     # Multi-start strategy.  Several seeds deliberately put non-zero mass on
     # set 2 with f_flex2 ~ 115 Hz so the optimiser explores using set 2 to

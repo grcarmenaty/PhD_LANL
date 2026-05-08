@@ -86,6 +86,17 @@ class BuildingGeometry:
     rail_direction: str = P.RAIL_DIRECTION
     column_factor: np.ndarray = field(default=None)
     joint_stiffness_ratio: float = float('inf')  # JSR; inf = fixed-fixed
+    # Per-end JSR override.  Shape (n_stories, 4, 2): last axis is
+    # [bottom_end, top_end].  Where it is finite, replaces the scalar
+    # ``joint_stiffness_ratio`` for that specific (storey, corner, end).
+    # The lateral stiffness then uses the *asymmetric* semi-rigid formula
+    #     k_eff = k_ff · (J_t·J_b + J_t + J_b) / (J_t·J_b + 4(J_t+J_b) + 12)
+    # which reduces to k_ff · J/(J+6) when J_t = J_b = J.  This lets the
+    # damage scenarios distinguish AD (top-end) from BD (bottom-end) bolt
+    # loosening — without it both reduce the same column lateral
+    # stiffness identically, which fails on cases like ``D(85%) 2BD`` and
+    # ``D(85%) 1AD + D(85%) 1BD``.
+    joint_stiffness_per_end: np.ndarray = field(default=None)
     screw_mass_per_joint: float = 0.0            # kg per joint (2 screws)
     base_extra_mass: float = 0.0                 # kg — shaker + attachment on base plate
     # plate_extra_mass is a length-(n_stories+1) array of extra translational
@@ -139,6 +150,14 @@ class BuildingGeometry:
             self.column_factor = np.ones((self.n_stories, 4), dtype=float)
         else:
             self.column_factor = np.asarray(self.column_factor, dtype=float)
+        if self.joint_stiffness_per_end is not None:
+            arr = np.asarray(self.joint_stiffness_per_end, dtype=float)
+            if arr.shape != (self.n_stories, 4, 2):
+                raise ValueError(
+                    'joint_stiffness_per_end must have shape '
+                    f'({self.n_stories}, 4, 2); got {arr.shape}'
+                )
+            self.joint_stiffness_per_end = arr
         if self.plate_extra_mass is None:
             self.plate_extra_mass = np.zeros(self.n_stories + 1, dtype=float)
         else:
@@ -282,25 +301,65 @@ class BuildingGeometry:
 # ---------------------------------------------------------------------------
 # Stiffness and mass matrices
 # ---------------------------------------------------------------------------
-def _column_lateral_stiffnesses(geom: BuildingGeometry) -> Tuple[float, float]:
-    """Translational stiffness of one nominal (factor=1) column.
+def _semirigid_factor(j_t: float, j_b: float) -> float:
+    """Asymmetric semi-rigid joint correction.
 
-    Applies the semi-rigid correction k_eff = k_ff * JSR/(JSR+6) when
-    ``geom.joint_stiffness_ratio`` is finite.
+        k_eff = k_ff · (J_t·J_b + J_t + J_b) / (J_t·J_b + 4(J_t+J_b) + 12)
+
+    Reduces to ``J/(J+6)`` when J_t = J_b = J.  ``+inf`` is treated as
+    fully rigid (no reduction); a zero or negative value as pinned (k=0).
+    """
+    if not np.isfinite(j_t) and not np.isfinite(j_b):
+        return 1.0                       # both rigid → no correction
+    if j_t <= 0.0 or j_b <= 0.0:
+        return 0.0                       # at least one pinned → no shear
+    if not np.isfinite(j_t):             # top rigid, bottom finite
+        # Limit J_t → ∞ of the asymmetric formula:
+        # ratio → (J_b + 1) / (J_b + 4)
+        return (j_b + 1.0) / (j_b + 4.0)
+    if not np.isfinite(j_b):
+        return (j_t + 1.0) / (j_t + 4.0)
+    num = j_t * j_b + j_t + j_b
+    den = j_t * j_b + 4.0 * (j_t + j_b) + 12.0
+    return num / den
+
+
+def _column_base_stiffnesses(geom: BuildingGeometry) -> Tuple[float, float]:
+    """Bare fixed-fixed lateral stiffness of one column (no JSR correction).
+
+    Returns ``(k_ff_x, k_ff_y)`` — the per-storey shear stiffness for X
+    and Y direction translations of a column with both ends fully rigid
+    and the section dimensions at ``column_factor = 1``.  The semi-rigid
+    correction is applied per-column inside ``stiffness_matrix`` because
+    each column may have different per-end JSR values.
     """
     L  = geom.storey_height
     I_yy = geom.col_ly * geom.col_lx ** 3 / 12.0   # deflection in X
     I_xx = geom.col_lx * geom.col_ly ** 3 / 12.0   # deflection in Y
-    kx = 12.0 * geom.young * I_yy / L ** 3
-    ky = 12.0 * geom.young * I_xx / L ** 3
+    return (12.0 * geom.young * I_yy / L ** 3,
+            12.0 * geom.young * I_xx / L ** 3)
 
+
+def _column_lateral_stiffnesses(geom: BuildingGeometry) -> Tuple[float, float]:
+    """Backwards-compat scalar entry point for callers that still want
+    one (kx, ky) for a nominal column.  Uses the global scalar
+    ``joint_stiffness_ratio`` symmetrically; per-end overrides are
+    only honoured by ``stiffness_matrix``.
+    """
+    kx, ky = _column_base_stiffnesses(geom)
     jsr = geom.joint_stiffness_ratio
-    if not np.isinf(jsr) and jsr > 0.0:
-        cf = jsr / (jsr + 6.0)
-        kx *= cf
-        ky *= cf
+    cf = _semirigid_factor(jsr, jsr) if np.isfinite(jsr) and jsr > 0.0 else 1.0
+    return kx * cf, ky * cf
 
-    return kx, ky
+
+def _column_jsr_pair(geom: BuildingGeometry, storey: int, corner: int) -> Tuple[float, float]:
+    """Return (J_top, J_bottom) for the column at ``(storey, corner)``."""
+    if geom.joint_stiffness_per_end is not None:
+        j_b = float(geom.joint_stiffness_per_end[storey, corner, 0])
+        j_t = float(geom.joint_stiffness_per_end[storey, corner, 1])
+        return j_t, j_b
+    j = float(geom.joint_stiffness_ratio)
+    return j, j
 
 
 def _column_local_K(kx_eff: float, ky_eff: float) -> np.ndarray:
@@ -370,17 +429,21 @@ def stiffness_matrix(geom: BuildingGeometry) -> np.ndarray:
         K[ig, ig] += (2.0 * np.pi * f_g) ** 2 * m_g
     cx, cy = geom.plate_centroid
     centres = geom.column_attachment_points()
-    kx, ky  = _column_lateral_stiffnesses(geom)
+    kx_ff, ky_ff = _column_base_stiffnesses(geom)
 
     for s in range(n):
         for c, (xc_abs, yc_abs) in enumerate(centres):
             factor = float(geom.column_factor[s, c])
             if factor <= 0.0:
                 continue
-            scale   = factor ** 4
-            xc      = xc_abs - cx
-            yc      = yc_abs - cy
-            K_local = _column_local_K(kx * scale, ky * scale)
+            j_t, j_b = _column_jsr_pair(geom, s, c)
+            cf_jsr   = _semirigid_factor(j_t, j_b)
+            scale    = factor ** 4
+            kx_eff   = kx_ff * scale * cf_jsr
+            ky_eff   = ky_ff * scale * cf_jsr
+            xc       = xc_abs - cx
+            yc       = yc_abs - cy
+            K_local  = _column_local_K(kx_eff, ky_eff)
             T_top   = _T_top(xc, yc)
             if s == 0:
                 T_bot = _T_base(xc, yc, geom)

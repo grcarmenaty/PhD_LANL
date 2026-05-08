@@ -48,6 +48,7 @@ for _p in (str(_HERE), str(_EXAMPLES)):
 
 from reduced_model_semirigid import BuildingGeometry  # noqa: E402
 import params as P                                    # noqa: E402
+from case_overrides import apply_overrides            # noqa: E402
 
 # ── Calibrated pristine parameters (loaded from calibration_result.npz) ─────
 _CAL_FILE = _HERE / "calibration_result.npz"
@@ -72,10 +73,22 @@ else:
 
 # ── Damage stiffness-ratio lookup (k_damaged / k_pristine for the storey) ──
 _BOLT_K_RATIO = {
-    11: 0.94,    # ~6 % stiffness reduction
-    20: 0.91,    # ~9 %
-    50: 0.86,    # ~14 %
-    85: 0.72,    # ~28 %
+    11: 0.94,    # ~6 % stiffness reduction (legacy cf-only path)
+    20: 0.91,
+    50: 0.86,
+    85: 0.72,
+}
+
+# Per-end JSR ratio for bolt damage: J_damaged / J_pristine at the loose end.
+# Combined with the asymmetric semi-rigid formula, single-end (AD-only or
+# BD-only) damage produces *less* effective stiffness reduction than damage
+# at both ends of the same storey — exactly what the experimental
+# `D(X%) 1AD + D(X%) 1BD` cases show vs `D(X%) 1BD` alone.
+_BOLT_JSR_RATIO = {
+    11: 0.85,
+    20: 0.70,
+    50: 0.55,
+    85: 0.39,
 }
 _CRACK_K_RATIO = {
     5: 0.96,
@@ -220,22 +233,42 @@ def _pristine_geom() -> BuildingGeometry:
     return g
 
 
+def _ensure_per_end_jsr(g: BuildingGeometry) -> np.ndarray:
+    """Initialise ``g.joint_stiffness_per_end`` from the scalar JSR if
+    not already populated.  Shape = ``(n_stories, 4, 2)`` with last axis
+    ``[bottom_end, top_end]``.
+    """
+    if g.joint_stiffness_per_end is None:
+        g.joint_stiffness_per_end = np.full((g.n_stories, 4, 2),
+                                              float(g.joint_stiffness_ratio),
+                                              dtype=float)
+    return g.joint_stiffness_per_end
+
+
 def geometry_for_case(case_name: str) -> BuildingGeometry:
-    """Return a calibrated BuildingGeometry for any IQS case label."""
+    """Return a calibrated BuildingGeometry for any IQS case label.
+
+    Bolt damage now reduces the joint-stiffness ratio at the *specific
+    end* affected by the looseness (`BD` → bottom end, `AD` → top end),
+    using ``_BOLT_JSR_RATIO`` and the asymmetric semi-rigid formula.
+    Cracks and holes still act through ``column_factor`` because they
+    physically reduce the column section, not the joint stiffness.
+    Masses still accumulate on ``plate_extra_mass``.
+    """
     g = _pristine_geom()
     ops = parse_label(case_name)
     if not ops:
         return g
 
-    # Apply each operation.  Multiple operations on the same storey/column
-    # compose multiplicatively on the column factor.
     for op in ops:
         kind = op[0]
         if kind == 'bolt':
             _, sty, face, pct = op
-            ratio = _BOLT_K_RATIO.get(pct, max(0.50, 1.0 - pct / 100.0 * 0.5))
-            cols = _columns_for_face(face)
-            g.column_factor[sty, cols] *= ratio ** 0.25
+            jsr_ratio = _BOLT_JSR_RATIO.get(
+                pct, max(0.05, 1.0 - pct / 100.0 * 0.6))
+            end_idx   = 1 if face.lower() == 'a' else 0  # BD -> 0 (bot), AD -> 1 (top)
+            per_end   = _ensure_per_end_jsr(g)
+            per_end[sty, :, end_idx] *= jsr_ratio
         elif kind == 'crack':
             _, sty, face, size = op
             ratio = _CRACK_K_RATIO.get(size, 0.94)
@@ -250,6 +283,9 @@ def geometry_for_case(case_name: str) -> BuildingGeometry:
             _, plate = op
             if 0 <= plate <= 3:
                 g.plate_extra_mass[plate] += _TEST_MASS_KG
+
+    # Apply any per-case overrides registered in case_overrides.CASE_OVERRIDES.
+    apply_overrides(g, case_name)
     return g
 
 
