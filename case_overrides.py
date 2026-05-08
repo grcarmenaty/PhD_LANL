@@ -41,8 +41,18 @@ import numpy as np
 # Empty by default; populate after global calibration when the SCI
 # scoreboard shows specific cases that the generic parser misses.
 CASE_OVERRIDES: dict = {
+    'Crack 5mm 1BD': {
+        'mul_jsr_storey_1_bot': 1.4,
+        'mul_cf_s1': 0.96,
+    },
     'D (11%) 1BD': {
         'mul_jsr_storey_1_bot': 0.7,
+    },
+    'D (11%) 2BD': {
+        'mul_jsr_storey_2_bot': 3.0,
+    },
+    'D (11%) 3BD': {
+        'mul_jsr_storey_3_bot': 3.0,
     },
     'D(11%) 1BD': {
         'mul_jsr_storey_1_bot': 0.5,
@@ -61,6 +71,54 @@ CASE_OVERRIDES: dict = {
     'D(85%) 2BD + D(85%) 2AD': {
         'mul_jsr_storey_2_bot': 0.7,
         'mul_jsr_storey_2_top': 2.0,
+    },
+    'D(85%) 2BD + D(85%) 2AD + Mass Base': {
+        'mul_jsr_storey_2_bot': 0.7,
+        'mul_jsr_storey_2_top': 0.5,
+        'add_plate_extra_mass_0': -0.6,
+    },
+    'D(85%) 2BD + D(85%) 2AD + Mass First Floor': {
+        'mul_jsr_storey_2_bot': 0.3,
+        'mul_jsr_storey_2_top': 1.4,
+        'add_plate_extra_mass_1': -0.6,
+    },
+    'Damage (85%) 1BD + Mass 1F': {
+        'mul_jsr_storey_1_bot': 1.4,
+        'add_plate_extra_mass_1': -0.6,
+    },
+    'Hole 4mm 1BD + D(50%) 2AD': {
+        'mul_jsr_storey_1_bot': 0.7,
+        'mul_jsr_storey_2_top': 2.0,
+    },
+    'Hole 6mm 2BD': {
+        'mul_jsr_storey_2_bot': 3.0,
+        'mul_cf_s2': 0.96,
+    },
+    'Mass Second Floor': {
+        'add_plate_extra_mass_2': 1.2,
+    },
+    'Mass Third Floor': {
+        'add_plate_extra_mass_3': 1.2,
+    },
+    'Pristine (26/1/2021)': {
+        'mul_cf_s1': 1.06,
+        'mul_cf_s2': 1.06,
+        'mul_cf_s3': 1.06,
+    },
+    'Pristine (27/1/2021)': {
+        'mul_cf_s1': 1.06,
+        'mul_cf_s2': 1.06,
+        'mul_cf_s3': 1.06,
+    },
+    'Pristine (5/2/2021)': {
+        'mul_cf_s1': 1.06,
+        'mul_cf_s2': 1.06,
+        'mul_cf_s3': 1.06,
+    },
+    'Pristine (8/2/2021)': {
+        'mul_cf_s1': 1.06,
+        'mul_cf_s2': 1.06,
+        'mul_cf_s3': 1.06,
     },
 }
 
