@@ -1,34 +1,21 @@
-# Python
+# ── Large raw data files (too big for GitHub) ──────────────────────
+experimental_frfs.h5
+raw_frfs.npz
+
+# ── Python ───────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-.Python
 *.egg-info/
-dist/
-build/
-.eggs/
 
-# Virtual environments
+# ── Virtual environment ──────────────────────────────────────────────
 .venv/
-venv/
-env/
 
-# Large binary/data files
-# *.zip
-# *.tar.gz3
-# *.h5
-# *.hdf5
-# *.npz
-
-# Jupyter checkpoints
+# ── Jupyter ──────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 
-# OS junk
+# ── OS ────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
-*~
-*.swp
-
-# Temp files
 test_write.tmp
+*.swp
+*~
