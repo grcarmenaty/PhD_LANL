@@ -50,16 +50,33 @@ CASE_OVERRIDES: dict = {
     },
     'D (11%) 2BD': {
         'mul_jsr_storey_2_bot': 3.0,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'D (11%) 3BD': {
         'mul_jsr_storey_3_bot': 3.0,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'D(11%) 1BD': {
-        'mul_jsr_storey_1_bot': 0.5,
+        'mul_jsr_storey_1_bot': 3.0,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
+    },
+    'D(50%) 2BD': {
+        'mul_damping_mode_0': 0.7,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'D(85%) 1AD + D(85%) 1BD': {
-        'mul_jsr_storey_1_bot': 3.0,
-        'mul_jsr_storey_1_top': 0.5,
+        'mul_jsr_storey_1_bot': 0.5,
+        'mul_jsr_storey_1_top': 3.0,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'D(85%) 1BD + D(85%) 2BD': {
         'mul_jsr_storey_1_bot': 2.0,
@@ -67,10 +84,16 @@ CASE_OVERRIDES: dict = {
     },
     'D(85%) 2BD': {
         'mul_jsr_storey_2_bot': 1.4,
+        'mul_damping_mode_0': 0.7,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'D(85%) 2BD + D(85%) 2AD': {
         'mul_jsr_storey_2_bot': 0.7,
         'mul_jsr_storey_2_top': 2.0,
+        'mul_damping_mode_0': 0.7,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'D(85%) 2BD + D(85%) 2AD + Mass Base': {
         'mul_jsr_storey_2_bot': 0.7,
@@ -93,32 +116,46 @@ CASE_OVERRIDES: dict = {
     'Hole 6mm 2BD': {
         'mul_jsr_storey_2_bot': 3.0,
         'mul_cf_s2': 0.96,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
     },
     'Mass Second Floor': {
         'add_plate_extra_mass_2': 1.2,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'Mass Third Floor': {
         'add_plate_extra_mass_3': 1.2,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
     },
     'Pristine (26/1/2021)': {
         'mul_cf_s1': 1.06,
-        'mul_cf_s2': 1.06,
+        'mul_cf_s2': 1.03,
         'mul_cf_s3': 1.06,
+        'mul_damping_mode_1': 2.0,
     },
     'Pristine (27/1/2021)': {
         'mul_cf_s1': 1.06,
         'mul_cf_s2': 1.06,
-        'mul_cf_s3': 1.06,
+        'mul_cf_s3': 0.94,
+        'mul_damping_mode_0': 0.7,
     },
     'Pristine (5/2/2021)': {
-        'mul_cf_s1': 1.06,
-        'mul_cf_s2': 1.06,
-        'mul_cf_s3': 1.06,
+        'mul_cf_s1': 0.97,
+        'mul_cf_s2': 0.94,
+        'mul_cf_s3': 0.94,
+        'mul_damping_mode_0': 1.4,
+        'mul_damping_mode_1': 0.5,
     },
     'Pristine (8/2/2021)': {
-        'mul_cf_s1': 1.06,
-        'mul_cf_s2': 1.06,
-        'mul_cf_s3': 1.06,
+        'mul_cf_s1': 0.97,
+        'mul_cf_s2': 0.94,
+        'mul_cf_s3': 0.97,
+        'mul_damping_mode_0': 1.4,
+        'mul_damping_mode_3': 2.0,
     },
 }
 
@@ -152,6 +189,20 @@ def apply_overrides(g, case_name: str) -> None:
                 )
             end_idx = 0 if end == 'bot' else 1
             g.joint_stiffness_per_end[s, :, end_idx] *= float(val)
+        elif key.startswith('mul_damping_mode_'):
+            r = int(key.split('_')[-1])
+            damping = getattr(g, 'damping_modes', None)
+            if damping is None:
+                damping = np.full(g.n_dof, float(g.damping))
+            damping = np.asarray(damping, dtype=float).copy()
+            if r < damping.size:
+                damping[r] = float(np.clip(damping[r] * float(val), 0.005, 0.10))
+                g.damping_modes = damping
+        elif key.startswith('mul_plate_flex_mass_fl'):
+            k = int(key[-1]) - 1
+            arr = g._flex_set_mass_per_floor(1).copy()
+            arr[k] *= float(val)
+            g.plate_flex_mass_per_floor = arr
         elif key == 'set_plate_flex_freq_hz':
             g.plate_flex_freq_hz = float(val)
         elif key.startswith('set_plate_flex_mass_fl'):

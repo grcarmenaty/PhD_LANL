@@ -98,6 +98,13 @@ def _grid_for(case_name: str):
     if re.search(r'mass\s*third', s):
         grid.setdefault('add_plate_extra_mass_3', [-0.6, 0.0, 0.6, 1.2])
 
+    # Per-mode damping multiplier (modes 0-3: Y1, Y2, theta/X, Y3) — small
+    # damping changes can shift CFDAC pattern noticeably, particularly for
+    # cases with strong damage.
+    grid.setdefault('mul_damping_mode_0', [0.7, 1.0, 1.4, 2.0])
+    grid.setdefault('mul_damping_mode_1', [0.5, 1.0, 2.0])
+    grid.setdefault('mul_damping_mode_3', [0.5, 1.0, 2.0])
+
     return grid
 
 
