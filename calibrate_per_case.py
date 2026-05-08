@@ -105,6 +105,26 @@ def _grid_for(case_name: str):
     grid.setdefault('mul_damping_mode_1', [0.5, 1.0, 2.0])
     grid.setdefault('mul_damping_mode_3', [0.5, 1.0, 2.0])
 
+    # Per-corner asymmetric JSR for the affected storey (breaks Y/θ
+    # symmetry, lets the model represent damage at a single bolt rather
+    # than all 4 column ends of a storey).  Sweep one corner at a time at
+    # severity 0.3 (near-pinned) — small grid (4 corners × 1 severity = 4
+    # combos) on top of the symmetric jsr sweep.
+    if bd_storeys:
+        sty = bd_storeys[0]
+        grid[f'mul_jsr_storey_{sty}_bot_corner_0'] = [0.3, 1.0, 3.0]
+        grid[f'mul_jsr_storey_{sty}_bot_corner_2'] = [0.3, 1.0, 3.0]
+    if ad_storeys:
+        sty = ad_storeys[0]
+        grid[f'mul_jsr_storey_{sty}_top_corner_0'] = [0.3, 1.0, 3.0]
+        grid[f'mul_jsr_storey_{sty}_top_corner_2'] = [0.3, 1.0, 3.0]
+
+    # Per-case plate-flex tuning for Pristine sessions and floor-3 weighted
+    # cases — lets the fitter shift the high-freq attachment per session.
+    if 'pristine' in s and s != 'pristine':
+        grid.setdefault('set_plate_flex_freq_hz',
+                         [80.0, 90.0, 95.0, 105.0, 115.0])
+
     return grid
 
 
@@ -148,15 +168,18 @@ def main(threshold=THRESHOLD, min_delta=MIN_DELTA, max_passes=4):
     band_idx_syn = _band_indices(FREQ_ARRAY)
     exp_cfdacs = [_cfdac(H_exp[i][band_idx]) for i in range(len(cn))]
 
+    # Track best-ever override per case to prevent regressions across passes
+    best_ever_sci = {}
+    best_ever_ov  = {}
+    for i, nm in enumerate(cn):
+        ov = case_overrides.CASE_OVERRIDES.get(nm, {})
+        s = _eval_sci(nm, ov, exp_cfdacs[i], band_idx_syn)
+        best_ever_sci[nm] = s
+        best_ever_ov[nm]  = dict(ov)
+
     for pass_no in range(max_passes):
-        # Recompute current SCI for every case
-        cur = []
-        for i, nm in enumerate(cn):
-            ov = case_overrides.CASE_OVERRIDES.get(nm, {})
-            s = _eval_sci(nm, ov, exp_cfdacs[i], band_idx_syn)
-            cur.append((s, nm))
-        cur.sort()
-        below = [(s, n) for s, n in cur if s < threshold]
+        below = sorted([(best_ever_sci[n], n) for n in cn
+                        if best_ever_sci[n] < threshold])
         print(f'\n=== pass {pass_no} : {len(below)} cases below {threshold:.2f} ===')
 
         improvements = 0
@@ -166,18 +189,16 @@ def main(threshold=THRESHOLD, min_delta=MIN_DELTA, max_passes=4):
                 continue
             i_exp = cn.index(nm)
             keys, values = list(grid.keys()), [grid[k] for k in grid.keys()]
-            # Cartesian product can blow up — cap at 4000 evals per case
             n_total = 1
             for v in values: n_total *= len(v)
-            if n_total > 4000:
-                # Random sample instead
+            if n_total > 6000:
                 rng = np.random.default_rng(pass_no * 17 + i_exp)
-                combos = [tuple(rng.choice(v) for v in values) for _ in range(4000)]
+                combos = [tuple(rng.choice(v) for v in values) for _ in range(6000)]
             else:
                 combos = list(itertools.product(*values))
 
-            best_sci = baseline_sci
-            best_ov  = case_overrides.CASE_OVERRIDES.get(nm, {})
+            best_sci = best_ever_sci[nm]
+            best_ov  = dict(best_ever_ov[nm])
             for combo in combos:
                 ov = {k: float(v) for k, v in zip(keys, combo)
                       if abs(float(v) - 1.0) > 1e-9 or k.startswith('add_')}
@@ -185,14 +206,16 @@ def main(threshold=THRESHOLD, min_delta=MIN_DELTA, max_passes=4):
                 if s > best_sci:
                     best_sci = s
                     best_ov  = ov
-            delta = best_sci - baseline_sci
+            delta = best_sci - best_ever_sci[nm]
             if delta > min_delta:
-                case_overrides.CASE_OVERRIDES[nm] = best_ov
+                best_ever_sci[nm] = best_sci
+                best_ever_ov[nm]  = dict(best_ov)
+                case_overrides.CASE_OVERRIDES[nm] = dict(best_ov)
                 improvements += 1
                 marker = ' ✓'
             else:
-                # restore previous override to avoid regression
-                case_overrides.CASE_OVERRIDES[nm] = case_overrides.CASE_OVERRIDES.get(nm, {})
+                # never regress: restore best-ever override
+                case_overrides.CASE_OVERRIDES[nm] = dict(best_ever_ov[nm])
                 marker = ''
             print(f'  {nm:<55s}  {baseline_sci:.3f} -> {best_sci:.3f}  Δ={delta:+.3f}{marker}')
 

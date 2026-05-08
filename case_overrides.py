@@ -42,29 +42,76 @@ import numpy as np
 # scoreboard shows specific cases that the generic parser misses.
 CASE_OVERRIDES: dict = {
     'Crack 5mm 1BD': {
-        'mul_jsr_storey_1_bot': 1.4,
-        'mul_cf_s1': 0.96,
+        'mul_jsr_storey_1_bot': 0.7,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+        'mul_damping_mode_3': 2.0,
+        'mul_jsr_storey_1_bot_corner_0': 0.3,
+        'mul_jsr_storey_1_bot_corner_2': 3.0,
+    },
+    'Crack 8mm 1BD': {
+        'mul_jsr_storey_1_bot': 0.7,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 2.0,
+    },
+    'Crack 8mm 3BD': {
+        'mul_jsr_storey_3_bot': 1.4,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+        'mul_damping_mode_3': 2.0,
     },
     'D (11%) 1BD': {
         'mul_jsr_storey_1_bot': 0.7,
     },
-    'D (11%) 2BD': {
-        'mul_jsr_storey_2_bot': 3.0,
+    'D (11%) 1BD + Mass First Floor': {
+        'add_plate_extra_mass_1': -0.6,
         'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+    },
+    'D (11%) 2BD': {
+        'mul_jsr_storey_2_bot': 0.7,
+        'mul_damping_mode_0': 0.7,
         'mul_damping_mode_1': 2.0,
         'mul_damping_mode_3': 2.0,
     },
-    'D (11%) 3BD': {
-        'mul_jsr_storey_3_bot': 3.0,
+    'D (11%) 2BD + Mass First Floor': {
+        'mul_jsr_storey_2_bot': 1.4,
+        'add_plate_extra_mass_1': -0.6,
         'mul_damping_mode_0': 2.0,
-        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_1': 0.5,
+    },
+    'D (11%) 3BD': {
+        'mul_jsr_storey_3_bot': 0.5,
+        'mul_damping_mode_0': 1.4,
+        'mul_damping_mode_1': 0.5,
+        'mul_damping_mode_3': 2.0,
+    },
+    'D (11%) 3BD + Mass First Floor': {
+        'mul_jsr_storey_3_bot': 1.4,
+        'add_plate_extra_mass_1': -0.6,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+        'mul_damping_mode_3': 0.5,
+    },
+    'D (20% 2BD)': {
+        'mul_jsr_storey_2_bot': 1.4,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
         'mul_damping_mode_3': 2.0,
     },
     'D(11%) 1BD': {
-        'mul_jsr_storey_1_bot': 3.0,
+        'mul_jsr_storey_1_bot': 0.5,
         'mul_damping_mode_0': 2.0,
-        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_1': 0.5,
         'mul_damping_mode_3': 2.0,
+    },
+    'D(50%) 1BD + Mass First Floor': {
+        'mul_jsr_storey_1_bot': 1.4,
+        'add_plate_extra_mass_1': -0.6,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+        'mul_damping_mode_3': 0.5,
     },
     'D(50%) 2BD': {
         'mul_damping_mode_0': 0.7,
@@ -78,15 +125,36 @@ CASE_OVERRIDES: dict = {
         'mul_damping_mode_1': 2.0,
         'mul_damping_mode_3': 2.0,
     },
+    'D(85%) 1AD + D(85%) 1BD + Mass Base': {
+        'mul_jsr_storey_1_bot': 0.3,
+        'mul_jsr_storey_1_top': 3.0,
+        'add_plate_extra_mass_0': -0.6,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+    },
+    'D(85%) 1AD + D(85%) 1BD + Mass First Floor': {
+        'add_plate_extra_mass_1': -0.6,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 2.0,
+        'mul_damping_mode_3': 0.5,
+    },
     'D(85%) 1BD + D(85%) 2BD': {
         'mul_jsr_storey_1_bot': 2.0,
         'mul_jsr_storey_2_bot': 3.0,
     },
+    'D(85%) 1BD + D(85%) 2BD + Mass First Floor': {
+        'mul_jsr_storey_1_bot': 1.4,
+        'add_plate_extra_mass_1': 0.0,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+    },
     'D(85%) 2BD': {
-        'mul_jsr_storey_2_bot': 1.4,
+        'mul_jsr_storey_2_bot': 0.7,
         'mul_damping_mode_0': 0.7,
         'mul_damping_mode_1': 2.0,
         'mul_damping_mode_3': 2.0,
+        'mul_jsr_storey_2_bot_corner_0': 3.0,
+        'mul_jsr_storey_2_bot_corner_2': 3.0,
     },
     'D(85%) 2BD + D(85%) 2AD': {
         'mul_jsr_storey_2_bot': 0.7,
@@ -105,6 +173,11 @@ CASE_OVERRIDES: dict = {
         'mul_jsr_storey_2_top': 1.4,
         'add_plate_extra_mass_1': -0.6,
     },
+    'Damage (85%) 1BD': {
+        'mul_jsr_storey_1_bot': 2.0,
+        'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+    },
     'Damage (85%) 1BD + Mass 1F': {
         'mul_jsr_storey_1_bot': 1.4,
         'add_plate_extra_mass_1': -0.6,
@@ -119,9 +192,15 @@ CASE_OVERRIDES: dict = {
         'mul_damping_mode_0': 2.0,
         'mul_damping_mode_1': 2.0,
     },
-    'Mass Second Floor': {
-        'add_plate_extra_mass_2': 1.2,
+    'Mass First Floor': {
+        'add_plate_extra_mass_1': -0.6,
         'mul_damping_mode_0': 2.0,
+        'mul_damping_mode_1': 0.5,
+        'mul_damping_mode_3': 0.5,
+    },
+    'Mass Second Floor': {
+        'add_plate_extra_mass_2': -0.6,
+        'mul_damping_mode_0': 0.7,
         'mul_damping_mode_1': 2.0,
         'mul_damping_mode_3': 2.0,
     },
@@ -188,7 +267,12 @@ def apply_overrides(g, case_name: str) -> None:
                     dtype=float,
                 )
             end_idx = 0 if end == 'bot' else 1
-            g.joint_stiffness_per_end[s, :, end_idx] *= float(val)
+            # Per-corner variant: ``mul_jsr_storey_<s>_<end>_corner_<c>``
+            if len(parts) >= 7 and parts[5] == 'corner':
+                c = int(parts[6])
+                g.joint_stiffness_per_end[s, c, end_idx] *= float(val)
+            else:
+                g.joint_stiffness_per_end[s, :, end_idx] *= float(val)
         elif key.startswith('mul_damping_mode_'):
             r = int(key.split('_')[-1])
             damping = getattr(g, 'damping_modes', None)
