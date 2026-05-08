@@ -67,16 +67,26 @@ def _search_grid_for(case_name: str):
     bd_storeys = sorted({int(m.group(1)) for m in _BOLT_BD_RE.finditer(s)})
     ad_storeys = sorted({int(m.group(1)) for m in _BOLT_AD_RE.finditer(s)})
 
+    # Wider per-end JSR sweep, including very-soft / fully-rigid end
+    JSR_GRID = [0.3, 0.5, 0.7, 1.0, 1.4, 2.0, 3.0]
+
     for sty in bd_storeys:
-        grid[f'mul_jsr_storey_{sty}_bot'] = [0.5, 0.7, 1.0, 1.4, 2.0]
+        grid[f'mul_jsr_storey_{sty}_bot'] = JSR_GRID
     for sty in ad_storeys:
-        grid[f'mul_jsr_storey_{sty}_top'] = [0.5, 0.7, 1.0, 1.4, 2.0]
+        grid[f'mul_jsr_storey_{sty}_top'] = JSR_GRID
 
     # Pristine variants: small symmetric tweaks on per-storey cf.
     if 'pristine' in s:
         grid['mul_cf_s1'] = [0.95, 1.00, 1.05]
         grid['mul_cf_s2'] = [0.95, 1.00, 1.05]
         grid['mul_cf_s3'] = [0.95, 1.00, 1.05]
+
+    # Mass cases: also sweep extra plate mass on the affected plate
+    if 'mass' in s:
+        if 'mass base' in s:
+            grid['add_plate_extra_mass_0'] = [-0.6, 0.0, 0.6]
+        if 'first floor' in s or 'mass 1f' in s:
+            grid['add_plate_extra_mass_1'] = [-0.6, 0.0, 0.6]
 
     return grid
 
