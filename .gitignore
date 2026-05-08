@@ -1,21 +1,25 @@
-# ── Large raw data files (too big for GitHub) ──────────────────────
+# Large raw data files (too big for GitHub)
 experimental_frfs.h5
 raw_frfs.npz
 
-# ── Python ───────────────────────────────────────────────────────────
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
 
-# ── Virtual environment ──────────────────────────────────────────────
+# Virtual environment
 .venv/
 
-# ── Jupyter ──────────────────────────────────────────────────────────
+# Jupyter
 .ipynb_checkpoints/
 
-# ── OS ────────────────────────────────────────────────────────────────
+# OS
 .DS_Store
 Thumbs.db
 test_write.tmp
 *.swp
 *~
+
+# Allow chunked splits
+!experimental_frfs_chunks/
+!experimental_frfs_chunks/**
