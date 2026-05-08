@@ -15,11 +15,11 @@ venv/
 env/
 
 # Large binary/data files
-*.zip
-*.tar.gz
-*.h5
-*.hdf5
-*.npz
+# *.zip
+# *.tar.gz3
+# *.h5
+# *.hdf5
+# *.npz
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
