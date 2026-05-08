@@ -192,6 +192,19 @@ def _pristine_geom() -> BuildingGeometry:
                                   'plate_extra_mass_fl3'], start=1):
             if key in cal.files:
                 g.plate_extra_mass[k] += float(cal[key])
+        if 'plate_flex_freq_hz' in cal.files:
+            g.plate_flex_freq_hz = float(cal['plate_flex_freq_hz'])
+        per_floor = []
+        for key in ('plate_flex_mass_fl1', 'plate_flex_mass_fl2',
+                    'plate_flex_mass_fl3'):
+            if key in cal.files:
+                per_floor.append(float(cal[key]))
+            else:
+                per_floor.append(0.0)
+        if any(m > 0 for m in per_floor):
+            g.plate_flex_mass_per_floor = np.array(per_floor, dtype=float)
+        elif 'plate_flex_mass' in cal.files:
+            g.plate_flex_mass = float(cal['plate_flex_mass'])
     return g
 
 

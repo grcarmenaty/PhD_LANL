@@ -94,6 +94,22 @@ class BuildingGeometry:
     # on top of a specific plate.  Stored independently of base_extra_mass
     # so that calibrated shaker mass and added test mass remain separable.
     plate_extra_mass: np.ndarray = field(default=None)
+    # Out-of-plane plate flexural mode (one extra DOF per upper plate,
+    # tuned-attachment style: a hidden mass `plate_flex_mass` connected to
+    # the plate's Y-translation DOF by a spring of stiffness
+    # `(2π · plate_flex_freq_hz)² · plate_flex_mass`.  When freq or mass is
+    # zero the flex DOFs are inert and the model reduces to the previous
+    # rigid-plate version.  Captures the experimental rise in floor-3 FRFs
+    # near 95 Hz that the rigid-plate Y-chain cannot reach.
+    plate_flex_freq_hz: float = 0.0              # natural frequency of the
+                                                 #   plate flexural attachment
+    plate_flex_mass:    float = 0.0              # default modal mass (kg)
+    # Optional per-plate override (length-n_stories array, ordered fl1..fl_n).
+    # Where it is > 0 it replaces ``plate_flex_mass`` on that plate.  Lets
+    # the calibrator turn the flex DOF on for one plate (typically floor 3,
+    # which is where the experimental rise above 75 Hz lives) without
+    # disturbing the other plates' SCI.
+    plate_flex_mass_per_floor: np.ndarray = field(default=None)
 
     def __post_init__(self):
         if self.column_factor is None:
@@ -109,7 +125,7 @@ class BuildingGeometry:
                     f'plate_extra_mass must have length {self.n_stories + 1}'
                 )
 
-    # ---- coordinate helpers ------------------------------------------------
+    # ── coordinate helpers ------------------------------------------------
     @property
     def storey_height(self) -> float:
         return self.plate_lz + self.inter_storey_gap
@@ -136,14 +152,61 @@ class BuildingGeometry:
                          (x_lo, self.plate_ly), (x_hi, self.plate_ly)])
 
     @property
-    def n_dof(self) -> int:
+    def _flex_mass_per_floor(self) -> np.ndarray:
+        """Length-n_stories vector of flex-attachment mass per upper plate."""
+        if self.plate_flex_mass_per_floor is not None:
+            arr = np.asarray(self.plate_flex_mass_per_floor, dtype=float)
+            if arr.size != self.n_stories:
+                raise ValueError(
+                    f'plate_flex_mass_per_floor must have length {self.n_stories}'
+                )
+            return arr
+        return np.full(self.n_stories, float(self.plate_flex_mass))
+
+    @property
+    def has_plate_flex(self) -> bool:
+        return (self.plate_flex_freq_hz > 0.0
+                and bool(np.any(self._flex_mass_per_floor > 0.0)))
+
+    @property
+    def n_flex(self) -> int:
+        return int((self._flex_mass_per_floor > 0.0).sum())
+
+    def _flex_index_for_plate(self, plate_index: int):
+        """Internal: position of plate *plate_index* in the active flex list,
+        or None if its flex mass is zero.
+        """
+        masses = self._flex_mass_per_floor
+        if masses[plate_index - 1] <= 0.0:
+            return None
+        active_before = int((masses[:plate_index - 1] > 0.0).sum())
+        return active_before
+
+    @property
+    def n_dof_base(self) -> int:
+        """DOF count without flex DOFs (base Y + (x, y, θ) per upper plate)."""
         return 1 + 3 * self.n_stories
+
+    @property
+    def n_dof(self) -> int:
+        return self.n_dof_base + self.n_flex
 
     def upper_dof_slice(self, plate_index: int) -> Tuple[int, int, int]:
         if not (1 <= plate_index <= self.n_stories):
             raise ValueError("plate_index must be in 1..n_stories")
         s = plate_index
         return 3 * s - 2, 3 * s - 1, 3 * s
+
+    def flex_dof(self, plate_index: int):
+        """Index of the flexural DOF for plate *plate_index* (1..n_stories),
+        or None when this plate has no flex mass attached.
+        """
+        if not (1 <= plate_index <= self.n_stories):
+            raise ValueError('plate_index must be in 1..n_stories')
+        slot = self._flex_index_for_plate(plate_index)
+        if slot is None:
+            return None
+        return self.n_dof_base + slot
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +262,27 @@ def _T_base(xc: float, yc: float, geom: BuildingGeometry) -> np.ndarray:
 def stiffness_matrix(geom: BuildingGeometry) -> np.ndarray:
     n     = geom.n_stories
     n_dof = geom.n_dof
+    n_dof_base = geom.n_dof_base
     K     = np.zeros((n_dof, n_dof))
+
+    # ── Plate flexural DOFs (tuned attachments) ─────────────────────────
+    # For every upper plate we attach a hidden mass on a spring of stiffness
+    # k_flex = (2π f)² m_flex to the plate's Y DOF.  Adds a 2×2 sub-matrix
+    # `[[k, -k], [-k, k]]` in (y_plate, q_flex) at the appropriate indices.
+    if geom.has_plate_flex:
+        omega_f = 2.0 * np.pi * geom.plate_flex_freq_hz
+        masses  = geom._flex_mass_per_floor
+        for s in range(1, n + 1):
+            iq = geom.flex_dof(s)
+            if iq is None:
+                continue
+            m_s = float(masses[s - 1])
+            k_flex = omega_f * omega_f * m_s
+            _, iy, _ = geom.upper_dof_slice(s)
+            K[iy, iy] += k_flex
+            K[iq, iq] += k_flex
+            K[iy, iq] -= k_flex
+            K[iq, iy] -= k_flex
     cx, cy = geom.plate_centroid
     centres = geom.column_attachment_points()
     kx, ky  = _column_lateral_stiffnesses(geom)
@@ -298,6 +381,15 @@ def mass_matrix(geom: BuildingGeometry) -> np.ndarray:
         M[ix, ix] = m_s
         M[iy, iy] = m_s
         M[it, it] = J_s
+
+    # Plate flexural DOFs (one extra mass per upper plate, only where active)
+    if geom.has_plate_flex:
+        masses = geom._flex_mass_per_floor
+        for s in range(1, n + 1):
+            iq = geom.flex_dof(s)
+            if iq is None:
+                continue
+            M[iq, iq] = float(masses[s - 1])
 
     return M
 
