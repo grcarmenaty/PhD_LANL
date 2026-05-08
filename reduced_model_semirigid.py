@@ -88,12 +88,26 @@ class BuildingGeometry:
     joint_stiffness_ratio: float = float('inf')  # JSR; inf = fixed-fixed
     screw_mass_per_joint: float = 0.0            # kg per joint (2 screws)
     base_extra_mass: float = 0.0                 # kg — shaker + attachment on base plate
+    # plate_extra_mass is a length-(n_stories+1) array of extra translational
+    # mass added to each plate (plate 0 = base, plate n = roof).  Used to
+    # model the IQS "Mass <Floor>" damage scenarios that strap an extra block
+    # on top of a specific plate.  Stored independently of base_extra_mass
+    # so that calibrated shaker mass and added test mass remain separable.
+    plate_extra_mass: np.ndarray = field(default=None)
 
     def __post_init__(self):
         if self.column_factor is None:
             self.column_factor = np.ones((self.n_stories, 4), dtype=float)
         else:
             self.column_factor = np.asarray(self.column_factor, dtype=float)
+        if self.plate_extra_mass is None:
+            self.plate_extra_mass = np.zeros(self.n_stories + 1, dtype=float)
+        else:
+            self.plate_extra_mass = np.asarray(self.plate_extra_mass, dtype=float)
+            if self.plate_extra_mass.size != self.n_stories + 1:
+                raise ValueError(
+                    f'plate_extra_mass must have length {self.n_stories + 1}'
+                )
 
     # ---- coordinate helpers ------------------------------------------------
     @property
@@ -270,13 +284,16 @@ def mass_matrix(geom: BuildingGeometry) -> np.ndarray:
     J_plate = m_plate * (geom.plate_lx ** 2 + geom.plate_ly ** 2) / 12.0
 
     # Base plate (DOF 0 = Y-translation); add shaker / attachment mass
-    m_base = m_plate + _screw_mass_per_plate(geom, 0) + geom.base_extra_mass
+    # plus any user-supplied per-plate extra mass (e.g. a "Mass Base" weight)
+    m_base = (m_plate + _screw_mass_per_plate(geom, 0)
+              + geom.base_extra_mass + float(geom.plate_extra_mass[0]))
     M[0, 0] = m_base
 
     # Upper floor plates
     for s in range(1, n + 1):
         ix, iy, it = geom.upper_dof_slice(s)
-        m_s = m_plate + _screw_mass_per_plate(geom, s)
+        m_extra_s = float(geom.plate_extra_mass[s])
+        m_s = m_plate + _screw_mass_per_plate(geom, s) + m_extra_s
         J_s = J_plate + _screw_J_per_plate(geom, s)
         M[ix, ix] = m_s
         M[iy, iy] = m_s
