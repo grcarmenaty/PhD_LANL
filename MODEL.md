@@ -342,7 +342,7 @@ The Complex Frequency Domain Assurance Criterion couples every pair of
 frequencies via the cross-correlation of the FRF row vectors across
 sensors.  Writing $\mathbf{H}_i = \mathbf{H}(f_i)$ for compactness:
 
-$$\mathrm{CFDAC}_{ij} = \frac{\lvert \mathbf{H}_i^{*}\,\mathbf{H}_j \rvert^2}{\bigl( \mathbf{H}_i^{*}\,\mathbf{H}_i \bigr) \bigl( \mathbf{H}_j^{*}\,\mathbf{H}_j \bigr)} \;\in\;[0,\,1].$$
+$$\mathrm{CFDAC}_{ij} = \frac{\lvert \mathbf{H}_i^{\ast}\,\mathbf{H}_j \rvert^2}{\bigl( \mathbf{H}_i^{\ast}\,\mathbf{H}_i \bigr) \bigl( \mathbf{H}_j^{\ast}\,\mathbf{H}_j \bigr)} \;\in\;[0,\,1].$$
 
 It is **amplitude-invariant**: scaling the whole FRF by any non-zero
 complex factor leaves CFDAC unchanged.  CFDAC is high (≈ 1) when the
