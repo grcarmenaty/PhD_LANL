@@ -131,9 +131,7 @@ star.](docs/images/building_pristine.png)
 | `ALU_RHO`          | 2700 kg/m³    | aluminium 6061-T6 density        |
 | `RAIL_DIRECTION`   | `'Y'`         | base plate is free in Y on the rail |
 
-Storey height (top plate to top plate) is `storey_height = PLATE_LZ +
-INTER_STOREY_GAP = 0.1778 m`.  Plate centroid Z coordinates are
-$z_k = k \cdot \text{storey\_height} + PLATE\_LZ/2$ for $k = 0..3$.
+Storey height (top plate to top plate) is given by `storey_height = PLATE_LZ + INTER_STOREY_GAP = 0.1778 m`.  Plate centroid Z coordinates are $z_k = k \cdot h + t/2$ for $k = 0..3$, where $h$ is the storey height and $t$ is the plate thickness.
 
 A few derived numbers that come up repeatedly:
 
@@ -342,9 +340,9 @@ See section 6.5.
 
 The Complex Frequency Domain Assurance Criterion couples every pair of
 frequencies via the cross-correlation of the FRF row vectors across
-sensors:
+sensors.  Writing $\mathbf{H}_i = \mathbf{H}(f_i)$ for compactness:
 
-$$\mathrm{CFDAC}_{ij} = \frac{\bigl|\mathbf{H}(f_i)^{*}\,\mathbf{H}(f_j)\bigr|^2}{\bigl(\mathbf{H}(f_i)^{*}\,\mathbf{H}(f_i)\bigr)\,\bigl(\mathbf{H}(f_j)^{*}\,\mathbf{H}(f_j)\bigr)}\;\;\in\;[0,\,1]$$
+$$\mathrm{CFDAC}_{ij} = \frac{\lvert \mathbf{H}_i^{*}\,\mathbf{H}_j \rvert^2}{\bigl( \mathbf{H}_i^{*}\,\mathbf{H}_i \bigr) \bigl( \mathbf{H}_j^{*}\,\mathbf{H}_j \bigr)} \;\in\;[0,\,1].$$
 
 It is **amplitude-invariant**: scaling the whole FRF by any non-zero
 complex factor leaves CFDAC unchanged.  CFDAC is high (≈ 1) when the
@@ -354,7 +352,7 @@ orthogonal.  The diagonal is identically 1.
 The Squared Correlation Index (SCI) between two CFDAC matrices is the
 squared Pearson correlation of their flattened entries:
 
-$$\mathrm{SCI}(C^{(1)}, C^{(2)}) = \frac{\Bigl[\sum_{ij}(C^{(1)}_{ij} - \bar{C}^{(1)})(C^{(2)}_{ij} - \bar{C}^{(2)})\Bigr]^2}{\Bigl[\sum_{ij}(C^{(1)}_{ij} - \bar{C}^{(1)})^2\Bigr]\,\Bigl[\sum_{ij}(C^{(2)}_{ij} - \bar{C}^{(2)})^2\Bigr]}.$$
+$$\mathrm{SCI}(C^{(1)}, C^{(2)}) = \frac{ \left[\, \sum_{ij}(C^{(1)}_{ij} - \bar{C}^{(1)})(C^{(2)}_{ij} - \bar{C}^{(2)}) \,\right]^2 }{ \left[\, \sum_{ij}(C^{(1)}_{ij} - \bar{C}^{(1)})^2 \,\right] \left[\, \sum_{ij}(C^{(2)}_{ij} - \bar{C}^{(2)})^2 \,\right] }.$$
 
 Properties:
 
@@ -683,9 +681,9 @@ Section 6.4).
    (≈ 6.39 kg).
 2. Plate yaw inertia about the centroid Z-axis:
    $J_{\text{plate}} = m_{\text{plate}} (L_x^2 + L_y^2)/12$.
-3. Diagonal entries:
-   - $M[0, 0] = m_{\text{plate}} + m_{\text{screws,base}} + m_{\text{base,extra}} + \text{plate\_extra\_mass}[0]$.
-   - For each upper plate $s$: $M[i_x, i_x] = M[i_y, i_y] = m_{\text{plate}} + m_{\text{screws}, s} + \text{plate\_extra\_mass}[s]$, $M[i_t, i_t] = J_{\text{plate}} + J_{\text{screws}, s}$.
+3. Diagonal entries (writing $m^{\text{e}}_k$ for `plate_extra_mass[k]`):
+   - Base plate (DOF 0):  $M[0, 0] = m_{\text{plate}} + m_{\text{screws,base}} + m_{\text{base,extra}} + m^{\text{e}}_0$.
+   - Each upper plate $s$:  $M[i_x, i_x] = M[i_y, i_y] = m_{\text{plate}} + m_{\text{screws}, s} + m^{\text{e}}_s$, and $M[i_t, i_t] = J_{\text{plate}} + J_{\text{screws}, s}$.
 4. For each active flex DOF: $M[q, q] = m_{\text{flex}}$.
 5. For each grounded oscillator: $M[g, g] = m_g$.
 
@@ -707,9 +705,12 @@ For applications that need **non-proportional** damping (grounded
 oscillators with dashpot coupling, or arbitrary
 `geom.dashpot_couplings`), the function `damping_matrix(geom,
 damping)` builds the full $(n_{\text{dof}}, n_{\text{dof}})$ viscous
-damping matrix by adding $\bigl[\bigl[+c, -c\bigr], \bigl[-c, +c\bigr]\bigr]$
-sub-blocks for every dashpot coupling on top of the proportional
-core.  When this matrix is non-diagonal in modal coordinates, the
+damping matrix by adding the sub-block
+
+$$C_{\text{dashpot}} = \begin{bmatrix} +c & -c \\ -c & +c \end{bmatrix}$$
+
+at the (i, j) coupled-DOF indices for every dashpot coupling, on top
+of the proportional core.  When this matrix is non-diagonal in modal coordinates, the
 modal-superposition formula no longer applies and the FRF must be
 computed by direct frequency-domain inversion.
 
