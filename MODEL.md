@@ -532,9 +532,7 @@ joint counter-clockwise when viewed along +X):
 $$M_{\text{beam,top}} = \frac{2EI}{L}\Bigl(2\theta_t + \theta_b - \frac{3\delta}{L}\Bigr),$$
 $$M_{\text{beam,bot}} = \frac{2EI}{L}\Bigl(\theta_t + 2\theta_b - \frac{3\delta}{L}\Bigr).$$
 
-The rotational springs exert moments $M_{\text{spring,top}} = k_{rt}
-\theta_t$ and $M_{\text{spring,bot}} = k_{rb} \theta_b$ on the beam
-(opposing rotation).  Joint equilibrium requires
+The rotational springs exert moments $M_{\text{spring,top}} = k_{rt} \theta_t$ and $M_{\text{spring,bot}} = k_{rb} \theta_b$ on the beam (opposing rotation).  Joint equilibrium requires
 
 $$M_{\text{beam,top}} + k_{rt}\theta_t = 0,
 \qquad
@@ -600,12 +598,7 @@ asymmetric formula reduces to it correctly.
 The map of $k_{\text{eff}}/k_{\text{ff}}$ over the $(J_t, J_b)$
 plane for finite values:
 
-![Asymmetric semi-rigid factor over (J_t, J_b). White contours
-mark constant-stiffness curves at 0.1, 0.25, 0.5, 0.75 and 0.9.
-The diagonal is the symmetric line; off-diagonal asymmetry shows
-how a single weak end pulls the effective stiffness down faster
-than two equally-stiff ends at the same average
-JSR.](docs/images/asymmetric_jsr.png)
+![Asymmetric semi-rigid factor over the Jt and Jb plane. White contours mark constant-stiffness curves at 0.1, 0.25, 0.5, 0.75 and 0.9. The diagonal is the symmetric line; off-diagonal asymmetry shows how a single weak end pulls the effective stiffness down faster than two equally-stiff ends at the same average JSR.](docs/images/asymmetric_jsr.png)
 
 The **key insight** for damage modelling: a single end at $J_b =
 0.39 \cdot J_{\text{pristine}}$ (D(85%) 1BD only) gives a different
@@ -651,10 +644,8 @@ column at corner $c$ of storey $s$:
 1. Look up the per-end JSR pair $(J_t, J_b)$ from
    `geom.joint_stiffness_per_end[s, c]` if set, else fall back to the
    scalar `geom.joint_stiffness_ratio` for both ends.
-2. Compute the asymmetric correction factor $cf_{\text{jsr}} =
-   k_{\text{eff}}/k_{\text{ff}}$ via `_semirigid_factor(J_t, J_b)`.
-3. Get the bare fixed-fixed lateral stiffnesses $k_{\text{ff,X}},
-   k_{\text{ff,Y}}$ from `_column_base_stiffnesses(geom)`.
+2. Compute the asymmetric correction factor $cf_{\text{jsr}} = k_{\text{eff}}/k_{\text{ff}}$ via `_semirigid_factor(J_t, J_b)`.
+3. Get the bare fixed-fixed lateral stiffnesses $k_{\text{ff,X}}, k_{\text{ff,Y}}$ from `_column_base_stiffnesses(geom)`.
 4. Apply the per-column scale factor `geom.column_factor[s, c]`
    raised to the **fourth power** because both column dimensions
    scale together, so the second moment of area scales as
@@ -735,8 +726,7 @@ to read the flex DOF $q_s$ instead, *when an active flex set exists
 for that plate*.  Physically this models discretising the plate into
 a lower half (where the columns attach) and an upper half (where the
 +Y face accelerometers physically sit) connected by an internal
-spring.  The FRF the sensor sees becomes $H_{qy}(\omega) \propto
--k_{\text{flex}} / \det(M, K)$ whose numerator is *constant* in
+spring.  The FRF the sensor sees becomes $H_{qy}(\omega) \propto -k_{\text{flex}} / \det(M, K)$ whose numerator is *constant* in
 $\omega$ — there is no anti-resonance below the new mode frequency.
 The 85–95 Hz rise on floor 3 fills cleanly.
 
@@ -810,10 +800,7 @@ with these design choices:
   term on S5/S11: only fires when the model is too low.  This is
   what forces the optimiser to engage the plate flex DOF (CFDAC's
   amplitude-invariance otherwise lets it set $m_{\text{flex}} = 0$).
-- **Bounds** keep parameters physical: $J_{\text{SR}} \in
-  [10^{0.5}, 10^{1.5}]$, $m_{\text{base,extra}} \in [0, 15]$ kg,
-  $m_{\text{plate,extra}} \in [0, 8]$ kg, $cf_{s,i} \in [0.7, 2.0]$,
-  $f_{\text{flex}} \in [110, 150]$ Hz, $m_{\text{flex}} \in [0, 4]$ kg.
+- **Bounds** keep parameters physical: $J_{\text{SR}} \in [10^{0.5}, 10^{1.5}]$, $m_{\text{base,extra}} \in [0, 15]$ kg, $m_{\text{plate,extra}} \in [0, 8]$ kg, $cf_{s,i} \in [0.7, 2.0]$, $f_{\text{flex}} \in [110, 150]$ Hz, $m_{\text{flex}} \in [0, 4]$ kg.
 
 ### 7.2 Per-elastic-mode damping fit (`calibrate_damping_fast.py`)
 
@@ -1252,7 +1239,7 @@ doesn't have.
 
 ### 10.4 3-D continuum FE digital twin
 
-Building an ANSYS / Code_Aster / FEniCS sister model of the 3SBB and
+Building an ANSYS / `Code_Aster` / FEniCS sister model of the 3SBB and
 running modal + harmonic analyses would (a) give an independent
 ground truth for the modal frequencies, mode shapes and damping
 ratios; (b) expose un-modelled physics (clamping compliance,
