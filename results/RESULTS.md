@@ -8,6 +8,15 @@
 > Methodology, model architectures and library versions live in
 > [`../docs/ml/THEORY.md`](../docs/ml/THEORY.md).
 
+## Where to look next
+
+| If you want to read about …                          | Go to                                            |
+|------------------------------------------------------|--------------------------------------------------|
+| **Train / val / test split** (what counts as "test") | [`PROTOCOL.md`](PROTOCOL.md)                     |
+| **How to read each plot type** (with examples)       | [`INTERPRETING_PLOTS.md`](INTERPRETING_PLOTS.md) |
+| **Per-task narrative** — use case, every model, every feature, comparison | [`by_task/`](by_task/) |
+| **Per-plot commentary** — short blurb for each of the 146 plots | [`PLOTS.md`](PLOTS.md) |
+
 ![global synthetic test metric](figures/train_metrics_by_task.png)
 ![global IQS experimental metric](figures/experimental_metrics_by_task.png)
 ![class counts and severity distributions](figures/dataset/class_severity.png)
