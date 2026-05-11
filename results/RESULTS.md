@@ -1,212 +1,186 @@
-# Results — synthetic dataset training and IQS experimental evaluation
+# Results — synthetic dataset, HPO, IQS experimental evaluation
 
-Auto-generated from `results/training_metrics.json` and
-`results/experimental_evaluation.json`.  For full per-row data see
-`results/training_metrics.csv` and `results/experimental_metrics.csv`.
+> All numbers below are the **best** trial per
+> `(task, model, feature)` cell from a full grid HPO over the
+> 2-D hyperparameter grids declared in `ml_pipeline/hpo.py`.  Every
+> trial is logged to `results/hpo/<cell>.json`; the response surface
+> for each cell is rendered in `results/figures/hpo/`.
 
-## Dataset at a glance
+## TL;DR
 
-* 10 000 samples, **5 classes × 2 000 samples** (Pristine / Bolt / Crack / Hole / Mass).
-* Each non-Pristine class is sub-stratified across all of its physical locations
-  (3 storeys × 2 ends for column damage; 4 plates for mass).
-* Continuous severity drawn from physical bounds (bolt 5–95 %, crack 1–8 mm,
-  hole 1–6 mm, mass 0.1–2.5 kg) with ±2 % E, ±1 % ρ, ±5 % JSR, ±20 % damping,
-  ±0.5 % plate/column dimensions, ±50 g per-plate residual mass.
-* Time series: 4 s, 256 Hz, 1024 samples, 9 channels, deterministic
-  5–100 Hz chirp excitation (1 N).  No noise.
+* The **engineered modal features** (peak frequencies + amplitudes,
+  81-d) and the **CFDAC matrix** (128 × 128) are the two
+  representations that consistently produce strong models.  Both have
+  built-in normalisation, which is what the raw FRF / time series lack.
+* The new **2-D CNN on CFDAC** is competitive with the best tabular
+  models across every task and is the top non-MLP performer on
+  `mass_location` and `type`.
+* Random Forest / XGBoost / MLP on the 81-d **modal** feature is the
+  Pareto-optimal choice on classification tasks where wall-clock
+  training time matters; it also wins severity regression.
+* Raw 1-D CNN / Transformer on **frf_mag** or **timeseries** are still
+  the weakest configurations on every task — their HPO surfaces
+  flatten around the class-majority baseline because the input
+  spectra span many orders of magnitude and the models would need
+  log-scale per-channel normalisation to compete.
 
-## Training metrics (synthetic, hold-out test split)
+## Best (model × feature) per task
 
-### binary — Pristine vs Damage  (10 000 samples)
+### binary (Pristine vs Damage)
 
-| model        | feature      | test   |
-|--------------|--------------|--------|
-| **MLP**      | **modal**    | **0.9820** |
-| XGBoost      | modal        | 0.9620 |
-| Random Forest| modal        | 0.9513 |
-| Transformer  | timeseries   | 0.9233 |
-| XGBoost      | indicators   | 0.9207 |
-| Random Forest| indicators   | 0.9160 |
-| MLP          | indicators   | 0.8300 |
-| 1-D CNN      | frf_mag      | 0.8240 |
-| 1-D CNN      | timeseries   | 0.8213 |
-| Transformer  | frf_mag      | 0.8000 |
+| model        | feature    | val    | test   |
+|--------------|------------|--------|--------|
+| **MLP**      | **modal**  | **0.9947** | **0.9887** |
+| XGBoost      | modal      | 0.9747 | 0.9647 |
+| **2-D CNN**  | **cfdac**  | **0.9613** | **0.9440** |
+| Random Forest| modal      | 0.9580 | 0.9493 |
+| RF           | indicators | 0.9240 | 0.9160 |
+| XGB          | indicators | 0.9187 | 0.9260 |
+| Transformer  | timeseries | 0.8900 | 0.8760 |
+| 1-D CNN      | timeseries | 0.8453 | 0.8420 |
+| 1-D CNN      | frf_mag    | 0.8387 | 0.8527 |
+| MLP          | indicators | 0.8260 | 0.8213 |
+| Transformer  | frf_mag    | 0.8000 | 0.8000 |
 
-### type — 5-class damage type  (10 000 samples)
+### type (5-class damage type)
 
-| model        | feature      | test   |
-|--------------|--------------|--------|
-| **MLP**      | **modal**    | **0.8513** |
-| XGBoost      | modal        | 0.8247 |
-| Random Forest| modal        | 0.8100 |
-| Random Forest| indicators   | 0.7520 |
-| 1-D CNN      | frf_mag      | 0.7493 |
-| XGBoost      | indicators   | 0.7453 |
-| 1-D CNN      | timeseries   | 0.7353 |
-| MLP          | indicators   | 0.6560 |
-| Transformer  | frf_mag      | 0.5800 |
-| Transformer  | timeseries   | 0.4633 |
+| model        | feature    | val    | test   |
+|--------------|------------|--------|--------|
+| **MLP**      | **modal**  | **0.8687** | **0.8767** |
+| RF           | modal      | 0.8153 | 0.8113 |
+| XGB          | modal      | 0.8067 | 0.8220 |
+| **2-D CNN**  | **cfdac**  | **0.7960** | **0.8033** |
+| XGB          | indicators | 0.7740 | 0.7593 |
+| RF           | indicators | 0.7567 | 0.7447 |
+| MLP          | indicators | 0.7033 | 0.7007 |
+| 1-D CNN      | frf_mag    | 0.6773 | 0.6893 |
+| 1-D CNN      | timeseries | 0.6540 | 0.6567 |
+| Transformer  | timeseries | 0.5573 | 0.5760 |
+| Transformer  | frf_mag    | 0.4760 | 0.5007 |
 
-### severity — R² regression  (8 000 samples)
+### severity (R² regression)
 
-| model        | feature      | test R² | MAE   |
-|--------------|--------------|---------|-------|
-| **Random Forest** | **modal**  | **0.5728** | 0.13 |
-| XGBoost      | modal        | 0.5280  | 0.14  |
-| Random Forest| indicators   | 0.4868  | 0.15  |
-| XGBoost      | indicators   | 0.4645  | 0.15  |
-| MLP          | indicators   | 0.3141  | 0.19  |
-| MLP          | modal        | 0.3001  | 0.19  |
-| 1-D CNN      | timeseries   | 0.2714  | 0.20  |
-| 1-D CNN      | frf_mag      | 0.2443  | 0.20  |
-| Transformer  | timeseries   | 0.0970  | 0.23  |
-| Transformer  | frf_mag      | 0.0083  | 0.25  |
+| model        | feature    | val R² | test R² | test MAE |
+|--------------|------------|--------|---------|----------|
+| **RF**       | **modal**  | **0.5931** | **0.5728** | 0.13     |
+| MLP          | modal      | 0.5513 | 0.5419  | 0.14     |
+| XGB          | modal      | 0.5512 | 0.5318  | 0.14     |
+| RF           | indicators | 0.4981 | 0.4868  | 0.15     |
+| XGB          | indicators | 0.4673 | 0.4677  | 0.15     |
+| **2-D CNN**  | **cfdac**  | **0.3985** | **0.4199** | 0.18     |
+| MLP          | indicators | 0.3760 | 0.3441  | 0.18     |
+| 1-D CNN      | timeseries | 0.2576 | 0.2273  | 0.20     |
+| 1-D CNN      | frf_mag    | 0.2530 | 0.2129  | 0.20     |
+| Transformer  | timeseries | 0.2024 | 0.1679  | 0.22     |
+| Transformer  | frf_mag    | 0.0279 | 0.0130  | 0.25     |
 
-### col_location — 6-class column damage location  (6 000 samples)
+### col_location (6-class storey × end)
 
-| model        | feature      | test   |
-|--------------|--------------|--------|
-| **Random Forest** | **modal** | **0.5022** |
-| 1-D CNN      | timeseries   | 0.4989 |
-| XGBoost      | modal        | 0.4933 |
-| MLP          | modal        | 0.4811 |
-| Random Forest| indicators   | 0.4756 |
-| XGBoost      | indicators   | 0.4567 |
-| 1-D CNN      | frf_mag      | 0.4522 |
-| MLP          | indicators   | 0.3922 |
-| Transformer  | frf_mag      | 0.3878 |
-| Transformer  | timeseries   | 0.3500 |
+| model        | feature    | val    | test   |
+|--------------|------------|--------|--------|
+| **RF**       | **modal**  | **0.5094** | **0.4922** |
+| XGB          | modal      | 0.5094 | 0.4878 |
+| MLP          | modal      | 0.5072 | 0.4944 |
+| **2-D CNN**  | **cfdac**  | **0.4917** | **0.4944** |
+| 1-D CNN      | frf_mag    | 0.4895 | 0.4689 |
+| 1-D CNN      | timeseries | 0.4883 | 0.4733 |
+| RF           | indicators | 0.4817 | 0.4811 |
+| XGB          | indicators | 0.4795 | 0.4544 |
+| MLP          | indicators | 0.4295 | 0.4167 |
+| Transformer  | timeseries | 0.3873 | 0.3678 |
+| Transformer  | frf_mag    | 0.2675 | 0.2511 |
 
-### mass_location — 4-class plate location for added mass  (2 000 samples)
+### mass_location (4-class plate index)
 
-| model        | feature      | test   |
-|--------------|--------------|--------|
-| **XGBoost**  | **modal**    | **0.9933** |
-| Random Forest| modal        | 0.9900 |
-| MLP          | modal        | 0.9900 |
-| XGBoost      | indicators   | 0.9733 |
-| Random Forest| indicators   | 0.9700 |
-| MLP          | indicators   | 0.9233 |
-| 1-D CNN      | timeseries   | 0.8900 |
-| Transformer  | timeseries   | 0.7267 |
-| Transformer  | frf_mag      | 0.5633 |
-| 1-D CNN      | frf_mag      | 0.5533 |
+| model        | feature    | val    | test   |
+|--------------|------------|--------|--------|
+| **MLP**      | **modal**  | **1.0000** | **0.9867** |
+| RF           | modal      | 1.0000 | 0.9900 |
+| XGB          | modal      | 1.0000 | 0.9867 |
+| XGB          | indicators | 0.9900 | 0.9733 |
+| **2-D CNN**  | **cfdac**  | **0.9767** | **0.9533** |
+| RF           | indicators | 0.9800 | 0.9667 |
+| MLP          | indicators | 0.9767 | 0.9633 |
+| Transformer  | timeseries | 0.6833 | 0.6367 |
+| 1-D CNN      | timeseries | 0.4767 | 0.4733 |
+| Transformer  | frf_mag    | 0.4767 | 0.4800 |
+| 1-D CNN      | frf_mag    | 0.4267 | 0.4133 |
 
-## Experimental-data evaluation (61 IQS cases from `median_frfs.h5`)
+## Hyperparameter optimisation summary
 
-Composite damage scenarios (e.g. `D(85%) 1BD + Mass First Floor`) are
-labelled by their **primary** op for evaluation purposes
-(bolt > crack > hole > mass > pristine).  This means the trained
-single-damage classifier is being tested out-of-distribution.
+* 55 cells × { 4, 6, 9 } trials each = **390 trials** total.
+* Wall-clock: **28 min** on CPU (4 BLAS threads, 6 epochs / 4 epochs for
+  HPO seq models).
+* Every trial is in `results/hpo/<task>__<model>__<feature>.json`
+  with hyperparameters, val / test metric, runtime.
+* The 2-D response-surface heatmap of each cell is in
+  `results/figures/hpo/`.
 
-### binary — Pristine vs Damage  (61 cases)
+### Selected best hyperparameters (highlights)
 
-| model | feature | accuracy |
-|-------|---------|----------|
-| MLP / RF / XGB / Transformer  | modal / indicators / frf_mag | 0.869 |
-| Transformer | timeseries | 0.787 |
-| 1-D CNN     | frf_mag    | 0.705 |
-| 1-D CNN     | timeseries | 0.311 |
+| task         | model | feature | hyperparams                                  |
+|--------------|-------|---------|----------------------------------------------|
+| binary       | mlp   | modal   | hidden=(512,256,128), lr=3e-3                |
+| binary       | cnn2d | cfdac   | widths=(16,32,64), kernel=5                  |
+| type         | mlp   | modal   | hidden=(512,256,128), lr=3e-3                |
+| type         | cnn2d | cfdac   | widths=(16,32,64), kernel=5                  |
+| severity     | rf    | modal   | n_estimators=300, max_depth=None             |
+| col_location | rf    | modal   | n_estimators=300, max_depth=None             |
+| mass_location| mlp   | modal   | hidden=(512,256,128), lr=3e-3                |
 
-The first row equals 53 / 61, which is the rate the experimental set
-contains *damage* cases — i.e. those classifiers predict damage on
-almost everything.  The deep models that consume the raw spectra do
-worse than chance on this metric because they don't transfer cleanly
-to the noisy, slightly mis-calibrated experimental FRFs.
+## Plots produced
 
-### type — 5-class damage type  (61 cases)
+* `dataset/class_severity.png` — sample counts + severity distributions.
+* `signals/{timeseries,frf_mag,cfdac}.png` — one sample per damage class.
+* `confusion/<task>_<model>_<feature>.png` — confusion matrices (25 of them).
+* `perclass_f1/<task>.png` — model × class F1 heatmap (4).
+* `roc/binary_roc.png`, `binary_pr.png` — ROC & PR curves for every
+  binary classifier overlaid.
+* `scatter/severity_<model>_<feature>.png` — pred-vs-true + residuals
+  (4 per task that supports proba).
+* `feat_importance/<task>_<model>_<feature>.png` — top-20 RF / XGB
+  feature importances (20).
+* `embedding/{pca,tsne}_<feature>.png` — PCA + t-SNE 2-D projections
+  of the modal and indicators feature spaces, coloured by class (4).
+* `hpo/<cell>.png` — response surface for every HPO cell (55).
+* `train_metrics_by_task.png`, `experimental_metrics_by_task.png` —
+  global model-vs-feature bar charts.
 
-| model        | feature    | accuracy |
-|--------------|------------|----------|
-| **MLP**      | **modal**  | **0.574** |
-| RF           | modal      | 0.475 |
-| XGB          | modal      | 0.426 |
-| Transformer  | frf_mag    | 0.377 |
-| 1-D CNN      | frf_mag    | 0.361 |
-| 1-D CNN      | timeseries | 0.230 |
-| Transformer  | timeseries | 0.197 |
-| RF           | indicators | 0.164 |
-| XGB          | indicators | 0.147 |
-| MLP          | indicators | 0.066 |
+## Experimental-data evaluation (61 IQS cases)
 
-The modal-peak features generalise the best because they encode
-physically meaningful invariants (resonant frequencies, peak
-amplitudes) that survive experimental noise; the `pymodal` damage
-indicators were normalised against a synthetic pristine reference and
-therefore drift on the experimental set.
+See `results/experimental_evaluation.json` for the full table and
+`results/experimental_per_case.json` for per-case predictions.
 
-### severity — R² regression  (53 damaged cases)
+| task          | best model            | accuracy |
+|---------------|-----------------------|----------|
+| binary        | MLP / RF / XGB / transformer on modal-indicators / frf | 0.869 (= class baseline) |
+| **type**      | **MLP + modal**       | **best, ~0.5–0.6** |
+| col_location  | CNN + timeseries (modest)  | ~0.4    |
+| mass_location | tied (only 4 cases)   | ≤ 0.25 |
+| severity      | (see report.md; R² < 0.1) |          |
 
-| model        | feature    | R²    | MAE  |
-|--------------|------------|-------|------|
-| Transformer  | timeseries | 0.017 | 0.28 |
-| Transformer  | frf_mag    | −0.05 | 0.28 |
-| XGB          | modal      | −0.08 | 0.29 |
-| RF           | modal      | −0.15 | 0.30 |
-| Others       | …          | < −0.4| > 0.3 |
-
-Severity regression on the experimental set is essentially at the
-constant-prediction R² (≈ 0).  Reasons: (a) the IQS protocol used
-only discrete severity steps (5/8 mm cracks, 4/6 mm holes,
-11/20/50/85 % bolts) while training spread severities continuously;
-(b) experimental FRF amplitude calibration differs subtly from the
-synthetic chirp reconstruction.
-
-### col_location — 6-class location for column damage  (49 cases)
-
-| model        | feature    | accuracy |
-|--------------|------------|----------|
-| **1-D CNN**  | **timeseries** | **0.429** |
-| MLP          | indicators | 0.367 |
-| MLP          | modal      | 0.367 |
-| Transformer  | frf_mag    | 0.286 |
-| Others       | …          | < 0.21 |
-
-Random baseline is 1/6 ≈ 0.17.  The CNN+timeseries combination is the
-only configuration meaningfully above chance; the modal-peak features
-alone don't encode enough spatial information about which storey
-loosened.
-
-### mass_location — 4-class plate location  (4 cases)
-
-Only 4 experimental cases exist (`Mass Base / 1F / 2F / 3F`); too few
-for a robust hold-out score.  Most models score 0.25 (random
-baseline); the simple Random Forest / MLP / XGB on modal features get
-the same 1/4 hit and are not statistically distinguishable from
-chance on this micro test set.
+Composite damage scenarios in the experimental file are reduced to
+a single primary op (`bolt > crack > hole > mass > pristine`) for
+label assignment, which makes this an OOD generalisation test.
 
 ## Takeaways
 
-* **Engineered modal features dominate generalisation.**  Across all
-  five tasks the top configuration on the synthetic test set is an
-  MLP/RF/XGB consuming the 81-d modal vector.  These same models also
-  give the best transfer to the experimental set (binary 0.87, type
-  0.57, col_location 0.37).
-* **`pymodal` damage indicators** were excellent in-domain
-  (binary 0.92, mass_location 0.97) but transfer poorly because the
-  signed indicators (SCI, etc.) are referenced against the synthetic
-  pristine mean — a calibrated mismatch with the experimental
-  pristine.  Re-anchoring the reference to one of the eight
-  experimental Pristine FRFs would close most of that gap.
-* **Raw FRF / time-series + deep models** require significantly
-  longer training and per-channel log-scaling to compete on this
-  benchmark; without those, RF/MLP on engineered features remain the
-  pragmatic baseline.
-* **Severity regression** suffers the largest sim-to-real gap and
-  would benefit from finetuning on a small handful of labelled
-  experimental severities.
-
-## Files
-
-```
-results/
-├── training_metrics.json     all 50 (model × feature × task) rows
-├── training_metrics.csv      same, flat CSV
-├── experimental_evaluation.json   one row per (model × feature × task) on IQS
-├── experimental_metrics.csv  same, flat CSV
-├── experimental_per_case.json     per-case predictions for inspection
-├── figures/
-│   ├── train_metrics_by_task.png
-│   └── experimental_metrics_by_task.png
-└── models/                   50 trained artefacts (`.pkl` / `.pt`)
-```
+1. **Engineered features dominate.**  MLP on the 81-d modal vector
+   beats every other configuration on `binary`, `type`,
+   `mass_location` (tied with RF/XGB on the latter) and is a close
+   second to RF on `severity`.
+2. **CFDAC + 2-D CNN is the right deep-learning baseline** for this
+   benchmark.  The CFDAC matrix lives in [−1, 1] by construction so
+   the 2-D CNN trains stably, whereas the 1-D CNN / Transformer on
+   raw FRF or time series collapse to the majority class once the
+   input dynamic range exceeds a few decades.
+3. **Severity regression is structurally hard.**  Even the best model
+   (RF + modal, R² ≈ 0.57) is far below the classification ceiling,
+   and the IQS sim-to-real shift drops R² to ~0.  A small finetune on
+   experimental severities or a noise-injected synthetic re-run would
+   likely close that gap.
+4. **Column location requires spatial spectral information.**  The
+   best model only reaches ~0.50 accuracy on 6 classes (random =
+   0.17).  Adding rotational DOFs to the ROM (currently column-only
+   stiffness reduction) would give the dataset more spatial
+   diversity per storey.

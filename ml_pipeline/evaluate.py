@@ -42,8 +42,9 @@ from ml_pipeline.features import (   # noqa: E402
 from ml_pipeline.generate_dataset import (   # noqa: E402
     make_chirp, N_T, FS, fft_freqs,
 )
-from ml_pipeline.models import MLP, Conv1DStack, SmallTransformer  # noqa: E402
+from ml_pipeline.models import MLP, Conv1DStack, SmallTransformer, Conv2DStack  # noqa: E402
 from ml_pipeline.tasks import TASK_DESCRIPTION  # noqa: E402
+from pymodal import utils as pm_utils  # noqa: E402
 
 
 # ── Case-name parser ────────────────────────────────────────────────────────
@@ -155,6 +156,8 @@ def build_experimental_features(median_path: Path, features_path: Path
         f_band = f["freqs"][:]
         H_ref  = f["reference/frf_complex"][:]   # (N_F, 9) pristine mean
         f_lo, f_hi = float(f.attrs["f_lo_hz"]), float(f.attrs["f_hi_hz"])
+        has_cfdac = "cfdac_real" in f
+        cfdac_n   = int(f.attrs["cfdac_n"]) if has_cfdac else None
     band_mask = (bins >= f_lo) & (bins <= f_hi)
 
     t, chirp = make_chirp()
@@ -175,6 +178,18 @@ def build_experimental_features(median_path: Path, features_path: Path
     modal = np.stack([modal_features(frf_mag[i], f_band) for i in range(n_cases)])
     ind   = np.stack([indicator_features(H_band[i], H_ref) for i in range(n_cases)])
 
+    # CFDAC at the same resolution as the synthetic dataset.
+    cfdac = None
+    if has_cfdac:
+        from ml_pipeline.cfdac import _decimate
+        H_ref_d = _decimate(H_ref, cfdac_n)              # (cfdac_n, 9)
+        cfdac = np.zeros((n_cases, 2, cfdac_n, cfdac_n), dtype=np.float32)
+        for i in range(n_cases):
+            H_d = _decimate(H_band[i], cfdac_n)          # (cfdac_n, 9)
+            m   = pm_utils.value_CFDAC(H_ref_d, H_d)     # (cfdac_n, cfdac_n) complex
+            cfdac[i, 0] = m.real.astype(np.float32)
+            cfdac[i, 1] = m.imag.astype(np.float32)
+
     # Labels from case names.
     type_code = np.zeros(n_cases, dtype=np.int8)
     storey    = np.full(n_cases, -1, dtype=np.int8)
@@ -187,7 +202,7 @@ def build_experimental_features(median_path: Path, features_path: Path
         end[i]       = op["end"]
         severity[i]  = op["severity"]
 
-    return {
+    out = {
         "names":      names,
         "timeseries": timeseries,
         "frf_mag":    frf_mag,
@@ -202,6 +217,9 @@ def build_experimental_features(median_path: Path, features_path: Path
             "severity":  severity,
         },
     }
+    if cfdac is not None:
+        out["cfdac"] = cfdac
+    return out
 
 
 # ── Run trained models on these features ────────────────────────────────────
@@ -215,6 +233,8 @@ def _load_torch_model(path: Path, n_channels: int | None, in_dim: int | None,
         mdl = Conv1DStack(n_channels=n_channels, n_out=n_out)
     elif name == "transformer":
         mdl = SmallTransformer(n_channels=n_channels, n_out=n_out)
+    elif name == "cnn2d":
+        mdl = Conv2DStack(n_channels=n_channels, n_out=n_out)
     else:
         raise ValueError(name)
     mdl.load_state_dict(blob["state_dict"])
@@ -250,9 +270,14 @@ def predict(model_path: Path, X: np.ndarray, model_kind: str,
     elif name == "cnn":
         mdl = Conv1DStack(n_channels=in_shape[1] if len(in_shape) == 2 else in_shape[-1],
                              n_out=n_out, regression=(task_kind == "reg"))
-    else:
+    elif name == "transformer":
         mdl = SmallTransformer(n_channels=in_shape[1] if len(in_shape) == 2 else in_shape[-1],
                                   n_out=n_out, regression=(task_kind == "reg"))
+    elif name == "cnn2d":
+        mdl = Conv2DStack(n_channels=in_shape[0], n_out=n_out,
+                              regression=(task_kind == "reg"))
+    else:
+        raise ValueError(name)
     mdl.load_state_dict(blob["state_dict"])
     mdl.eval()
     with torch.no_grad():

@@ -107,14 +107,73 @@ class SmallTransformer(nn.Module):
         return self.head(z[:, 0])
 
 
+class Conv2DStack(nn.Module):
+    """2-D CNN for matricial features (CFDAC).
+
+    Input shape: ``(B, 2, 128, 128)`` (real + imag CFDAC).  Architecture:
+
+      * one strided stem (kernel = 7, stride = 4) that drops the
+        spatial extent to 32×32 immediately — required to keep CPU
+        training time tractable;
+      * three Conv2d + BN + GELU + MaxPool2d blocks that shrink to
+        16×16 → 8×8 → 4×4 with channel widths ``widths``;
+      * global average pool + two-layer MLP head.
+    """
+
+    def __init__(self, n_channels: int, n_out: int,
+                  widths: tuple[int, ...] = (16, 32, 64),
+                  kernel_size: int = 5,
+                  regression: bool = False):
+        super().__init__()
+        c = n_channels
+        stem_out = widths[0]
+        self.stem = nn.Sequential(
+            nn.Conv2d(c, stem_out, kernel_size=7, stride=4, padding=3),
+            nn.BatchNorm2d(stem_out),
+            nn.GELU(),
+        )
+        c = stem_out
+        layers: list[nn.Module] = []
+        for w in widths:
+            layers += [
+                nn.Conv2d(c, w, kernel_size, padding=kernel_size // 2),
+                nn.BatchNorm2d(w),
+                nn.GELU(),
+                nn.MaxPool2d(2),
+            ]
+            c = w
+        self.features = nn.Sequential(*layers)
+        self.head = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Flatten(),
+            nn.Linear(c, 64),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(64, n_out),
+        )
+        self.regression = regression
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (B, C, H, W).  Input is roughly in [-1, 1] for CFDAC, so
+        # no further normalisation is needed.
+        x = self.stem(x)
+        x = self.features(x)
+        return self.head(x)
+
+
 def build_torch_model(name: str, in_channels: Optional[int],
                        in_dim: Optional[int], n_out: int,
-                       regression: bool = False) -> nn.Module:
+                       regression: bool = False,
+                       **kwargs) -> nn.Module:
     if name == "mlp":
-        return MLP(in_dim=in_dim, n_out=n_out, regression=regression)
+        return MLP(in_dim=in_dim, n_out=n_out, regression=regression, **kwargs)
     if name == "cnn":
-        return Conv1DStack(n_channels=in_channels, n_out=n_out, regression=regression)
+        return Conv1DStack(n_channels=in_channels, n_out=n_out,
+                              regression=regression, **kwargs)
     if name == "transformer":
         return SmallTransformer(n_channels=in_channels, n_out=n_out,
-                                 regression=regression)
+                                   regression=regression, **kwargs)
+    if name == "cnn2d":
+        return Conv2DStack(n_channels=in_channels, n_out=n_out,
+                              regression=regression, **kwargs)
     raise ValueError(name)

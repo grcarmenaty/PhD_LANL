@@ -44,7 +44,7 @@ _REPO = Path(__file__).resolve().parent.parent
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-from ml_pipeline.models import MLP, Conv1DStack, SmallTransformer  # noqa: E402
+from ml_pipeline.models import MLP, Conv1DStack, SmallTransformer, Conv2DStack  # noqa: E402
 from ml_pipeline.tasks import (   # noqa: E402
     build_targets, TASK_DESCRIPTION, TASK_N_CLASSES,
 )
@@ -52,9 +52,11 @@ from ml_pipeline.tasks import (   # noqa: E402
 
 FEATURES_FLAT  = ("modal", "indicators")
 FEATURES_SEQ   = ("frf_mag", "timeseries")
+FEATURES_MAT   = ("cfdac",)        # 2-D matricial features
 SK_MODELS      = ("rf", "xgb")
 TORCH_FLAT     = ("mlp",)
 TORCH_SEQ      = ("cnn", "transformer")
+TORCH_MAT      = ("cnn2d",)
 
 DEVICE = torch.device("cpu")
 SEED   = 20260511
@@ -93,11 +95,17 @@ def load_labels(features_path: Path) -> dict[str, np.ndarray]:
 
 def load_feature(features_path: Path, name: str,
                   rows: np.ndarray | None = None) -> np.ndarray:
+    """Load a feature array.  ``cfdac`` is stacked from cfdac_real / cfdac_imag."""
+    if name == "cfdac":
+        with h5py.File(features_path, "r") as f:
+            re = f["cfdac_real"][:] if rows is None else f["cfdac_real"][rows]
+            im = f["cfdac_imag"][:] if rows is None else f["cfdac_imag"][rows]
+        # Channel-first: (n, 2, H, W).
+        return np.stack([re, im], axis=1)
     with h5py.File(features_path, "r") as f:
         if rows is None:
             data = f[name][:]
         else:
-            # fancy indexing in HDF5 must be sorted
             order = np.argsort(rows)
             tmp = f[name][rows[order]]
             data = np.empty_like(tmp)
@@ -181,6 +189,7 @@ def _to_tensor(x: np.ndarray, seq: bool) -> torch.Tensor:
     if seq and t.ndim == 3:
         # (N, L, C) -> (N, C, L)
         t = t.permute(0, 2, 1)
+    # 4-D inputs (N, C, H, W) — CFDAC — pass through unchanged.
     return t.float()
 
 
@@ -190,9 +199,12 @@ def train_torch(model_name: str, kind: str, n_out: int,
                  lr: float = 1e-3) -> Dict:
     t0 = time.time()
     seq = X_tr.ndim == 3
+    is_mat = X_tr.ndim == 4
     # Larger batches for sequence inputs to amortise per-iter Python overhead.
     if seq and X_tr.shape[1] >= 256:
         batch = 128
+    if is_mat:
+        batch = 64
     Xtr = _to_tensor(X_tr, seq); Xva = _to_tensor(X_va, seq); Xte = _to_tensor(X_te, seq)
 
     if kind == "cls":
@@ -220,6 +232,9 @@ def train_torch(model_name: str, kind: str, n_out: int,
     elif model_name == "transformer":
         model = SmallTransformer(n_channels=Xtr.shape[1], n_out=n_out,
                                    regression=(kind == "reg"))
+    elif model_name == "cnn2d":
+        model = Conv2DStack(n_channels=Xtr.shape[1], n_out=n_out,
+                              regression=(kind == "reg"))
     else:
         raise ValueError(model_name)
 
@@ -293,7 +308,7 @@ def run(features_path: Path, out_dir: Path,
 
     # Pre-load each feature representation once (still small enough at 339 MB total).
     feats: Dict[str, np.ndarray] = {}
-    for name in (*FEATURES_FLAT, *FEATURES_SEQ):
+    for name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
         print(f"loading feature: {name}")
         feats[name] = load_feature(features_path, name)
 
@@ -318,7 +333,7 @@ def run(features_path: Path, out_dir: Path,
         y_va = y_pool[idx_va_local]
         y_te = y_pool[idx_te_local]
 
-        for feat_name in (*FEATURES_FLAT, *FEATURES_SEQ):
+        for feat_name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
             X = feats[feat_name]
             X_tr = X[idx_tr]; X_va = X[idx_va]; X_te = X[idx_te]
 
@@ -336,8 +351,11 @@ def run(features_path: Path, out_dir: Path,
             if feat_name in FEATURES_FLAT:
                 model_list = (*SK_MODELS, "mlp")
                 flat_X = (X_tr_s, X_va_s, X_te_s)
-            else:
+            elif feat_name in FEATURES_SEQ:
                 model_list = TORCH_SEQ
+                flat_X = (X_tr, X_va, X_te)
+            else:  # FEATURES_MAT
+                model_list = TORCH_MAT
                 flat_X = (X_tr, X_va, X_te)
 
             for model_name in model_list:

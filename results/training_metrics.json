@@ -1,672 +1,1059 @@
 [
   {
     "task": "binary",
-    "model": "rf",
-    "feature": "modal",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.9553333333333334,
-    "metric_test": 0.9513333333333334,
-    "runtime_s": 2.0192203521728516,
-    "extra": {}
+    "metric_val": 0.9613333333333334,
+    "metric_test": 0.944,
+    "runtime_s": 14.86291766166687,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 5
+    }
   },
   {
     "task": "binary",
-    "model": "xgb",
-    "feature": "modal",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.97,
-    "metric_test": 0.962,
-    "runtime_s": 1.2295143604278564,
-    "extra": {}
+    "metric_val": 0.8386666666666667,
+    "metric_test": 0.8526666666666667,
+    "runtime_s": 4.941930770874023,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.8453333333333334,
+    "metric_test": 0.842,
+    "runtime_s": 30.489070415496826,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        32,
+        64,
+        128
+      ],
+      "kernel_size": 7
+    }
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.826,
+    "metric_test": 0.8213333333333334,
+    "runtime_s": 1.5216999053955078,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.001
+    }
   },
   {
     "task": "binary",
     "model": "mlp",
     "feature": "modal",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.9913333333333333,
-    "metric_test": 0.982,
-    "runtime_s": 2.538355588912964,
-    "extra": {}
+    "metric_val": 0.9946666666666667,
+    "metric_test": 0.9886666666666667,
+    "runtime_s": 1.8204882144927979,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
   },
   {
     "task": "binary",
     "model": "rf",
     "feature": "indicators",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
     "metric_val": 0.924,
     "metric_test": 0.916,
-    "runtime_s": 1.1975946426391602,
-    "extra": {}
+    "runtime_s": 1.2400944232940674,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 200,
+      "max_depth": null
+    }
   },
   {
     "task": "binary",
-    "model": "xgb",
-    "feature": "indicators",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "model": "rf",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.9086666666666666,
-    "metric_test": 0.9206666666666666,
-    "runtime_s": 0.32959675788879395,
-    "extra": {}
-  },
-  {
-    "task": "binary",
-    "model": "mlp",
-    "feature": "indicators",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.8166666666666667,
-    "metric_test": 0.83,
-    "runtime_s": 1.5843026638031006,
-    "extra": {}
-  },
-  {
-    "task": "binary",
-    "model": "cnn",
-    "feature": "frf_mag",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.8126666666666666,
-    "metric_test": 0.824,
-    "runtime_s": 19.519354104995728,
-    "extra": {}
+    "metric_val": 0.958,
+    "metric_test": 0.9493333333333334,
+    "runtime_s": 3.7949373722076416,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": null
+    }
   },
   {
     "task": "binary",
     "model": "transformer",
     "feature": "frf_mag",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
     "metric_val": 0.8,
     "metric_test": 0.8,
-    "runtime_s": 12.443497896194458,
-    "extra": {}
-  },
-  {
-    "task": "binary",
-    "model": "cnn",
-    "feature": "timeseries",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.824,
-    "metric_test": 0.8213333333333334,
-    "runtime_s": 52.81226682662964,
-    "extra": {}
+    "runtime_s": 3.433284282684326,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 32,
+      "n_layers": 1
+    }
   },
   {
     "task": "binary",
     "model": "transformer",
     "feature": "timeseries",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.9286666666666666,
-    "metric_test": 0.9233333333333333,
-    "runtime_s": 37.18753147125244,
-    "extra": {}
+    "metric_val": 0.89,
+    "metric_test": 0.876,
+    "runtime_s": 32.831528663635254,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 64,
+      "n_layers": 2
+    }
   },
   {
-    "task": "type",
-    "model": "rf",
-    "feature": "modal",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.8113333333333334,
-    "metric_test": 0.81,
-    "runtime_s": 2.2113890647888184,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "xgb",
-    "feature": "modal",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.8006666666666666,
-    "metric_test": 0.8246666666666667,
-    "runtime_s": 4.443805456161499,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "mlp",
-    "feature": "modal",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.8426666666666667,
-    "metric_test": 0.8513333333333334,
-    "runtime_s": 1.6605191230773926,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "rf",
-    "feature": "indicators",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.756,
-    "metric_test": 0.752,
-    "runtime_s": 1.4053318500518799,
-    "extra": {}
-  },
-  {
-    "task": "type",
+    "task": "binary",
     "model": "xgb",
     "feature": "indicators",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.7606666666666667,
-    "metric_test": 0.7453333333333333,
-    "runtime_s": 1.7183997631072998,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "mlp",
-    "feature": "indicators",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.6646666666666666,
-    "metric_test": 0.656,
-    "runtime_s": 1.9452991485595703,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "cnn",
-    "feature": "frf_mag",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.738,
-    "metric_test": 0.7493333333333333,
-    "runtime_s": 15.961246252059937,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "transformer",
-    "feature": "frf_mag",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.5626666666666666,
-    "metric_test": 0.58,
-    "runtime_s": 12.746675729751587,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "cnn",
-    "feature": "timeseries",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.7366666666666667,
-    "metric_test": 0.7353333333333333,
-    "runtime_s": 53.668811082839966,
-    "extra": {}
-  },
-  {
-    "task": "type",
-    "model": "transformer",
-    "feature": "timeseries",
-    "n_train": 7000,
-    "n_val": 1500,
-    "n_test": 1500,
-    "metric_name": "accuracy",
-    "metric_val": 0.47,
-    "metric_test": 0.4633333333333333,
-    "runtime_s": 40.27357840538025,
-    "extra": {}
-  },
-  {
-    "task": "severity",
-    "model": "rf",
-    "feature": "modal",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.5931187752625133,
-    "metric_test": 0.5727793417459944,
-    "runtime_s": 17.69242787361145,
-    "extra": {
-      "mae_test": 0.13004205335058697
+    "metric_val": 0.9186666666666666,
+    "metric_test": 0.926,
+    "runtime_s": 0.7704989910125732,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 600,
+      "max_depth": 6
     }
   },
   {
-    "task": "severity",
+    "task": "binary",
     "model": "xgb",
     "feature": "modal",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.5382514595985413,
-    "metric_test": 0.5279849767684937,
-    "runtime_s": 1.5079827308654785,
-    "extra": {
-      "mae_test": 0.14027930796146393
-    }
-  },
-  {
-    "task": "severity",
-    "model": "mlp",
-    "feature": "modal",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.3339434862136841,
-    "metric_test": 0.3001177906990051,
-    "runtime_s": 1.349076747894287,
-    "extra": {
-      "mae_test": 0.18599101901054382
-    }
-  },
-  {
-    "task": "severity",
-    "model": "rf",
-    "feature": "indicators",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.49809312882490453,
-    "metric_test": 0.4867599011607452,
-    "runtime_s": 6.7544989585876465,
-    "extra": {
-      "mae_test": 0.14628254104051044
-    }
-  },
-  {
-    "task": "severity",
-    "model": "xgb",
-    "feature": "indicators",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.45739632844924927,
-    "metric_test": 0.46451592445373535,
-    "runtime_s": 0.4465630054473877,
-    "extra": {
-      "mae_test": 0.1510256677865982
-    }
-  },
-  {
-    "task": "severity",
-    "model": "mlp",
-    "feature": "indicators",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.3333238363265991,
-    "metric_test": 0.31412065029144287,
-    "runtime_s": 1.6840457916259766,
-    "extra": {
-      "mae_test": 0.18888677656650543
-    }
-  },
-  {
-    "task": "severity",
-    "model": "cnn",
-    "feature": "frf_mag",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.2912622094154358,
-    "metric_test": 0.24431538581848145,
-    "runtime_s": 13.857031106948853,
-    "extra": {
-      "mae_test": 0.20214271545410156
-    }
-  },
-  {
-    "task": "severity",
-    "model": "transformer",
-    "feature": "frf_mag",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.014051377773284912,
-    "metric_test": 0.008312761783599854,
-    "runtime_s": 10.241724967956543,
-    "extra": {
-      "mae_test": 0.2497943937778473
-    }
-  },
-  {
-    "task": "severity",
-    "model": "cnn",
-    "feature": "timeseries",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.2920438051223755,
-    "metric_test": 0.2713739275932312,
-    "runtime_s": 40.538954973220825,
-    "extra": {
-      "mae_test": 0.20050835609436035
-    }
-  },
-  {
-    "task": "severity",
-    "model": "transformer",
-    "feature": "timeseries",
-    "n_train": 5600,
-    "n_val": 1200,
-    "n_test": 1200,
-    "metric_name": "R2",
-    "metric_val": 0.10435652732849121,
-    "metric_test": 0.09703576564788818,
-    "runtime_s": 29.57552409172058,
-    "extra": {
-      "mae_test": 0.23475830256938934
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.9746666666666667,
+    "metric_test": 0.9646666666666667,
+    "runtime_s": 1.0619690418243408,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": 8
     }
   },
   {
     "task": "col_location",
-    "model": "rf",
-    "feature": "modal",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.4972253052164262,
-    "metric_test": 0.5022222222222222,
-    "runtime_s": 1.2691309452056885,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "xgb",
-    "feature": "modal",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.4972253052164262,
-    "metric_test": 0.49333333333333335,
-    "runtime_s": 4.764479398727417,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "mlp",
-    "feature": "modal",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.4938956714761376,
-    "metric_test": 0.4811111111111111,
-    "runtime_s": 0.9214282035827637,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "rf",
-    "feature": "indicators",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.48057713651498335,
-    "metric_test": 0.47555555555555556,
-    "runtime_s": 1.0673134326934814,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "xgb",
-    "feature": "indicators",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.4528301886792453,
-    "metric_test": 0.45666666666666667,
-    "runtime_s": 1.8520967960357666,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "mlp",
-    "feature": "indicators",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.40066592674805773,
-    "metric_test": 0.39222222222222225,
-    "runtime_s": 0.9379122257232666,
-    "extra": {}
+    "metric_val": 0.4916759156492786,
+    "metric_test": 0.49444444444444446,
+    "runtime_s": 8.682823181152344,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 5
+    }
   },
   {
     "task": "col_location",
     "model": "cnn",
     "feature": "frf_mag",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.4439511653718091,
-    "metric_test": 0.45222222222222225,
-    "runtime_s": 9.30664873123169,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "transformer",
-    "feature": "frf_mag",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
-    "metric_name": "accuracy",
-    "metric_val": 0.3895671476137625,
-    "metric_test": 0.3877777777777778,
-    "runtime_s": 7.038567066192627,
-    "extra": {}
-  },
-  {
-    "task": "col_location",
-    "model": "cnn",
-    "feature": "timeseries",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
     "metric_val": 0.4894561598224195,
-    "metric_test": 0.4988888888888889,
-    "runtime_s": 30.539127111434937,
-    "extra": {}
+    "metric_test": 0.4688888888888889,
+    "runtime_s": 5.658894062042236,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        32,
+        64,
+        128
+      ],
+      "kernel_size": 7
+    }
+  },
+  {
+    "task": "col_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.48834628190899,
+    "metric_test": 0.47333333333333333,
+    "runtime_s": 7.129541397094727,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 7
+    }
+  },
+  {
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.4295227524972253,
+    "metric_test": 0.4166666666666667,
+    "runtime_s": 0.9056851863861084,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
+  },
+  {
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.5072142064372919,
+    "metric_test": 0.49444444444444446,
+    "runtime_s": 1.0653445720672607,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        256,
+        128,
+        64
+      ],
+      "lr": 0.003
+    }
+  },
+  {
+    "task": "col_location",
+    "model": "rf",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.4816870144284129,
+    "metric_test": 0.4811111111111111,
+    "runtime_s": 1.4342381954193115,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": null
+    }
+  },
+  {
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.5094339622641509,
+    "metric_test": 0.4922222222222222,
+    "runtime_s": 1.7641167640686035,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": 12
+    }
+  },
+  {
+    "task": "col_location",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.26748057713651496,
+    "metric_test": 0.2511111111111111,
+    "runtime_s": 3.800626039505005,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 32,
+      "n_layers": 2
+    }
   },
   {
     "task": "col_location",
     "model": "transformer",
     "feature": "timeseries",
-    "n_train": 4199,
-    "n_val": 901,
-    "n_test": 900,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.35405105438401774,
-    "metric_test": 0.35,
-    "runtime_s": 22.553128957748413,
-    "extra": {}
+    "metric_val": 0.3873473917869034,
+    "metric_test": 0.36777777777777776,
+    "runtime_s": 17.900086641311646,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 64,
+      "n_layers": 2
+    }
   },
   {
-    "task": "mass_location",
-    "model": "rf",
-    "feature": "modal",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 1.0,
-    "metric_test": 0.99,
-    "runtime_s": 0.574582576751709,
-    "extra": {}
+    "metric_val": 0.4794672586015538,
+    "metric_test": 0.45444444444444443,
+    "runtime_s": 2.661818265914917,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 600,
+      "max_depth": 4
+    }
   },
   {
-    "task": "mass_location",
+    "task": "col_location",
     "model": "xgb",
     "feature": "modal",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 1.0,
-    "metric_test": 0.9933333333333333,
-    "runtime_s": 0.5743045806884766,
-    "extra": {}
+    "metric_val": 0.5094339622641509,
+    "metric_test": 0.48777777777777775,
+    "runtime_s": 1.624300241470337,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 100,
+      "max_depth": 6
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.9766666666666667,
+    "metric_test": 0.9533333333333334,
+    "runtime_s": 1.765878677368164,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        8,
+        16,
+        32
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.4266666666666667,
+    "metric_test": 0.41333333333333333,
+    "runtime_s": 0.8908097743988037,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.4766666666666667,
+    "metric_test": 0.47333333333333333,
+    "runtime_s": 5.6570515632629395,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        32,
+        64,
+        128
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.9766666666666667,
+    "metric_test": 0.9633333333333334,
+    "runtime_s": 0.6217882633209229,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
   },
   {
     "task": "mass_location",
     "model": "mlp",
     "feature": "modal",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
     "metric_val": 1.0,
-    "metric_test": 0.99,
-    "runtime_s": 0.5394506454467773,
-    "extra": {}
+    "metric_test": 0.9866666666666667,
+    "runtime_s": 0.2287909984588623,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        256,
+        128,
+        64
+      ],
+      "lr": 0.001
+    }
   },
   {
     "task": "mass_location",
     "model": "rf",
     "feature": "indicators",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.9766666666666667,
-    "metric_test": 0.97,
-    "runtime_s": 0.6048352718353271,
-    "extra": {}
+    "metric_val": 0.98,
+    "metric_test": 0.9666666666666667,
+    "runtime_s": 0.28629422187805176,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 100,
+      "max_depth": 12
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 1.0,
+    "metric_test": 0.99,
+    "runtime_s": 0.2899501323699951,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 100,
+      "max_depth": 12
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.4766666666666667,
+    "metric_test": 0.48,
+    "runtime_s": 0.6823546886444092,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 32,
+      "n_layers": 1
+    }
+  },
+  {
+    "task": "mass_location",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.6833333333333333,
+    "metric_test": 0.6366666666666667,
+    "runtime_s": 6.059870004653931,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 64,
+      "n_layers": 2
+    }
   },
   {
     "task": "mass_location",
     "model": "xgb",
     "feature": "indicators",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
     "metric_val": 0.99,
     "metric_test": 0.9733333333333334,
-    "runtime_s": 0.5795791149139404,
-    "extra": {}
+    "runtime_s": 0.5770037174224854,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": 6
+    }
   },
   {
     "task": "mass_location",
+    "model": "xgb",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 1.0,
+    "metric_test": 0.9866666666666667,
+    "runtime_s": 0.31707763671875,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 100,
+      "max_depth": 4
+    }
+  },
+  {
+    "task": "severity",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.39846938848495483,
+    "metric_test": 0.4199444055557251,
+    "runtime_s": 7.400938987731934,
+    "extra": {
+      "mae_test": 0.17430682480335236
+    },
+    "best_hyperparams": {
+      "widths": [
+        8,
+        16,
+        32
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.2530056834220886,
+    "metric_test": 0.2129012942314148,
+    "runtime_s": 3.7591583728790283,
+    "extra": {
+      "mae_test": 0.21294020116329193
+    },
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 7
+    }
+  },
+  {
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.2575575113296509,
+    "metric_test": 0.22734969854354858,
+    "runtime_s": 24.622376918792725,
+    "extra": {
+      "mae_test": 0.21092137694358826
+    },
+    "best_hyperparams": {
+      "widths": [
+        32,
+        64,
+        128
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "severity",
     "model": "mlp",
     "feature": "indicators",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
-    "metric_name": "accuracy",
-    "metric_val": 0.9333333333333333,
-    "metric_test": 0.9233333333333333,
-    "runtime_s": 0.3706991672515869,
-    "extra": {}
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.37596583366394043,
+    "metric_test": 0.34406644105911255,
+    "runtime_s": 1.1931722164154053,
+    "extra": {
+      "mae_test": 0.17773839831352234
+    },
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
   },
   {
-    "task": "mass_location",
-    "model": "cnn",
-    "feature": "frf_mag",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
-    "metric_name": "accuracy",
-    "metric_val": 0.5733333333333334,
-    "metric_test": 0.5533333333333333,
-    "runtime_s": 2.788299322128296,
-    "extra": {}
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.5513070225715637,
+    "metric_test": 0.5418701171875,
+    "runtime_s": 1.240140438079834,
+    "extra": {
+      "mae_test": 0.14530062675476074
+    },
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
   },
   {
-    "task": "mass_location",
+    "task": "severity",
+    "model": "rf",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.49809312882490453,
+    "metric_test": 0.4867599011607452,
+    "runtime_s": 6.733672380447388,
+    "extra": {
+      "mae_test": 0.14628254104051044
+    },
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": null
+    }
+  },
+  {
+    "task": "severity",
+    "model": "rf",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.5931187752625133,
+    "metric_test": 0.5727793417459944,
+    "runtime_s": 18.02321696281433,
+    "extra": {
+      "mae_test": 0.13004205335058697
+    },
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": null
+    }
+  },
+  {
+    "task": "severity",
     "model": "transformer",
     "feature": "frf_mag",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
-    "metric_name": "accuracy",
-    "metric_val": 0.6,
-    "metric_test": 0.5633333333333334,
-    "runtime_s": 2.310439109802246,
-    "extra": {}
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.02790546417236328,
+    "metric_test": 0.012962818145751953,
+    "runtime_s": 3.0104129314422607,
+    "extra": {
+      "mae_test": 0.24911442399024963
+    },
+    "best_hyperparams": {
+      "d_model": 32,
+      "n_layers": 1
+    }
   },
   {
-    "task": "mass_location",
-    "model": "cnn",
-    "feature": "timeseries",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
-    "metric_name": "accuracy",
-    "metric_val": 0.8933333333333333,
-    "metric_test": 0.89,
-    "runtime_s": 10.456107378005981,
-    "extra": {}
-  },
-  {
-    "task": "mass_location",
+    "task": "severity",
     "model": "transformer",
     "feature": "timeseries",
-    "n_train": 1400,
-    "n_val": 300,
-    "n_test": 300,
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.2024320363998413,
+    "metric_test": 0.16794723272323608,
+    "runtime_s": 16.21095061302185,
+    "extra": {
+      "mae_test": 0.22185684740543365
+    },
+    "best_hyperparams": {
+      "d_model": 32,
+      "n_layers": 2
+    }
+  },
+  {
+    "task": "severity",
+    "model": "xgb",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.4673452377319336,
+    "metric_test": 0.4677273631095886,
+    "runtime_s": 0.3252756595611572,
+    "extra": {
+      "mae_test": 0.15104076266288757
+    },
+    "best_hyperparams": {
+      "n_estimators": 100,
+      "max_depth": 8
+    }
+  },
+  {
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "R2",
+    "metric_val": 0.5511954426765442,
+    "metric_test": 0.5318478345870972,
+    "runtime_s": 3.089080810546875,
+    "extra": {
+      "mae_test": 0.13744007050991058
+    },
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": 8
+    }
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
     "metric_name": "accuracy",
-    "metric_val": 0.72,
-    "metric_test": 0.7266666666666667,
-    "runtime_s": 7.59133243560791,
-    "extra": {}
+    "metric_val": 0.796,
+    "metric_test": 0.8033333333333333,
+    "runtime_s": 13.912433624267578,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        16,
+        32,
+        64
+      ],
+      "kernel_size": 5
+    }
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.6773333333333333,
+    "metric_test": 0.6893333333333334,
+    "runtime_s": 10.88052773475647,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        32,
+        64,
+        128
+      ],
+      "kernel_size": 7
+    }
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.654,
+    "metric_test": 0.6566666666666666,
+    "runtime_s": 35.10527753829956,
+    "extra": {},
+    "best_hyperparams": {
+      "widths": [
+        32,
+        64,
+        128
+      ],
+      "kernel_size": 7
+    }
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.7033333333333334,
+    "metric_test": 0.7006666666666667,
+    "runtime_s": 1.828329086303711,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.8686666666666667,
+    "metric_test": 0.8766666666666667,
+    "runtime_s": 1.5432312488555908,
+    "extra": {},
+    "best_hyperparams": {
+      "hidden": [
+        512,
+        256,
+        128
+      ],
+      "lr": 0.003
+    }
+  },
+  {
+    "task": "type",
+    "model": "rf",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.7566666666666667,
+    "metric_test": 0.7446666666666667,
+    "runtime_s": 2.006263017654419,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 300,
+      "max_depth": null
+    }
+  },
+  {
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.8153333333333334,
+    "metric_test": 0.8113333333333334,
+    "runtime_s": 1.182340383529663,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 100,
+      "max_depth": null
+    }
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.476,
+    "metric_test": 0.5006666666666667,
+    "runtime_s": 10.064920663833618,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 64,
+      "n_layers": 2
+    }
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.5573333333333333,
+    "metric_test": 0.576,
+    "runtime_s": 30.154788494110107,
+    "extra": {},
+    "best_hyperparams": {
+      "d_model": 64,
+      "n_layers": 2
+    }
+  },
+  {
+    "task": "type",
+    "model": "xgb",
+    "feature": "indicators",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.774,
+    "metric_test": 0.7593333333333333,
+    "runtime_s": 4.002729654312134,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 600,
+      "max_depth": 6
+    }
+  },
+  {
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "n_train": 0,
+    "n_val": 0,
+    "n_test": 0,
+    "metric_name": "accuracy",
+    "metric_val": 0.8066666666666666,
+    "metric_test": 0.822,
+    "runtime_s": 8.850003480911255,
+    "extra": {},
+    "best_hyperparams": {
+      "n_estimators": 600,
+      "max_depth": 6
+    }
   }
 ]
