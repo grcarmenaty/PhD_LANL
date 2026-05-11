@@ -35,3 +35,6 @@ results/hpo.log
 results/models/*.pkl
 results/models_indicators/*.pkl
 
+# Per-case eval blob (30 MB) — regenerate with evaluate_full_experimental.py
+results/experimental_full_per_case.json
+
