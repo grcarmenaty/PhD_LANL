@@ -52,11 +52,7 @@ GRIDS = {
 CELLS = [
     ("cnn2d", f) for f in (
         "cfdac_real", "cfdac_imag", "cfdac_mag", "cfdac_phase",
-        "cfdac_magphase", "cfdac_all",
-    )
-] + [
-    ("cnn3d", f) for f in (
-        "cfdac3d_realimag", "cfdac3d_magphase", "cfdac3d_all",
+        "cfdac_magphase",
     )
 ]
 

@@ -33,4 +33,5 @@ results/hpo.log
 
 # Large RF / XGB pickles regenerate with train.py; keep small Torch .pt only.
 results/models/*.pkl
+results/models_indicators/*.pkl
 
