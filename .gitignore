@@ -27,6 +27,7 @@ test_write.tmp
 # Derived ML-pipeline artefacts (regenerate with the scripts)
 dataset/features.h5
 results/train.log
+results/hpo.log
 
 # Large RF / XGB pickles regenerate with train.py; keep small Torch .pt only.
 results/models/*.pkl
