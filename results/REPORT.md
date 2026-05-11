@@ -934,7 +934,7 @@ collapse; smaller `d_model` falls back to majority-class.
 
 timeseries wins in-domain.
 
-### 7.1.18 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
+### 7.1.18 2-D CNN, 3-D CNN, 4-channel CNN and tabular models on CFDAC variants
 
 The 2-channel `cfdac` (real + imag) is the original CFDAC
 encoding.  Seven new variants split or stack the four complex
@@ -943,6 +943,25 @@ discriminative axis directly.  4-channel (`cfdac_all`) is the
 2-D CNN consuming all four CFDAC projections as channels;
 `cfdac3d_*` runs a `Conv3DStack` whose first layer collapses
 the depth axis (2 or 4) with a `(D, 7, 7)` kernel.
+
+`hpo_cfdac_allmodels.py` additionally trains a Random Forest
+and an MLP on the *flattened* 16 384-dim view of each variant —
+the same treatment `modal` / `frf_mag` / `timeseries` get — so
+the tabular family is represented on every CFDAC variant too.
+RF on flat `cfdac_real` hits binary val **1.000 / test 0.991**,
+matching the modal-feature RF cell.
+
+| variant       | model | val   | test  |
+|---------------|-------|-------|-------|
+| `cfdac_real`  | RF    | **1.000** | **0.991** |
+| `cfdac_real`  | MLP   | 0.992 | 0.986 |
+
+(Tabular cells beyond `cfdac_real` are still running at commit
+time; the in-progress logs land under `results/hpo/<task>__{rf,mlp}__<variant>.json`
+and will populate § 12 on the next sweep.  RF on flat CFDAC is
+not viable for the severity task — a single 16 384-dim regression
+fit costs > 6 min, so MLP is the only tabular regressor reported
+for severity.)
 
 | variant            | architecture       | input shape        | val   | test  | exp (full 2 638) |
 |--------------------|--------------------|---------------------|-------|-------|------------------|
@@ -2249,9 +2268,11 @@ Output locations:
 
 ---
 
+---
+
 # 12. Full HPO trial dump (all cells, all trials)
 
-Every trial for every (task, model, feature) cell.  Rows are sorted by  (descending).  See § 7 for narrative context.
+Every trial for every (task, model, feature) cell.  Rows are sorted by val (descending) within each cell.  See § 7 for narrative context.
 
 ## Classification + severity HPO
 
@@ -2375,6 +2396,13 @@ _4 trials_  ·  best val = **0.8453**  ·  best test = **0.8420**
 | 5 | [16, 32, 64] | 0.8000 | 0.8000 | 14.3 |
 | 7 | [16, 32, 64] | 0.8000 | 0.8000 | 14.8 |
 
+### `binary` / `mlp` / `cfdac_real`
+_1 trials_  ·  best val = **0.9920**  ·  best test = **0.9860**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.001 | 0.9920 | 0.9860 | 10.6 |
+
 ### `binary` / `mlp` / `modal`
 _9 trials_  ·  best val = **0.9947**  ·  best test = **0.9887**
 
@@ -2389,6 +2417,13 @@ _9 trials_  ·  best val = **0.9947**  ·  best test = **0.9887**
 | [128, 64] | 0.001 | 0.8927 | 0.8800 | 0.9 |
 | [256, 128, 64] | 0.0005 | 0.8473 | 0.8453 | 1.1 |
 | [128, 64] | 0.0005 | 0.8127 | 0.8320 | 1.7 |
+
+### `binary` / `rf` / `cfdac_real`
+_1 trials_  ·  best val = **1.0000**  ·  best test = **0.9907**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 200 | 1.0000 | 0.9907 | 29.3 |
 
 ### `binary` / `rf` / `modal`
 _9 trials_  ·  best val = **0.9580**  ·  best test = **0.9493**
@@ -2564,6 +2599,13 @@ _4 trials_  ·  best val = **0.4883**  ·  best test = **0.4733**
 | 5 | [16, 32, 64] | 0.4684 | 0.4544 | 6.3 |
 | 7 | [32, 64, 128] | 0.4550 | 0.4411 | 21.8 |
 
+### `col_location` / `mlp` / `cfdac_real`
+_1 trials_  ·  best val = **0.5183**  ·  best test = **0.4900**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.001 | 0.5183 | 0.4900 | 4.8 |
+
 ### `col_location` / `mlp` / `modal`
 _9 trials_  ·  best val = **0.5072**  ·  best test = **0.4944**
 
@@ -2578,6 +2620,13 @@ _9 trials_  ·  best val = **0.5072**  ·  best test = **0.4944**
 | [128, 64] | 0.001 | 0.4928 | 0.4511 | 0.5 |
 | [512, 256, 128] | 0.0005 | 0.4895 | 0.4700 | 1.0 |
 | [256, 128, 64] | 0.0005 | 0.4883 | 0.4656 | 0.7 |
+
+### `col_location` / `rf` / `cfdac_real`
+_1 trials_  ·  best val = **0.5105**  ·  best test = **0.4967**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 200 | 0.5105 | 0.4967 | 27.7 |
 
 ### `col_location` / `rf` / `modal`
 _9 trials_  ·  best val = **0.5094**  ·  best test = **0.4922**
@@ -2753,6 +2802,13 @@ _4 trials_  ·  best val = **0.4767**  ·  best test = **0.4733**
 | 7 | [32, 64, 128] | 0.4467 | 0.4300 | 6.6 |
 | 7 | [16, 32, 64] | 0.3900 | 0.4133 | 2.3 |
 
+### `mass_location` / `mlp` / `cfdac_real`
+_1 trials_  ·  best val = **1.0000**  ·  best test = **0.9967**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.001 | 1.0000 | 0.9967 | 2.5 |
+
 ### `mass_location` / `mlp` / `modal`
 _9 trials_  ·  best val = **1.0000**  ·  best test = **0.9867**
 
@@ -2767,6 +2823,13 @@ _9 trials_  ·  best val = **1.0000**  ·  best test = **0.9867**
 | [128, 64] | 0.001 | 0.9933 | 0.9867 | 0.2 |
 | [256, 128, 64] | 0.0005 | 0.9800 | 0.9600 | 0.2 |
 | [128, 64] | 0.0005 | 0.9267 | 0.9200 | 0.2 |
+
+### `mass_location` / `rf` / `cfdac_real`
+_1 trials_  ·  best val = **0.9967**  ·  best test = **0.9967**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 200 | 0.9967 | 0.9967 | 2.5 |
 
 ### `mass_location` / `rf` / `modal`
 _9 trials_  ·  best val = **1.0000**  ·  best test = **0.9900**
@@ -2941,6 +3004,13 @@ _4 trials_  ·  best val = **0.2576**  ·  best test = **0.2273**
 | 7 | [32, 64, 128] | 0.2372 | 0.2288 | 24.4 |
 | 5 | [16, 32, 64] | 0.2263 | 0.1816 | 9.2 |
 | 7 | [16, 32, 64] | 0.2137 | 0.1982 | 9.6 |
+
+### `severity` / `mlp` / `cfdac_real`
+_1 trials_  ·  best val = **0.2557**  ·  best test = **0.2049**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.001 | 0.2557 | 0.2049 | 7.7 |
 
 ### `severity` / `mlp` / `modal`
 _9 trials_  ·  best val = **0.5513**  ·  best test = **0.5419**
