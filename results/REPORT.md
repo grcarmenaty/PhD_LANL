@@ -987,18 +987,75 @@ small Bolt damage on synth.
 
 ### 7.1.19 Cross-model comparison (binary)
 
-| model       | feature     | val   | test     | exp   | gap   |
-|-------------|-------------|-------|----------|-------|-------|
-| MLP         | modal       | 0.995 | **0.989** | 0.869 | +0.12 |
-| XGB         | modal       | 0.975 | 0.965    | 0.869 | +0.10 |
-| RF          | modal       | 0.958 | 0.949    | 0.869 | +0.08 |
-| 2-D CNN     | cfdac       | 0.961 | 0.944    | 0.869 | +0.08 |
-| Transformer | timeseries  | 0.890 | 0.876    | 0.738 | +0.14 |
-| 1-D CNN     | frf_mag     | 0.839 | 0.853    | 0.869 | −0.02 |
-| 1-D CNN     | timeseries  | 0.845 | 0.842    | 0.410 | +0.43 |
-| Transformer | frf_mag     | 0.800 | 0.800    | 0.869 | −0.07 |
+| model | feature | val acc | test acc | exp acc |
+|---|---|---|---|---|
+| xgb         | `cfdac_real` | 0.999 | 0.995 | — |
+| rf          | `cfdac_real` | 1.000 | 0.991 | — |
+| mlp         | `modal` | 0.995 | 0.989 | 0.825 |
+| mlp         | `cfdac_real` | 0.992 | 0.986 | — |
+| xgb         | `modal` | 0.975 | 0.965 | 0.825 |
+| cnn3d       | `cfdac3d_magphase` | 0.959 | 0.959 | 0.825 |
+| cnn2d       | `cfdac_real` | 0.952 | 0.957 | 0.803 |
+| cnn2d       | `cfdac_phase` | 0.953 | 0.953 | 0.825 |
+| rf          | `modal` | 0.958 | 0.949 | 0.825 |
+| cnn2d       | `cfdac_imag` | 0.957 | 0.946 | 0.818 |
+| cnn2d       | `cfdac` | 0.961 | 0.944 | 0.821 |
+| cnn3d       | `cfdac3d_realimag` | 0.954 | 0.939 | 0.784 |
+| cnn2d       | `cfdac_magphase` | 0.936 | 0.935 | 0.825 |
+| cnn3d       | `cfdac3d_all` | 0.931 | 0.935 | 0.825 |
+| cnn2d       | `cfdac_all` | 0.924 | 0.920 | 0.825 |
+| transformer | `timeseries` | 0.890 | 0.876 | 0.750 |
+| cnn         | `frf_mag` | 0.839 | 0.853 | 0.825 |
+| cnn         | `timeseries` | 0.845 | 0.842 | 0.415 |
+| cnn         | `cfdac_real` | 0.800 | 0.800 | — |
+| transformer | `cfdac_real` | 0.800 | 0.800 | — |
+| transformer | `frf_mag` | 0.800 | 0.800 | 0.825 |
+| cnn2d       | `cfdac_mag` | 0.801 | 0.799 | 0.821 |
 
-![per-class F1 — binary](figures/perclass_f1/binary.png)
+![HPO — binary/xgb/cfdac_real](figures/hpo/binary__xgb__cfdac_real.png)
+![confusion — binary/xgb/cfdac_real](figures/confusion/binary_xgb_cfdac_real.png)
+![HPO — binary/rf/cfdac_real](figures/hpo/binary__rf__cfdac_real.png)
+![confusion — binary/rf/cfdac_real](figures/confusion/binary_rf_cfdac_real.png)
+![HPO — binary/mlp/modal](figures/hpo/binary__mlp__modal.png)
+![confusion — binary/mlp/modal](figures/confusion/binary_mlp_modal.png)
+![HPO — binary/mlp/cfdac_real](figures/hpo/binary__mlp__cfdac_real.png)
+![confusion — binary/mlp/cfdac_real](figures/confusion/binary_mlp_cfdac_real.png)
+![HPO — binary/xgb/modal](figures/hpo/binary__xgb__modal.png)
+![confusion — binary/xgb/modal](figures/confusion/binary_xgb_modal.png)
+![HPO — binary/cnn3d/cfdac3d_magphase](figures/hpo/binary__cnn3d__cfdac3d_magphase.png)
+![confusion — binary/cnn3d/cfdac3d_magphase](figures/confusion/binary_cnn3d_cfdac3d_magphase.png)
+![HPO — binary/cnn2d/cfdac_real](figures/hpo/binary__cnn2d__cfdac_real.png)
+![confusion — binary/cnn2d/cfdac_real](figures/confusion/binary_cnn2d_cfdac_real.png)
+![HPO — binary/cnn2d/cfdac_phase](figures/hpo/binary__cnn2d__cfdac_phase.png)
+![confusion — binary/cnn2d/cfdac_phase](figures/confusion/binary_cnn2d_cfdac_phase.png)
+![HPO — binary/rf/modal](figures/hpo/binary__rf__modal.png)
+![confusion — binary/rf/modal](figures/confusion/binary_rf_modal.png)
+![HPO — binary/cnn2d/cfdac_imag](figures/hpo/binary__cnn2d__cfdac_imag.png)
+![confusion — binary/cnn2d/cfdac_imag](figures/confusion/binary_cnn2d_cfdac_imag.png)
+![HPO — binary/cnn2d/cfdac](figures/hpo/binary__cnn2d__cfdac.png)
+![confusion — binary/cnn2d/cfdac](figures/confusion/binary_cnn2d_cfdac.png)
+![HPO — binary/cnn3d/cfdac3d_realimag](figures/hpo/binary__cnn3d__cfdac3d_realimag.png)
+![confusion — binary/cnn3d/cfdac3d_realimag](figures/confusion/binary_cnn3d_cfdac3d_realimag.png)
+![HPO — binary/cnn2d/cfdac_magphase](figures/hpo/binary__cnn2d__cfdac_magphase.png)
+![confusion — binary/cnn2d/cfdac_magphase](figures/confusion/binary_cnn2d_cfdac_magphase.png)
+![HPO — binary/cnn3d/cfdac3d_all](figures/hpo/binary__cnn3d__cfdac3d_all.png)
+![confusion — binary/cnn3d/cfdac3d_all](figures/confusion/binary_cnn3d_cfdac3d_all.png)
+![HPO — binary/cnn2d/cfdac_all](figures/hpo/binary__cnn2d__cfdac_all.png)
+![confusion — binary/cnn2d/cfdac_all](figures/confusion/binary_cnn2d_cfdac_all.png)
+![HPO — binary/transformer/timeseries](figures/hpo/binary__transformer__timeseries.png)
+![confusion — binary/transformer/timeseries](figures/confusion/binary_transformer_timeseries.png)
+![HPO — binary/cnn/frf_mag](figures/hpo/binary__cnn__frf_mag.png)
+![confusion — binary/cnn/frf_mag](figures/confusion/binary_cnn_frf_mag.png)
+![HPO — binary/cnn/timeseries](figures/hpo/binary__cnn__timeseries.png)
+![confusion — binary/cnn/timeseries](figures/confusion/binary_cnn_timeseries.png)
+![HPO — binary/cnn/cfdac_real](figures/hpo/binary__cnn__cfdac_real.png)
+![confusion — binary/cnn/cfdac_real](figures/confusion/binary_cnn_cfdac_real.png)
+![HPO — binary/transformer/cfdac_real](figures/hpo/binary__transformer__cfdac_real.png)
+![confusion — binary/transformer/cfdac_real](figures/confusion/binary_transformer_cfdac_real.png)
+![HPO — binary/transformer/frf_mag](figures/hpo/binary__transformer__frf_mag.png)
+![confusion — binary/transformer/frf_mag](figures/confusion/binary_transformer_frf_mag.png)
+![HPO — binary/cnn2d/cfdac_mag](figures/hpo/binary__cnn2d__cfdac_mag.png)
+![confusion — binary/cnn2d/cfdac_mag](figures/confusion/binary_cnn2d_cfdac_mag.png)
 ![binary ROC overlay](figures/roc/binary_roc.png)
 ![binary PR overlay](figures/roc/binary_pr.png)
 
@@ -1228,18 +1285,57 @@ synth precision for cross-domain robustness.
 
 ### 7.2.19 Cross-model comparison (type)
 
-| model       | feature     | val   | test     | exp   | gap   |
-|-------------|-------------|-------|----------|-------|-------|
-| MLP         | modal       | 0.869 | **0.877** | 0.443 | +0.43 |
-| XGB         | modal       | 0.807 | 0.822    | 0.295 | +0.53 |
-| RF          | modal       | 0.815 | 0.811    | 0.443 | +0.37 |
-| 2-D CNN     | cfdac       | 0.796 | 0.803    | 0.426 | +0.38 |
-| 1-D CNN     | frf_mag     | 0.677 | 0.689    | 0.361 | +0.33 |
-| 1-D CNN     | timeseries  | 0.654 | 0.657    | 0.262 | +0.39 |
-| Transformer | timeseries  | 0.557 | 0.576    | 0.295 | +0.28 |
-| Transformer | frf_mag     | 0.476 | 0.501    | 0.393 | +0.11 |
+| model | feature | val acc | test acc | exp acc |
+|---|---|---|---|---|
+| mlp         | `modal` | 0.869 | 0.877 | 0.384 |
+| xgb         | `modal` | 0.807 | 0.822 | 0.328 |
+| cnn3d       | `cfdac3d_realimag` | 0.808 | 0.812 | 0.339 |
+| rf          | `modal` | 0.815 | 0.811 | 0.421 |
+| cnn2d       | `cfdac` | 0.796 | 0.803 | 0.415 |
+| cnn2d       | `cfdac_imag` | 0.799 | 0.802 | 0.331 |
+| cnn3d       | `cfdac3d_all` | 0.778 | 0.782 | 0.227 |
+| cnn2d       | `cfdac_real` | 0.769 | 0.778 | 0.417 |
+| cnn3d       | `cfdac3d_magphase` | 0.771 | 0.778 | 0.125 |
+| cnn2d       | `cfdac_phase` | 0.775 | 0.769 | 0.184 |
+| cnn2d       | `cfdac_magphase` | 0.770 | 0.767 | 0.266 |
+| cnn         | `frf_mag` | 0.677 | 0.689 | 0.333 |
+| cnn         | `timeseries` | 0.654 | 0.657 | 0.288 |
+| cnn2d       | `cfdac_mag` | 0.618 | 0.630 | 0.470 |
+| transformer | `timeseries` | 0.557 | 0.576 | 0.294 |
+| transformer | `frf_mag` | 0.476 | 0.501 | 0.347 |
 
-![per-class F1 — type](figures/perclass_f1/type.png)
+![HPO — type/mlp/modal](figures/hpo/type__mlp__modal.png)
+![confusion — type/mlp/modal](figures/confusion/type_mlp_modal.png)
+![HPO — type/xgb/modal](figures/hpo/type__xgb__modal.png)
+![confusion — type/xgb/modal](figures/confusion/type_xgb_modal.png)
+![HPO — type/cnn3d/cfdac3d_realimag](figures/hpo/type__cnn3d__cfdac3d_realimag.png)
+![confusion — type/cnn3d/cfdac3d_realimag](figures/confusion/type_cnn3d_cfdac3d_realimag.png)
+![HPO — type/rf/modal](figures/hpo/type__rf__modal.png)
+![confusion — type/rf/modal](figures/confusion/type_rf_modal.png)
+![HPO — type/cnn2d/cfdac](figures/hpo/type__cnn2d__cfdac.png)
+![confusion — type/cnn2d/cfdac](figures/confusion/type_cnn2d_cfdac.png)
+![HPO — type/cnn2d/cfdac_imag](figures/hpo/type__cnn2d__cfdac_imag.png)
+![confusion — type/cnn2d/cfdac_imag](figures/confusion/type_cnn2d_cfdac_imag.png)
+![HPO — type/cnn3d/cfdac3d_all](figures/hpo/type__cnn3d__cfdac3d_all.png)
+![confusion — type/cnn3d/cfdac3d_all](figures/confusion/type_cnn3d_cfdac3d_all.png)
+![HPO — type/cnn2d/cfdac_real](figures/hpo/type__cnn2d__cfdac_real.png)
+![confusion — type/cnn2d/cfdac_real](figures/confusion/type_cnn2d_cfdac_real.png)
+![HPO — type/cnn3d/cfdac3d_magphase](figures/hpo/type__cnn3d__cfdac3d_magphase.png)
+![confusion — type/cnn3d/cfdac3d_magphase](figures/confusion/type_cnn3d_cfdac3d_magphase.png)
+![HPO — type/cnn2d/cfdac_phase](figures/hpo/type__cnn2d__cfdac_phase.png)
+![confusion — type/cnn2d/cfdac_phase](figures/confusion/type_cnn2d_cfdac_phase.png)
+![HPO — type/cnn2d/cfdac_magphase](figures/hpo/type__cnn2d__cfdac_magphase.png)
+![confusion — type/cnn2d/cfdac_magphase](figures/confusion/type_cnn2d_cfdac_magphase.png)
+![HPO — type/cnn/frf_mag](figures/hpo/type__cnn__frf_mag.png)
+![confusion — type/cnn/frf_mag](figures/confusion/type_cnn_frf_mag.png)
+![HPO — type/cnn/timeseries](figures/hpo/type__cnn__timeseries.png)
+![confusion — type/cnn/timeseries](figures/confusion/type_cnn_timeseries.png)
+![HPO — type/cnn2d/cfdac_mag](figures/hpo/type__cnn2d__cfdac_mag.png)
+![confusion — type/cnn2d/cfdac_mag](figures/confusion/type_cnn2d_cfdac_mag.png)
+![HPO — type/transformer/timeseries](figures/hpo/type__transformer__timeseries.png)
+![confusion — type/transformer/timeseries](figures/confusion/type_transformer_timeseries.png)
+![HPO — type/transformer/frf_mag](figures/hpo/type__transformer__frf_mag.png)
+![confusion — type/transformer/frf_mag](figures/confusion/type_transformer_frf_mag.png)
 
 ### 7.2.20 Recommendation for type
 
@@ -1404,16 +1500,63 @@ regression is broken cross-domain regardless of representation
 
 ### 7.3.19 Cross-model comparison (severity)
 
-| model       | feature     | val R² | test R² | MAE   | exp R² |
-|-------------|-------------|--------|---------|-------|--------|
-| RF          | modal       | 0.593  | **0.573** | 0.130 | −0.15  |
-| MLP         | modal       | 0.551  | 0.542    | 0.145 | −33.2  |
-| XGB         | modal       | 0.551  | 0.532    | 0.137 | −0.06  |
-| 2-D CNN     | cfdac       | 0.399  | 0.420    | 0.174 | −0.21  |
-| 1-D CNN     | timeseries  | 0.258  | 0.227    | 0.211 | −22.4  |
-| 1-D CNN     | frf_mag     | 0.253  | 0.213    | 0.213 | −4.25  |
-| Transformer | timeseries  | 0.202  | 0.168    | 0.222 | −0.10  |
-| Transformer | frf_mag     | 0.028  | 0.013    | 0.249 | −0.04  |
+| model | feature | val R² | test R² | exp R² |
+|---|---|---|---|---|
+| rf          | `modal` | 0.593 | 0.573 | -0.175 |
+| mlp         | `modal` | 0.551 | 0.542 | -24188615174025006546944.000 |
+| xgb         | `modal` | 0.551 | 0.532 | -0.045 |
+| cnn2d       | `cfdac_all` | 0.498 | 0.508 | -0.383 |
+| cnn2d       | `cfdac_magphase` | 0.484 | 0.506 | -0.025 |
+| cnn3d       | `cfdac3d_all` | 0.496 | 0.480 | -0.262 |
+| cnn3d       | `cfdac3d_magphase` | 0.484 | 0.472 | -0.130 |
+| cnn2d       | `cfdac_phase` | 0.467 | 0.470 | -0.031 |
+| cnn2d       | `cfdac_imag` | 0.423 | 0.420 | -0.581 |
+| cnn2d       | `cfdac` | 0.398 | 0.420 | -0.215 |
+| cnn2d       | `cfdac_real` | 0.410 | 0.400 | -0.104 |
+| cnn3d       | `cfdac3d_realimag` | 0.373 | 0.353 | -0.648 |
+| cnn         | `timeseries` | 0.258 | 0.227 | -5450889216.000 |
+| cnn2d       | `cfdac_mag` | 0.256 | 0.222 | -0.906 |
+| cnn         | `frf_mag` | 0.253 | 0.213 | -11885453312.000 |
+| mlp         | `cfdac_real` | 0.256 | 0.205 | — |
+| transformer | `timeseries` | 0.202 | 0.168 | -0.077 |
+| transformer | `frf_mag` | 0.028 | 0.013 | -0.020 |
+
+![HPO — severity/rf/modal](figures/hpo/severity__rf__modal.png)
+![scatter — severity/rf/modal](figures/scatter/severity_rf_modal.png)
+![HPO — severity/mlp/modal](figures/hpo/severity__mlp__modal.png)
+![scatter — severity/mlp/modal](figures/scatter/severity_mlp_modal.png)
+![HPO — severity/xgb/modal](figures/hpo/severity__xgb__modal.png)
+![scatter — severity/xgb/modal](figures/scatter/severity_xgb_modal.png)
+![HPO — severity/cnn2d/cfdac_all](figures/hpo/severity__cnn2d__cfdac_all.png)
+![scatter — severity/cnn2d/cfdac_all](figures/scatter/severity_cnn2d_cfdac_all.png)
+![HPO — severity/cnn2d/cfdac_magphase](figures/hpo/severity__cnn2d__cfdac_magphase.png)
+![scatter — severity/cnn2d/cfdac_magphase](figures/scatter/severity_cnn2d_cfdac_magphase.png)
+![HPO — severity/cnn3d/cfdac3d_all](figures/hpo/severity__cnn3d__cfdac3d_all.png)
+![scatter — severity/cnn3d/cfdac3d_all](figures/scatter/severity_cnn3d_cfdac3d_all.png)
+![HPO — severity/cnn3d/cfdac3d_magphase](figures/hpo/severity__cnn3d__cfdac3d_magphase.png)
+![scatter — severity/cnn3d/cfdac3d_magphase](figures/scatter/severity_cnn3d_cfdac3d_magphase.png)
+![HPO — severity/cnn2d/cfdac_phase](figures/hpo/severity__cnn2d__cfdac_phase.png)
+![scatter — severity/cnn2d/cfdac_phase](figures/scatter/severity_cnn2d_cfdac_phase.png)
+![HPO — severity/cnn2d/cfdac_imag](figures/hpo/severity__cnn2d__cfdac_imag.png)
+![scatter — severity/cnn2d/cfdac_imag](figures/scatter/severity_cnn2d_cfdac_imag.png)
+![HPO — severity/cnn2d/cfdac](figures/hpo/severity__cnn2d__cfdac.png)
+![scatter — severity/cnn2d/cfdac](figures/scatter/severity_cnn2d_cfdac.png)
+![HPO — severity/cnn2d/cfdac_real](figures/hpo/severity__cnn2d__cfdac_real.png)
+![scatter — severity/cnn2d/cfdac_real](figures/scatter/severity_cnn2d_cfdac_real.png)
+![HPO — severity/cnn3d/cfdac3d_realimag](figures/hpo/severity__cnn3d__cfdac3d_realimag.png)
+![scatter — severity/cnn3d/cfdac3d_realimag](figures/scatter/severity_cnn3d_cfdac3d_realimag.png)
+![HPO — severity/cnn/timeseries](figures/hpo/severity__cnn__timeseries.png)
+![scatter — severity/cnn/timeseries](figures/scatter/severity_cnn_timeseries.png)
+![HPO — severity/cnn2d/cfdac_mag](figures/hpo/severity__cnn2d__cfdac_mag.png)
+![scatter — severity/cnn2d/cfdac_mag](figures/scatter/severity_cnn2d_cfdac_mag.png)
+![HPO — severity/cnn/frf_mag](figures/hpo/severity__cnn__frf_mag.png)
+![scatter — severity/cnn/frf_mag](figures/scatter/severity_cnn_frf_mag.png)
+![HPO — severity/mlp/cfdac_real](figures/hpo/severity__mlp__cfdac_real.png)
+![scatter — severity/mlp/cfdac_real](figures/scatter/severity_mlp_cfdac_real.png)
+![HPO — severity/transformer/timeseries](figures/hpo/severity__transformer__timeseries.png)
+![scatter — severity/transformer/timeseries](figures/scatter/severity_transformer_timeseries.png)
+![HPO — severity/transformer/frf_mag](figures/hpo/severity__transformer__frf_mag.png)
+![scatter — severity/transformer/frf_mag](figures/scatter/severity_transformer_frf_mag.png)
 
 ### 7.3.20 Recommendation for severity
 
@@ -1600,18 +1743,72 @@ experimental score to 0.24+, behind only `cfdac_mag`.
 
 ### 7.4.20 Cross-model comparison (col_location)
 
-| model       | feature     | val   | test     | exp   | gap   |
-|-------------|-------------|-------|----------|-------|-------|
-| RF          | modal       | 0.509 | **0.492** | 0.061 | +0.43 |
-| 2-D CNN     | cfdac       | 0.492 | 0.494    | 0.163 | +0.33 |
-| MLP         | modal       | 0.507 | 0.494    | 0.490 | +0.005 |
-| XGB         | modal       | 0.509 | 0.488    | 0.020 | +0.47 |
-| 1-D CNN     | timeseries  | 0.488 | 0.473    | 0.347 | +0.13 |
-| 1-D CNN     | frf_mag     | 0.490 | 0.469    | 0.265 | +0.20 |
-| Transformer | timeseries  | 0.387 | 0.368    | 0.204 | +0.16 |
-| Transformer | frf_mag     | 0.268 | 0.251    | 0.041 | +0.21 |
+| model | feature | val acc | test acc | exp acc |
+|---|---|---|---|---|
+| cnn2d       | `cfdac_all` | 0.505 | 0.504 | 0.155 |
+| cnn2d       | `cfdac_imag` | 0.478 | 0.500 | 0.104 |
+| rf          | `cfdac_real` | 0.511 | 0.497 | — |
+| cnn2d       | `cfdac` | 0.492 | 0.494 | 0.165 |
+| mlp         | `modal` | 0.507 | 0.494 | 0.453 |
+| rf          | `modal` | 0.509 | 0.492 | 0.101 |
+| mlp         | `cfdac_real` | 0.518 | 0.490 | — |
+| xgb         | `modal` | 0.509 | 0.488 | 0.059 |
+| cnn2d       | `cfdac_phase` | 0.504 | 0.487 | 0.230 |
+| cnn3d       | `cfdac3d_all` | 0.509 | 0.484 | 0.125 |
+| cnn3d       | `cfdac3d_magphase` | 0.496 | 0.479 | 0.170 |
+| cnn2d       | `cfdac_real` | 0.492 | 0.478 | 0.212 |
+| cnn2d       | `cfdac_magphase` | 0.512 | 0.474 | 0.119 |
+| cnn         | `timeseries` | 0.488 | 0.473 | 0.301 |
+| cnn         | `frf_mag` | 0.489 | 0.469 | 0.239 |
+| cnn2d       | `cfdac_mag` | 0.492 | 0.463 | 0.416 |
+| cnn3d       | `cfdac3d_realimag` | 0.496 | 0.457 | 0.149 |
+| cnn         | `cfdac_real` | 0.443 | 0.449 | — |
+| transformer | `timeseries` | 0.387 | 0.368 | 0.204 |
+| transformer | `frf_mag` | 0.267 | 0.251 | 0.040 |
+| transformer | `cfdac_real` | 0.236 | 0.230 | — |
 
-![per-class F1 — col_location](figures/perclass_f1/col_location.png)
+![HPO — col_location/cnn2d/cfdac_all](figures/hpo/col_location__cnn2d__cfdac_all.png)
+![confusion — col_location/cnn2d/cfdac_all](figures/confusion/col_location_cnn2d_cfdac_all.png)
+![HPO — col_location/cnn2d/cfdac_imag](figures/hpo/col_location__cnn2d__cfdac_imag.png)
+![confusion — col_location/cnn2d/cfdac_imag](figures/confusion/col_location_cnn2d_cfdac_imag.png)
+![HPO — col_location/rf/cfdac_real](figures/hpo/col_location__rf__cfdac_real.png)
+![confusion — col_location/rf/cfdac_real](figures/confusion/col_location_rf_cfdac_real.png)
+![HPO — col_location/cnn2d/cfdac](figures/hpo/col_location__cnn2d__cfdac.png)
+![confusion — col_location/cnn2d/cfdac](figures/confusion/col_location_cnn2d_cfdac.png)
+![HPO — col_location/mlp/modal](figures/hpo/col_location__mlp__modal.png)
+![confusion — col_location/mlp/modal](figures/confusion/col_location_mlp_modal.png)
+![HPO — col_location/rf/modal](figures/hpo/col_location__rf__modal.png)
+![confusion — col_location/rf/modal](figures/confusion/col_location_rf_modal.png)
+![HPO — col_location/mlp/cfdac_real](figures/hpo/col_location__mlp__cfdac_real.png)
+![confusion — col_location/mlp/cfdac_real](figures/confusion/col_location_mlp_cfdac_real.png)
+![HPO — col_location/xgb/modal](figures/hpo/col_location__xgb__modal.png)
+![confusion — col_location/xgb/modal](figures/confusion/col_location_xgb_modal.png)
+![HPO — col_location/cnn2d/cfdac_phase](figures/hpo/col_location__cnn2d__cfdac_phase.png)
+![confusion — col_location/cnn2d/cfdac_phase](figures/confusion/col_location_cnn2d_cfdac_phase.png)
+![HPO — col_location/cnn3d/cfdac3d_all](figures/hpo/col_location__cnn3d__cfdac3d_all.png)
+![confusion — col_location/cnn3d/cfdac3d_all](figures/confusion/col_location_cnn3d_cfdac3d_all.png)
+![HPO — col_location/cnn3d/cfdac3d_magphase](figures/hpo/col_location__cnn3d__cfdac3d_magphase.png)
+![confusion — col_location/cnn3d/cfdac3d_magphase](figures/confusion/col_location_cnn3d_cfdac3d_magphase.png)
+![HPO — col_location/cnn2d/cfdac_real](figures/hpo/col_location__cnn2d__cfdac_real.png)
+![confusion — col_location/cnn2d/cfdac_real](figures/confusion/col_location_cnn2d_cfdac_real.png)
+![HPO — col_location/cnn2d/cfdac_magphase](figures/hpo/col_location__cnn2d__cfdac_magphase.png)
+![confusion — col_location/cnn2d/cfdac_magphase](figures/confusion/col_location_cnn2d_cfdac_magphase.png)
+![HPO — col_location/cnn/timeseries](figures/hpo/col_location__cnn__timeseries.png)
+![confusion — col_location/cnn/timeseries](figures/confusion/col_location_cnn_timeseries.png)
+![HPO — col_location/cnn/frf_mag](figures/hpo/col_location__cnn__frf_mag.png)
+![confusion — col_location/cnn/frf_mag](figures/confusion/col_location_cnn_frf_mag.png)
+![HPO — col_location/cnn2d/cfdac_mag](figures/hpo/col_location__cnn2d__cfdac_mag.png)
+![confusion — col_location/cnn2d/cfdac_mag](figures/confusion/col_location_cnn2d_cfdac_mag.png)
+![HPO — col_location/cnn3d/cfdac3d_realimag](figures/hpo/col_location__cnn3d__cfdac3d_realimag.png)
+![confusion — col_location/cnn3d/cfdac3d_realimag](figures/confusion/col_location_cnn3d_cfdac3d_realimag.png)
+![HPO — col_location/cnn/cfdac_real](figures/hpo/col_location__cnn__cfdac_real.png)
+![confusion — col_location/cnn/cfdac_real](figures/confusion/col_location_cnn_cfdac_real.png)
+![HPO — col_location/transformer/timeseries](figures/hpo/col_location__transformer__timeseries.png)
+![confusion — col_location/transformer/timeseries](figures/confusion/col_location_transformer_timeseries.png)
+![HPO — col_location/transformer/frf_mag](figures/hpo/col_location__transformer__frf_mag.png)
+![confusion — col_location/transformer/frf_mag](figures/confusion/col_location_transformer_frf_mag.png)
+![HPO — col_location/transformer/cfdac_real](figures/hpo/col_location__transformer__cfdac_real.png)
+![confusion — col_location/transformer/cfdac_real](figures/confusion/col_location_transformer_cfdac_real.png)
 
 ### 7.4.21 Recommendation for col_location
 
@@ -1773,18 +1970,66 @@ from Conv3d at D = 2 / 4.
 
 ### 7.5.19 Cross-model comparison (mass_location)
 
-| model       | feature     | val   | test     | exp   |
-|-------------|-------------|-------|----------|-------|
-| RF          | modal       | 1.000 | **0.990** | 0.250 |
-| MLP         | modal       | 1.000 | 0.987    | 0.250 |
-| XGB         | modal       | 1.000 | 0.987    | 0.250 |
-| 2-D CNN     | cfdac       | 0.977 | 0.953    | 0.250 |
-| Transformer | timeseries  | 0.683 | 0.637    | 0.000 |
-| Transformer | frf_mag     | 0.477 | 0.480    | 0.250 |
-| 1-D CNN     | timeseries  | 0.477 | 0.473    | 0.250 |
-| 1-D CNN     | frf_mag     | 0.427 | 0.413    | 0.250 |
+| model | feature | val acc | test acc | exp acc |
+|---|---|---|---|---|
+| mlp         | `cfdac_real` | 1.000 | 0.997 | — |
+| rf          | `cfdac_real` | 0.997 | 0.997 | — |
+| rf          | `modal` | 1.000 | 0.990 | 0.168 |
+| cnn2d       | `cfdac_magphase` | 0.990 | 0.987 | 0.168 |
+| mlp         | `modal` | 1.000 | 0.987 | 0.256 |
+| xgb         | `modal` | 1.000 | 0.987 | 0.256 |
+| cnn2d       | `cfdac_phase` | 0.983 | 0.973 | 0.168 |
+| cnn2d       | `cfdac_all` | 0.977 | 0.970 | 0.282 |
+| cnn2d       | `cfdac_imag` | 0.973 | 0.970 | 0.168 |
+| cnn3d       | `cfdac3d_all` | 0.987 | 0.970 | 0.256 |
+| cnn3d       | `cfdac3d_magphase` | 0.987 | 0.970 | 0.168 |
+| cnn2d       | `cfdac` | 0.977 | 0.953 | 0.168 |
+| cnn3d       | `cfdac3d_realimag` | 0.937 | 0.937 | 0.168 |
+| cnn2d       | `cfdac_mag` | 0.953 | 0.927 | 0.256 |
+| cnn2d       | `cfdac_real` | 0.893 | 0.863 | 0.218 |
+| transformer | `timeseries` | 0.683 | 0.637 | 0.059 |
+| transformer | `frf_mag` | 0.477 | 0.480 | 0.168 |
+| cnn         | `timeseries` | 0.477 | 0.473 | 0.256 |
+| cnn         | `frf_mag` | 0.427 | 0.413 | 0.256 |
 
-![per-class F1 — mass_location](figures/perclass_f1/mass_location.png)
+![HPO — mass_location/mlp/cfdac_real](figures/hpo/mass_location__mlp__cfdac_real.png)
+![confusion — mass_location/mlp/cfdac_real](figures/confusion/mass_location_mlp_cfdac_real.png)
+![HPO — mass_location/rf/cfdac_real](figures/hpo/mass_location__rf__cfdac_real.png)
+![confusion — mass_location/rf/cfdac_real](figures/confusion/mass_location_rf_cfdac_real.png)
+![HPO — mass_location/rf/modal](figures/hpo/mass_location__rf__modal.png)
+![confusion — mass_location/rf/modal](figures/confusion/mass_location_rf_modal.png)
+![HPO — mass_location/cnn2d/cfdac_magphase](figures/hpo/mass_location__cnn2d__cfdac_magphase.png)
+![confusion — mass_location/cnn2d/cfdac_magphase](figures/confusion/mass_location_cnn2d_cfdac_magphase.png)
+![HPO — mass_location/mlp/modal](figures/hpo/mass_location__mlp__modal.png)
+![confusion — mass_location/mlp/modal](figures/confusion/mass_location_mlp_modal.png)
+![HPO — mass_location/xgb/modal](figures/hpo/mass_location__xgb__modal.png)
+![confusion — mass_location/xgb/modal](figures/confusion/mass_location_xgb_modal.png)
+![HPO — mass_location/cnn2d/cfdac_phase](figures/hpo/mass_location__cnn2d__cfdac_phase.png)
+![confusion — mass_location/cnn2d/cfdac_phase](figures/confusion/mass_location_cnn2d_cfdac_phase.png)
+![HPO — mass_location/cnn2d/cfdac_all](figures/hpo/mass_location__cnn2d__cfdac_all.png)
+![confusion — mass_location/cnn2d/cfdac_all](figures/confusion/mass_location_cnn2d_cfdac_all.png)
+![HPO — mass_location/cnn2d/cfdac_imag](figures/hpo/mass_location__cnn2d__cfdac_imag.png)
+![confusion — mass_location/cnn2d/cfdac_imag](figures/confusion/mass_location_cnn2d_cfdac_imag.png)
+![HPO — mass_location/cnn3d/cfdac3d_all](figures/hpo/mass_location__cnn3d__cfdac3d_all.png)
+![confusion — mass_location/cnn3d/cfdac3d_all](figures/confusion/mass_location_cnn3d_cfdac3d_all.png)
+![HPO — mass_location/cnn3d/cfdac3d_magphase](figures/hpo/mass_location__cnn3d__cfdac3d_magphase.png)
+![confusion — mass_location/cnn3d/cfdac3d_magphase](figures/confusion/mass_location_cnn3d_cfdac3d_magphase.png)
+![HPO — mass_location/cnn2d/cfdac](figures/hpo/mass_location__cnn2d__cfdac.png)
+![confusion — mass_location/cnn2d/cfdac](figures/confusion/mass_location_cnn2d_cfdac.png)
+![HPO — mass_location/cnn3d/cfdac3d_realimag](figures/hpo/mass_location__cnn3d__cfdac3d_realimag.png)
+![confusion — mass_location/cnn3d/cfdac3d_realimag](figures/confusion/mass_location_cnn3d_cfdac3d_realimag.png)
+![HPO — mass_location/cnn2d/cfdac_mag](figures/hpo/mass_location__cnn2d__cfdac_mag.png)
+![confusion — mass_location/cnn2d/cfdac_mag](figures/confusion/mass_location_cnn2d_cfdac_mag.png)
+![HPO — mass_location/cnn2d/cfdac_real](figures/hpo/mass_location__cnn2d__cfdac_real.png)
+![confusion — mass_location/cnn2d/cfdac_real](figures/confusion/mass_location_cnn2d_cfdac_real.png)
+![HPO — mass_location/transformer/timeseries](figures/hpo/mass_location__transformer__timeseries.png)
+![confusion — mass_location/transformer/timeseries](figures/confusion/mass_location_transformer_timeseries.png)
+![HPO — mass_location/transformer/frf_mag](figures/hpo/mass_location__transformer__frf_mag.png)
+![confusion — mass_location/transformer/frf_mag](figures/confusion/mass_location_transformer_frf_mag.png)
+![HPO — mass_location/cnn/timeseries](figures/hpo/mass_location__cnn__timeseries.png)
+![confusion — mass_location/cnn/timeseries](figures/confusion/mass_location_cnn_timeseries.png)
+![HPO — mass_location/cnn/frf_mag](figures/hpo/mass_location__cnn__frf_mag.png)
+![confusion — mass_location/cnn/frf_mag](figures/confusion/mass_location_cnn_frf_mag.png)
 
 ### 7.5.20 Recommendation for mass_location
 
@@ -1927,7 +2172,368 @@ All 66 scatter plots and 66 HPO surfaces are linked from
 Every trial value (val + test R², MAE, runtime) is tabulated
 inline in § 12 of this report under "Indicator-prediction HPO".
 
-### 7.6.5 What this means
+
+### 7.6.7 `SCI`
+
+Signed Structural Change Indicator — positive when CFDAC mass mostly sits below the diagonal, negative above.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.871 | 0.847 | -0.263 | 0.2922 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.879 | 0.837 | -0.217 | 0.271 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.769 | 0.764 | -1269656214323173785600.000 | 2.69e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![SCI scatter — xgb/modal](figures/indicators/scatter/SCI_xgb_modal.png)
+![SCI HPO — xgb/modal](figures/indicators/hpo/SCI__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.217 for xgb/modal; synth-only signal.
+
+### 7.6.8 `unsigned_SCI`
+
+Magnitude version of SCI: `1 − |Pearson(CFDAC_ref, CFDAC_dmg)|`, bounded in `[0, 1]`.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.995 | 0.995 | +0.064 | 0.1937 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.996 | 0.994 | -0.144 | 0.2659 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.991 | 0.994 | -665854319788216549376.000 | 1.642e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![unsigned_SCI scatter — rf/modal](figures/indicators/scatter/unsigned_SCI_rf_modal.png)
+![unsigned_SCI HPO — rf/modal](figures/indicators/hpo/unsigned_SCI__rf__modal.png)
+
+Marginal cross-domain transfer (exp R² +0.064); no better than the experimental mean.
+
+### 7.6.9 `DRQ`
+
+Mean of the per-frequency Response Vector Assurance Criterion (RVAC); 1 = identical mode-shape, 0 = orthogonal.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.999 | +0.219 | 0.163 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | +0.512 | 0.1098 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.996 | 0.996 | -666028687488974848.000 | 4.192e+06 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![DRQ scatter — xgb/modal](figures/indicators/scatter/DRQ_xgb_modal.png)
+![DRQ HPO — xgb/modal](figures/indicators/hpo/DRQ__xgb__modal.png)
+
+**Transfers cleanly** (exp R² +0.512 for xgb/modal); usable as a cross-domain damage proxy.
+
+### 7.6.10 `AIGAC`
+
+Mean of the per-frequency Generalised Assurance Criterion (GAC); cross-channel structural similarity.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.998 | -0.839 | 0.2103 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | -0.257 | 0.1617 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.994 | 0.994 | -7420790523401038987264.000 | 3.147e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![AIGAC scatter — xgb/modal](figures/indicators/scatter/AIGAC_xgb_modal.png)
+![AIGAC HPO — xgb/modal](figures/indicators/hpo/AIGAC__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.257 for xgb/modal; synth-only signal.
+
+### 7.6.11 `FRFRMS`
+
+RMS deviation between the log-magnitude FRF of the damaged sample and the pristine reference.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.994 | 0.994 | -1.157 | 0.9987 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.996 | 0.995 | -1.141 | 0.9931 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.991 | 0.990 | -16559382886608797696.000 | 8.129e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![FRFRMS scatter — xgb/modal](figures/indicators/scatter/FRFRMS_xgb_modal.png)
+![FRFRMS HPO — xgb/modal](figures/indicators/hpo/FRFRMS__xgb__modal.png)
+
+**Does not transfer** — exp R² -1.141 for xgb/modal; synth-only signal.
+
+### 7.6.12 `FRFSF`
+
+FRF Shape Factor — peak / band-energy ratio difference vs. the pristine reference.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.998 | -12.767 | 0.2275 | `{'n_estimators': 100, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | -12.085 | 0.2217 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.920 | 0.924 | -634600782340895832801280.000 | 1.078e+09 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![FRFSF scatter — xgb/modal](figures/indicators/scatter/FRFSF_xgb_modal.png)
+![FRFSF HPO — xgb/modal](figures/indicators/hpo/FRFSF__xgb__modal.png)
+
+**Does not transfer** — exp R² -12.085 for xgb/modal; synth-only signal.
+
+### 7.6.13 `FRFSM_6dB`
+
+Standard Mean with 6 dB band: total FRF deviation summed inside the 6 dB-down band around each peak.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.997 | 0.997 | -1.280 | 0.2358 | `{'n_estimators': 100, 'max_depth': None}` |
+| xgb | 0.996 | 0.996 | -1.281 | 0.236 | `{'n_estimators': 100, 'max_depth': 8}` |
+| mlp | -2.192 | -1.965 | -205675323727947409391616.000 | 2.027e+09 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![FRFSM_6dB scatter — rf/modal](figures/indicators/scatter/FRFSM_6dB_rf_modal.png)
+![FRFSM_6dB HPO — rf/modal](figures/indicators/hpo/FRFSM_6dB__rf__modal.png)
+
+**Does not transfer** — exp R² -1.280 for rf/modal; synth-only signal.
+
+### 7.6.14 `ODS_diff`
+
+`Σ |FRF − FRF_ref|`, an unbounded L1 distance between Operating Deflection Shapes.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.997 | -0.000 | 1.989e+05 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.998 | -0.000 | 1.989e+05 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.953 | 0.953 | -90756587520.000 | 5.986e+10 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![ODS_diff scatter — rf/modal](figures/indicators/scatter/ODS_diff_rf_modal.png)
+![ODS_diff HPO — rf/modal](figures/indicators/hpo/ODS_diff__rf__modal.png)
+
+**Does not transfer** — exp R² -0.000 for rf/modal; synth-only signal.
+
+### 7.6.15 `r2_imag`
+
+R² of `Im(FRF_dmg)` against `Im(FRF_ref)`.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.999 | 0.999 | -0.000 | 9.587e+08 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | -0.000 | 9.587e+08 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.998 | 0.998 | +0.613 | 5.961e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![r2_imag scatter — mlp/modal](figures/indicators/scatter/r2_imag_mlp_modal.png)
+![r2_imag HPO — mlp/modal](figures/indicators/hpo/r2_imag__mlp__modal.png)
+
+**Transfers cleanly** (exp R² +0.613 for mlp/modal); usable as a cross-domain damage proxy.
+
+### 7.6.16 `RVAC_mean`
+
+Mean of the RVAC vector (across frequency bins).
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.999 | +0.219 | 0.163 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | +0.512 | 0.1098 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.995 | 0.995 | -564026806313462792192.000 | 1.22e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![RVAC_mean scatter — xgb/modal](figures/indicators/scatter/RVAC_mean_xgb_modal.png)
+![RVAC_mean HPO — xgb/modal](figures/indicators/hpo/RVAC_mean__xgb__modal.png)
+
+**Transfers cleanly** (exp R² +0.512 for xgb/modal); usable as a cross-domain damage proxy.
+
+### 7.6.17 `RVAC_std`
+
+Standard deviation of the RVAC vector.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.991 | 0.991 | -0.832 | 0.04928 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.993 | 0.992 | -0.430 | 0.0423 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.970 | 0.965 | -677071097610136190976.000 | 2.28e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![RVAC_std scatter — xgb/modal](figures/indicators/scatter/RVAC_std_xgb_modal.png)
+![RVAC_std HPO — xgb/modal](figures/indicators/hpo/RVAC_std__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.430 for xgb/modal; synth-only signal.
+
+### 7.6.18 `RVAC_min`
+
+Minimum RVAC value across the frequency band — captures the worst-case shape mismatch.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.999 | 0.999 | +0.430 | 0.1266 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | +0.533 | 0.1059 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.997 | 0.996 | -82989809454486126592.000 | 5.239e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![RVAC_min scatter — xgb/modal](figures/indicators/scatter/RVAC_min_xgb_modal.png)
+![RVAC_min HPO — xgb/modal](figures/indicators/hpo/RVAC_min__xgb__modal.png)
+
+**Transfers cleanly** (exp R² +0.533 for xgb/modal); usable as a cross-domain damage proxy.
+
+### 7.6.19 `RVAC_max`
+
+Maximum RVAC value across the frequency band — captures the best-case agreement.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.997 | 0.997 | +0.194 | 0.1563 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.998 | 0.998 | +0.501 | 0.1073 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.995 | 0.995 | -2134218286501487181824.000 | 1.966e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![RVAC_max scatter — xgb/modal](figures/indicators/scatter/RVAC_max_xgb_modal.png)
+![RVAC_max HPO — xgb/modal](figures/indicators/hpo/RVAC_max__xgb__modal.png)
+
+**Transfers cleanly** (exp R² +0.501 for xgb/modal); usable as a cross-domain damage proxy.
+
+### 7.6.20 `GAC_mean`
+
+Mean of the GAC vector.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.998 | -0.839 | 0.2103 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | -0.257 | 0.1617 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.992 | 0.991 | -13305130746128545873920.000 | 4.213e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![GAC_mean scatter — xgb/modal](figures/indicators/scatter/GAC_mean_xgb_modal.png)
+![GAC_mean HPO — xgb/modal](figures/indicators/hpo/GAC_mean__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.257 for xgb/modal; synth-only signal.
+
+### 7.6.21 `GAC_std`
+
+Standard deviation of the GAC vector.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.995 | 0.994 | -0.314 | 0.02623 | `{'n_estimators': 100, 'max_depth': None}` |
+| xgb | 0.997 | 0.997 | -1.113 | 0.03895 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.974 | 0.973 | -10320740514158100873216.000 | 6.956e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![GAC_std scatter — rf/modal](figures/indicators/scatter/GAC_std_rf_modal.png)
+![GAC_std HPO — rf/modal](figures/indicators/hpo/GAC_std__rf__modal.png)
+
+**Does not transfer** — exp R² -0.314 for rf/modal; synth-only signal.
+
+### 7.6.22 `GAC_min`
+
+Minimum GAC value across the frequency band.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.999 | 0.999 | -1.085 | 0.2313 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | -0.654 | 0.1956 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.995 | 0.995 | -43927081622488219648.000 | 2.651e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![GAC_min scatter — xgb/modal](figures/indicators/scatter/GAC_min_xgb_modal.png)
+![GAC_min HPO — xgb/modal](figures/indicators/hpo/GAC_min__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.654 for xgb/modal; synth-only signal.
+
+### 7.6.23 `GAC_max`
+
+Maximum GAC value across the frequency band.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.997 | 0.997 | -0.732 | 0.1786 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.998 | 0.998 | -0.334 | 0.1484 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.988 | 0.989 | -26025410533847877025792.000 | 4.959e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![GAC_max scatter — xgb/modal](figures/indicators/scatter/GAC_max_xgb_modal.png)
+![GAC_max HPO — xgb/modal](figures/indicators/hpo/GAC_max__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.334 for xgb/modal; synth-only signal.
+
+### 7.6.24 `M2L_mean`
+
+Mean of the Modal-to-Linearity ratio across the frequency band.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.998 | +0.502 | 0.1638 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | +0.529 | 0.1557 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.995 | 0.996 | -34361299674511441920.000 | 3.828e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![M2L_mean scatter — xgb/modal](figures/indicators/scatter/M2L_mean_xgb_modal.png)
+![M2L_mean HPO — xgb/modal](figures/indicators/hpo/M2L_mean__xgb__modal.png)
+
+**Transfers cleanly** (exp R² +0.529 for xgb/modal); usable as a cross-domain damage proxy.
+
+### 7.6.25 `M2L_std`
+
+Standard deviation of the M2L vector.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.991 | 0.992 | -0.384 | 0.09034 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.994 | 0.994 | -0.593 | 0.1045 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.981 | 0.981 | -308631928754304712704.000 | 4.685e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![M2L_std scatter — rf/modal](figures/indicators/scatter/M2L_std_rf_modal.png)
+![M2L_std HPO — rf/modal](figures/indicators/hpo/M2L_std__rf__modal.png)
+
+**Does not transfer** — exp R² -0.384 for rf/modal; synth-only signal.
+
+### 7.6.26 `M2L_min`
+
+Minimum M2L value.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.998 | -0.244 | 0.3117 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | -0.241 | 0.3123 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.997 | 0.997 | -2588658840354422784.000 | 1.644e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![M2L_min scatter — xgb/modal](figures/indicators/scatter/M2L_min_xgb_modal.png)
+![M2L_min HPO — xgb/modal](figures/indicators/hpo/M2L_min__xgb__modal.png)
+
+**Does not transfer** — exp R² -0.241 for xgb/modal; synth-only signal.
+
+### 7.6.27 `M2L_max`
+
+Maximum M2L value.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.996 | 0.996 | +0.494 | 0.2129 | `{'n_estimators': 300, 'max_depth': None}` |
+| xgb | 0.997 | 0.997 | +0.287 | 0.2542 | `{'n_estimators': 300, 'max_depth': 4}` |
+| mlp | 0.991 | 0.991 | -100597335885132857344.000 | 7.328e+07 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![M2L_max scatter — rf/modal](figures/indicators/scatter/M2L_max_rf_modal.png)
+![M2L_max HPO — rf/modal](figures/indicators/hpo/M2L_max__rf__modal.png)
+
+**Transfers cleanly** (exp R² +0.494 for rf/modal); usable as a cross-domain damage proxy.
+
+### 7.6.28 `M2L_abs_sum`
+
+`Σ |M2L_dmg − M2L_ref|`, an unbounded L1 sum.
+
+| model | val R² | test R² | exp R² | exp MAE | best HPs |
+|---|---|---|---|---|---|
+| rf  | 0.998 | 0.998 | +0.756 | 0.9265 | `{'n_estimators': 100, 'max_depth': None}` |
+| xgb | 0.999 | 0.999 | +0.742 | 0.9676 | `{'n_estimators': 300, 'max_depth': 8}` |
+| mlp | 0.995 | 0.995 | -63897106697504686080.000 | 3.998e+08 | `{'hidden': [256, 128, 64], 'lr': 0.003}` |
+
+![M2L_abs_sum scatter — rf/modal](figures/indicators/scatter/M2L_abs_sum_rf_modal.png)
+![M2L_abs_sum HPO — rf/modal](figures/indicators/hpo/M2L_abs_sum__rf__modal.png)
+
+**Transfers cleanly** (exp R² +0.756 for rf/modal); usable as a cross-domain damage proxy.
+
+### 7.6.29 Indicator regression vs direct damage-parameter regression
+
+For every `(model, feature)` cell, the table below places the **best transferring indicator's exp R²** next to the **direct damage-parameter** scores from §§ 7.1 – 7.5.  Two takeaways:
+
+* RF on `modal` predicts `M2L_abs_sum` at exp R² **+0.76**, but predicts severity directly at exp R² **−0.17**.  The indicator-as-target approach transfers an order of magnitude better than direct regression for this cell.
+* The same `(model, feature)` cell that fails on direct severity regression often **does** transfer on the bounded indicators (DRQ / RVAC_* / M2L_*) — these are usable cross-domain proxies of damage severity even though severity itself is not.
+
+| model | feature | best indicator (exp R²) | severity exp R² | type exp acc | col_loc exp acc | mass_loc exp acc | binary exp acc |
+|---|---|---|---|---|---|---|---|
+| cnn | `frf_mag` | — | -11885453312.00 | 0.33 | 0.24 | 0.26 | 0.82 |
+| cnn | `timeseries` | — | -5450889216.00 | 0.29 | 0.30 | 0.26 | 0.42 |
+| cnn2d | `cfdac` | — | -0.21 | 0.41 | 0.17 | 0.17 | 0.82 |
+| cnn2d | `cfdac_all` | — | -0.38 | — | 0.16 | 0.28 | 0.82 |
+| cnn2d | `cfdac_imag` | — | -0.58 | 0.33 | 0.10 | 0.17 | 0.82 |
+| cnn2d | `cfdac_mag` | — | -0.91 | 0.47 | 0.42 | 0.26 | 0.82 |
+| cnn2d | `cfdac_magphase` | — | -0.02 | 0.27 | 0.12 | 0.17 | 0.82 |
+| cnn2d | `cfdac_phase` | — | -0.03 | 0.18 | 0.23 | 0.17 | 0.82 |
+| cnn2d | `cfdac_real` | — | -0.10 | 0.42 | 0.21 | 0.22 | 0.80 |
+| cnn3d | `cfdac3d_all` | — | -0.26 | 0.23 | 0.13 | 0.26 | 0.82 |
+| cnn3d | `cfdac3d_magphase` | — | -0.13 | 0.13 | 0.17 | 0.17 | 0.82 |
+| cnn3d | `cfdac3d_realimag` | — | -0.65 | 0.34 | 0.15 | 0.17 | 0.78 |
+| mlp | `indicators` | — | -48110543046268944384.00 | 0.09 | 0.37 | 0.26 | 0.82 |
+| mlp | `modal` | `r2_imag` (+0.61) | -24188615174025006546944.00 | 0.38 | 0.45 | 0.26 | 0.82 |
+| rf | `indicators` | — | -0.51 | 0.18 | 0.05 | 0.27 | 0.82 |
+| rf | `modal` | `M2L_abs_sum` (+0.76) | -0.17 | 0.42 | 0.10 | 0.17 | 0.82 |
+| transformer | `frf_mag` | — | -0.02 | 0.35 | 0.04 | 0.17 | 0.82 |
+| transformer | `timeseries` | — | -0.08 | 0.29 | 0.20 | 0.06 | 0.75 |
+| xgb | `indicators` | — | -0.28 | 0.16 | 0.16 | 0.09 | 0.82 |
+| xgb | `modal` | `M2L_abs_sum` (+0.74) | -0.04 | 0.33 | 0.06 | 0.26 | 0.82 |
+
+### 7.6.30 What it means (rolled-up)
 
 Five indicators **transfer cleanly** (exp R² ≥ 0.49):
 `M2L_abs_sum`, `M2L_mean`, `M2L_max`, `RVAC_{min,mean,max}`,
@@ -1947,7 +2553,7 @@ predicting the experimental mean*.  For these, the synth → exp
 gap on the indicator itself is bigger than the gap a constant
 predictor would absorb.
 
-### 7.6.6 Recommendation
+### 7.6.31 Recommendation (rolled-up)
 
 * **For sim-to-real SCI / DRQ estimation in the wild**, deploy
   the `M2L_abs_sum` and `RVAC_min` XGBoost regressors — they
@@ -1966,7 +2572,6 @@ Per-cell results in
 [`indicator_predictions_full.json`](indicator_predictions_full.json).
 
 ---
-
 # 8. Cross-task takeaways
 
 1. **Engineered modal features dominate** every classification
