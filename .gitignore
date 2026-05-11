@@ -23,3 +23,8 @@ test_write.tmp
 # Allow chunked splits
 !experimental_frfs_chunks/
 !experimental_frfs_chunks/**
+
+# Derived ML-pipeline artefacts (regenerate with the scripts)
+dataset/features.h5
+results/train.log
+
