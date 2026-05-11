@@ -2,9 +2,15 @@
 
 > All numbers below are the **best** trial per
 > `(task, model, feature)` cell from a full grid HPO over the
-> 2-D hyperparameter grids declared in `ml_pipeline/hpo.py`.  Every
-> trial is logged to `results/hpo/<cell>.json`; the response surface
-> for each cell is rendered in `results/figures/hpo/`.
+> 2-D hyperparameter grids declared in [`../ml_pipeline/hpo.py`](../ml_pipeline/hpo.py).
+> Every trial is logged to [`hpo/`](hpo/);
+> the response surface for each cell is rendered in [`figures/hpo/`](figures/hpo/).
+> Methodology, model architectures and library versions live in
+> [`../docs/ml/THEORY.md`](../docs/ml/THEORY.md).
+
+![global synthetic test metric](figures/train_metrics_by_task.png)
+![global IQS experimental metric](figures/experimental_metrics_by_task.png)
+![class counts and severity distributions](figures/dataset/class_severity.png)
 
 ## TL;DR
 
@@ -130,26 +136,53 @@
 
 ## Plots produced
 
-* `dataset/class_severity.png` — sample counts + severity distributions.
-* `signals/{timeseries,frf_mag,cfdac}.png` — one sample per damage class.
-* `confusion/<task>_<model>_<feature>.png` — confusion matrices (25 of them).
-* `perclass_f1/<task>.png` — model × class F1 heatmap (4).
-* `roc/binary_roc.png`, `binary_pr.png` — ROC & PR curves for every
-  binary classifier overlaid.
-* `scatter/severity_<model>_<feature>.png` — pred-vs-true + residuals
-  (4 per task that supports proba).
-* `feat_importance/<task>_<model>_<feature>.png` — top-20 RF / XGB
-  feature importances (20).
-* `embedding/{pca,tsne}_<feature>.png` — PCA + t-SNE 2-D projections
-  of the modal and indicators feature spaces, coloured by class (4).
-* `hpo/<cell>.png` — response surface for every HPO cell (55).
-* `train_metrics_by_task.png`, `experimental_metrics_by_task.png` —
-  global model-vs-feature bar charts.
+All plots live under [`figures/`](figures/).  Click any link to open the
+PNG on GitHub.
+
+### Example signals (one sample per damage class)
+
+![example acceleration time series](figures/signals/timeseries.png)
+![example |H(f)| spectrum](figures/signals/frf_mag.png)
+![example |CFDAC| matrix](figures/signals/cfdac.png)
+
+### ROC & PR curves (binary task)
+
+![binary ROC overlay](figures/roc/binary_roc.png)
+![binary precision–recall overlay](figures/roc/binary_pr.png)
+
+### Severity scatter (best regressor)
+
+![severity scatter — rf+modal](figures/scatter/severity_rf_modal.png)
+
+### Top HPO response surfaces
+
+![HPO surface — binary MLP+modal](figures/hpo/binary__mlp__modal.png)
+![HPO surface — binary 2-D CNN+CFDAC](figures/hpo/binary__cnn2d__cfdac.png)
+![HPO surface — type MLP+modal](figures/hpo/type__mlp__modal.png)
+![HPO surface — severity RF+modal](figures/hpo/severity__rf__modal.png)
+
+### Feature-space embeddings
+
+![PCA — modal](figures/embedding/pca_modal.png)
+![t-SNE — modal](figures/embedding/tsne_modal.png)
+
+### Index of all plot directories
+
+* [`figures/dataset/`](figures/dataset/) — class counts + severity distributions.
+* [`figures/signals/`](figures/signals/) — example time series, FRF, CFDAC (one sample/class).
+* [`figures/confusion/`](figures/confusion/) — 25 confusion matrices, one per classifier.
+* [`figures/perclass_f1/`](figures/perclass_f1/) — 4 model × class F1 heatmaps.
+* [`figures/roc/`](figures/roc/) — ROC + PR for every binary classifier.
+* [`figures/scatter/`](figures/scatter/) — 4 severity scatter+residual plots.
+* [`figures/feat_importance/`](figures/feat_importance/) — 20 RF/XGB top-20 importance bars.
+* [`figures/embedding/`](figures/embedding/) — PCA + t-SNE projections (4).
+* [`figures/hpo/`](figures/hpo/) — 55 HPO response-surface heatmaps.
 
 ## Experimental-data evaluation (61 IQS cases)
 
-See `results/experimental_evaluation.json` for the full table and
-`results/experimental_per_case.json` for per-case predictions.
+See [`experimental_evaluation.json`](experimental_evaluation.json) for
+the full table and [`experimental_per_case.json`](experimental_per_case.json)
+for per-case predictions.
 
 | task          | best model            | accuracy |
 |---------------|-----------------------|----------|
