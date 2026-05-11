@@ -1516,6 +1516,7 @@ regression is broken cross-domain regardless of representation
 | cnn3d       | `cfdac3d_realimag` | 0.373 | 0.353 | -0.648 |
 | cnn         | `timeseries` | 0.258 | 0.227 | -5450889216.000 |
 | cnn2d       | `cfdac_mag` | 0.256 | 0.222 | -0.906 |
+| cnn         | `cfdac_real` | 0.277 | 0.214 | — |
 | cnn         | `frf_mag` | 0.253 | 0.213 | -11885453312.000 |
 | mlp         | `cfdac_real` | 0.256 | 0.205 | — |
 | transformer | `timeseries` | 0.202 | 0.168 | -0.077 |
@@ -1549,6 +1550,8 @@ regression is broken cross-domain regardless of representation
 ![scatter — severity/cnn/timeseries](figures/scatter/severity_cnn_timeseries.png)
 ![HPO — severity/cnn2d/cfdac_mag](figures/hpo/severity__cnn2d__cfdac_mag.png)
 ![scatter — severity/cnn2d/cfdac_mag](figures/scatter/severity_cnn2d_cfdac_mag.png)
+![HPO — severity/cnn/cfdac_real](figures/hpo/severity__cnn__cfdac_real.png)
+![scatter — severity/cnn/cfdac_real](figures/scatter/severity_cnn_cfdac_real.png)
 ![HPO — severity/cnn/frf_mag](figures/hpo/severity__cnn__frf_mag.png)
 ![scatter — severity/cnn/frf_mag](figures/scatter/severity_cnn_frf_mag.png)
 ![HPO — severity/mlp/cfdac_real](figures/hpo/severity__mlp__cfdac_real.png)
@@ -1983,11 +1986,13 @@ from Conv3d at D = 2 / 4.
 | cnn2d       | `cfdac_imag` | 0.973 | 0.970 | 0.168 |
 | cnn3d       | `cfdac3d_all` | 0.987 | 0.970 | 0.256 |
 | cnn3d       | `cfdac3d_magphase` | 0.987 | 0.970 | 0.168 |
+| cnn         | `cfdac_real` | 0.990 | 0.967 | — |
 | cnn2d       | `cfdac` | 0.977 | 0.953 | 0.168 |
 | cnn3d       | `cfdac3d_realimag` | 0.937 | 0.937 | 0.168 |
 | cnn2d       | `cfdac_mag` | 0.953 | 0.927 | 0.256 |
 | cnn2d       | `cfdac_real` | 0.893 | 0.863 | 0.218 |
 | transformer | `timeseries` | 0.683 | 0.637 | 0.059 |
+| transformer | `cfdac_real` | 0.553 | 0.560 | — |
 | transformer | `frf_mag` | 0.477 | 0.480 | 0.168 |
 | cnn         | `timeseries` | 0.477 | 0.473 | 0.256 |
 | cnn         | `frf_mag` | 0.427 | 0.413 | 0.256 |
@@ -2014,6 +2019,8 @@ from Conv3d at D = 2 / 4.
 ![confusion — mass_location/cnn3d/cfdac3d_all](figures/confusion/mass_location_cnn3d_cfdac3d_all.png)
 ![HPO — mass_location/cnn3d/cfdac3d_magphase](figures/hpo/mass_location__cnn3d__cfdac3d_magphase.png)
 ![confusion — mass_location/cnn3d/cfdac3d_magphase](figures/confusion/mass_location_cnn3d_cfdac3d_magphase.png)
+![HPO — mass_location/cnn/cfdac_real](figures/hpo/mass_location__cnn__cfdac_real.png)
+![confusion — mass_location/cnn/cfdac_real](figures/confusion/mass_location_cnn_cfdac_real.png)
 ![HPO — mass_location/cnn2d/cfdac](figures/hpo/mass_location__cnn2d__cfdac.png)
 ![confusion — mass_location/cnn2d/cfdac](figures/confusion/mass_location_cnn2d_cfdac.png)
 ![HPO — mass_location/cnn3d/cfdac3d_realimag](figures/hpo/mass_location__cnn3d__cfdac3d_realimag.png)
@@ -2024,6 +2031,8 @@ from Conv3d at D = 2 / 4.
 ![confusion — mass_location/cnn2d/cfdac_real](figures/confusion/mass_location_cnn2d_cfdac_real.png)
 ![HPO — mass_location/transformer/timeseries](figures/hpo/mass_location__transformer__timeseries.png)
 ![confusion — mass_location/transformer/timeseries](figures/confusion/mass_location_transformer_timeseries.png)
+![HPO — mass_location/transformer/cfdac_real](figures/hpo/mass_location__transformer__cfdac_real.png)
+![confusion — mass_location/transformer/cfdac_real](figures/confusion/mass_location_transformer_cfdac_real.png)
 ![HPO — mass_location/transformer/frf_mag](figures/hpo/mass_location__transformer__frf_mag.png)
 ![confusion — mass_location/transformer/frf_mag](figures/confusion/mass_location_transformer_frf_mag.png)
 ![HPO — mass_location/cnn/timeseries](figures/hpo/mass_location__cnn__timeseries.png)
@@ -2875,6 +2884,8 @@ Output locations:
 
 ---
 
+---
+
 # 12. Full HPO trial dump (all cells, all trials)
 
 Every trial for every (task, model, feature) cell.  Rows are sorted by val (descending) within each cell.  See § 7 for narrative context.
@@ -2981,6 +2992,13 @@ _4 trials_  ·  best val = **0.9540**  ·  best test = **0.9393**
 | 3 | [16, 32, 64] | 0.9420 | 0.9247 | 20.2 |
 | 3 | [8, 16, 32] | 0.8533 | 0.8647 | 13.0 |
 
+### `binary` / `cnn` / `cfdac_real`
+_1 trials_  ·  best val = **0.8000**  ·  best test = **0.8000**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.8000 | 0.8000 | 15.6 |
+
 ### `binary` / `cnn` / `frf_mag`
 _4 trials_  ·  best val = **0.8387**  ·  best test = **0.8527**
 
@@ -3045,6 +3063,13 @@ _9 trials_  ·  best val = **0.9580**  ·  best test = **0.9493**
 | 6 | 200 | 0.7687 | 0.7773 | 1.0 |
 | 6 | 100 | 0.7647 | 0.7727 | 0.5 |
 
+### `binary` / `transformer` / `cfdac_real`
+_1 trials_  ·  best val = **0.8000**  ·  best test = **0.8000**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 48 | 2 | 0.8000 | 0.8000 | 12.5 |
+
 ### `binary` / `transformer` / `frf_mag`
 _6 trials_  ·  best val = **0.8000**  ·  best test = **0.8000**
 
@@ -3068,6 +3093,13 @@ _6 trials_  ·  best val = **0.8900**  ·  best test = **0.8760**
 | 48 | 1 | 0.8000 | 0.8000 | 13.8 |
 | 48 | 2 | 0.8000 | 0.8000 | 27.1 |
 | 64 | 1 | 0.8000 | 0.8000 | 16.5 |
+
+### `binary` / `xgb` / `cfdac_real`
+_1 trials_  ·  best val = **0.9993**  ·  best test = **0.9953**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 6 | 200 | 0.9993 | 0.9953 | 132.0 |
 
 ### `binary` / `xgb` / `modal`
 _9 trials_  ·  best val = **0.9747**  ·  best test = **0.9647**
@@ -3184,6 +3216,13 @@ _4 trials_  ·  best val = **0.4961**  ·  best test = **0.4567**
 | 3 | [8, 16, 32] | 0.4728 | 0.4878 | 41.0 |
 | 3 | [16, 32, 64] | 0.4451 | 0.4278 | 11.3 |
 
+### `col_location` / `cnn` / `cfdac_real`
+_1 trials_  ·  best val = **0.4428**  ·  best test = **0.4489**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.4428 | 0.4489 | 8.6 |
+
 ### `col_location` / `cnn` / `frf_mag`
 _4 trials_  ·  best val = **0.4895**  ·  best test = **0.4689**
 
@@ -3247,6 +3286,13 @@ _9 trials_  ·  best val = **0.5094**  ·  best test = **0.4922**
 | 6 | 100 | 0.4739 | 0.4911 | 0.5 |
 | 6 | 300 | 0.4739 | 0.4922 | 1.2 |
 | 6 | 200 | 0.4717 | 0.4933 | 0.9 |
+
+### `col_location` / `transformer` / `cfdac_real`
+_1 trials_  ·  best val = **0.2364**  ·  best test = **0.2300**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 48 | 2 | 0.2364 | 0.2300 | 7.6 |
 
 ### `col_location` / `transformer` / `frf_mag`
 _6 trials_  ·  best val = **0.2675**  ·  best test = **0.2511**
@@ -3387,6 +3433,13 @@ _4 trials_  ·  best val = **0.9367**  ·  best test = **0.9367**
 | 5 | [8, 16, 32] | 0.8700 | 0.9067 | 3.3 |
 | 3 | [8, 16, 32] | 0.8133 | 0.8133 | 2.9 |
 
+### `mass_location` / `cnn` / `cfdac_real`
+_1 trials_  ·  best val = **0.9900**  ·  best test = **0.9667**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.9900 | 0.9667 | 5.6 |
+
 ### `mass_location` / `cnn` / `frf_mag`
 _4 trials_  ·  best val = **0.4267**  ·  best test = **0.4133**
 
@@ -3450,6 +3503,13 @@ _9 trials_  ·  best val = **1.0000**  ·  best test = **0.9900**
 | 6 | 100 | 0.9967 | 0.9867 | 0.3 |
 | 6 | 300 | 0.9967 | 0.9900 | 0.8 |
 | 6 | 200 | 0.9933 | 0.9867 | 0.6 |
+
+### `mass_location` / `transformer` / `cfdac_real`
+_1 trials_  ·  best val = **0.5533**  ·  best test = **0.5600**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 48 | 2 | 0.5533 | 0.5600 | 3.2 |
 
 ### `mass_location` / `transformer` / `frf_mag`
 _6 trials_  ·  best val = **0.4767**  ·  best test = **0.4800**
@@ -3589,6 +3649,13 @@ _4 trials_  ·  best val = **0.3727**  ·  best test = **0.3533**
 | 5 | [8, 16, 32] | 0.3461 | 0.3394 | 13.0 |
 | 3 | [16, 32, 64] | 0.3106 | 0.2942 | 15.9 |
 | 3 | [8, 16, 32] | 0.2779 | 0.2406 | 10.2 |
+
+### `severity` / `cnn` / `cfdac_real`
+_1 trials_  ·  best val = **0.2769**  ·  best test = **0.2139**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.2769 | 0.2139 | 10.7 |
 
 ### `severity` / `cnn` / `frf_mag`
 _4 trials_  ·  best val = **0.2530**  ·  best test = **0.2129**

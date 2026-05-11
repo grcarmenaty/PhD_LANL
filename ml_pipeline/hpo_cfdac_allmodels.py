@@ -94,6 +94,11 @@ SKIP_XGB_TASKS = {"type", "col_location", "mass_location"}
 # explodes during AdamW updates because of the lack of input
 # normalisation through the conv stem); CNN remains usable.
 SKIP_TRANSFORMER_TASKS = {"severity"}
+# RF regression on 16 384-dim flat CFDAC fits a full-depth tree per
+# estimator; even with n_estimators=100 a single trial takes > 6 min
+# on the severity task.  Skip it and keep the cnn / mlp severity
+# rows that do finish.
+SKIP_RF_TASKS = {"severity"}
 
 
 def _flatten(X: np.ndarray) -> np.ndarray:
@@ -257,6 +262,8 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                 if m == "xgb" and tname in SKIP_XGB_TASKS:
                     continue
                 if m == "transformer" and tname in SKIP_TRANSFORMER_TASKS:
+                    continue
+                if m == "rf" and tname in SKIP_RF_TASKS:
                     continue
                 cell_path = hpo_dir / f"{tname}__{m}__{variant}.json"
                 if _existing_cell_done(cell_path):
