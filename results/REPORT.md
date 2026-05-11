@@ -10,6 +10,7 @@ the sim-to-real analysis, and per-plot commentary on all 146 plots.
 1. [Executive summary](#1-executive-summary)
 2. [Dataset](#2-dataset)
    * [2.5 Location distribution — synthetic vs experimental](#25-location-distribution--synthetic-vs-experimental)
+   * [2.6 Balanced subsets](#26-balanced-subsets--features_balancedh5--experimental_features_balancedh5)
 3. [Train / val / test protocol](#3-train--val--test-protocol)
 4. [Models (what each one is, how it works)](#4-models)
 5. [Features (what each one is, with examples)](#5-features)
@@ -50,25 +51,34 @@ trains 22 regressors that *predict* each indicator value.  The
 classification / severity HPO grid covers every
 `(task, model, feature)` cell in a single sweep.
 
-Cross-domain test uses the **full 2 638-case** IQS experimental
-dataset (was 61 cases against `median_frfs.h5` in the earlier
-version of this report).
+Cross-domain test uses **two** experimental views: the
+**full 2 638-case** IQS dataset (heavily skewed) and a matched
+**balanced 680-case subset** built by elimination so every
+`(type, location)` cell carries 40 cases (see § 2.6).  The
+balanced subset is the fair sim-to-real metric; the full set
+shows the deployable-population score.
 
-| task          | best cell                    | synth test    | exp test (n)                   |
-|---------------|------------------------------|---------------|--------------------------------|
-| binary        | MLP + modal                  | 0.989         | 0.825 = class baseline (2 638) |
-| type          | **2-D CNN + cfdac_mag**      | 0.630         | **0.470** (2 638)              |
-| severity      | RF + modal                   | R² 0.573      | R² −0.02 (transformer/frf_mag, 2 176) |
-| col_location  | MLP + modal                  | 0.494         | 0.453 (1 938)                  |
-| mass_location | 2-D CNN + cfdac_magphase     | 0.987         | 0.282 (2-D CNN + cfdac_all, 238) |
-| indicators    | XGB + modal                  | R² ≥ 0.99 ×20 | M2L_abs_sum R² 0.756 best of 22 |
+| task          | best cell                    | synth test    | full exp (n)                              | balanced exp (n, 40/cell)                    |
+|---------------|------------------------------|---------------|-------------------------------------------|----------------------------------------------|
+| binary        | MLP + modal                  | 0.989         | 0.825 = class baseline (2 638)            | 0.941 = class baseline (680)                 |
+| type          | **2-D CNN + cfdac_mag**      | 0.630         | **0.470** (2 638)                          | 0.403 (680)                                  |
+| severity      | RF + modal                   | R² 0.573      | R² −0.02 (transformer/frf_mag, 2 176)     | **R² +0.02 (XGB/modal, 640)**                |
+| col_location  | MLP + modal                  | 0.494         | 0.453 (1 938)                              | 0.287 (1-D CNN/frf_mag, 480)                 |
+| mass_location | 2-D CNN + cfdac_magphase     | 0.987         | 0.282 (2-D CNN + cfdac_all, 238)           | **0.338 (2-D CNN + cfdac_all, 160)**         |
+| indicators    | XGB + modal                  | R² ≥ 0.99 ×20 | M2L_abs_sum R² 0.756 best of 22 (2 176)    | M2L_abs_sum R² 0.78 / RVAC_min 0.60 (640)    |
 
 Headline takeaways:
 
 * **CFDAC-magnitude beats modal features on the 5-class type
-  task experimentally** (0.470 vs 0.384 for MLP+modal).  This
-  is a flip from the 61-case median dataset and the most
-  important new result.
+  task experimentally** (full exp 0.470 vs MLP+modal 0.384;
+  balanced 0.403 vs 0.251).  This is a flip from the 61-case
+  median dataset and is robust to per-cell rebalancing.
+* **Severity regression breaks the zero barrier only on the
+  balanced subset** — XGB+modal hits exp R² +0.02 vs every
+  unbalanced cell's negative R².  Removing the per-cell
+  population skew reduces the unbounded-head extrapolation
+  pressure enough that the boosted-tree predictor is
+  marginally better than the per-cell mean.
 * **Engineered modal features still dominate** in-domain for
   every classification task except `col_location` (ROM-bounded)
   and for severity regression.
@@ -104,8 +114,15 @@ calibrated semi-rigid reduced-order model of the LANL 3SBB.
 * **5 classes × 2 000 samples each** (Pristine / Bolt / Crack /
   Hole / Mass).
 * Within each non-Pristine class the 2 000 samples are
-  sub-stratified across every physical location (3 storeys × 2
-  ends for column damage; 4 plates for mass).
+  sub-stratified across **every physical location**:
+  * Bolt / Crack / Hole — 6 column-end positions
+    `(S1BD, S1AD, S2BD, S2AD, S3BD, S3AD)` ≈ 333 samples each;
+  * Mass — 4 plate positions `(Base, F1, F2, F3)` = 500 each.
+
+  These location labels feed the two location classification
+  tasks (`col_location`, `mass_location`); the per-location
+  count tables and the in-depth ROM ceiling discussion are in
+  § 2.5 below.
 * Continuous severity sampled uniformly inside physical bounds
   (bolt 5–95 % loosening; crack 1–8 mm; hole 1–6 mm; mass
   0.1–2.5 kg).
@@ -115,6 +132,14 @@ calibrated semi-rigid reduced-order model of the LANL 3SBB.
 * **No measurement noise**.  All variability is structural.
 * 4 s chirp from 5 to 100 Hz, 256 Hz sampling, 1 024 samples,
   9 sensors (`S2, S5, S6, S7, S8, S11, S12, S13, S14`).
+* **Class-balanced and location-balanced by construction.**
+  Every (type, location) cell carries the same prior so the
+  classification tasks have no class-imbalance to compensate.
+  The 2 638-case **experimental** dataset that backs the
+  cross-domain test is *not* balanced — see § 2.5 for the
+  asymmetric (type, location) distribution and § 2.6 for the
+  matched-balanced subset built for fair sim-to-real
+  comparison.
 
 ![class counts and severity distributions](figures/dataset/class_severity.png)
 
@@ -248,6 +273,62 @@ Consequence on `col_location` (6-class):
   is a good candidate for sim-to-real fine-tuning when more
   real Mass cases become available.
 
+## 2.6 Balanced subsets — `features_balanced.h5` + `experimental_features_balanced.h5`
+
+The imbalance in § 2.5 is corrected by building two matched
+balanced datasets that share the same `(type, location)` cell
+structure.  The balancing rules:
+
+1. **Restrict synthetic.**  Drop every `(type, location)` cell
+   that is *absent* in the experimental dataset (Bolt-S3AD,
+   Crack-S1AD/S2AD/S3AD, Hole-S1AD/S2AD).  Eleven of seventeen
+   surviving cells then get **subsampled** to `TARGET_SYNTH = 500`
+   per cell; the four Mass plates (500 samples each in the
+   source) pass through unchanged; the five Bolt cells get
+   **bootstrap-augmented** from the 333 source samples up to
+   500.
+2. **Eliminate experimental.**  Every cell with ≥ 40 source
+   samples is randomly **subsampled** to `TARGET_EXP = 40` per
+   cell; cells with fewer than 40 source samples are excluded
+   (the same 6 cells we drop on the synth side are already
+   absent in experimental).
+
+Result:
+
+| dataset                          | total cases | per cell | location cells |
+|----------------------------------|-------------|----------|----------------|
+| `features.h5` (original synth)   | 10 000      | 333–500  | 21 (full grid) |
+| `features_balanced.h5`           | 8 500       | 500      | 17             |
+| `experimental_features.h5`       | 2 638       | 0–531    | 16 + Pristine  |
+| `experimental_features_balanced.h5` | 680      | 40       | 17             |
+
+The 17 common cells:
+
+| type      | locations kept                       | cells |
+|-----------|--------------------------------------|-------|
+| Pristine  | (single class)                        | 1     |
+| Bolt      | S1BD, S1AD, S2BD, S2AD, S3BD          | 5     |
+| Crack     | S1BD, S2BD, S3BD                      | 3     |
+| Hole      | S1BD, S2BD, S3BD, S3AD                | 4     |
+| Mass      | Base, F1, F2, F3                      | 4     |
+| **Total** |                                       | **17** |
+
+Augmentation is **bootstrap-with-replacement on the row index**
+— no Gaussian noise or per-channel mixup is applied, since the
+synthetic source already carries ±2 % / ±1 % / ±5 % / ±20 %
+parameter variation per sample.  Rebuilding the synth-train
+fold *before* augmentation is the responsibility of any
+training script that consumes `features_balanced.h5` (otherwise
+val / test will receive bootstrap copies of train).
+
+The balanced eval results in §§ 7 – 8 are denoted "**balanced
+exp**" to distinguish from the full 2 638-case "exp" numbers.
+Build the balanced datasets with:
+
+```
+python ml_pipeline/rebalance_datasets.py
+```
+
 ---
 
 # 3. Train / val / test protocol
@@ -374,7 +455,7 @@ exact PyTorch code.
   between layers, AdamW optimiser, cosine LR schedule.
 * **Why for this benchmark.** Universal function approximator
   on fixed-length feature vectors; what HPO consistently picks
-  as the best non-tree model on `modal` and `indicators`.
+  as the best non-tree model on the `modal` feature.
 * **HPO grid:**
   `hidden ∈ {(128, 64), (256, 128, 64), (512, 256, 128)}`,
   `lr ∈ {5e-4, 1e-3, 3e-3}` — 9 trials per cell.
@@ -453,7 +534,16 @@ experimental sample per damage class:
 
 ![modal feature — synth vs experimental](figures/feature_examples/modal.png)
 
-## `indicators` — 22-d pymodal damage-indicator vector
+## `indicators` — 22-d pymodal damage-indicator vector (target only)
+
+> **Not used as an input feature anywhere in this report.**
+> The pymodal indicators are reference-anchored (computed against
+> the synthetic pristine mean FRF) and therefore leak information
+> about the reference into the input.  They are kept on disk as
+> *regression targets* for the 22 per-indicator predictors in
+> § 7.6, but every classification / severity model in §§ 7.1 – 7.5
+> consumes only `modal`, `frf_mag`, `timeseries`, or one of the
+> CFDAC variants.
 
 Every scalar is computed by `pymodal.utils.<name>` against the
 synthetic pristine mean FRF.  Entries:
@@ -745,35 +835,6 @@ the forest still loses 17 % of Pristine samples to the Damage
 class even with `class_weight="balanced"` because the tail of
 the Pristine envelope overlaps the lightly-damaged Bolt cases.
 
-### 7.1.4 RF on indicators
-
-![HPO surface — binary RF/indicators](figures/hpo/binary__rf__indicators.png)
-![confusion — binary RF/indicators](figures/confusion/binary_rf_indicators.png)
-![importance — binary RF/indicators](figures/feat_importance/binary_rf_indicators.png)
-
-* HPO best : `n_estimators=200, max_depth=None`
-* Synthetic : val 0.924, test 0.916, recall 0.73 / 0.96
-* Experimental : 0.869, gap +0.05
-* Top features : `unsigned_SCI` (8 %), `RVAC_std` (7 %),
-  `FRFSM_6dB` (7 %).
-
-**Interpretation.** Indicator-feature RF drops 3 pp vs
-modal-feature RF on Pristine recall.  Importances spread across
-many indicators — no single one dominates.  The experimental
-score happens to match modal-RF (0.869), confirming
-indicators transfer slightly more robustly when the synthetic
-reference itself is the most off.
-
-### 7.1.5 RF — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.958 | 0.949 | 0.869 |
-| indicators  | 0.924 | 0.916 | 0.869 |
-
-modal wins in-domain by ~3 pp; both transfer to the class
-baseline.
-
 ### 7.1.6 XGB on modal
 
 ![HPO surface — binary XGB/modal](figures/hpo/binary__xgb__modal.png)
@@ -790,31 +851,6 @@ baseline.
 Pristine recall vs the RF; the top split is the *frequency* of
 the first mode at Floor 2 (sensor S6) instead of band energy.
 
-### 7.1.7 XGB on indicators
-
-![HPO surface — binary XGB/indicators](figures/hpo/binary__xgb__indicators.png)
-![confusion — binary XGB/indicators](figures/confusion/binary_xgb_indicators.png)
-![importance — binary XGB/indicators](figures/feat_importance/binary_xgb_indicators.png)
-
-* HPO best : `n_estimators=300, max_depth=8`
-* Synthetic : val 0.919, test 0.926, recall 0.82 / 0.95
-* Experimental : 0.869, gap +0.06
-* Top features : `unsigned_SCI` (10 %), `FRFRMS` (8 %),
-  `GAC_min` (8 %).
-
-**Interpretation.** Boosting concentrates 10 % of importance
-on `unsigned_SCI` — the indicator the SCI variable is named
-for.
-
-### 7.1.8 XGB — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.975 | 0.965 | 0.869 |
-| indicators  | 0.919 | 0.926 | 0.869 |
-
-modal wins by ~4 pp on synth, ties on experimental.
-
 ### 7.1.9 MLP on modal
 
 ![HPO surface — binary MLP/modal](figures/hpo/binary__mlp__modal.png)
@@ -828,30 +864,6 @@ modal wins by ~4 pp on synth, ties on experimental.
 task.*  HPO surface ramps cleanly toward wider hidden + higher
 lr; the boundary case `(512, 256, 128), 3e-3` is the best inside
 this grid.  Confusion matrix is symmetric.
-
-### 7.1.10 MLP on indicators
-
-![HPO surface — binary MLP/indicators](figures/hpo/binary__mlp__indicators.png)
-![confusion — binary MLP/indicators](figures/confusion/binary_mlp_indicators.png)
-
-* HPO best : `hidden=(512, 256, 128), lr=3e-3`
-* Synthetic : val 0.826, test 0.821, recall 0.42 / 0.92
-* Experimental : 0.869, gap −0.05
-
-**Interpretation.** With indicators the MLP collapses Pristine
-recall to 0.42.  Counter-intuitively the experimental score is
-*higher* than the synthetic test because the IQS data is mostly
-damaged cases (53/61) so a model with high Damage recall and
-low Pristine recall accidentally hits the prior.
-
-### 7.1.11 MLP — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.995 | 0.989 | 0.869 |
-| indicators  | 0.826 | 0.821 | 0.869 |
-
-modal wins by ~17 pp on synth.
 
 ### 7.1.12 1-D CNN on frf_mag
 
@@ -927,19 +939,37 @@ collapse; smaller `d_model` falls back to majority-class.
 
 timeseries wins in-domain.
 
-### 7.1.18 2-D CNN on cfdac
+### 7.1.18 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
 
-![HPO surface — binary CNN2D/cfdac](figures/hpo/binary__cnn2d__cfdac.png)
-![confusion — binary CNN2D/cfdac](figures/confusion/binary_cnn2d_cfdac.png)
+The 2-channel `cfdac` (real + imag) is the original CFDAC
+encoding.  Seven new variants split or stack the four complex
+projections so the convolutional model can pick the most
+discriminative axis directly.  4-channel (`cfdac_all`) is the
+2-D CNN consuming all four CFDAC projections as channels;
+`cfdac3d_*` runs a `Conv3DStack` whose first layer collapses
+the depth axis (2 or 4) with a `(D, 7, 7)` kernel.
 
-* HPO best : `widths=(16, 32, 64), kernel_size=5`
-* Synthetic : val 0.961, test 0.944, recall 0.93 / 0.95
-* Experimental : 0.869, gap +0.08
+| variant            | architecture       | input shape        | val   | test  | exp (full 2 638) |
+|--------------------|--------------------|---------------------|-------|-------|------------------|
+| `cfdac`            | 2-D CNN, 2-ch      | (2, 128, 128)        | 0.961 | 0.944 | 0.821            |
+| `cfdac_real`       | 2-D CNN, 1-ch      | (1, 128, 128)        | 0.952 | 0.957 | 0.803            |
+| `cfdac_imag`       | 2-D CNN, 1-ch      | (1, 128, 128)        | 0.957 | 0.946 | 0.825            |
+| `cfdac_mag`        | 2-D CNN, 1-ch      | (1, 128, 128)        | 0.801 | 0.799 | 0.825            |
+| `cfdac_phase`      | 2-D CNN, 1-ch      | (1, 128, 128)        | 0.953 | 0.953 | 0.825            |
+| `cfdac_magphase`   | 2-D CNN, 2-ch      | (2, 128, 128)        | 0.936 | 0.935 | 0.825            |
+| `cfdac_all`        | 2-D CNN, **4-ch**  | (4, 128, 128)        | 0.924 | 0.920 | 0.825            |
+| `cfdac3d_realimag` | **3-D CNN**, D = 2 | (1, 2, 128, 128)     | 0.954 | 0.939 | 0.784            |
+| `cfdac3d_magphase` | **3-D CNN**, D = 2 | (1, 2, 128, 128)     | 0.959 | 0.959 | 0.825            |
+| `cfdac3d_all`      | **3-D CNN**, D = 4 | (1, 4, 128, 128)     | 0.931 | 0.935 | 0.825            |
 
-**Interpretation.** The matricial CFDAC representation lives
-in `[−1, 1]` by construction, so the 2-D CNN trains stably.
-Best non-MLP cell for this task — 9.2 pp improvement over the
-best 1-D deep model.
+**Interpretation.** Every CFDAC variant lands at the class
+baseline (0.825) on the experimental set because Pristine
+is only 17.5 % of the 2 638 cases and binary collapses
+to "predict damage."  Synth-test ordering: `cfdac_imag` /
+`cfdac_real` / `cfdac3d_magphase` ≈ 0.96 lead the variant
+table; `cfdac_mag` alone drops to 0.80 because magnitude
+loses the sign information that distinguishes Pristine from
+small Bolt damage on synth.
 
 ### 7.1.19 Cross-model comparison (binary)
 
@@ -949,12 +979,9 @@ best 1-D deep model.
 | XGB         | modal       | 0.975 | 0.965    | 0.869 | +0.10 |
 | RF          | modal       | 0.958 | 0.949    | 0.869 | +0.08 |
 | 2-D CNN     | cfdac       | 0.961 | 0.944    | 0.869 | +0.08 |
-| XGB         | indicators  | 0.919 | 0.926    | 0.869 | +0.06 |
-| RF          | indicators  | 0.924 | 0.916    | 0.869 | +0.05 |
 | Transformer | timeseries  | 0.890 | 0.876    | 0.738 | +0.14 |
 | 1-D CNN     | frf_mag     | 0.839 | 0.853    | 0.869 | −0.02 |
 | 1-D CNN     | timeseries  | 0.845 | 0.842    | 0.410 | +0.43 |
-| MLP         | indicators  | 0.826 | 0.821    | 0.869 | −0.05 |
 | Transformer | frf_mag     | 0.800 | 0.800    | 0.869 | −0.07 |
 
 ![per-class F1 — binary](figures/perclass_f1/binary.png)
@@ -1026,37 +1053,6 @@ modal-energy signatures.  Crack/Hole is the residual confusion:
 both reduce column stiffness similarly, the random-forest
 splits on `bandE` cannot fully separate them.
 
-### 7.2.4 RF on indicators
-
-![HPO surface — type RF/indicators](figures/hpo/type__rf__indicators.png)
-![confusion — type RF/indicators](figures/confusion/type_rf_indicators.png)
-![importance — type RF/indicators](figures/feat_importance/type_rf_indicators.png)
-
-* HPO best : `n_estimators=100, max_depth=None`
-* Synthetic : val 0.757, test 0.745
-* Per-class recall : 0.84 / 0.84 / 0.61 / 0.53 / 0.90
-* Experimental : 0.164, gap +0.58
-* Top features : `unsigned_SCI` (9 %), `FRFRMS` (8 %),
-  `RVAC_std` (7 %).
-
-**Interpretation.** Indicators carry detection signal but not
-type signal: every indicator is a scalar summary of the
-*overall* FRF deviation, so Bolt-vs-Crack-vs-Hole score similar
-indicator values.  Pristine recall still 0.84 because
-indicators *do* detect "anything is wrong".
-
-### 7.2.5 RF — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.815 | 0.811 | 0.443 |
-| indicators  | 0.757 | 0.745 | 0.164 |
-
-modal wins by ~7 pp in-domain and by a factor of 3 on
-experimental.  Indicators are anchored to the *synthetic*
-pristine reference; the closer the model relies on that anchor,
-the worse it transfers.
-
 ### 7.2.6 XGB on modal
 
 ![HPO surface — type XGB/modal](figures/hpo/type__xgb__modal.png)
@@ -1074,32 +1070,6 @@ the worse it transfers.
 frequencies at the three floors** as its top splits — directly
 mirrors the physics.
 
-### 7.2.7 XGB on indicators
-
-![HPO surface — type XGB/indicators](figures/hpo/type__xgb__indicators.png)
-![confusion — type XGB/indicators](figures/confusion/type_xgb_indicators.png)
-![importance — type XGB/indicators](figures/feat_importance/type_xgb_indicators.png)
-
-* HPO best : `n_estimators=600, max_depth=6`
-* Synthetic : val 0.774, test 0.759
-* Per-class recall : 0.86 / 0.84 / 0.62 / 0.55 / 0.92
-* Experimental : 0.148, gap +0.61
-* Top features : `unsigned_SCI` (19 %), `FRFRMS` (9 %),
-  `M2L_std` (7 %).
-
-**Interpretation.** Boosting concentrates 19 % of importance
-on `unsigned_SCI` — not enough alone to separate damage
-mechanisms.
-
-### 7.2.8 XGB — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.807 | 0.822 | 0.295 |
-| indicators  | 0.774 | 0.759 | 0.148 |
-
-Same direction as RF: modal wins, indicator gap is larger.
-
 ### 7.2.9 MLP on modal
 
 ![HPO surface — type MLP/modal](figures/hpo/type__mlp__modal.png)
@@ -1116,28 +1086,6 @@ the only model that breaks 90 % on Hole — Hole recall 0.92 is
 *can* read the small amplitude differences that separate Hole
 from Crack on the modal features, while every tree model
 cannot.
-
-### 7.2.10 MLP on indicators
-
-![HPO surface — type MLP/indicators](figures/hpo/type__mlp__indicators.png)
-![confusion — type MLP/indicators](figures/confusion/type_mlp_indicators.png)
-
-* HPO best : `hidden=(512, 256, 128), lr=3e-3`
-* Synthetic : val 0.703, test 0.701
-* Per-class recall : 0.72 / 0.83 / 0.53 / 0.53 / 0.90
-* Experimental : 0.066, gap +0.63
-
-**Interpretation.** Same indicator-vector ceiling as the
-tree models.
-
-### 7.2.11 MLP — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.869 | 0.877 | 0.443 |
-| indicators  | 0.703 | 0.701 | 0.066 |
-
-modal wins by 18 pp.
 
 ### 7.2.12 1-D CNN on frf_mag
 
@@ -1210,21 +1158,50 @@ Mass drop.
 
 timeseries wins in-domain.
 
-### 7.2.18 2-D CNN on cfdac
+### 7.2.18 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
+
+The cross-domain breakthrough of this report lands here.  Every
+2-D / 3-D / 4-channel variant trained at 4 epochs on the
+standard `Conv2DStack` / `Conv3DStack` HPO grid:
+
+| variant            | architecture       | val   | test  | exp (full 2 638) |
+|--------------------|--------------------|-------|-------|------------------|
+| `cfdac`            | 2-D CNN, 2-ch      | 0.796 | 0.803 | 0.415            |
+| `cfdac_real`       | 2-D CNN, 1-ch      | 0.769 | 0.778 | 0.417            |
+| `cfdac_imag`       | 2-D CNN, 1-ch      | 0.799 | 0.802 | 0.107            |
+| `cfdac_mag`        | 2-D CNN, 1-ch      | 0.618 | 0.630 | **0.470**        |
+| `cfdac_phase`      | 2-D CNN, 1-ch      | 0.775 | 0.769 | 0.205            |
+| `cfdac_magphase`   | 2-D CNN, 2-ch      | 0.770 | 0.767 | 0.190            |
+| `cfdac_all`        | 2-D CNN, **4-ch**  | OOM   | OOM   | 0.169            |
+| `cfdac3d_realimag` | **3-D CNN**, D = 2 | 0.808 | 0.812 | 0.146            |
+| `cfdac3d_magphase` | **3-D CNN**, D = 2 | 0.771 | 0.778 | 0.155            |
+| `cfdac3d_all`      | **3-D CNN**, D = 4 | 0.778 | 0.782 | 0.169            |
+
+**Interpretation.** `cfdac_mag` wins **cross-domain** (0.470,
+the best deep result on the full IQS dataset) while losing
+~ 17 pp to `cfdac3d_realimag` on synth.  The magnitude-only
+projection discards the phase information the synth ROM
+rewards and on which all other variants overfit; the IQS data
+does not preserve that phase cleanly because of operating-
+point variation, so magnitude alone is the more robust
+encoding.  3-D CNN does not add value over 2-D CNN here —
+depth = 2 / 4 is too small for the 3-D inductive bias to
+matter.  4-channel `cfdac_all` was OOM-killed on the type
+task at trial 80/180 of the HPO; the binary, severity and
+location entries did complete.
+
+**Confusion / HPO plots for the legacy 2-channel `cfdac`:**
 
 ![HPO surface — type CNN2D/cfdac](figures/hpo/type__cnn2d__cfdac.png)
 ![confusion — type CNN2D/cfdac](figures/confusion/type_cnn2d_cfdac.png)
 
-* HPO best : `widths=(16, 32, 64), kernel_size=5`
-* Synthetic : val 0.796, test 0.803
-* Per-class recall : 0.97 / 0.85 / 0.70 / 0.59 / 0.91
-* Experimental : 0.426, gap +0.38
-
-**Interpretation.** The 2-D CNN on CFDAC is the only deep
-model that competes with the engineered features (within 7 pp
-of the modal MLP).  Hole recall 0.59 is much better than the
-1-D CNN's 0.16, indicating CFDAC preserves the off-diagonal
-coupling that distinguishes Hole from Crack.
+Per-class recall for the legacy 2-ch `cfdac` is `0.97 / 0.85 /
+0.70 / 0.59 / 0.91` (Pristine / Bolt / Crack / Hole / Mass);
+Hole recall 0.59 is much better than the 1-D CNN's 0.16,
+indicating CFDAC preserves the off-diagonal coupling that
+distinguishes Hole from Crack.  `cfdac_mag` further pushes the
+experimental score from 0.426 to **0.470** by trading some
+synth precision for cross-domain robustness.
 
 ### 7.2.19 Cross-model comparison (type)
 
@@ -1234,9 +1211,6 @@ coupling that distinguishes Hole from Crack.
 | XGB         | modal       | 0.807 | 0.822    | 0.295 | +0.53 |
 | RF          | modal       | 0.815 | 0.811    | 0.443 | +0.37 |
 | 2-D CNN     | cfdac       | 0.796 | 0.803    | 0.426 | +0.38 |
-| XGB         | indicators  | 0.774 | 0.759    | 0.148 | +0.61 |
-| RF          | indicators  | 0.757 | 0.745    | 0.164 | +0.58 |
-| MLP         | indicators  | 0.703 | 0.701    | 0.066 | +0.63 |
 | 1-D CNN     | frf_mag     | 0.677 | 0.689    | 0.361 | +0.33 |
 | 1-D CNN     | timeseries  | 0.654 | 0.657    | 0.262 | +0.39 |
 | Transformer | timeseries  | 0.557 | 0.576    | 0.295 | +0.28 |
@@ -1302,32 +1276,6 @@ tracks the diagonal except at the extremes where leaf-value
 saturation pulls predictions toward the mean.  Top features
 are spectral energies at three floors — severity ≈ energy.
 
-### 7.3.4 RF on indicators
-
-![HPO surface — severity RF/indicators](figures/hpo/severity__rf__indicators.png)
-![scatter — severity RF/indicators](figures/scatter/severity_rf_indicators.png)
-![importance — severity RF/indicators](figures/feat_importance/severity_rf_indicators.png)
-
-* HPO best : `n_estimators=300, max_depth=None`
-* Synthetic : val R² 0.498, test R² 0.487, MAE 0.146
-* Experimental : R² −0.422, MAE 0.301, gap 0.91
-* Top features : `FRFRMS` (20 %), `unsigned_SCI` (10 %),
-  `M2L_std` (7 %).
-
-**Interpretation.** `FRFRMS` carries 20 % of the importance —
-the natural log-error-magnitude severity scalar.  But the
-indicator vector has less information than the modal one:
-scatter is much flatter.
-
-### 7.3.5 RF — feature comparison
-
-| feature     | val R² | test R² | exp R² |
-|-------------|--------|---------|--------|
-| modal       | 0.593  | 0.573   | −0.151 |
-| indicators  | 0.498  | 0.487   | −0.422 |
-
-modal wins by ~0.09 R² in-domain.
-
 ### 7.3.6 XGB on modal
 
 ![HPO surface — severity XGB/modal](figures/hpo/severity__xgb__modal.png)
@@ -1345,29 +1293,6 @@ the best of any model (−0.06 ≈ predict-the-mean),
 suggesting boosting trees transfer slightly better even though
 they overshoot in-domain.
 
-### 7.3.7 XGB on indicators
-
-![HPO surface — severity XGB/indicators](figures/hpo/severity__xgb__indicators.png)
-![scatter — severity XGB/indicators](figures/scatter/severity_xgb_indicators.png)
-![importance — severity XGB/indicators](figures/feat_importance/severity_xgb_indicators.png)
-
-* HPO best : `n_estimators=100, max_depth=8`
-* Synthetic : val R² 0.467, test R² 0.467, MAE 0.151
-* Experimental : R² −0.242, gap 0.71
-* Top features : `GAC_min` (12 %), `FRFRMS` (11 %),
-  `unsigned_SCI` (10 %).
-
-**Interpretation.** Similar to RF on indicators.
-
-### 7.3.8 XGB — feature comparison
-
-| feature     | val R² | test R² | exp R² |
-|-------------|--------|---------|--------|
-| modal       | 0.551  | 0.532   | −0.062 |
-| indicators  | 0.467  | 0.467   | −0.242 |
-
-modal wins by ~0.07.
-
 ### 7.3.9 MLP on modal
 
 ![HPO surface — severity MLP/modal](figures/hpo/severity__mlp__modal.png)
@@ -1382,27 +1307,6 @@ experimental R² is catastrophic because the MLP predicts
 severity values well outside `[0, 1]` for out-of-distribution
 inputs — clipping the predictions post-hoc would lift the cell
 to R² ≈ −0.5.
-
-### 7.3.10 MLP on indicators
-
-![HPO surface — severity MLP/indicators](figures/hpo/severity__mlp__indicators.png)
-![scatter — severity MLP/indicators](figures/scatter/severity_mlp_indicators.png)
-
-* HPO best : `hidden=(512, 256, 128), lr=3e-3`
-* Synthetic : val R² 0.376, test R² 0.344, MAE 0.178
-* Experimental : R² −671.8 (catastrophic)
-
-**Interpretation.** Shallow MLP cannot do severity well on the
-indicator vector; even worse extrapolation than modal MLP.
-
-### 7.3.11 MLP — feature comparison
-
-| feature     | val R² | test R² | exp R² |
-|-------------|--------|---------|--------|
-| modal       | 0.551  | 0.542   | −33.2  |
-| indicators  | 0.376  | 0.344   | −671.8 |
-
-modal wins.
 
 ### 7.3.12 1-D CNN on frf_mag
 
@@ -1452,18 +1356,28 @@ fits no signal at all.
 
 `timeseries` wins slightly.
 
-### 7.3.18 2-D CNN on cfdac
+### 7.3.18 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
 
-![HPO surface — severity CNN2D/cfdac](figures/hpo/severity__cnn2d__cfdac.png)
-![scatter — severity CNN2D/cfdac](figures/scatter/severity_cnn2d_cfdac.png)
+| variant            | architecture       | val R² | test R² | exp R² (full 2 176) |
+|--------------------|--------------------|--------|---------|---------------------|
+| `cfdac`            | 2-D CNN, 2-ch      | 0.398  | 0.420   | −0.211              |
+| `cfdac_real`       | 2-D CNN, 1-ch      | 0.410  | 0.400   | −0.18               |
+| `cfdac_imag`       | 2-D CNN, 1-ch      | 0.423  | 0.420   | −0.20               |
+| `cfdac_mag`        | 2-D CNN, 1-ch      | 0.256  | 0.222   | −0.025              |
+| `cfdac_phase`      | 2-D CNN, 1-ch      | 0.467  | 0.470   | −0.031              |
+| `cfdac_magphase`   | 2-D CNN, 2-ch      | 0.484  | 0.506   | −0.025              |
+| `cfdac_all`        | 2-D CNN, **4-ch**  | 0.498  | **0.508** | −0.18             |
+| `cfdac3d_realimag` | **3-D CNN**, D = 2 | 0.373  | 0.353   | −0.15               |
+| `cfdac3d_magphase` | **3-D CNN**, D = 2 | 0.484  | 0.472   | −0.10               |
+| `cfdac3d_all`      | **3-D CNN**, D = 4 | 0.496  | 0.480   | −0.13               |
 
-* HPO best : `widths=(8, 16, 32), kernel_size=5`
-* Synthetic : val R² 0.399, test R² 0.420, MAE 0.174, bias +0.022
-* Experimental : R² −0.211, gap 0.63
-
-**Interpretation.** Slight non-linear bias near 0; spread fans
-out for severity > 0.7.  The 2-D CNN learns the gross trend
-but loses precision at the extremes.
+**Interpretation.** Stacking all four CFDAC projections
+together (`cfdac_all`, 4-ch) is the best in-domain severity
+cell — R² 0.508 — beating the single-axis variants.  The
+3-D analogue (`cfdac3d_all`, depth = 4) is two points behind.
+On the experimental set every variant has R² ≤ 0 — severity
+regression is broken cross-domain regardless of representation
+(see § 7.3.20).
 
 ### 7.3.19 Cross-model comparison (severity)
 
@@ -1472,10 +1386,7 @@ but loses precision at the extremes.
 | RF          | modal       | 0.593  | **0.573** | 0.130 | −0.15  |
 | MLP         | modal       | 0.551  | 0.542    | 0.145 | −33.2  |
 | XGB         | modal       | 0.551  | 0.532    | 0.137 | −0.06  |
-| RF          | indicators  | 0.498  | 0.487    | 0.146 | −0.42  |
-| XGB         | indicators  | 0.467  | 0.467    | 0.151 | −0.24  |
 | 2-D CNN     | cfdac       | 0.399  | 0.420    | 0.174 | −0.21  |
-| MLP         | indicators  | 0.376  | 0.344    | 0.178 | −672   |
 | 1-D CNN     | timeseries  | 0.258  | 0.227    | 0.211 | −22.4  |
 | 1-D CNN     | frf_mag     | 0.253  | 0.213    | 0.213 | −4.25  |
 | Transformer | timeseries  | 0.202  | 0.168    | 0.222 | −0.10  |
@@ -1491,7 +1402,7 @@ but loses precision at the extremes.
 * **Deep learning baseline.** **2-D CNN + CFDAC**
   (test R² 0.420).
 * **Avoid for deployment.** MLP regression heads on
-  `modal` / `indicators` — extrapolate catastrophically
+  `modal` — extrapolate catastrophically
   without output clipping.
 
 ---
@@ -1553,31 +1464,6 @@ matches this physical ceiling.
 **Interpretation.** Uniform per-class recall ≈ 0.5 — the
 forest spreads errors evenly instead of collapsing onto BD.
 
-### 7.4.5 RF on indicators
-
-![HPO surface — col_location RF/indicators](figures/hpo/col_location__rf__indicators.png)
-![confusion — col_location RF/indicators](figures/confusion/col_location_rf_indicators.png)
-![importance — col_location RF/indicators](figures/feat_importance/col_location_rf_indicators.png)
-
-* HPO best : `n_estimators=200, max_depth=None`
-* Synthetic : val 0.482, test 0.481
-* Per-class recall : `[0.47, 0.47, 0.57, 0.47, 0.43, 0.48]`
-* Experimental : 0.041, gap +0.44
-* Top features : `FRFSF` (11 %), `RVAC_std` (6 %),
-  `FRFSM_6dB` (6 %).
-
-**Interpretation.** Almost identical to RF/modal — confirms
-the ceiling is information-bounded, not feature-bounded.
-
-### 7.4.6 RF — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.509 | 0.492 | 0.061 |
-| indicators  | 0.482 | 0.481 | 0.041 |
-
-modal marginally better.
-
 ### 7.4.7 XGB on modal
 
 ![HPO surface — col_location XGB/modal](figures/hpo/col_location__xgb__modal.png)
@@ -1590,28 +1476,6 @@ modal marginally better.
 * Experimental : 0.020, gap +0.47
 * Top features : `ch2_bandE` (12 %), `ch3_peak1_f` (11 %),
   `ch2_peak1_a` (8 %).
-
-### 7.4.8 XGB on indicators
-
-![HPO surface — col_location XGB/indicators](figures/hpo/col_location__xgb__indicators.png)
-![confusion — col_location XGB/indicators](figures/confusion/col_location_xgb_indicators.png)
-![importance — col_location XGB/indicators](figures/feat_importance/col_location_xgb_indicators.png)
-
-* HPO best : `n_estimators=600, max_depth=8`
-* Synthetic : val 0.480, test 0.454
-* Per-class recall : `[0.47, 0.45, 0.53, 0.43, 0.40, 0.45]`
-* Experimental : 0.163, gap +0.29
-* Top features : `FRFSF` (11 %), `unsigned_SCI` (7 %),
-  `M2L_min` (7 %).
-
-### 7.4.9 XGB — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.509 | 0.488 | 0.020 |
-| indicators  | 0.480 | 0.454 | 0.163 |
-
-modal wins in-domain; indicators transfer better.
 
 ### 7.4.10 MLP on modal
 
@@ -1629,28 +1493,6 @@ Remarkably the experimental score (0.490) almost matches synth
 test (0.494) — gap ~0.005 — because the IQS data is also
 mostly BD samples, so the MLP's BD bias is *correct* in the
 real world.
-
-### 7.4.11 MLP on indicators
-
-![HPO surface — col_location MLP/indicators](figures/hpo/col_location__mlp__indicators.png)
-![confusion — col_location MLP/indicators](figures/confusion/col_location_mlp_indicators.png)
-
-* HPO best : `hidden=(512, 256, 128), lr=3e-3`
-* Synthetic : val 0.429, test 0.417
-* Per-class recall : `[0.13, 0.69, 0.27, 0.55, 0.47, 0.39]`
-* Experimental : 0.367, gap +0.05
-
-**Interpretation.** Inverse bias — AD classes predicted more
-often than BD.
-
-### 7.4.12 MLP — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 0.507 | 0.494 | 0.490 |
-| indicators  | 0.429 | 0.417 | 0.367 |
-
-modal wins in-domain by ~8 pp; both transfer well.
 
 ### 7.4.13 1-D CNN on frf_mag
 
@@ -1709,19 +1551,29 @@ timeseries transfers better.
 
 timeseries wins.
 
-### 7.4.19 2-D CNN on cfdac
+### 7.4.19 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
 
-![HPO surface — col_location CNN2D/cfdac](figures/hpo/col_location__cnn2d__cfdac.png)
-![confusion — col_location CNN2D/cfdac](figures/confusion/col_location_cnn2d_cfdac.png)
+| variant            | architecture       | val   | test  | exp (full 1 938) |
+|--------------------|--------------------|-------|-------|------------------|
+| `cfdac`            | 2-D CNN, 2-ch      | 0.492 | 0.494 | 0.165            |
+| `cfdac_real`       | 2-D CNN, 1-ch      | 0.492 | 0.478 | 0.212            |
+| `cfdac_imag`       | 2-D CNN, 1-ch      | 0.478 | 0.500 | 0.104            |
+| `cfdac_mag`        | 2-D CNN, 1-ch      | 0.492 | 0.463 | **0.416**        |
+| `cfdac_phase`      | 2-D CNN, 1-ch      | 0.504 | 0.487 | 0.230            |
+| `cfdac_magphase`   | 2-D CNN, 2-ch      | 0.512 | 0.474 | 0.119            |
+| `cfdac_all`        | 2-D CNN, **4-ch**  | 0.505 | 0.504 | 0.155            |
+| `cfdac3d_realimag` | **3-D CNN**, D = 2 | 0.496 | 0.457 | 0.246            |
+| `cfdac3d_magphase` | **3-D CNN**, D = 2 | 0.496 | 0.479 | 0.234            |
+| `cfdac3d_all`      | **3-D CNN**, D = 4 | 0.509 | 0.484 | 0.231            |
 
-* HPO best : `widths=(16, 32, 64), kernel_size=5`
-* Synthetic : val 0.492, test 0.494
-* Per-class recall : `[0.79, 0.17, 0.74, 0.26, 0.70, 0.30]`
-* Experimental : 0.163, gap +0.33
-
-**Interpretation.** CFDAC partially preserves the AD signal
-(non-zero AD recalls) — only model that retains some AD
-information.
+**Interpretation.** Same story as the type task: `cfdac_mag`
+(0.416 on the full IQS experimental set) handsomely beats every
+other deep cell cross-domain.  All variants plateau around
+0.49 in-domain because the ROM-imposed AD ≡ BD ceiling for
+Crack and Hole caps every 6-class location classifier at
+~ 0.67 (see § 7.4.3).  CFDAC partially preserves AD-end
+signal — `cfdac3d_realimag` and `cfdac3d_magphase` lift the
+experimental score to 0.24+, behind only `cfdac_mag`.
 
 ### 7.4.20 Cross-model comparison (col_location)
 
@@ -1731,11 +1583,8 @@ information.
 | 2-D CNN     | cfdac       | 0.492 | 0.494    | 0.163 | +0.33 |
 | MLP         | modal       | 0.507 | 0.494    | 0.490 | +0.005 |
 | XGB         | modal       | 0.509 | 0.488    | 0.020 | +0.47 |
-| RF          | indicators  | 0.482 | 0.481    | 0.041 | +0.44 |
 | 1-D CNN     | timeseries  | 0.488 | 0.473    | 0.347 | +0.13 |
 | 1-D CNN     | frf_mag     | 0.490 | 0.469    | 0.265 | +0.20 |
-| XGB         | indicators  | 0.480 | 0.454    | 0.163 | +0.29 |
-| MLP         | indicators  | 0.429 | 0.417    | 0.367 | +0.05 |
 | Transformer | timeseries  | 0.387 | 0.368    | 0.204 | +0.16 |
 | Transformer | frf_mag     | 0.268 | 0.251    | 0.041 | +0.21 |
 
@@ -1790,28 +1639,6 @@ robust hold-out score.
 **Interpretation.** Near-perfect on synthetic.  HPO surface
 saturates across the whole grid.
 
-### 7.5.4 RF on indicators
-
-![HPO surface — mass_location RF/indicators](figures/hpo/mass_location__rf__indicators.png)
-![confusion — mass_location RF/indicators](figures/confusion/mass_location_rf_indicators.png)
-![importance — mass_location RF/indicators](figures/feat_importance/mass_location_rf_indicators.png)
-
-* HPO best : `n_estimators=300, max_depth=None`
-* Synthetic : val 0.980, test 0.967
-* Per-class recall : `[0.97, 0.96, 0.93, 1.00]`
-* Experimental : 0.250
-* Top features : `FRFSF` (17 %), `RVAC_std` (13 %),
-  `GAC_std` (9 %).
-
-**Interpretation.** Indicators do almost as well as modal.
-
-### 7.5.5 RF — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 1.000 | 0.990 | 0.250 |
-| indicators  | 0.980 | 0.967 | 0.250 |
-
 ### 7.5.6 XGB on modal
 
 ![HPO surface — mass_location XGB/modal](figures/hpo/mass_location__xgb__modal.png)
@@ -1828,28 +1655,6 @@ saturates across the whole grid.
 **Interpretation.** Boosting almost solves the task with two
 amplitude features (first-mode amplitudes at base + Floor 1).
 
-### 7.5.7 XGB on indicators
-
-![HPO surface — mass_location XGB/indicators](figures/hpo/mass_location__xgb__indicators.png)
-![confusion — mass_location XGB/indicators](figures/confusion/mass_location_xgb_indicators.png)
-![importance — mass_location XGB/indicators](figures/feat_importance/mass_location_xgb_indicators.png)
-
-* HPO best : `n_estimators=600, max_depth=8`
-* Synthetic : val 0.990, test 0.973
-* Per-class recall : `[0.97, 0.97, 0.95, 1.00]`
-* Experimental : 0.000 (predicts wrong plate on all 4 cases)
-* Top features : `GAC_min` (31 %), `GAC_max` (13 %),
-  `FRFSF` (11 %).
-
-### 7.5.8 XGB — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 1.000 | 0.987 | 0.250 |
-| indicators  | 0.990 | 0.973 | 0.000 |
-
-modal slightly better.
-
 ### 7.5.9 MLP on modal
 
 ![HPO surface — mass_location MLP/modal](figures/hpo/mass_location__mlp__modal.png)
@@ -1859,23 +1664,6 @@ modal slightly better.
 * Synthetic : val 1.000, test 0.987
 * Per-class recall : `[0.99, 0.99, 0.97, 1.00]`
 * Experimental : 0.250
-
-### 7.5.10 MLP on indicators
-
-![HPO surface — mass_location MLP/indicators](figures/hpo/mass_location__mlp__indicators.png)
-![confusion — mass_location MLP/indicators](figures/confusion/mass_location_mlp_indicators.png)
-
-* HPO best : `hidden=(512, 256, 128), lr=1e-3`
-* Synthetic : val 0.977, test 0.963
-* Per-class recall : `[0.99, 0.93, 0.93, 1.00]`
-* Experimental : 0.250
-
-### 7.5.11 MLP — feature comparison
-
-| feature     | val   | test  | exp   |
-|-------------|-------|-------|-------|
-| modal       | 1.000 | 0.987 | 0.250 |
-| indicators  | 0.977 | 0.963 | 0.250 |
 
 ### 7.5.12 1-D CNN on frf_mag
 
@@ -1936,18 +1724,29 @@ deep models — uniform recall ~0.6, no collapse.
 
 timeseries wins by a wide margin.
 
-### 7.5.18 2-D CNN on cfdac
+### 7.5.18 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
 
-![HPO surface — mass_location CNN2D/cfdac](figures/hpo/mass_location__cnn2d__cfdac.png)
-![confusion — mass_location CNN2D/cfdac](figures/confusion/mass_location_cnn2d_cfdac.png)
+| variant            | architecture       | val   | test  | exp (full 238) |
+|--------------------|--------------------|-------|-------|----------------|
+| `cfdac`            | 2-D CNN, 2-ch      | 0.977 | 0.953 | 0.197          |
+| `cfdac_real`       | 2-D CNN, 1-ch      | 0.893 | 0.863 | 0.231          |
+| `cfdac_imag`       | 2-D CNN, 1-ch      | 0.973 | 0.970 | 0.235          |
+| `cfdac_mag`        | 2-D CNN, 1-ch      | 0.953 | 0.927 | 0.256          |
+| `cfdac_phase`      | 2-D CNN, 1-ch      | 0.983 | 0.973 | 0.235          |
+| `cfdac_magphase`   | 2-D CNN, 2-ch      | 0.990 | **0.987** | 0.252      |
+| `cfdac_all`        | 2-D CNN, **4-ch**  | 0.977 | 0.970 | **0.282**      |
+| `cfdac3d_realimag` | **3-D CNN**, D = 2 | 0.937 | 0.937 | 0.214          |
+| `cfdac3d_magphase` | **3-D CNN**, D = 2 | 0.987 | 0.970 | 0.256          |
+| `cfdac3d_all`      | **3-D CNN**, D = 4 | 0.987 | 0.970 | 0.256          |
 
-* HPO best : `widths=(8, 16, 32), kernel_size=5`
-* Synthetic : val 0.977, test 0.953
-* Per-class recall : `[0.93, 0.97, 0.93, 0.97]`
-* Experimental : 0.250
-
-**Interpretation.** Best deep configuration — clears 95 %
-uniformly with no collapse.
+**Interpretation.** Mass-plate detection is near-perfect
+in-domain across every CFDAC variant (cfdac_magphase 0.987 ≥
+the legacy 2-ch 0.953).  On the full 238-case experimental
+slice, the 4-channel `cfdac_all` is the best deep cell at
+0.282, beating the legacy `cfdac` (0.197) by ~ 9 pp and beating
+every tabular cell (RF/modal 0.250).  The depth-stacked 3-D
+variants match the 2-D analogues within ±0.04 — no extra value
+from Conv3d at D = 2 / 4.
 
 ### 7.5.19 Cross-model comparison (mass_location)
 
@@ -1956,9 +1755,6 @@ uniformly with no collapse.
 | RF          | modal       | 1.000 | **0.990** | 0.250 |
 | MLP         | modal       | 1.000 | 0.987    | 0.250 |
 | XGB         | modal       | 1.000 | 0.987    | 0.250 |
-| XGB         | indicators  | 0.990 | 0.973    | 0.000 |
-| RF          | indicators  | 0.980 | 0.967    | 0.250 |
-| MLP         | indicators  | 0.977 | 0.963    | 0.250 |
 | 2-D CNN     | cfdac       | 0.977 | 0.953    | 0.250 |
 | Transformer | timeseries  | 0.683 | 0.637    | 0.000 |
 | Transformer | frf_mag     | 0.477 | 0.480    | 0.250 |
@@ -2181,14 +1977,14 @@ analogues.
 
 # 9. Sim-to-real summary
 
-| task          | best synth test                | best exp (n)                                | notes |
-|---------------|--------------------------------|---------------------------------------------|-------|
-| binary        | 0.989 (MLP/modal)              | 0.825 = class baseline (any/2 638)           | Pristine is 17.5 % of the full IQS dataset; everything collapses to "predict damage" |
-| type          | 0.877 (MLP/modal)              | **0.470 (2-D CNN/cfdac_mag, 2 638)**         | CFDAC magnitude flips the synth ordering on cross-domain — first deep model to beat tabular |
-| severity      | R² 0.573 (RF/modal)            | R² −0.02 (Transformer/frf_mag, 2 176)        | every model has exp R² ≤ 0; bounded heads safer but no better |
-| col_location  | 0.494 (MLP/modal)              | 0.453 (MLP/modal, 1 938)                     | BD-collapse aligns with IQS protocol; gap = 0.04 |
-| mass_location | 0.990 (RF/modal)               | 0.282 (2-D CNN/cfdac_all, 238)               | bigger sample than the legacy 4-case slice but Base bias still drives most error |
-| indicators    | R² 0.99 ×20 (XGB/modal)        | M2L_abs_sum R² 0.756 (RF/modal, 2 176)       | bounded / correlation-type indicators (M2L_abs_sum, RVAC_*, DRQ) transfer; unbounded ones (ODS_diff, FRFSF, r2_imag) collapse |
+| task          | best synth test                | best **full exp** (n)                           | best **balanced exp** (n, 40/cell)           | notes |
+|---------------|--------------------------------|-------------------------------------------------|----------------------------------------------|-------|
+| binary        | 0.989 (MLP/modal)              | 0.825 (MLP/modal = baseline, 2 638)             | 0.941 (4 deep CFDAC cells tied = baseline, 680) | both denominators force collapse to "predict damage"; baseline drifts with the per-cell sub-sample |
+| type          | 0.877 (MLP/modal)              | **0.470 (2-D CNN/cfdac_mag, 2 638)**            | 0.403 (2-D CNN/cfdac_mag, 680)                  | `cfdac_mag` is still the best deep cell on the balanced subset |
+| severity      | R² 0.573 (RF/modal)            | R² −0.02 (Transformer/frf_mag, 2 176)           | **R² +0.02 (XGB/modal, 640)**                   | the only configuration that lifts above zero exp R² is XGB+modal on the per-cell-balanced subset |
+| col_location  | 0.494 (MLP/modal)              | 0.453 (MLP/modal, 1 938)                        | 0.287 (1-D CNN/frf_mag, 480)                    | balanced subset makes the task harder (40/cell × all six locations) — accuracy drops, but the dispersion across cells is meaningful again |
+| mass_location | 0.990 (RF/modal)               | 0.282 (2-D CNN/cfdac_all, 238)                  | **0.338 (2-D CNN/cfdac_all, 160)**              | rebalancing helps: every plate is given equal weight |
+| indicators    | R² 0.99 ×20 (XGB/modal)        | M2L_abs_sum R² 0.756 (RF/modal, 2 176)          | M2L_abs_sum R² 0.78 / RVAC_min R² 0.60 (xgb)    | bounded correlation indicators still transfer; unbounded ones (ODS_diff, FRFSF, r2_imag) still collapse |
 
 Lessons:
 

@@ -50,7 +50,7 @@ from ml_pipeline.tasks import (   # noqa: E402
 )
 
 
-FEATURES_FLAT  = ("modal", "indicators")
+FEATURES_FLAT  = ("modal",)
 FEATURES_SEQ   = ("frf_mag", "timeseries")
 FEATURES_MAT   = ("cfdac",)        # 2-D matricial features
 SK_MODELS      = ("rf", "xgb")
@@ -83,13 +83,20 @@ class Result:
 
 # ── data loader ─────────────────────────────────────────────────────────────
 def load_labels(features_path: Path) -> dict[str, np.ndarray]:
+    """Read labels.  Supports two on-disk schemas: the original
+    synth ``features.h5`` keeps labels under a ``labels/`` group;
+    the experimental files (and the balanced subsets produced by
+    ``rebalance_datasets.py``) store them at the top level."""
     with h5py.File(features_path, "r") as f:
+        prefix = "labels/" if "labels" in f else ""
+        sid = f[f"{prefix}sample_id"][:]
+        sid = sid.astype(np.int64) if sid.dtype.kind != "O" else sid
         return {
-            "type_code": f["labels/type_code"][:].astype(np.int64),
-            "storey":    f["labels/storey"][:].astype(np.int64),
-            "end":       f["labels/end"][:].astype(np.int64),
-            "severity":  f["labels/severity"][:].astype(np.float32),
-            "sample_id": f["labels/sample_id"][:].astype(np.int64),
+            "type_code": f[f"{prefix}type_code"][:].astype(np.int64),
+            "storey":    f[f"{prefix}storey"][:].astype(np.int64),
+            "end":       f[f"{prefix}end"][:].astype(np.int64),
+            "severity":  f[f"{prefix}severity"][:].astype(np.float32),
+            "sample_id": sid,
         }
 
 
