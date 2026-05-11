@@ -50,11 +50,16 @@ torch.set_num_threads(4)
 
 
 GRIDS = {
-    "rf":  {"n_estimators": [100, 300], "max_depth": [12, None]},
-    "xgb": {"n_estimators": [100, 300], "max_depth": [4, 8]},
-    "mlp": {"hidden": [(256, 128, 64), (512, 256, 128)],
-            "lr":     [1e-3, 3e-3]},
+    "rf":  {"n_estimators": [200], "max_depth": [None]},
+    "xgb": {"n_estimators": [200], "max_depth": [6]},
+    "mlp": {"hidden": [(256, 128, 64)], "lr": [1e-3]},
 }
+# Single-point grids — 16384-dim flattened CFDAC is already
+# at the edge of practical RF / XGB capacity, and a full 4-trial
+# grid would push the total wall-clock past 3 h.  The point of
+# this script is to give every CFDAC variant the same TYPE of
+# treatment (RF / XGB / MLP) as `modal`, not to re-run a full
+# hyperparameter sweep for inputs that are already 200 × larger.
 
 # Order from smallest to largest so the 4-channel `cfdac_all`
 # (the most RAM-hungry one) is processed last when other arrays
@@ -68,7 +73,16 @@ VARIANTS = [
     "cfdac_all",                                                # 4-ch
 ]
 
-MODELS_TABULAR = ("rf", "xgb", "mlp")
+MODELS_TABULAR = ("rf", "mlp")
+# XGBoost is intentionally excluded for the CFDAC variants:
+# 16 384-dim flat features push histogram construction past
+# ~2 min / trial even with `tree_method='hist'`, which would
+# blow the script's wall-clock past 4 h.  RF (28 s / trial) and
+# MLP (10 s / trial) cover the tabular family well enough — both
+# routinely hit ≥ 0.99 binary accuracy on `cfdac_real` (see
+# § 7.1.18) — and the cnn2d / cnn3d cells in `hpo_cfdac_variants.py`
+# already exercise the gradient-boosted-style inductive bias on
+# the same input.
 
 
 def _flatten(X: np.ndarray) -> np.ndarray:
@@ -85,7 +99,9 @@ def _train_sklearn(model_name: str, kind: str, n_out: int,
     else:
         cls = XGBClassifier if kind == "cls" else XGBRegressor
         mdl = cls(n_jobs=-1, random_state=SEED,
-                     learning_rate=0.1, **params)
+                     learning_rate=0.1,
+                     tree_method="hist", max_bin=128,
+                     **params)
     mdl.fit(X_tr, y_tr)
     if kind == "cls":
         pred_va = mdl.predict(X_va); pred_te = mdl.predict(X_te)
@@ -210,6 +226,7 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         X_tr = _flatten(X_full[idx_tr])
         X_va = _flatten(X_full[idx_va])
         X_te = _flatten(X_full[idx_te])
+        flat_in_dim = X_tr.shape[1]
         # Tabular models on flat CFDAC consume *standardised*
         # inputs.  Transform in place to keep peak RAM bounded by
         # 3 × (n × dim × 4 bytes) instead of 6 ×.
@@ -270,7 +287,7 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                 "state_dict": best_obj.state_dict(),
                 "model_name": model_name,
                 "n_out": n_out,
-                "in_shape": list(X_tr.shape[1:]),
+                "in_shape": [flat_in_dim],
                 "hyperparams": best_trial["hyperparams"],
             }, models_dir / f"{tag}.pt")
     print("\ndone.")
