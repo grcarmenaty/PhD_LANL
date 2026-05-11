@@ -84,6 +84,11 @@ VARIANTS = [
 ]
 
 MODELS = ("rf", "xgb", "mlp", "cnn", "transformer")
+# XGB on 16 384-dim flat CFDAC is fast enough for the binary task
+# (~ 130 s / trial) but unreasonable for multi-class (col_location
+# took > 7 min on cfdac_real alone).  We skip XGB on multi-class
+# variants and document it.
+SKIP_XGB_TASKS = {"type", "col_location", "mass_location"}
 
 
 def _flatten(X: np.ndarray) -> np.ndarray:
@@ -244,6 +249,8 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     for tname in tasks:
         for variant in VARIANTS:
             for m in MODELS:
+                if m == "xgb" and tname in SKIP_XGB_TASKS:
+                    continue
                 cell_path = hpo_dir / f"{tname}__{m}__{variant}.json"
                 if _existing_cell_done(cell_path):
                     continue

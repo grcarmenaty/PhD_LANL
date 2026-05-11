@@ -1,0 +1,34 @@
+{
+  "task": "severity",
+  "model": "cnn",
+  "feature": "cfdac_real",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.2768872380256653,
+  "best_metric_test": 0.21394306421279907,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "R2",
+      "metric_val": 0.2768872380256653,
+      "metric_test": 0.21394306421279907,
+      "extras": {
+        "mae_test": 0.20796364545822144
+      },
+      "runtime_s": 10.650710582733154
+    }
+  ]
+}
