@@ -89,6 +89,11 @@ MODELS = ("rf", "xgb", "mlp", "cnn", "transformer")
 # took > 7 min on cfdac_real alone).  We skip XGB on multi-class
 # variants and document it.
 SKIP_XGB_TASKS = {"type", "col_location", "mass_location"}
+# Severity-Transformer on the (128-channel, 128-step) reshape blows
+# past 5 min per trial on cfdac_real (unbounded regression head
+# explodes during AdamW updates because of the lack of input
+# normalisation through the conv stem); CNN remains usable.
+SKIP_TRANSFORMER_TASKS = {"severity"}
 
 
 def _flatten(X: np.ndarray) -> np.ndarray:
@@ -250,6 +255,8 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         for variant in VARIANTS:
             for m in MODELS:
                 if m == "xgb" and tname in SKIP_XGB_TASKS:
+                    continue
+                if m == "transformer" and tname in SKIP_TRANSFORMER_TASKS:
                     continue
                 cell_path = hpo_dir / f"{tname}__{m}__{variant}.json"
                 if _existing_cell_done(cell_path):
