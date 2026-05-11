@@ -26,6 +26,8 @@ test_write.tmp
 
 # Derived ML-pipeline artefacts (regenerate with the scripts)
 dataset/features.h5
+dataset/experimental_features.h5
+experimental_frfs.h5
 results/train.log
 results/hpo.log
 

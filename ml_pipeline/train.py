@@ -93,15 +93,46 @@ def load_labels(features_path: Path) -> dict[str, np.ndarray]:
         }
 
 
+_CFDAC_VARIANTS = {
+    # 2-D inputs (n, C, H, W) for Conv2d
+    "cfdac_real":     (("cfdac_real",),                          "stack2d"),
+    "cfdac_imag":     (("cfdac_imag",),                          "stack2d"),
+    "cfdac_mag":      (("cfdac_mag",),                           "stack2d"),
+    "cfdac_phase":    (("cfdac_phase",),                         "stack2d"),
+    "cfdac_realimag": (("cfdac_real", "cfdac_imag"),             "stack2d"),
+    "cfdac_magphase": (("cfdac_mag", "cfdac_phase"),             "stack2d"),
+    "cfdac_all":      (("cfdac_real", "cfdac_imag",
+                          "cfdac_mag",  "cfdac_phase"),            "stack2d"),
+    # 3-D inputs (n, 1, D, H, W) for Conv3d
+    "cfdac3d_realimag": (("cfdac_real", "cfdac_imag"),                  "stack3d"),
+    "cfdac3d_magphase": (("cfdac_mag",  "cfdac_phase"),                 "stack3d"),
+    "cfdac3d_all":      (("cfdac_real", "cfdac_imag",
+                            "cfdac_mag",  "cfdac_phase"),                "stack3d"),
+    # legacy alias kept for backward-compat with the early HPO log file
+    "cfdac":          (("cfdac_real", "cfdac_imag"),             "stack2d"),
+}
+
+
 def load_feature(features_path: Path, name: str,
                   rows: np.ndarray | None = None) -> np.ndarray:
-    """Load a feature array.  ``cfdac`` is stacked from cfdac_real / cfdac_imag."""
-    if name == "cfdac":
+    """Load a feature array.
+
+    For CFDAC variants, the on-disk arrays are individual H × W planes;
+    this function stacks them into the right tensor shape:
+
+      * ``stack2d`` →  (n, C, H, W)  for Conv2d
+      * ``stack3d`` →  (n, 1, D, H, W)  for Conv3d
+    """
+    if name in _CFDAC_VARIANTS:
+        parts, mode = _CFDAC_VARIANTS[name]
+        layers = []
         with h5py.File(features_path, "r") as f:
-            re = f["cfdac_real"][:] if rows is None else f["cfdac_real"][rows]
-            im = f["cfdac_imag"][:] if rows is None else f["cfdac_imag"][rows]
-        # Channel-first: (n, 2, H, W).
-        return np.stack([re, im], axis=1)
+            for p in parts:
+                layers.append(f[p][:] if rows is None else f[p][rows])
+        if mode == "stack2d":
+            return np.stack(layers, axis=1)
+        # stack3d → add a singleton channel dim then stack along depth
+        return np.stack(layers, axis=1)[:, np.newaxis, ...]
     with h5py.File(features_path, "r") as f:
         if rows is None:
             data = f[name][:]

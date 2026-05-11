@@ -161,6 +161,58 @@ class Conv2DStack(nn.Module):
         return self.head(x)
 
 
+class Conv3DStack(nn.Module):
+    """3-D CNN for CFDAC parts stacked along an extra "depth" axis.
+
+    Input shape: ``(B, 1, D, H, W)`` where D is the number of CFDAC
+    parts (real, imag, mag, phase, …) treated as the depth axis of a
+    volumetric input.  The stem is a strided 3-D convolution
+    (kernel = (D, 7, 7), stride = (1, 4, 4)) that immediately reduces
+    the spatial extent to 32 × 32 while preserving depth.  Subsequent
+    blocks pool the spatial dims with MaxPool3d kernel = (1, 2, 2).
+    """
+
+    def __init__(self, depth: int, n_out: int,
+                  widths: tuple[int, ...] = (8, 16, 32),
+                  kernel_size: int = 3, regression: bool = False):
+        super().__init__()
+        self.depth = depth
+        stem_out = widths[0]
+        self.stem = nn.Sequential(
+            nn.Conv3d(1, stem_out, kernel_size=(depth, 7, 7),
+                         stride=(1, 4, 4), padding=(0, 3, 3)),
+            nn.BatchNorm3d(stem_out),
+            nn.GELU(),
+        )
+        c = stem_out
+        layers: list[nn.Module] = []
+        for w in widths:
+            layers += [
+                nn.Conv3d(c, w, kernel_size=(1, kernel_size, kernel_size),
+                            padding=(0, kernel_size // 2, kernel_size // 2)),
+                nn.BatchNorm3d(w),
+                nn.GELU(),
+                nn.MaxPool3d(kernel_size=(1, 2, 2)),
+            ]
+            c = w
+        self.features = nn.Sequential(*layers)
+        self.head = nn.Sequential(
+            nn.AdaptiveAvgPool3d(1),
+            nn.Flatten(),
+            nn.Linear(c, 64),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(64, n_out),
+        )
+        self.regression = regression
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: (B, 1, D, H, W)
+        x = self.stem(x)
+        x = self.features(x)
+        return self.head(x)
+
+
 def build_torch_model(name: str, in_channels: Optional[int],
                        in_dim: Optional[int], n_out: int,
                        regression: bool = False,
@@ -175,5 +227,9 @@ def build_torch_model(name: str, in_channels: Optional[int],
                                    regression=regression, **kwargs)
     if name == "cnn2d":
         return Conv2DStack(n_channels=in_channels, n_out=n_out,
+                              regression=regression, **kwargs)
+    if name == "cnn3d":
+        # in_channels here is the depth of the volume, not channel count.
+        return Conv3DStack(depth=in_channels, n_out=n_out,
                               regression=regression, **kwargs)
     raise ValueError(name)
