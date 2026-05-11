@@ -160,7 +160,23 @@ calibrated semi-rigid reduced-order model of the LANL 3SBB.
 * **Conclusion.** Zero class imbalance; any metric below 0.20
   is below random.
 
-![per-(type, location) sample counts — synth vs experimental](figures/dataset/location_distribution.png)
+![per-(type, location) sample count — synth vs experimental](figures/dataset/location_distribution.png)
+
+* **What.** Per-cell counts for every `(type, location)` cell
+  in the synthetic (blue) and experimental (red) datasets.
+  Mass plates labelled `Base, F1, F2, F3`; column-end locations
+  labelled `S1BD … S3AD` (storey + end).
+* **What is shown.** Synth is rigidly uniform — every column
+  cell holds 333 – 334 samples, every Mass plate 500, Pristine
+  2 000.  Experimental is heavily asymmetric — Bolt S1BD = 531
+  is 13 × more populated than Bolt S2AD = 40, and three
+  column-end cells are entirely absent (Bolt S3AD = 0, every
+  Crack AD = 0, Hole S1AD/S2AD = 0).
+* **Conclusion.** Synth alone has no class- or
+  location-imbalance to worry about.  Cross-domain evaluation
+  must respect the experimental skew — § 2.5 explains the cell
+  structure, § 2.6 describes the matched balanced subsets that
+  collapse to a fair 17-cell common grid.
 
 ## 2.5 Location distribution — synthetic vs experimental
 
@@ -543,46 +559,6 @@ Synth + experimental example panels, one synth sample and one
 experimental sample per damage class:
 
 ![modal feature — synth vs experimental](figures/feature_examples/modal.png)
-
-## `indicators` — 22-d pymodal damage-indicator vector (target only)
-
-> **Not used as an input feature anywhere in this report.**
-> The pymodal indicators are reference-anchored (computed against
-> the synthetic pristine mean FRF) and therefore leak information
-> about the reference into the input.  They are kept on disk as
-> *regression targets* for the 22 per-indicator predictors in
-> § 7.6, but every classification / severity model in §§ 7.1 – 7.5
-> consumes only `modal`, `frf_mag`, `timeseries`, or one of the
-> CFDAC variants.
-
-Every scalar is computed by `pymodal.utils.<name>` against the
-synthetic pristine mean FRF.  Entries:
-
-| idx   | name                              | meaning                                |
-|-------|-----------------------------------|----------------------------------------|
-| 0     | `SCI`                             | signed Structural Change Indicator     |
-| 1     | `unsigned_SCI`                    | `1 − |Pearson(CFDAC_ref, CFDAC_dmg)|`  |
-| 2     | `DRQ`                             | mean of the RVAC vector                |
-| 3     | `AIGAC`                           | mean of the GAC vector                 |
-| 4     | `FRFRMS`                          | log-FRF RMS deviation                  |
-| 5     | `FRFSF`                           | FRF Shape Factor                       |
-| 6     | `FRFSM_6dB`                       | Standard Mean with 6 dB band           |
-| 7     | `ODS_diff`                        | `Σ|FRF − Ref|` ODS-difference          |
-| 8     | `r2_imag`                         | R² of `Im(FRF)` against `Im(Ref)`      |
-| 9–12  | `RVAC_{mean,std,min,max}`         | summaries of per-frequency RVAC        |
-| 13–16 | `GAC_{mean,std,min,max}`          | summaries of GAC                       |
-| 17–21 | `M2L_{mean,std,min,max,abs_sum}`  | summaries of M2L                       |
-
-The per-indicator value histogram across damage cases (synth vs
-experimental) is in
-[`figures/dataset/indicator_distributions.png`](figures/dataset/indicator_distributions.png)
-— 22 panels, one per indicator, with synth (blue) and
-experimental (red) densities overlaid.  Each panel is clipped to
-the [1, 99] percentile range to make the cross-domain shift
-visible.  The indicators are *no longer used as inputs*; they
-are kept only as regression targets for § 7.6.
-
-![per-indicator value distribution across damage cases — synth vs experimental](figures/dataset/indicator_distributions.png)
 
 ## `frf_mag` — `(N_f, 9)` accelerance magnitude
 
@@ -1827,16 +1803,17 @@ one PNG per `(indicator, model)` cell, 66 of each.
 
 ### 7.6.1 What the task is
 
-For every one of the 22 pymodal damage indicators (SCI,
-unsigned_SCI, DRQ, AIGAC, FRFRMS, FRFSF, FRFSM_6dB, ODS_diff,
-r2_imag, RVAC_{mean,std,min,max}, GAC_{mean,std,min,max},
-M2L_{mean,std,min,max,abs_sum}) we train a *separate* regressor.
-Each predictor takes a feature vector and outputs that one
-scalar indicator value — no damage typology / location is
-required as an auxiliary input.  The motivation is in
-[`../ml_pipeline/train_indicator_predictors.py`](../ml_pipeline/train_indicator_predictors.py):
-"models to predict each indicator independently of damage
-typology or location".
+This section trains one *independent* scalar regressor per
+damage indicator.  There is **no 22-element vector** anywhere
+in the pipeline: each indicator (`SCI`, `unsigned_SCI`, `DRQ`,
+`AIGAC`, `FRFRMS`, `FRFSF`, `FRFSM_6dB`, `ODS_diff`, `r2_imag`,
+`RVAC_{mean,std,min,max}`, `GAC_{mean,std,min,max}`,
+`M2L_{mean,std,min,max,abs_sum}`) has its own model, fit
+end-to-end from a feature vector to a single number, with no
+damage typology / location as an auxiliary input.  The intent
+is "predict each indicator independently of damage typology or
+location" — exactly the formulation requested in the task
+brief.
 
 ### 7.6.2 Protocol
 
@@ -1859,7 +1836,7 @@ typology or location".
 The synth-test numbers are uniformly near-perfect because the
 modal-peak features and the pymodal indicators are derived from
 the same underlying FRF.  XGBoost on modal features is the best
-in 20 of 22 indicators; the rest are RF wins on indicators where
+in most indicators; the rest are RF wins on indicators where
 the relationship is noisier (SCI, FRFSM_6dB).
 
 | indicator     | best model    | synth val | synth test |
