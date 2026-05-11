@@ -67,17 +67,35 @@ def main() -> None:
     figs = args.results / "figures"
     figs.mkdir(parents=True, exist_ok=True)
 
-    train = json.loads((args.results / "training_metrics.json").read_text())
-    _bar_plot(train, figs / "train_metrics_by_task.png",
-                "Synthetic test-set metric per (model, feature, task)")
+    # Synth test bars — built from every results/hpo/<task>__<model>__<feature>.json.
+    hpo_dir = args.results / "hpo"
+    train_rows = []
+    for path in sorted(hpo_dir.glob("*.json")):
+        blob = json.loads(path.read_text())
+        if blob.get("best_metric_test") is None:
+            continue
+        train_rows.append({"task": blob["task"], "model": blob["model"],
+                              "feature": blob["feature"],
+                              "metric_test": blob["best_metric_test"]})
+    if train_rows:
+        _bar_plot(train_rows, figs / "train_metrics_by_task.png",
+                    "Synthetic test-set metric per (model, feature, task)")
 
-    exp_path = args.results / "experimental_evaluation.json"
-    if exp_path.exists():
-        exp = json.loads(exp_path.read_text())
-        for r in exp:
+    # Experimental bars — prefer the full 2 638-case eval if present.
+    full_exp_path = args.results / "experimental_full_evaluation.json"
+    if full_exp_path.exists():
+        rows = json.loads(full_exp_path.read_text())
+        for r in rows:
             r["metric_test"] = r.get("value")
-        _bar_plot(exp, figs / "experimental_metrics_by_task.png",
-                    "Experimental IQS metric per (model, feature, task)")
+        _bar_plot(rows, figs / "experimental_metrics_by_task.png",
+                    "Full 2 638-case experimental metric per (model, feature, task)")
+    bal_exp_path = args.results / "balanced" / "experimental_full_evaluation.json"
+    if bal_exp_path.exists():
+        rows = json.loads(bal_exp_path.read_text())
+        for r in rows:
+            r["metric_test"] = r.get("value")
+        _bar_plot(rows, figs / "experimental_balanced_metrics_by_task.png",
+                    "Balanced 680-case experimental metric per (model, feature, task)")
     print(f"Plots written to {figs}")
 
 

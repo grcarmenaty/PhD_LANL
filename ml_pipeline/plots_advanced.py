@@ -47,16 +47,63 @@ from ml_pipeline.tasks import (   # noqa: E402
     build_targets, TASK_DESCRIPTION, TASK_N_CLASSES,
 )
 from ml_pipeline.train import (   # noqa: E402
-    FEATURES_FLAT, FEATURES_SEQ, FEATURES_MAT,
+    FEATURES_FLAT, FEATURES_SEQ, FEATURES_MAT, _CFDAC_VARIANTS,
     load_labels, load_feature, make_split, SEED,
 )
-from ml_pipeline.models import MLP, Conv1DStack, SmallTransformer, Conv2DStack  # noqa: E402
+from ml_pipeline.models import (   # noqa: E402
+    MLP, Conv1DStack, SmallTransformer, Conv2DStack, Conv3DStack,
+)
+
+# All CFDAC variants get the same matricial / volumetric treatment in
+# plot_confusions / scatter / per-class F1 as the legacy `cfdac`.
+ALL_MAT_FEATURES = tuple(_CFDAC_VARIANTS.keys())
 
 # Per-(task, flat-feature) StandardScaler table.  Populated in main().
 SCALERS: Dict[str, Dict[str, "StandardScaler"]] = {}
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────
+class _LazyFeatures:
+    """Lazy cache of feature arrays keyed by feature name.
+
+    Loading all 10 CFDAC variants eagerly costs > 5 GB of RAM, so the
+    plot pipeline uses this wrapper instead of a plain dict.  Each
+    array is loaded once on first access and kept in memory until the
+    object is garbage-collected.
+    """
+
+    def __init__(self, features_path: "Path"):
+        self._path = features_path
+        self._cache: Dict[str, np.ndarray] = {}
+
+    def __getitem__(self, name: str) -> np.ndarray:
+        if name not in self._cache:
+            self._cache[name] = load_feature(self._path, name)
+        return self._cache[name]
+
+    def __contains__(self, name: str) -> bool:  # pragma: no cover
+        return name in self._cache
+
+
+def _parse_tag(tag: str, tasks: Dict) -> Tuple:
+    """Split ``<task>_<model>_<feature>`` allowing both task names and
+    feature names to contain underscores.  Returns
+    ``(task, model, feature)`` or ``(None, None, None)`` if no
+    prefix-suffix split matches both ends of the catalogue."""
+    feature_catalog = (*ALL_MAT_FEATURES, *FEATURES_FLAT,
+                          *FEATURES_SEQ, "indicators")
+    for task in tasks:
+        prefix = task + "_"
+        if not tag.startswith(prefix):
+            continue
+        rest = tag[len(prefix):]
+        for feat in feature_catalog:
+            suffix = "_" + feat
+            if rest.endswith(suffix):
+                return task, rest[:-len(suffix)], feat
+    return None, None, None
+
+
 def _safe_savefig(fig, path: Path, dpi: int = 110) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with warnings.catch_warnings():
@@ -217,6 +264,12 @@ def _load_model_predict(art_path: Path, X: np.ndarray, kind: str,
                               widths=tuple(hp.get("widths", (16, 32, 64))),
                               kernel_size=int(hp.get("kernel_size", 5)),
                               regression=(kind == "reg"))
+    elif name == "cnn3d":
+        depth = in_shape[1]
+        mdl = Conv3DStack(depth=depth, n_out=n_out,
+                              widths=tuple(hp.get("widths", (8, 16, 32))),
+                              kernel_size=int(hp.get("kernel_size", 3)),
+                              regression=(kind == "reg"))
     else:
         raise ValueError(name)
     mdl.load_state_dict(blob["state_dict"]); mdl.eval()
@@ -264,25 +317,22 @@ def plot_confusions(features_path: Path, results_dir: Path,
             "kind":   kind,
         }
 
-    feats: Dict[str, np.ndarray] = {}
-    for name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-        feats[name] = load_feature(features_path, name)
+    feats = _LazyFeatures(features_path)
 
     models_dir = results_dir / "models"
     for art in sorted(models_dir.iterdir()):
         tag = art.stem
-        # tag = "<task>_<model>_<feature>" — task may contain underscore.
-        for k in (3, 2):
-            cand = "_".join(tag.split("_")[:-k])
-            if cand in tasks:
-                task_name = cand; rest = tag.split("_")[-k:]; break
-        else:
+        task_name, model_name, feature = _parse_tag(tag, tasks)
+        if task_name is None:
             continue
-        model_name = rest[0]; feature = "_".join(rest[1:])
         sp = splits[task_name]
         if sp["kind"] != "cls":
             continue
-        X_te = feats[feature][sp["idx_te"]]
+        try:
+            X_te = feats[feature][sp["idx_te"]]
+        except KeyError:
+            print(f"  skip {tag}: feature '{feature}' not in h5")
+            continue
         n_out = TASK_N_CLASSES[task_name]
         try:
             scaler = SCALERS.get(task_name, {}).get(feature)
@@ -323,23 +373,21 @@ def plot_perclass_f1(features_path: Path, results_dir: Path,
         _, _, i_te = make_split(y_pool, kind)
         splits[tn] = {"idx_te": ipool[i_te], "y_te": y_pool[i_te], "kind": kind}
 
-    feats: Dict[str, np.ndarray] = {}
-    for name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-        feats[name] = load_feature(features_path, name)
+    feats = _LazyFeatures(features_path)
 
     # Aggregate per task: matrix (model x class) of F1.
     by_task: Dict[str, list[Tuple[str, str, np.ndarray]]] = {}
     for art in sorted((results_dir / "models").iterdir()):
         tag = art.stem
-        for k in (3, 2):
-            cand = "_".join(tag.split("_")[:-k])
-            if cand in tasks: task_name = cand; rest = tag.split("_")[-k:]; break
-        else:
+        task_name, model_name, feature = _parse_tag(tag, tasks)
+        if task_name is None:
             continue
-        model_name = rest[0]; feature = "_".join(rest[1:])
         sp = splits[task_name]
         if sp["kind"] != "cls": continue
-        X_te = feats[feature][sp["idx_te"]]
+        try:
+            X_te = feats[feature][sp["idx_te"]]
+        except KeyError:
+            continue
         n_out = TASK_N_CLASSES[task_name]
         try:
             scaler = SCALERS.get(task_name, {}).get(feature)
@@ -380,9 +428,7 @@ def plot_roc_pr_binary(features_path: Path, results_dir: Path,
     _, _, i_te = make_split(y_all, kind)
     ipool = np.where(mask)[0]; idx_te = ipool[i_te]; y_te = y_all[i_te]
 
-    feats: Dict[str, np.ndarray] = {}
-    for name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-        feats[name] = load_feature(features_path, name)
+    feats = _LazyFeatures(features_path)
 
     fig_roc, ax_roc = plt.subplots(figsize=(7, 7))
     fig_pr,  ax_pr  = plt.subplots(figsize=(7, 7))
@@ -391,16 +437,13 @@ def plot_roc_pr_binary(features_path: Path, results_dir: Path,
         tag = art.stem
         if not tag.startswith("binary_"):
             continue
-        rest = tag[len("binary_"):]
-        # rest = "<model>_<feature>"
-        for f in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-            if rest.endswith("_" + f):
-                feat = f
-                model_name = rest[:-(len(f) + 1)]
-                break
-        else:
+        task_name, model_name, feat = _parse_tag(tag, tasks)
+        if task_name != "binary":
             continue
-        X = feats[feat][idx_te]
+        try:
+            X = feats[feat][idx_te]
+        except KeyError:
+            continue
         try:
             scaler = SCALERS.get("binary", {}).get(feat)
             _, proba = _load_model_predict(art, X, "cls", 2, scaler=scaler)
@@ -437,21 +480,19 @@ def plot_severity_scatter(features_path: Path, results_dir: Path,
     i_tr, i_va, i_te = make_split(y_all, kind)
     idx_te = ipool[i_te]; y_te = y_all[i_te]
 
-    feats: Dict[str, np.ndarray] = {}
-    for name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-        feats[name] = load_feature(features_path, name)
+    feats = _LazyFeatures(features_path)
 
     for art in sorted((results_dir / "models").iterdir()):
         tag = art.stem
         if not tag.startswith("severity_"):
             continue
-        rest = tag[len("severity_"):]
-        for f in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-            if rest.endswith("_" + f):
-                feat = f; model_name = rest[:-(len(f) + 1)]; break
-        else:
+        task_name, model_name, feat = _parse_tag(tag, tasks)
+        if task_name != "severity":
             continue
-        X = feats[feat][idx_te]
+        try:
+            X = feats[feat][idx_te]
+        except KeyError:
+            continue
         try:
             scaler = SCALERS.get("severity", {}).get(feat)
             y_pred, _ = _load_model_predict(art, X, "reg", 1, scaler=scaler)
@@ -482,17 +523,18 @@ def plot_feature_importance(features_path: Path, results_dir: Path,
                            "peak1_f", "peak1_a", "peak2_f", "peak2_a",
                            "peak3_f", "peak3_a", "mean_logA", "std_logA", "bandE",
                        )]
-    name_lookup = {"modal": modal_names, "indicators": INDICATOR_NAMES}
+    name_lookup = {"modal": modal_names}
     for art in sorted((results_dir / "models").iterdir()):
         tag = art.stem
         if art.suffix != ".pkl":
             continue
+        feat = None
         for f in FEATURES_FLAT:
             if tag.endswith("_" + f):
                 feat = f
                 rest = tag[:-(len(f) + 1)]
                 break
-        else:
+        if feat is None:
             continue
         model_name = rest.split("_")[-1]
         if model_name not in {"rf", "xgb"}:
@@ -526,7 +568,7 @@ def plot_embeddings(features_path: Path, out_dir: Path,
     y = tc[idx]
 
     feats: Dict[str, np.ndarray] = {}
-    for name in ("modal", "indicators"):
+    for name in ("modal",):
         feats[name] = load_feature(features_path, name)[idx]
 
     for feat_name, X in feats.items():

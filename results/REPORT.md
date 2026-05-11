@@ -26,6 +26,7 @@ the sim-to-real analysis, and per-plot commentary on all 146 plots.
 9. [Sim-to-real summary](#9-sim-to-real-summary)
 10. [Per-plot commentary](#10-per-plot-commentary)
 11. [Reproducibility](#11-reproducibility)
+12. [Full HPO trial dump (all cells, all trials)](#12-full-hpo-trial-dump-all-cells-all-trials)
 
 ---
 
@@ -66,6 +67,13 @@ shows the deployable-population score.
 | col_location  | MLP + modal                  | 0.494         | 0.453 (1 938)                              | 0.287 (1-D CNN/frf_mag, 480)                 |
 | mass_location | 2-D CNN + cfdac_magphase     | 0.987         | 0.282 (2-D CNN + cfdac_all, 238)           | **0.338 (2-D CNN + cfdac_all, 160)**         |
 | indicators    | XGB + modal                  | R² ≥ 0.99 ×20 | M2L_abs_sum R² 0.756 best of 22 (2 176)    | M2L_abs_sum R² 0.78 / RVAC_min 0.60 (640)    |
+
+> **Every trial** for every `(task, model, feature)` cell is
+> tabulated inline in § 12 of this report — hyperparameters,
+> val metric, test metric, runtime — sorted by val score per
+> cell.  The HPO response-surface heatmaps inside
+> `figures/hpo/` and `figures/indicators/hpo/` visualise the
+> same data.
 
 Headline takeaways:
 
@@ -151,6 +159,8 @@ calibrated semi-rigid reduced-order model of the LANL 3SBB.
   flat over each type's bounded range — uniform severity prior.
 * **Conclusion.** Zero class imbalance; any metric below 0.20
   is below random.
+
+![per-(type, location) sample counts — synth vs experimental](figures/dataset/location_distribution.png)
 
 ## 2.5 Location distribution — synthetic vs experimental
 
@@ -563,7 +573,16 @@ synthetic pristine mean FRF.  Entries:
 | 13–16 | `GAC_{mean,std,min,max}`          | summaries of GAC                       |
 | 17–21 | `M2L_{mean,std,min,max,abs_sum}`  | summaries of M2L                       |
 
-![indicators feature — synth vs experimental](figures/feature_examples/indicators.png)
+The per-indicator value histogram across damage cases (synth vs
+experimental) is in
+[`figures/dataset/indicator_distributions.png`](figures/dataset/indicator_distributions.png)
+— 22 panels, one per indicator, with synth (blue) and
+experimental (red) densities overlaid.  Each panel is clipped to
+the [1, 99] percentile range to make the cross-domain shift
+visible.  The indicators are *no longer used as inputs*; they
+are kept only as regression targets for § 7.6.
+
+![per-indicator value distribution across damage cases — synth vs experimental](figures/dataset/indicator_distributions.png)
 
 ## `frf_mag` — `(N_f, 9)` accelerance magnitude
 
@@ -742,7 +761,7 @@ Files: [`figures/feat_importance/<task>_<rf|xgb>_<feature>.png`](figures/feat_im
 
 ## 6.10 PCA / t-SNE embeddings
 
-Files: [`figures/embedding/{pca,tsne}_{modal,indicators}.png`](figures/embedding/).
+Files: [`figures/embedding/{pca,tsne}_modal.png`](figures/embedding/) (the legacy `*_indicators` embeddings were removed when indicators stopped being an input feature; the modal embedding is the only relevant feature-space view now).
 
 * **Layout.** 2-D scatter of 3 000 samples coloured by damage
   type.  PCA axes labelled with `% variance explained`; t-SNE
@@ -1189,6 +1208,15 @@ depth = 2 / 4 is too small for the 3-D inductive bias to
 matter.  4-channel `cfdac_all` was OOM-killed on the type
 task at trial 80/180 of the HPO; the binary, severity and
 location entries did complete.
+
+**Representative HPO surfaces and confusion matrices** (the
+remaining 49 cells are in `figures/hpo/` and
+`figures/confusion/`):
+
+![HPO — type 2-D CNN / cfdac_mag](figures/hpo/type__cnn2d__cfdac_mag.png)
+![confusion — type 2-D CNN / cfdac_mag](figures/confusion/type_cnn2d_cfdac_mag.png)
+![HPO — type 3-D CNN / cfdac3d_realimag](figures/hpo/type__cnn3d__cfdac3d_realimag.png)
+![confusion — type 3-D CNN / cfdac3d_realimag](figures/confusion/type_cnn3d_cfdac3d_realimag.png)
 
 **Confusion / HPO plots for the legacy 2-channel `cfdac`:**
 
@@ -1776,6 +1804,27 @@ from Conv3d at D = 2 / 4.
 
 ## 7.6 Indicator regression (22 separate predictors)
 
+![indicator regression — full-exp R² per (indicator, model)](figures/indicators/r2_summary.png)
+
+* **What.** Bar chart of cross-domain R² for each of the 22
+  indicators, grouped by model (RF / XGB / MLP).  Bars clipped
+  at R² = −1.5 so the catastrophic MLP failures don't dominate
+  the y-axis.
+* **What is shown.** RF and XGB transfer cleanly for
+  `M2L_abs_sum`, `RVAC_{min,mean,max}`, `DRQ`, `M2L_mean`,
+  `M2L_max` (R² ≥ 0.5).  Every other indicator dips below zero
+  or — for MLP — far below zero.
+* **Conclusion.** Use bounded / correlation-style indicators
+  as the transfer targets; treat the unbounded ones
+  (`ODS_diff`, `r2_imag`, `FRFSM_6dB`, `FRFRMS`, `FRFSF`) as
+  synth-only.
+
+Per-indicator HPO surfaces (all RF / XGB / MLP trials) live
+in [`figures/indicators/hpo/`](figures/indicators/hpo/) and
+true-vs-predicted scatter plots in
+[`figures/indicators/scatter/`](figures/indicators/scatter/) —
+one PNG per `(indicator, model)` cell, 66 of each.
+
 ### 7.6.1 What the task is
 
 For every one of the 22 pymodal damage indicators (SCI,
@@ -1864,6 +1913,23 @@ distribution under IQS sits outside the synth-trained scaler
 support and the unbounded regression head amplifies the
 extrapolation; this is the same failure mode that breaks raw
 severity regression in § 7.3.)
+
+**Example scatter plots — best, mediocre, worst:**
+
+![M2L_abs_sum / RF — best transferring](figures/indicators/scatter/M2L_abs_sum_rf_modal.png)
+![DRQ / XGB — clean transfer](figures/indicators/scatter/DRQ_xgb_modal.png)
+![SCI / RF — mediocre](figures/indicators/scatter/SCI_rf_modal.png)
+![FRFSF / XGB — collapse](figures/indicators/scatter/FRFSF_xgb_modal.png)
+
+**Example HPO surfaces (val R²):**
+
+![HPO — DRQ / XGB](figures/indicators/hpo/DRQ__xgb__modal.png)
+![HPO — SCI / RF](figures/indicators/hpo/SCI__rf__modal.png)
+
+All 66 scatter plots and 66 HPO surfaces are linked from
+`figures/indicators/scatter/` and `figures/indicators/hpo/`.
+Every trial value (val + test R², MAE, runtime) is tabulated
+inline in § 12 of this report under "Indicator-prediction HPO".
 
 ### 7.6.5 What this means
 
@@ -2048,10 +2114,13 @@ section is the index for fast browsing.
 ## 10.2 Synth-vs-real feature panels
 
 * [`figures/feature_examples/modal.png`](figures/feature_examples/modal.png)
-* [`figures/feature_examples/indicators.png`](figures/feature_examples/indicators.png)
 * [`figures/feature_examples/frf_mag.png`](figures/feature_examples/frf_mag.png)
 * [`figures/feature_examples/timeseries.png`](figures/feature_examples/timeseries.png)
 * [`figures/feature_examples/cfdac.png`](figures/feature_examples/cfdac.png)
+
+The `indicators` example panel that used to live here has been
+removed since the indicators are no longer used as an input
+feature — see § 7.6 for their new role as regression targets.
 
 Each panel is a 5 (class) × 2 (synth, real) grid.  Use these
 to spot calibration mismatch between the synthetic dataset and
@@ -2147,12 +2216,9 @@ All 20 plots in [`figures/feat_importance/`](figures/feat_importance/).
 * [`figures/embedding/tsne_modal.png`](figures/embedding/tsne_modal.png)
   — larger separation between Pristine, Bolt, Mass; Crack /
   Hole partially break.
-* [`figures/embedding/pca_indicators.png`](figures/embedding/pca_indicators.png)
-  — Pristine isolated on a thin spike; damage mechanisms
-  tangled.
-* [`figures/embedding/tsne_indicators.png`](figures/embedding/tsne_indicators.png)
-  — same.  Predicts the indicator-vector ceiling on type
-  classification.
+
+(The legacy `*_indicators` embedding plots have been removed
+because indicators are no longer used as an input feature.)
 
 ## 10.10 HPO response surfaces
 
@@ -2202,3 +2268,1610 @@ Output locations:
 * All 146 plots → [`figures/`](figures/)
 * This report → `REPORT.md` (the only narrative file in
   `results/`).
+
+
+---
+
+# 12. Full HPO trial dump (all cells, all trials)
+
+Every trial for every (task, model, feature) cell.  Rows are sorted by  (descending).  See § 7 for narrative context.
+
+## Classification + severity HPO
+
+### `binary` / `cnn2d` / `cfdac`
+_4 trials_  ·  best val = **0.9613**  ·  best test = **0.9440**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9613 | 0.9440 | 14.9 |
+| 5 | [8, 16, 32] | 0.9427 | 0.9413 | 9.3 |
+| 3 | [16, 32, 64] | 0.9360 | 0.9327 | 12.4 |
+| 3 | [8, 16, 32] | 0.9193 | 0.9267 | 8.0 |
+
+### `binary` / `cnn2d` / `cfdac_all`
+_4 trials_  ·  best val = **0.9240**  ·  best test = **0.9200**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.9240 | 0.9200 | 25.1 |
+| 5 | [8, 16, 32] | 0.9193 | 0.9113 | 18.2 |
+| 3 | [8, 16, 32] | 0.9133 | 0.9180 | 15.8 |
+| 5 | [16, 32, 64] | 0.8887 | 0.8907 | 29.5 |
+
+### `binary` / `cnn2d` / `cfdac_imag`
+_4 trials_  ·  best val = **0.9567**  ·  best test = **0.9460**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9567 | 0.9460 | 20.8 |
+| 5 | [8, 16, 32] | 0.9507 | 0.9413 | 12.4 |
+| 3 | [16, 32, 64] | 0.9193 | 0.9287 | 16.5 |
+| 3 | [8, 16, 32] | 0.9013 | 0.9080 | 25.0 |
+
+### `binary` / `cnn2d` / `cfdac_mag`
+_4 trials_  ·  best val = **0.8007**  ·  best test = **0.7987**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.8007 | 0.7987 | 17.7 |
+| 5 | [16, 32, 64] | 0.8007 | 0.8000 | 22.1 |
+| 3 | [8, 16, 32] | 0.8000 | 0.8000 | 10.4 |
+| 5 | [8, 16, 32] | 0.8000 | 0.8000 | 13.7 |
+
+### `binary` / `cnn2d` / `cfdac_magphase`
+_4 trials_  ·  best val = **0.9360**  ·  best test = **0.9347**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.9360 | 0.9347 | 18.9 |
+| 5 | [8, 16, 32] | 0.9273 | 0.9367 | 14.6 |
+| 5 | [16, 32, 64] | 0.9213 | 0.9167 | 22.1 |
+| 3 | [8, 16, 32] | 0.9153 | 0.9320 | 12.2 |
+
+### `binary` / `cnn2d` / `cfdac_phase`
+_4 trials_  ·  best val = **0.9533**  ·  best test = **0.9533**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9533 | 0.9533 | 20.7 |
+| 5 | [8, 16, 32] | 0.9520 | 0.9400 | 13.3 |
+| 3 | [16, 32, 64] | 0.9380 | 0.9387 | 15.9 |
+| 3 | [8, 16, 32] | 0.9067 | 0.9107 | 10.6 |
+
+### `binary` / `cnn2d` / `cfdac_real`
+_4 trials_  ·  best val = **0.9520**  ·  best test = **0.9573**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9520 | 0.9573 | 21.9 |
+| 3 | [16, 32, 64] | 0.9140 | 0.9127 | 16.8 |
+| 5 | [8, 16, 32] | 0.8847 | 0.8667 | 12.2 |
+| 3 | [8, 16, 32] | 0.8533 | 0.8620 | 10.7 |
+
+### `binary` / `cnn3d` / `cfdac3d_all`
+_4 trials_  ·  best val = **0.9313**  ·  best test = **0.9347**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.9313 | 0.9347 | 18.1 |
+| 5 | [16, 32, 64] | 0.9287 | 0.9213 | 22.0 |
+| 3 | [8, 16, 32] | 0.9273 | 0.9300 | 26.6 |
+| 5 | [8, 16, 32] | 0.9260 | 0.9180 | 13.4 |
+
+### `binary` / `cnn3d` / `cfdac3d_magphase`
+_4 trials_  ·  best val = **0.9593**  ·  best test = **0.9593**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9593 | 0.9593 | 26.3 |
+| 5 | [8, 16, 32] | 0.9347 | 0.9273 | 13.0 |
+| 3 | [16, 32, 64] | 0.9347 | 0.9313 | 18.5 |
+| 3 | [8, 16, 32] | 0.9187 | 0.9240 | 11.3 |
+
+### `binary` / `cnn3d` / `cfdac3d_realimag`
+_4 trials_  ·  best val = **0.9540**  ·  best test = **0.9393**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.9540 | 0.9393 | 15.9 |
+| 5 | [16, 32, 64] | 0.9500 | 0.9460 | 59.6 |
+| 3 | [16, 32, 64] | 0.9420 | 0.9247 | 20.2 |
+| 3 | [8, 16, 32] | 0.8533 | 0.8647 | 13.0 |
+
+### `binary` / `cnn` / `frf_mag`
+_4 trials_  ·  best val = **0.8387**  ·  best test = **0.8527**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.8387 | 0.8527 | 4.9 |
+| 7 | [32, 64, 128] | 0.8273 | 0.8500 | 11.9 |
+| 5 | [32, 64, 128] | 0.8087 | 0.8273 | 10.9 |
+| 7 | [16, 32, 64] | 0.8000 | 0.8000 | 5.3 |
+
+### `binary` / `cnn` / `timeseries`
+_4 trials_  ·  best val = **0.8453**  ·  best test = **0.8420**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.8453 | 0.8420 | 30.5 |
+| 5 | [32, 64, 128] | 0.8020 | 0.8013 | 30.7 |
+| 5 | [16, 32, 64] | 0.8000 | 0.8000 | 14.3 |
+| 7 | [16, 32, 64] | 0.8000 | 0.8000 | 14.8 |
+
+### `binary` / `mlp` / `modal`
+_9 trials_  ·  best val = **0.9947**  ·  best test = **0.9887**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [512, 256, 128] | 0.003 | 0.9947 | 0.9887 | 1.8 |
+| [128, 64] | 0.003 | 0.9887 | 0.9767 | 0.8 |
+| [256, 128, 64] | 0.003 | 0.9860 | 0.9787 | 1.1 |
+| [512, 256, 128] | 0.001 | 0.9827 | 0.9820 | 23.4 |
+| [256, 128, 64] | 0.001 | 0.9800 | 0.9740 | 1.1 |
+| [512, 256, 128] | 0.0005 | 0.9553 | 0.9473 | 74.9 |
+| [128, 64] | 0.001 | 0.8927 | 0.8800 | 0.9 |
+| [256, 128, 64] | 0.0005 | 0.8473 | 0.8453 | 1.1 |
+| [128, 64] | 0.0005 | 0.8127 | 0.8320 | 1.7 |
+
+### `binary` / `rf` / `modal`
+_9 trials_  ·  best val = **0.9580**  ·  best test = **0.9493**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9580 | 0.9493 | 3.8 |
+| None | 200 | 0.9553 | 0.9513 | 2.2 |
+| None | 100 | 0.9540 | 0.9493 | 1.1 |
+| 12 | 200 | 0.8573 | 0.8540 | 1.4 |
+| 12 | 100 | 0.8567 | 0.8520 | 0.7 |
+| 12 | 300 | 0.8567 | 0.8540 | 2.1 |
+| 6 | 300 | 0.7693 | 0.7787 | 1.6 |
+| 6 | 200 | 0.7687 | 0.7773 | 1.0 |
+| 6 | 100 | 0.7647 | 0.7727 | 0.5 |
+
+### `binary` / `transformer` / `frf_mag`
+_6 trials_  ·  best val = **0.8000**  ·  best test = **0.8000**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 32 | 1 | 0.8000 | 0.8000 | 3.4 |
+| 32 | 2 | 0.8000 | 0.8000 | 6.4 |
+| 48 | 1 | 0.8000 | 0.8000 | 4.3 |
+| 48 | 2 | 0.8000 | 0.8000 | 7.4 |
+| 64 | 1 | 0.8000 | 0.8000 | 4.8 |
+| 64 | 2 | 0.8000 | 0.8000 | 10.0 |
+
+### `binary` / `transformer` / `timeseries`
+_6 trials_  ·  best val = **0.8900**  ·  best test = **0.8760**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 64 | 2 | 0.8900 | 0.8760 | 32.8 |
+| 32 | 2 | 0.8200 | 0.8427 | 20.7 |
+| 32 | 1 | 0.8000 | 0.8000 | 10.5 |
+| 48 | 1 | 0.8000 | 0.8000 | 13.8 |
+| 48 | 2 | 0.8000 | 0.8000 | 27.1 |
+| 64 | 1 | 0.8000 | 0.8000 | 16.5 |
+
+### `binary` / `xgb` / `modal`
+_9 trials_  ·  best val = **0.9747**  ·  best test = **0.9647**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9747 | 0.9647 | 1.1 |
+| 8 | 600 | 0.9740 | 0.9640 | 2.0 |
+| 6 | 600 | 0.9720 | 0.9647 | 1.8 |
+| 4 | 600 | 0.9713 | 0.9600 | 1.3 |
+| 6 | 300 | 0.9700 | 0.9620 | 0.9 |
+| 8 | 100 | 0.9687 | 0.9560 | 0.4 |
+| 4 | 300 | 0.9680 | 0.9527 | 0.5 |
+| 6 | 100 | 0.9633 | 0.9520 | 0.3 |
+| 4 | 100 | 0.9480 | 0.9353 | 0.2 |
+
+### `col_location` / `cnn2d` / `cfdac`
+_4 trials_  ·  best val = **0.4917**  ·  best test = **0.4944**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4917 | 0.4944 | 8.7 |
+| 3 | [16, 32, 64] | 0.4628 | 0.4611 | 6.5 |
+| 3 | [8, 16, 32] | 0.4506 | 0.4467 | 4.6 |
+| 5 | [8, 16, 32] | 0.4251 | 0.4256 | 5.5 |
+
+### `col_location` / `cnn2d` / `cfdac_all`
+_4 trials_  ·  best val = **0.5050**  ·  best test = **0.5044**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.5050 | 0.5044 | 10.0 |
+| 5 | [16, 32, 64] | 0.5050 | 0.4611 | 18.0 |
+| 3 | [16, 32, 64] | 0.4961 | 0.4756 | 14.7 |
+| 3 | [8, 16, 32] | 0.4850 | 0.4678 | 8.9 |
+
+### `col_location` / `cnn2d` / `cfdac_imag`
+_4 trials_  ·  best val = **0.4784**  ·  best test = **0.5000**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.4784 | 0.5000 | 6.9 |
+| 3 | [16, 32, 64] | 0.4772 | 0.4622 | 9.4 |
+| 5 | [16, 32, 64] | 0.4628 | 0.4800 | 12.7 |
+| 3 | [8, 16, 32] | 0.4329 | 0.4411 | 6.0 |
+
+### `col_location` / `cnn2d` / `cfdac_mag`
+_4 trials_  ·  best val = **0.4917**  ·  best test = **0.4633**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.4917 | 0.4633 | 10.5 |
+| 5 | [8, 16, 32] | 0.4817 | 0.5056 | 8.3 |
+| 5 | [16, 32, 64] | 0.4550 | 0.4656 | 13.2 |
+| 3 | [8, 16, 32] | 0.4539 | 0.4233 | 6.9 |
+
+### `col_location` / `cnn2d` / `cfdac_magphase`
+_4 trials_  ·  best val = **0.5117**  ·  best test = **0.4744**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.5117 | 0.4744 | 8.6 |
+| 3 | [16, 32, 64] | 0.5006 | 0.4667 | 10.4 |
+| 5 | [16, 32, 64] | 0.4950 | 0.5144 | 13.0 |
+| 3 | [8, 16, 32] | 0.4928 | 0.4722 | 7.1 |
+
+### `col_location` / `cnn2d` / `cfdac_phase`
+_4 trials_  ·  best val = **0.5039**  ·  best test = **0.4867**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [8, 16, 32] | 0.5039 | 0.4867 | 5.7 |
+| 5 | [16, 32, 64] | 0.4972 | 0.4844 | 12.7 |
+| 3 | [16, 32, 64] | 0.4872 | 0.4856 | 10.3 |
+| 5 | [8, 16, 32] | 0.4761 | 0.4789 | 6.9 |
+
+### `col_location` / `cnn2d` / `cfdac_real`
+_4 trials_  ·  best val = **0.4917**  ·  best test = **0.4778**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.4917 | 0.4778 | 9.9 |
+| 5 | [16, 32, 64] | 0.4850 | 0.4856 | 13.3 |
+| 3 | [8, 16, 32] | 0.4728 | 0.4689 | 6.7 |
+| 5 | [8, 16, 32] | 0.4451 | 0.4433 | 7.6 |
+
+### `col_location` / `cnn3d` / `cfdac3d_all`
+_4 trials_  ·  best val = **0.5094**  ·  best test = **0.4844**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.5094 | 0.4844 | 7.6 |
+| 3 | [16, 32, 64] | 0.4983 | 0.4822 | 9.7 |
+| 3 | [8, 16, 32] | 0.4795 | 0.4800 | 6.4 |
+| 5 | [16, 32, 64] | 0.4639 | 0.4311 | 12.4 |
+
+### `col_location` / `cnn3d` / `cfdac3d_magphase`
+_4 trials_  ·  best val = **0.4961**  ·  best test = **0.4789**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [8, 16, 32] | 0.4961 | 0.4789 | 8.5 |
+| 5 | [8, 16, 32] | 0.4928 | 0.4656 | 8.7 |
+| 3 | [16, 32, 64] | 0.4895 | 0.4822 | 11.6 |
+| 5 | [16, 32, 64] | 0.4883 | 0.4733 | 14.1 |
+
+### `col_location` / `cnn3d` / `cfdac3d_realimag`
+_4 trials_  ·  best val = **0.4961**  ·  best test = **0.4567**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4961 | 0.4567 | 14.1 |
+| 5 | [8, 16, 32] | 0.4950 | 0.4511 | 9.3 |
+| 3 | [8, 16, 32] | 0.4728 | 0.4878 | 41.0 |
+| 3 | [16, 32, 64] | 0.4451 | 0.4278 | 11.3 |
+
+### `col_location` / `cnn` / `frf_mag`
+_4 trials_  ·  best val = **0.4895**  ·  best test = **0.4689**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.4895 | 0.4689 | 5.7 |
+| 5 | [32, 64, 128] | 0.4739 | 0.4344 | 5.1 |
+| 7 | [16, 32, 64] | 0.4584 | 0.4489 | 2.8 |
+| 5 | [16, 32, 64] | 0.4084 | 0.3967 | 3.0 |
+
+### `col_location` / `cnn` / `timeseries`
+_4 trials_  ·  best val = **0.4883**  ·  best test = **0.4733**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [16, 32, 64] | 0.4883 | 0.4733 | 7.1 |
+| 5 | [32, 64, 128] | 0.4861 | 0.4989 | 18.9 |
+| 5 | [16, 32, 64] | 0.4684 | 0.4544 | 6.3 |
+| 7 | [32, 64, 128] | 0.4550 | 0.4411 | 21.8 |
+
+### `col_location` / `mlp` / `modal`
+_9 trials_  ·  best val = **0.5072**  ·  best test = **0.4944**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.5072 | 0.4944 | 1.1 |
+| [128, 64] | 0.003 | 0.5061 | 0.4756 | 0.5 |
+| [128, 64] | 0.0005 | 0.5039 | 0.4589 | 0.7 |
+| [512, 256, 128] | 0.001 | 0.5017 | 0.4933 | 1.0 |
+| [512, 256, 128] | 0.003 | 0.4950 | 0.4933 | 0.9 |
+| [256, 128, 64] | 0.001 | 0.4939 | 0.4978 | 0.8 |
+| [128, 64] | 0.001 | 0.4928 | 0.4511 | 0.5 |
+| [512, 256, 128] | 0.0005 | 0.4895 | 0.4700 | 1.0 |
+| [256, 128, 64] | 0.0005 | 0.4883 | 0.4656 | 0.7 |
+
+### `col_location` / `rf` / `modal`
+_9 trials_  ·  best val = **0.5094**  ·  best test = **0.4922**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 12 | 300 | 0.5094 | 0.4922 | 1.8 |
+| None | 300 | 0.5083 | 0.5000 | 2.0 |
+| 12 | 200 | 0.4972 | 0.4900 | 1.1 |
+| None | 200 | 0.4972 | 0.5022 | 1.3 |
+| None | 100 | 0.4917 | 0.5067 | 0.7 |
+| 12 | 100 | 0.4872 | 0.4922 | 0.6 |
+| 6 | 100 | 0.4739 | 0.4911 | 0.5 |
+| 6 | 300 | 0.4739 | 0.4922 | 1.2 |
+| 6 | 200 | 0.4717 | 0.4933 | 0.9 |
+
+### `col_location` / `transformer` / `frf_mag`
+_6 trials_  ·  best val = **0.2675**  ·  best test = **0.2511**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 32 | 2 | 0.2675 | 0.2511 | 3.8 |
+| 48 | 1 | 0.2675 | 0.2267 | 2.4 |
+| 64 | 2 | 0.2519 | 0.2456 | 6.3 |
+| 48 | 2 | 0.2442 | 0.2378 | 4.8 |
+| 64 | 1 | 0.2442 | 0.2456 | 3.1 |
+| 32 | 1 | 0.2386 | 0.2578 | 2.0 |
+
+### `col_location` / `transformer` / `timeseries`
+_6 trials_  ·  best val = **0.3873**  ·  best test = **0.3678**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 64 | 2 | 0.3873 | 0.3678 | 17.9 |
+| 48 | 1 | 0.3341 | 0.3267 | 8.3 |
+| 32 | 2 | 0.3219 | 0.3089 | 11.9 |
+| 64 | 1 | 0.3163 | 0.3033 | 9.6 |
+| 32 | 1 | 0.2930 | 0.2889 | 6.2 |
+| 48 | 2 | 0.2775 | 0.2878 | 15.5 |
+
+### `col_location` / `xgb` / `modal`
+_9 trials_  ·  best val = **0.5094**  ·  best test = **0.4878**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 6 | 100 | 0.5094 | 0.4878 | 1.6 |
+| 8 | 300 | 0.5094 | 0.4778 | 6.9 |
+| 8 | 100 | 0.5039 | 0.4867 | 2.8 |
+| 8 | 600 | 0.4983 | 0.4800 | 11.3 |
+| 6 | 300 | 0.4972 | 0.4933 | 4.9 |
+| 6 | 600 | 0.4850 | 0.4967 | 8.5 |
+| 4 | 600 | 0.4839 | 0.4822 | 5.2 |
+| 4 | 100 | 0.4806 | 0.4689 | 0.9 |
+| 4 | 300 | 0.4806 | 0.4656 | 2.9 |
+
+### `mass_location` / `cnn2d` / `cfdac`
+_4 trials_  ·  best val = **0.9767**  ·  best test = **0.9533**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.9767 | 0.9533 | 1.8 |
+| 3 | [16, 32, 64] | 0.8467 | 0.8267 | 2.4 |
+| 5 | [16, 32, 64] | 0.8133 | 0.8267 | 2.5 |
+| 3 | [8, 16, 32] | 0.7867 | 0.7967 | 1.7 |
+
+### `mass_location` / `cnn2d` / `cfdac_all`
+_4 trials_  ·  best val = **0.9767**  ·  best test = **0.9700**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.9767 | 0.9700 | 3.7 |
+| 3 | [16, 32, 64] | 0.9733 | 0.9833 | 4.3 |
+| 5 | [16, 32, 64] | 0.9733 | 0.9700 | 5.3 |
+| 3 | [8, 16, 32] | 0.9000 | 0.9100 | 3.4 |
+
+### `mass_location` / `cnn2d` / `cfdac_imag`
+_4 trials_  ·  best val = **0.9733**  ·  best test = **0.9700**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9733 | 0.9700 | 3.7 |
+| 5 | [8, 16, 32] | 0.9567 | 0.9367 | 2.2 |
+| 3 | [16, 32, 64] | 0.8567 | 0.8533 | 3.3 |
+| 3 | [8, 16, 32] | 0.7700 | 0.8000 | 1.9 |
+
+### `mass_location` / `cnn2d` / `cfdac_mag`
+_4 trials_  ·  best val = **0.9533**  ·  best test = **0.9267**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9533 | 0.9267 | 3.8 |
+| 5 | [8, 16, 32] | 0.9300 | 0.9200 | 2.3 |
+| 3 | [16, 32, 64] | 0.9267 | 0.9000 | 3.5 |
+| 3 | [8, 16, 32] | 0.8700 | 0.8533 | 2.4 |
+
+### `mass_location` / `cnn2d` / `cfdac_magphase`
+_4 trials_  ·  best val = **0.9900**  ·  best test = **0.9867**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9900 | 0.9867 | 4.1 |
+| 3 | [16, 32, 64] | 0.9733 | 0.9767 | 3.6 |
+| 5 | [8, 16, 32] | 0.9633 | 0.9700 | 2.4 |
+| 3 | [8, 16, 32] | 0.9233 | 0.9033 | 2.0 |
+
+### `mass_location` / `cnn2d` / `cfdac_phase`
+_4 trials_  ·  best val = **0.9833**  ·  best test = **0.9733**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.9833 | 0.9733 | 3.2 |
+| 5 | [16, 32, 64] | 0.9733 | 0.9667 | 3.9 |
+| 5 | [8, 16, 32] | 0.9633 | 0.9500 | 2.2 |
+| 3 | [8, 16, 32] | 0.9400 | 0.9433 | 2.2 |
+
+### `mass_location` / `cnn2d` / `cfdac_real`
+_4 trials_  ·  best val = **0.8933**  ·  best test = **0.8633**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.8933 | 0.8633 | 4.7 |
+| 3 | [16, 32, 64] | 0.8700 | 0.8733 | 3.5 |
+| 5 | [8, 16, 32] | 0.8633 | 0.8900 | 2.4 |
+| 3 | [8, 16, 32] | 0.7533 | 0.7467 | 1.9 |
+
+### `mass_location` / `cnn3d` / `cfdac3d_all`
+_4 trials_  ·  best val = **0.9867**  ·  best test = **0.9700**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.9867 | 0.9700 | 3.1 |
+| 5 | [16, 32, 64] | 0.9833 | 0.9900 | 4.1 |
+| 5 | [8, 16, 32] | 0.9633 | 0.9533 | 2.5 |
+| 3 | [8, 16, 32] | 0.9233 | 0.9367 | 2.1 |
+
+### `mass_location` / `cnn3d` / `cfdac3d_magphase`
+_4 trials_  ·  best val = **0.9867**  ·  best test = **0.9700**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.9867 | 0.9700 | 5.8 |
+| 3 | [16, 32, 64] | 0.9833 | 0.9800 | 3.6 |
+| 5 | [8, 16, 32] | 0.9633 | 0.9467 | 3.4 |
+| 3 | [8, 16, 32] | 0.9067 | 0.9400 | 2.9 |
+
+### `mass_location` / `cnn3d` / `cfdac3d_realimag`
+_4 trials_  ·  best val = **0.9367**  ·  best test = **0.9367**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.9367 | 0.9367 | 3.7 |
+| 5 | [16, 32, 64] | 0.9367 | 0.9233 | 5.4 |
+| 5 | [8, 16, 32] | 0.8700 | 0.9067 | 3.3 |
+| 3 | [8, 16, 32] | 0.8133 | 0.8133 | 2.9 |
+
+### `mass_location` / `cnn` / `frf_mag`
+_4 trials_  ·  best val = **0.4267**  ·  best test = **0.4133**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4267 | 0.4133 | 0.9 |
+| 7 | [16, 32, 64] | 0.3400 | 0.3500 | 0.9 |
+| 5 | [32, 64, 128] | 0.2500 | 0.2500 | 1.6 |
+| 7 | [32, 64, 128] | 0.2500 | 0.2500 | 2.2 |
+
+### `mass_location` / `cnn` / `timeseries`
+_4 trials_  ·  best val = **0.4767**  ·  best test = **0.4733**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [32, 64, 128] | 0.4767 | 0.4733 | 5.7 |
+| 5 | [16, 32, 64] | 0.4700 | 0.4600 | 2.0 |
+| 7 | [32, 64, 128] | 0.4467 | 0.4300 | 6.6 |
+| 7 | [16, 32, 64] | 0.3900 | 0.4133 | 2.3 |
+
+### `mass_location` / `mlp` / `modal`
+_9 trials_  ·  best val = **1.0000**  ·  best test = **0.9867**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.001 | 1.0000 | 0.9867 | 0.2 |
+| [256, 128, 64] | 0.003 | 1.0000 | 0.9867 | 0.2 |
+| [512, 256, 128] | 0.0005 | 1.0000 | 0.9833 | 0.3 |
+| [512, 256, 128] | 0.001 | 1.0000 | 0.9933 | 0.3 |
+| [512, 256, 128] | 0.003 | 1.0000 | 0.9867 | 0.4 |
+| [128, 64] | 0.003 | 0.9967 | 0.9833 | 0.2 |
+| [128, 64] | 0.001 | 0.9933 | 0.9867 | 0.2 |
+| [256, 128, 64] | 0.0005 | 0.9800 | 0.9600 | 0.2 |
+| [128, 64] | 0.0005 | 0.9267 | 0.9200 | 0.2 |
+
+### `mass_location` / `rf` / `modal`
+_9 trials_  ·  best val = **1.0000**  ·  best test = **0.9900**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 12 | 100 | 1.0000 | 0.9900 | 0.3 |
+| None | 100 | 1.0000 | 0.9900 | 0.3 |
+| 12 | 200 | 1.0000 | 0.9900 | 0.6 |
+| None | 200 | 1.0000 | 0.9900 | 0.6 |
+| 12 | 300 | 1.0000 | 0.9900 | 0.8 |
+| None | 300 | 1.0000 | 0.9900 | 0.8 |
+| 6 | 100 | 0.9967 | 0.9867 | 0.3 |
+| 6 | 300 | 0.9967 | 0.9900 | 0.8 |
+| 6 | 200 | 0.9933 | 0.9867 | 0.6 |
+
+### `mass_location` / `transformer` / `frf_mag`
+_6 trials_  ·  best val = **0.4767**  ·  best test = **0.4800**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 32 | 1 | 0.4767 | 0.4800 | 0.7 |
+| 32 | 2 | 0.4633 | 0.4300 | 1.3 |
+| 64 | 1 | 0.4467 | 0.5033 | 1.0 |
+| 48 | 1 | 0.4267 | 0.4567 | 1.2 |
+| 64 | 2 | 0.4100 | 0.4133 | 2.2 |
+| 48 | 2 | 0.3067 | 0.3033 | 1.5 |
+
+### `mass_location` / `transformer` / `timeseries`
+_6 trials_  ·  best val = **0.6833**  ·  best test = **0.6367**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 64 | 2 | 0.6833 | 0.6367 | 6.1 |
+| 48 | 2 | 0.5767 | 0.5333 | 5.0 |
+| 48 | 1 | 0.5200 | 0.4600 | 2.7 |
+| 32 | 2 | 0.5133 | 0.4633 | 4.2 |
+| 32 | 1 | 0.4867 | 0.4200 | 2.0 |
+| 64 | 1 | 0.4767 | 0.4667 | 2.8 |
+
+### `mass_location` / `xgb` / `modal`
+_9 trials_  ·  best val = **1.0000**  ·  best test = **0.9867**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 100 | 1.0000 | 0.9867 | 0.3 |
+| 6 | 100 | 1.0000 | 0.9933 | 0.3 |
+| 8 | 100 | 1.0000 | 0.9933 | 0.4 |
+| 4 | 300 | 1.0000 | 0.9867 | 0.5 |
+| 6 | 300 | 1.0000 | 0.9933 | 0.5 |
+| 8 | 300 | 1.0000 | 0.9933 | 0.9 |
+| 4 | 600 | 1.0000 | 0.9867 | 0.7 |
+| 6 | 600 | 1.0000 | 0.9933 | 0.7 |
+| 8 | 600 | 1.0000 | 0.9933 | 0.7 |
+
+### `severity` / `cnn2d` / `cfdac`
+_4 trials_  ·  best val = **0.3985**  ·  best test = **0.4199**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.3985 | 0.4199 | 7.4 |
+| 3 | [16, 32, 64] | 0.3610 | 0.3263 | 9.3 |
+| 5 | [16, 32, 64] | 0.3127 | 0.2988 | 11.2 |
+| 3 | [8, 16, 32] | 0.3032 | 0.2703 | 6.1 |
+
+### `severity` / `cnn2d` / `cfdac_all`
+_4 trials_  ·  best val = **0.4980**  ·  best test = **0.5079**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4980 | 0.5079 | 22.0 |
+| 5 | [8, 16, 32] | 0.4606 | 0.4504 | 14.1 |
+| 3 | [16, 32, 64] | 0.4425 | 0.4371 | 18.9 |
+| 3 | [8, 16, 32] | 0.3965 | 0.3963 | 13.1 |
+
+### `severity` / `cnn2d` / `cfdac_imag`
+_4 trials_  ·  best val = **0.4225**  ·  best test = **0.4201**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4225 | 0.4201 | 17.2 |
+| 5 | [8, 16, 32] | 0.3552 | 0.3297 | 10.9 |
+| 3 | [16, 32, 64] | 0.2978 | 0.2562 | 13.3 |
+| 3 | [8, 16, 32] | 0.2919 | 0.2499 | 8.4 |
+
+### `severity` / `cnn2d` / `cfdac_mag`
+_4 trials_  ·  best val = **0.2561**  ·  best test = **0.2217**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.2561 | 0.2217 | 10.7 |
+| 3 | [8, 16, 32] | 0.2377 | 0.2068 | 9.3 |
+| 3 | [16, 32, 64] | 0.2375 | 0.1964 | 14.0 |
+| 5 | [16, 32, 64] | 0.1830 | 0.1153 | 17.1 |
+
+### `severity` / `cnn2d` / `cfdac_magphase`
+_4 trials_  ·  best val = **0.4842**  ·  best test = **0.5057**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4842 | 0.5057 | 18.0 |
+| 5 | [8, 16, 32] | 0.4703 | 0.4399 | 11.8 |
+| 3 | [16, 32, 64] | 0.4281 | 0.4201 | 14.5 |
+| 3 | [8, 16, 32] | 0.3746 | 0.3498 | 9.7 |
+
+### `severity` / `cnn2d` / `cfdac_phase`
+_4 trials_  ·  best val = **0.4665**  ·  best test = **0.4696**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.4665 | 0.4696 | 13.9 |
+| 5 | [16, 32, 64] | 0.4657 | 0.4557 | 16.8 |
+| 5 | [8, 16, 32] | 0.4621 | 0.4504 | 9.9 |
+| 3 | [8, 16, 32] | 0.3874 | 0.3508 | 8.1 |
+
+### `severity` / `cnn2d` / `cfdac_real`
+_4 trials_  ·  best val = **0.4096**  ·  best test = **0.4000**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.4096 | 0.4000 | 10.3 |
+| 3 | [16, 32, 64] | 0.3411 | 0.3101 | 13.7 |
+| 5 | [16, 32, 64] | 0.3298 | 0.3186 | 16.7 |
+| 3 | [8, 16, 32] | 0.2644 | 0.2193 | 8.6 |
+
+### `severity` / `cnn3d` / `cfdac3d_all`
+_4 trials_  ·  best val = **0.4960**  ·  best test = **0.4795**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.4960 | 0.4795 | 16.6 |
+| 3 | [16, 32, 64] | 0.4463 | 0.4289 | 12.6 |
+| 3 | [8, 16, 32] | 0.4035 | 0.3914 | 8.8 |
+| 5 | [8, 16, 32] | 0.3681 | 0.3949 | 10.3 |
+
+### `severity` / `cnn3d` / `cfdac3d_magphase`
+_4 trials_  ·  best val = **0.4843**  ·  best test = **0.4716**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.4843 | 0.4716 | 15.0 |
+| 5 | [8, 16, 32] | 0.4411 | 0.4104 | 12.8 |
+| 3 | [8, 16, 32] | 0.4074 | 0.3954 | 11.0 |
+| 5 | [16, 32, 64] | 0.3283 | 0.3043 | 18.7 |
+
+### `severity` / `cnn3d` / `cfdac3d_realimag`
+_4 trials_  ·  best val = **0.3727**  ·  best test = **0.3533**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.3727 | 0.3533 | 20.0 |
+| 5 | [8, 16, 32] | 0.3461 | 0.3394 | 13.0 |
+| 3 | [16, 32, 64] | 0.3106 | 0.2942 | 15.9 |
+| 3 | [8, 16, 32] | 0.2779 | 0.2406 | 10.2 |
+
+### `severity` / `cnn` / `frf_mag`
+_4 trials_  ·  best val = **0.2530**  ·  best test = **0.2129**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [16, 32, 64] | 0.2530 | 0.2129 | 3.8 |
+| 5 | [32, 64, 128] | 0.2448 | 0.1837 | 7.6 |
+| 5 | [16, 32, 64] | 0.2405 | 0.1951 | 3.8 |
+| 7 | [32, 64, 128] | 0.2389 | 0.2143 | 8.5 |
+
+### `severity` / `cnn` / `timeseries`
+_4 trials_  ·  best val = **0.2576**  ·  best test = **0.2273**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [32, 64, 128] | 0.2576 | 0.2273 | 24.6 |
+| 7 | [32, 64, 128] | 0.2372 | 0.2288 | 24.4 |
+| 5 | [16, 32, 64] | 0.2263 | 0.1816 | 9.2 |
+| 7 | [16, 32, 64] | 0.2137 | 0.1982 | 9.6 |
+
+### `severity` / `mlp` / `modal`
+_9 trials_  ·  best val = **0.5513**  ·  best test = **0.5419**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [512, 256, 128] | 0.003 | 0.5513 | 0.5419 | 1.2 |
+| [256, 128, 64] | 0.003 | 0.4027 | 0.3755 | 0.9 |
+| [512, 256, 128] | 0.001 | 0.3482 | 0.3012 | 1.2 |
+| [128, 64] | 0.003 | 0.3381 | 0.2981 | 0.6 |
+| [512, 256, 128] | 0.0005 | 0.3300 | 0.2922 | 1.6 |
+| [256, 128, 64] | 0.001 | 0.3265 | 0.2894 | 0.9 |
+| [128, 64] | 0.001 | 0.3186 | 0.2908 | 0.6 |
+| [128, 64] | 0.0005 | 0.3136 | 0.2722 | 0.6 |
+| [256, 128, 64] | 0.0005 | 0.3123 | 0.2838 | 0.9 |
+
+### `severity` / `rf` / `modal`
+_9 trials_  ·  best val = **0.5931**  ·  best test = **0.5728**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.5931 | 0.5728 | 18.0 |
+| None | 200 | 0.5884 | 0.5738 | 11.9 |
+| None | 100 | 0.5870 | 0.5726 | 5.8 |
+| 12 | 300 | 0.5556 | 0.5433 | 13.5 |
+| 12 | 200 | 0.5539 | 0.5446 | 9.0 |
+| 12 | 100 | 0.5534 | 0.5428 | 4.5 |
+| 6 | 200 | 0.3896 | 0.3579 | 5.5 |
+| 6 | 300 | 0.3894 | 0.3567 | 8.5 |
+| 6 | 100 | 0.3894 | 0.3564 | 2.8 |
+
+### `severity` / `transformer` / `frf_mag`
+_6 trials_  ·  best val = **0.0279**  ·  best test = **0.0130**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 32 | 1 | 0.0279 | 0.0130 | 3.0 |
+| 64 | 1 | 0.0167 | 0.0109 | 4.6 |
+| 48 | 2 | 0.0148 | 0.0165 | 6.4 |
+| 48 | 1 | 0.0129 | 0.0057 | 3.6 |
+| 32 | 2 | 0.0095 | 0.0070 | 5.0 |
+| 64 | 2 | 0.0088 | 0.0052 | 8.7 |
+
+### `severity` / `transformer` / `timeseries`
+_6 trials_  ·  best val = **0.2024**  ·  best test = **0.1679**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 32 | 2 | 0.2024 | 0.1679 | 16.2 |
+| 48 | 2 | 0.1260 | 0.1030 | 20.6 |
+| 32 | 1 | 0.1158 | 0.1102 | 8.4 |
+| 64 | 2 | 0.1152 | 0.1084 | 23.1 |
+| 48 | 1 | 0.0989 | 0.0994 | 10.9 |
+| 64 | 1 | 0.0942 | 0.0931 | 12.3 |
+
+### `severity` / `xgb` / `modal`
+_9 trials_  ·  best val = **0.5512**  ·  best test = **0.5318**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.5512 | 0.5318 | 3.1 |
+| 8 | 600 | 0.5510 | 0.5313 | 5.3 |
+| 8 | 100 | 0.5503 | 0.5413 | 1.3 |
+| 6 | 100 | 0.5456 | 0.5301 | 0.4 |
+| 6 | 600 | 0.5396 | 0.5243 | 2.8 |
+| 4 | 600 | 0.5388 | 0.5109 | 1.0 |
+| 6 | 300 | 0.5383 | 0.5280 | 1.2 |
+| 4 | 300 | 0.5329 | 0.5177 | 0.5 |
+| 4 | 100 | 0.4916 | 0.4788 | 0.2 |
+
+### `type` / `cnn2d` / `cfdac`
+_4 trials_  ·  best val = **0.7960**  ·  best test = **0.8033**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.7960 | 0.8033 | 13.9 |
+| 5 | [8, 16, 32] | 0.7887 | 0.7960 | 9.5 |
+| 3 | [16, 32, 64] | 0.7200 | 0.7380 | 10.9 |
+| 3 | [8, 16, 32] | 0.6140 | 0.6287 | 7.8 |
+
+### `type` / `cnn2d` / `cfdac_imag`
+_4 trials_  ·  best val = **0.7993**  ·  best test = **0.8020**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.7993 | 0.8020 | 22.1 |
+| 5 | [8, 16, 32] | 0.7887 | 0.7980 | 13.2 |
+| 3 | [16, 32, 64] | 0.7680 | 0.7680 | 16.9 |
+| 3 | [8, 16, 32] | 0.6327 | 0.6353 | 10.5 |
+
+### `type` / `cnn2d` / `cfdac_mag`
+_4 trials_  ·  best val = **0.6180**  ·  best test = **0.6300**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.6180 | 0.6300 | 13.9 |
+| 5 | [16, 32, 64] | 0.5527 | 0.5347 | 21.4 |
+| 3 | [8, 16, 32] | 0.5347 | 0.5273 | 11.8 |
+| 3 | [16, 32, 64] | 0.5253 | 0.5373 | 17.9 |
+
+### `type` / `cnn2d` / `cfdac_magphase`
+_4 trials_  ·  best val = **0.7700**  ·  best test = **0.7673**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.7700 | 0.7673 | 13.7 |
+| 3 | [16, 32, 64] | 0.7487 | 0.7480 | 17.5 |
+| 3 | [8, 16, 32] | 0.7293 | 0.7320 | 11.5 |
+| 5 | [16, 32, 64] | 0.7067 | 0.7187 | 21.4 |
+
+### `type` / `cnn2d` / `cfdac_phase`
+_4 trials_  ·  best val = **0.7747**  ·  best test = **0.7687**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.7747 | 0.7687 | 13.5 |
+| 3 | [16, 32, 64] | 0.7700 | 0.7773 | 16.4 |
+| 5 | [16, 32, 64] | 0.7580 | 0.7860 | 22.5 |
+| 3 | [8, 16, 32] | 0.7267 | 0.7193 | 11.4 |
+
+### `type` / `cnn2d` / `cfdac_real`
+_4 trials_  ·  best val = **0.7693**  ·  best test = **0.7780**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [8, 16, 32] | 0.7693 | 0.7780 | 13.3 |
+| 5 | [16, 32, 64] | 0.7527 | 0.7527 | 22.2 |
+| 3 | [16, 32, 64] | 0.7153 | 0.7220 | 17.3 |
+| 3 | [8, 16, 32] | 0.5980 | 0.5913 | 10.6 |
+
+### `type` / `cnn3d` / `cfdac3d_all`
+_4 trials_  ·  best val = **0.7780**  ·  best test = **0.7820**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.7780 | 0.7820 | 22.2 |
+| 5 | [8, 16, 32] | 0.7640 | 0.7693 | 13.6 |
+| 3 | [16, 32, 64] | 0.7453 | 0.7573 | 17.2 |
+| 3 | [8, 16, 32] | 0.7133 | 0.7200 | 12.4 |
+
+### `type` / `cnn3d` / `cfdac3d_magphase`
+_4 trials_  ·  best val = **0.7707**  ·  best test = **0.7780**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 3 | [16, 32, 64] | 0.7707 | 0.7780 | 18.7 |
+| 5 | [8, 16, 32] | 0.7680 | 0.7687 | 16.2 |
+| 5 | [16, 32, 64] | 0.7573 | 0.7607 | 24.8 |
+| 3 | [8, 16, 32] | 0.6980 | 0.7187 | 12.8 |
+
+### `type` / `cnn3d` / `cfdac3d_realimag`
+_4 trials_  ·  best val = **0.8080**  ·  best test = **0.8120**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 5 | [16, 32, 64] | 0.8080 | 0.8120 | 21.1 |
+| 3 | [16, 32, 64] | 0.7233 | 0.7393 | 18.1 |
+| 5 | [8, 16, 32] | 0.6993 | 0.7027 | 16.5 |
+| 3 | [8, 16, 32] | 0.6507 | 0.6593 | 13.2 |
+
+### `type` / `cnn` / `frf_mag`
+_4 trials_  ·  best val = **0.6773**  ·  best test = **0.6893**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.6773 | 0.6893 | 10.9 |
+| 5 | [16, 32, 64] | 0.6187 | 0.6227 | 4.9 |
+| 5 | [32, 64, 128] | 0.5833 | 0.5860 | 9.7 |
+| 7 | [16, 32, 64] | 0.5733 | 0.5873 | 5.1 |
+
+### `type` / `cnn` / `timeseries`
+_4 trials_  ·  best val = **0.6540**  ·  best test = **0.6567**
+
+| kernel_size | widths | val | test | runtime_s |
+|---|---|---|---|---|
+| 7 | [32, 64, 128] | 0.6540 | 0.6567 | 35.1 |
+| 7 | [16, 32, 64] | 0.6393 | 0.6427 | 12.0 |
+| 5 | [32, 64, 128] | 0.5593 | 0.5633 | 32.0 |
+| 5 | [16, 32, 64] | 0.5467 | 0.5460 | 11.1 |
+
+### `type` / `mlp` / `modal`
+_9 trials_  ·  best val = **0.8687**  ·  best test = **0.8767**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [512, 256, 128] | 0.003 | 0.8687 | 0.8767 | 1.5 |
+| [256, 128, 64] | 0.003 | 0.8527 | 0.8607 | 1.2 |
+| [512, 256, 128] | 0.001 | 0.8427 | 0.8547 | 2.0 |
+| [128, 64] | 0.003 | 0.8333 | 0.8487 | 0.8 |
+| [256, 128, 64] | 0.001 | 0.8180 | 0.8273 | 1.2 |
+| [512, 256, 128] | 0.0005 | 0.8013 | 0.8247 | 1.6 |
+| [128, 64] | 0.001 | 0.7647 | 0.7873 | 0.8 |
+| [256, 128, 64] | 0.0005 | 0.7420 | 0.7427 | 1.1 |
+| [128, 64] | 0.0005 | 0.6560 | 0.6360 | 0.9 |
+
+### `type` / `rf` / `modal`
+_9 trials_  ·  best val = **0.8153**  ·  best test = **0.8113**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 100 | 0.8153 | 0.8113 | 1.2 |
+| None | 300 | 0.8127 | 0.8147 | 3.5 |
+| None | 200 | 0.8113 | 0.8100 | 2.3 |
+| 12 | 200 | 0.7580 | 0.7707 | 1.6 |
+| 12 | 300 | 0.7580 | 0.7667 | 2.5 |
+| 12 | 100 | 0.7573 | 0.7613 | 0.9 |
+| 6 | 300 | 0.6627 | 0.6593 | 1.8 |
+| 6 | 200 | 0.6607 | 0.6573 | 1.1 |
+| 6 | 100 | 0.6507 | 0.6567 | 0.6 |
+
+### `type` / `transformer` / `frf_mag`
+_6 trials_  ·  best val = **0.4760**  ·  best test = **0.5007**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 64 | 2 | 0.4760 | 0.5007 | 10.1 |
+| 48 | 2 | 0.4613 | 0.4453 | 8.1 |
+| 32 | 2 | 0.4313 | 0.4353 | 6.4 |
+| 48 | 1 | 0.4033 | 0.4127 | 4.5 |
+| 64 | 1 | 0.3873 | 0.4000 | 5.5 |
+| 32 | 1 | 0.3787 | 0.4000 | 3.5 |
+
+### `type` / `transformer` / `timeseries`
+_6 trials_  ·  best val = **0.5573**  ·  best test = **0.5760**
+
+| d_model | n_layers | val | test | runtime_s |
+|---|---|---|---|---|
+| 64 | 2 | 0.5573 | 0.5760 | 30.2 |
+| 32 | 2 | 0.4787 | 0.4907 | 19.9 |
+| 48 | 2 | 0.4127 | 0.4327 | 25.1 |
+| 64 | 1 | 0.3793 | 0.3900 | 15.3 |
+| 32 | 1 | 0.3787 | 0.3740 | 10.3 |
+| 48 | 1 | 0.3693 | 0.3827 | 13.3 |
+
+### `type` / `xgb` / `modal`
+_9 trials_  ·  best val = **0.8067**  ·  best test = **0.8220**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 6 | 600 | 0.8067 | 0.8220 | 8.9 |
+| 8 | 300 | 0.8027 | 0.8247 | 6.2 |
+| 4 | 600 | 0.8020 | 0.8167 | 5.5 |
+| 6 | 300 | 0.8007 | 0.8247 | 4.5 |
+| 8 | 600 | 0.8007 | 0.8213 | 11.1 |
+| 8 | 100 | 0.7973 | 0.8120 | 2.2 |
+| 4 | 300 | 0.7947 | 0.8127 | 2.3 |
+| 6 | 100 | 0.7860 | 0.8040 | 1.4 |
+| 4 | 100 | 0.7607 | 0.7867 | 0.8 |
+
+
+## Indicator-prediction HPO
+
+### `AIGAC` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9939**  ·  best test R² = **0.9940**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9939 | 0.9940 | 1.5 |
+| [128, 64] | 0.003 | 0.9882 | 0.9898 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9800 | 0.9824 | 1.0 |
+| [128, 64] | 0.001 | 0.9725 | 0.9740 | 0.7 |
+
+### `AIGAC` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9979**  ·  best test R² = **0.9985**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9979 | 0.9985 | 15.5 |
+| None | 100 | 0.9979 | 0.9984 | 5.1 |
+| 12 | 300 | 0.9978 | 0.9984 | 13.2 |
+| 12 | 100 | 0.9977 | 0.9983 | 4.2 |
+
+### `AIGAC` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9990**  ·  best test R² = **0.9990**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9990 | 0.9990 | 0.6 |
+| 8 | 300 | 0.9985 | 0.9987 | 1.5 |
+| 8 | 100 | 0.9985 | 0.9987 | 1.1 |
+| 4 | 100 | 0.9983 | 0.9982 | 0.4 |
+
+### `DRQ` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9964**  ·  best test R² = **0.9963**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9964 | 0.9963 | 1.1 |
+| [128, 64] | 0.003 | 0.9936 | 0.9936 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9874 | 0.9884 | 1.2 |
+| [128, 64] | 0.001 | 0.9760 | 0.9775 | 0.7 |
+
+### `DRQ` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9979**  ·  best test R² = **0.9985**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9979 | 0.9985 | 15.3 |
+| None | 100 | 0.9979 | 0.9985 | 5.5 |
+| 12 | 300 | 0.9978 | 0.9983 | 12.8 |
+| 12 | 100 | 0.9977 | 0.9983 | 4.5 |
+
+### `DRQ` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9991**  ·  best test R² = **0.9989**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9991 | 0.9989 | 0.5 |
+| 8 | 300 | 0.9988 | 0.9990 | 1.7 |
+| 8 | 100 | 0.9987 | 0.9990 | 1.1 |
+| 4 | 100 | 0.9983 | 0.9980 | 0.3 |
+
+### `FRFRMS` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9910**  ·  best test R² = **0.9899**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9910 | 0.9899 | 1.1 |
+| [128, 64] | 0.003 | 0.9824 | 0.9820 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9790 | 0.9791 | 1.5 |
+| [128, 64] | 0.001 | 0.9738 | 0.9717 | 0.8 |
+
+### `FRFRMS` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9942**  ·  best test R² = **0.9939**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9942 | 0.9939 | 17.2 |
+| None | 100 | 0.9940 | 0.9939 | 5.8 |
+| 12 | 300 | 0.9932 | 0.9930 | 13.8 |
+| 12 | 100 | 0.9931 | 0.9929 | 4.6 |
+
+### `FRFRMS` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9956**  ·  best test R² = **0.9955**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9956 | 0.9955 | 0.5 |
+| 8 | 300 | 0.9953 | 0.9950 | 1.3 |
+| 8 | 100 | 0.9952 | 0.9950 | 1.2 |
+| 4 | 100 | 0.9929 | 0.9925 | 0.2 |
+
+### `FRFSF` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9202**  ·  best test R² = **0.9245**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9202 | 0.9245 | 1.1 |
+| [256, 128, 64] | 0.001 | 0.7411 | 0.7676 | 1.1 |
+| [128, 64] | 0.003 | 0.6850 | 0.7125 | 0.7 |
+| [128, 64] | 0.001 | 0.0728 | 0.2037 | 0.7 |
+
+### `FRFSF` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9980**  ·  best test R² = **0.9979**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 100 | 0.9980 | 0.9979 | 5.5 |
+| None | 300 | 0.9980 | 0.9979 | 16.2 |
+| 12 | 300 | 0.9978 | 0.9978 | 13.5 |
+| 12 | 100 | 0.9978 | 0.9977 | 4.6 |
+
+### `FRFSF` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9985**  ·  best test R² = **0.9986**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9985 | 0.9986 | 0.5 |
+| 8 | 100 | 0.9983 | 0.9984 | 0.8 |
+| 8 | 300 | 0.9983 | 0.9984 | 0.9 |
+| 4 | 100 | 0.9976 | 0.9976 | 0.2 |
+
+### `FRFSM_6dB` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **-2.1916**  ·  best test R² = **-1.9651**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | -2.1916 | -1.9651 | 14.3 |
+| [128, 64] | 0.003 | -19.4271 | -15.8125 | 0.7 |
+| [256, 128, 64] | 0.001 | -41.0244 | -36.2511 | 1.1 |
+| [128, 64] | 0.001 | -79.5166 | -64.1835 | 0.7 |
+
+### `FRFSM_6dB` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9973**  ·  best test R² = **0.9974**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 100 | 0.9973 | 0.9974 | 6.7 |
+| None | 300 | 0.9973 | 0.9973 | 20.5 |
+| 12 | 100 | 0.9972 | 0.9973 | 4.9 |
+| 12 | 300 | 0.9971 | 0.9972 | 14.7 |
+
+### `FRFSM_6dB` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9955**  ·  best test R² = **0.9964**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 100 | 0.9955 | 0.9964 | 0.3 |
+| 8 | 300 | 0.9955 | 0.9964 | 0.3 |
+| 4 | 100 | 0.9943 | 0.9950 | 0.1 |
+| 4 | 300 | 0.9943 | 0.9950 | 0.2 |
+
+### `GAC_max` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9882**  ·  best test R² = **0.9887**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9882 | 0.9887 | 1.0 |
+| [128, 64] | 0.003 | 0.9760 | 0.9787 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9638 | 0.9694 | 1.0 |
+| [128, 64] | 0.001 | 0.9387 | 0.9504 | 0.8 |
+
+### `GAC_max` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9968**  ·  best test R² = **0.9974**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9968 | 0.9974 | 15.4 |
+| None | 100 | 0.9967 | 0.9973 | 5.2 |
+| 12 | 300 | 0.9966 | 0.9972 | 12.5 |
+| 12 | 100 | 0.9966 | 0.9971 | 4.2 |
+
+### `GAC_max` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9979**  ·  best test R² = **0.9977**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9979 | 0.9977 | 0.5 |
+| 8 | 300 | 0.9977 | 0.9977 | 1.5 |
+| 8 | 100 | 0.9976 | 0.9977 | 1.1 |
+| 4 | 100 | 0.9968 | 0.9964 | 0.2 |
+
+### `GAC_mean` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9916**  ·  best test R² = **0.9909**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9916 | 0.9909 | 1.0 |
+| [128, 64] | 0.003 | 0.9896 | 0.9900 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9781 | 0.9819 | 1.0 |
+| [128, 64] | 0.001 | 0.9679 | 0.9729 | 0.7 |
+
+### `GAC_mean` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9979**  ·  best test R² = **0.9985**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9979 | 0.9985 | 15.7 |
+| None | 100 | 0.9979 | 0.9984 | 5.3 |
+| 12 | 300 | 0.9978 | 0.9984 | 12.7 |
+| 12 | 100 | 0.9977 | 0.9983 | 4.2 |
+
+### `GAC_mean` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9990**  ·  best test R² = **0.9990**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9990 | 0.9990 | 0.6 |
+| 8 | 300 | 0.9985 | 0.9987 | 1.5 |
+| 8 | 100 | 0.9985 | 0.9987 | 1.1 |
+| 4 | 100 | 0.9983 | 0.9982 | 0.2 |
+
+### `GAC_min` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9954**  ·  best test R² = **0.9952**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9954 | 0.9952 | 1.1 |
+| [128, 64] | 0.003 | 0.9845 | 0.9843 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9844 | 0.9860 | 1.0 |
+| [128, 64] | 0.001 | 0.9780 | 0.9809 | 0.7 |
+
+### `GAC_min` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9986**  ·  best test R² = **0.9988**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9986 | 0.9988 | 15.2 |
+| None | 100 | 0.9986 | 0.9988 | 5.1 |
+| 12 | 300 | 0.9985 | 0.9987 | 13.2 |
+| 12 | 100 | 0.9985 | 0.9987 | 4.2 |
+
+### `GAC_min` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9992**  ·  best test R² = **0.9992**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9992 | 0.9992 | 0.6 |
+| 8 | 300 | 0.9990 | 0.9992 | 1.6 |
+| 8 | 100 | 0.9990 | 0.9992 | 1.1 |
+| 4 | 100 | 0.9986 | 0.9985 | 0.2 |
+
+### `GAC_std` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9739**  ·  best test R² = **0.9726**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9739 | 0.9726 | 1.0 |
+| [256, 128, 64] | 0.001 | 0.9716 | 0.9685 | 1.1 |
+| [128, 64] | 0.003 | 0.9646 | 0.9619 | 0.7 |
+| [128, 64] | 0.001 | 0.9317 | 0.9324 | 0.7 |
+
+### `GAC_std` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9948**  ·  best test R² = **0.9944**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 100 | 0.9948 | 0.9944 | 6.4 |
+| None | 300 | 0.9948 | 0.9947 | 19.0 |
+| 12 | 300 | 0.9936 | 0.9936 | 13.9 |
+| 12 | 100 | 0.9936 | 0.9935 | 4.7 |
+
+### `GAC_std` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9969**  ·  best test R² = **0.9966**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9969 | 0.9966 | 0.7 |
+| 8 | 100 | 0.9964 | 0.9949 | 0.9 |
+| 8 | 300 | 0.9964 | 0.9949 | 1.0 |
+| 4 | 100 | 0.9950 | 0.9944 | 0.2 |
+
+### `M2L_abs_sum` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9952**  ·  best test R² = **0.9952**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9952 | 0.9952 | 1.1 |
+| [128, 64] | 0.003 | 0.9828 | 0.9816 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9823 | 0.9824 | 1.1 |
+| [128, 64] | 0.001 | 0.9120 | 0.9071 | 0.7 |
+
+### `M2L_abs_sum` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9984**  ·  best test R² = **0.9983**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 100 | 0.9984 | 0.9983 | 4.8 |
+| None | 300 | 0.9984 | 0.9983 | 14.2 |
+| 12 | 300 | 0.9983 | 0.9982 | 12.3 |
+| 12 | 100 | 0.9983 | 0.9981 | 4.2 |
+
+### `M2L_abs_sum` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9988**  ·  best test R² = **0.9989**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9988 | 0.9989 | 3.3 |
+| 8 | 100 | 0.9987 | 0.9988 | 1.4 |
+| 4 | 300 | 0.9985 | 0.9986 | 0.6 |
+| 4 | 100 | 0.9977 | 0.9977 | 0.2 |
+
+### `M2L_max` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9911**  ·  best test R² = **0.9909**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9911 | 0.9909 | 1.0 |
+| [128, 64] | 0.003 | 0.9845 | 0.9833 | 0.8 |
+| [256, 128, 64] | 0.001 | 0.9784 | 0.9799 | 1.1 |
+| [128, 64] | 0.001 | 0.9629 | 0.9645 | 0.7 |
+
+### `M2L_max` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9955**  ·  best test R² = **0.9959**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9955 | 0.9959 | 14.1 |
+| None | 100 | 0.9955 | 0.9959 | 4.7 |
+| 12 | 300 | 0.9953 | 0.9956 | 12.7 |
+| 12 | 100 | 0.9952 | 0.9956 | 4.1 |
+
+### `M2L_max` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9972**  ·  best test R² = **0.9971**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9972 | 0.9971 | 0.5 |
+| 8 | 300 | 0.9969 | 0.9971 | 2.3 |
+| 8 | 100 | 0.9968 | 0.9969 | 1.2 |
+| 4 | 100 | 0.9954 | 0.9952 | 0.2 |
+
+### `M2L_mean` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9955**  ·  best test R² = **0.9957**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9955 | 0.9957 | 1.1 |
+| [128, 64] | 0.003 | 0.9945 | 0.9942 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9926 | 0.9925 | 1.0 |
+| [128, 64] | 0.001 | 0.9827 | 0.9816 | 0.8 |
+
+### `M2L_mean` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9981**  ·  best test R² = **0.9984**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9981 | 0.9984 | 14.2 |
+| None | 100 | 0.9981 | 0.9984 | 4.8 |
+| 12 | 100 | 0.9980 | 0.9982 | 4.1 |
+| 12 | 300 | 0.9980 | 0.9982 | 12.2 |
+
+### `M2L_mean` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9988**  ·  best test R² = **0.9990**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9988 | 0.9990 | 2.1 |
+| 8 | 100 | 0.9988 | 0.9989 | 1.2 |
+| 4 | 300 | 0.9987 | 0.9987 | 0.5 |
+| 4 | 100 | 0.9977 | 0.9977 | 0.2 |
+
+### `M2L_min` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9972**  ·  best test R² = **0.9969**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9972 | 0.9969 | 1.0 |
+| [256, 128, 64] | 0.001 | 0.9943 | 0.9931 | 1.1 |
+| [128, 64] | 0.003 | 0.9941 | 0.9934 | 0.7 |
+| [128, 64] | 0.001 | 0.9861 | 0.9858 | 0.7 |
+
+### `M2L_min` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9984**  ·  best test R² = **0.9984**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9984 | 0.9984 | 14.6 |
+| None | 100 | 0.9984 | 0.9984 | 5.0 |
+| 12 | 100 | 0.9981 | 0.9980 | 4.1 |
+| 12 | 300 | 0.9981 | 0.9980 | 12.4 |
+
+### `M2L_min` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9991**  ·  best test R² = **0.9990**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9991 | 0.9990 | 2.1 |
+| 8 | 100 | 0.9990 | 0.9989 | 1.2 |
+| 4 | 300 | 0.9988 | 0.9988 | 0.5 |
+| 4 | 100 | 0.9979 | 0.9980 | 0.2 |
+
+### `M2L_std` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9806**  ·  best test R² = **0.9807**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9806 | 0.9807 | 1.0 |
+| [128, 64] | 0.003 | 0.9755 | 0.9755 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9749 | 0.9756 | 1.0 |
+| [128, 64] | 0.001 | 0.9460 | 0.9497 | 0.7 |
+
+### `M2L_std` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9912**  ·  best test R² = **0.9918**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9912 | 0.9918 | 16.2 |
+| None | 100 | 0.9912 | 0.9918 | 5.7 |
+| 12 | 300 | 0.9889 | 0.9899 | 12.8 |
+| 12 | 100 | 0.9887 | 0.9899 | 4.3 |
+
+### `M2L_std` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9943**  ·  best test R² = **0.9945**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9943 | 0.9945 | 1.5 |
+| 8 | 100 | 0.9942 | 0.9944 | 1.3 |
+| 4 | 300 | 0.9936 | 0.9934 | 0.6 |
+| 4 | 100 | 0.9887 | 0.9880 | 0.2 |
+
+### `ODS_diff` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9534**  ·  best test R² = **0.9526**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9534 | 0.9526 | 1.0 |
+| [128, 64] | 0.003 | 0.8804 | 0.8835 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.8424 | 0.8435 | 1.0 |
+| [128, 64] | 0.001 | 0.6717 | 0.6806 | 0.8 |
+
+### `ODS_diff` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9977**  ·  best test R² = **0.9975**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9977 | 0.9975 | 14.8 |
+| None | 100 | 0.9977 | 0.9975 | 5.1 |
+| 12 | 300 | 0.9975 | 0.9973 | 12.6 |
+| 12 | 100 | 0.9975 | 0.9973 | 4.2 |
+
+### `ODS_diff` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9987**  ·  best test R² = **0.9984**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9987 | 0.9984 | 3.2 |
+| 8 | 100 | 0.9986 | 0.9984 | 1.2 |
+| 4 | 300 | 0.9984 | 0.9984 | 0.5 |
+| 4 | 100 | 0.9973 | 0.9972 | 0.2 |
+
+### `RVAC_max` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9952**  ·  best test R² = **0.9951**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9952 | 0.9951 | 1.0 |
+| [128, 64] | 0.003 | 0.9906 | 0.9912 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9846 | 0.9873 | 1.1 |
+| [128, 64] | 0.001 | 0.9741 | 0.9768 | 0.7 |
+
+### `RVAC_max` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9967**  ·  best test R² = **0.9975**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9967 | 0.9975 | 15.5 |
+| None | 100 | 0.9965 | 0.9974 | 5.2 |
+| 12 | 300 | 0.9964 | 0.9973 | 12.7 |
+| 12 | 100 | 0.9964 | 0.9973 | 4.4 |
+
+### `RVAC_max` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9980**  ·  best test R² = **0.9981**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9980 | 0.9981 | 0.5 |
+| 8 | 300 | 0.9980 | 0.9982 | 1.9 |
+| 8 | 100 | 0.9979 | 0.9982 | 1.1 |
+| 4 | 100 | 0.9969 | 0.9969 | 0.2 |
+
+### `RVAC_mean` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9954**  ·  best test R² = **0.9951**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9954 | 0.9951 | 1.1 |
+| [128, 64] | 0.003 | 0.9893 | 0.9905 | 1.2 |
+| [256, 128, 64] | 0.001 | 0.9889 | 0.9895 | 1.7 |
+| [128, 64] | 0.001 | 0.9746 | 0.9775 | 0.7 |
+
+### `RVAC_mean` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9979**  ·  best test R² = **0.9985**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9979 | 0.9985 | 15.6 |
+| None | 100 | 0.9979 | 0.9985 | 5.1 |
+| 12 | 300 | 0.9978 | 0.9983 | 12.8 |
+| 12 | 100 | 0.9977 | 0.9983 | 4.3 |
+
+### `RVAC_mean` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9991**  ·  best test R² = **0.9989**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9991 | 0.9989 | 0.6 |
+| 8 | 300 | 0.9988 | 0.9990 | 2.2 |
+| 8 | 100 | 0.9987 | 0.9990 | 1.1 |
+| 4 | 100 | 0.9983 | 0.9980 | 0.2 |
+
+### `RVAC_min` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9965**  ·  best test R² = **0.9961**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9965 | 0.9961 | 1.0 |
+| [128, 64] | 0.003 | 0.9946 | 0.9945 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9907 | 0.9906 | 1.0 |
+| [128, 64] | 0.001 | 0.9805 | 0.9806 | 0.7 |
+
+### `RVAC_min` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9987**  ·  best test R² = **0.9989**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9987 | 0.9989 | 15.0 |
+| None | 100 | 0.9986 | 0.9989 | 5.1 |
+| 12 | 300 | 0.9986 | 0.9987 | 12.4 |
+| 12 | 100 | 0.9985 | 0.9987 | 4.2 |
+
+### `RVAC_min` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9991**  ·  best test R² = **0.9990**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9991 | 0.9990 | 0.5 |
+| 8 | 300 | 0.9991 | 0.9992 | 1.8 |
+| 8 | 100 | 0.9990 | 0.9992 | 1.2 |
+| 4 | 100 | 0.9984 | 0.9982 | 0.2 |
+
+### `RVAC_std` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9701**  ·  best test R² = **0.9653**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9701 | 0.9653 | 1.0 |
+| [256, 128, 64] | 0.001 | 0.9395 | 0.9345 | 1.5 |
+| [128, 64] | 0.003 | 0.9307 | 0.9218 | 0.7 |
+| [128, 64] | 0.001 | 0.8487 | 0.8502 | 0.7 |
+
+### `RVAC_std` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9905**  ·  best test R² = **0.9909**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9905 | 0.9909 | 18.8 |
+| None | 100 | 0.9903 | 0.9907 | 6.4 |
+| 12 | 300 | 0.9883 | 0.9888 | 14.1 |
+| 12 | 100 | 0.9880 | 0.9886 | 4.6 |
+
+### `RVAC_std` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9928**  ·  best test R² = **0.9923**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 4 | 300 | 0.9928 | 0.9923 | 0.5 |
+| 8 | 100 | 0.9919 | 0.9913 | 1.0 |
+| 8 | 300 | 0.9919 | 0.9913 | 1.1 |
+| 4 | 100 | 0.9870 | 0.9858 | 0.2 |
+
+### `SCI` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.7694**  ·  best test R² = **0.7643**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.7694 | 0.7643 | 1.5 |
+| [256, 128, 64] | 0.001 | 0.7059 | 0.7072 | 1.2 |
+| [128, 64] | 0.003 | 0.6966 | 0.6981 | 0.8 |
+| [128, 64] | 0.001 | 0.6749 | 0.6883 | 1.7 |
+
+### `SCI` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.8707**  ·  best test R² = **0.8474**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.8707 | 0.8474 | 27.1 |
+| 12 | 300 | 0.8667 | 0.8456 | 15.7 |
+| None | 100 | 0.8651 | 0.8410 | 8.9 |
+| 12 | 100 | 0.8580 | 0.8373 | 5.3 |
+
+### `SCI` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.8789**  ·  best test R² = **0.8368**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.8789 | 0.8368 | 2.2 |
+| 8 | 100 | 0.8785 | 0.8361 | 0.8 |
+| 4 | 300 | 0.8783 | 0.8077 | 0.5 |
+| 4 | 100 | 0.8676 | 0.8105 | 0.2 |
+
+### `r2_imag` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9982**  ·  best test R² = **0.9978**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9982 | 0.9978 | 1.1 |
+| [256, 128, 64] | 0.001 | 0.9962 | 0.9959 | 1.1 |
+| [128, 64] | 0.003 | 0.9955 | 0.9948 | 0.8 |
+| [128, 64] | 0.001 | 0.9909 | 0.9905 | 0.8 |
+
+### `r2_imag` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9986**  ·  best test R² = **0.9986**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9986 | 0.9986 | 15.3 |
+| None | 100 | 0.9986 | 0.9986 | 4.9 |
+| 12 | 300 | 0.9984 | 0.9985 | 12.6 |
+| 12 | 100 | 0.9984 | 0.9984 | 4.1 |
+
+### `r2_imag` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9991**  ·  best test R² = **0.9989**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9991 | 0.9989 | 2.9 |
+| 8 | 100 | 0.9990 | 0.9989 | 1.3 |
+| 4 | 300 | 0.9989 | 0.9989 | 0.5 |
+| 4 | 100 | 0.9982 | 0.9982 | 0.2 |
+
+### `unsigned_SCI` / `mlp` / `modal`
+_4 trials_  ·  best val R² = **0.9907**  ·  best test R² = **0.9939**
+
+| hidden | lr | val | test | runtime_s |
+|---|---|---|---|---|
+| [256, 128, 64] | 0.003 | 0.9907 | 0.9939 | 1.0 |
+| [128, 64] | 0.003 | 0.9809 | 0.9864 | 0.7 |
+| [256, 128, 64] | 0.001 | 0.9766 | 0.9827 | 1.0 |
+| [128, 64] | 0.001 | 0.9709 | 0.9800 | 1.3 |
+
+### `unsigned_SCI` / `rf` / `modal`
+_4 trials_  ·  best val R² = **0.9955**  ·  best test R² = **0.9954**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| None | 300 | 0.9955 | 0.9954 | 20.2 |
+| 12 | 300 | 0.9954 | 0.9953 | 14.3 |
+| None | 100 | 0.9953 | 0.9951 | 6.8 |
+| 12 | 100 | 0.9953 | 0.9950 | 4.6 |
+
+### `unsigned_SCI` / `xgb` / `modal`
+_4 trials_  ·  best val R² = **0.9960**  ·  best test R² = **0.9936**
+
+| max_depth | n_estimators | val | test | runtime_s |
+|---|---|---|---|---|
+| 8 | 300 | 0.9960 | 0.9936 | 1.2 |
+| 8 | 100 | 0.9959 | 0.9935 | 0.9 |
+| 4 | 300 | 0.9958 | 0.9962 | 0.5 |
+| 4 | 100 | 0.9947 | 0.9946 | 0.2 |
