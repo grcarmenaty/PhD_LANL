@@ -243,38 +243,61 @@ def _load_torch_model(path: Path, n_channels: int | None, in_dim: int | None,
 
 
 def predict(model_path: Path, X: np.ndarray, model_kind: str,
-             task_kind: str) -> np.ndarray:
+             task_kind: str, scaler=None) -> np.ndarray:
+    """Run a saved HPO model on ``X``.
+
+    ``scaler``: ``StandardScaler`` previously fit on the train fold for
+    flat features (modal / indicators).  Torch ``.pt`` files don't
+    embed this so it must be passed in by the caller — see
+    ``evaluate_all`` for how the per-task scalers are built.
+    """
     if model_path.suffix == ".pkl":
         with open(model_path, "rb") as f:
             blob = pickle.load(f)
         mdl    = blob["model"]
-        scaler = blob.get("scaler")
+        sk_scaler = blob.get("scaler") or scaler
         Xf = X.reshape(len(X), -1)
-        if scaler is not None:
-            Xf = scaler.transform(Xf)
+        if sk_scaler is not None:
+            Xf = sk_scaler.transform(Xf)
         return mdl.predict(Xf)
     # Torch
-    seq = X.ndim == 3
-    if seq:
-        t = torch.as_tensor(X).float().permute(0, 2, 1)
-    else:
-        t = torch.as_tensor(X).float()
     blob = torch.load(model_path, map_location="cpu", weights_only=False)
     in_shape = blob["in_shape"]
     name = blob["model_name"]
     n_out = blob["n_out"]
+    hp = blob.get("hyperparams") or {}
+
+    Xa = X
+    if name == "mlp" and scaler is not None:
+        Xa = scaler.transform(X.reshape(len(X), -1))
+    t = torch.as_tensor(np.asarray(Xa)).float()
+    seq = t.ndim == 3
+    if seq:
+        t = t.permute(0, 2, 1)
+
     if name == "mlp":
-        in_dim = int(np.prod(in_shape))
-        mdl = MLP(in_dim=in_dim, n_out=n_out, regression=(task_kind == "reg"))
-        t = t if t.ndim == 2 else t.flatten(1)
+        in_dim = t.shape[-1] if t.ndim == 2 else int(np.prod(in_shape))
+        if t.ndim == 3:
+            t = t.flatten(1)
+        hidden = tuple(hp.get("hidden", (256, 128, 64)))
+        mdl = MLP(in_dim=in_dim, n_out=n_out, hidden=hidden,
+                     regression=(task_kind == "reg"))
     elif name == "cnn":
-        mdl = Conv1DStack(n_channels=in_shape[1] if len(in_shape) == 2 else in_shape[-1],
-                             n_out=n_out, regression=(task_kind == "reg"))
+        ch = in_shape[1] if len(in_shape) == 2 else in_shape[-1]
+        mdl = Conv1DStack(n_channels=ch, n_out=n_out,
+                             widths=tuple(hp.get("widths", (32, 64, 128))),
+                             kernel_size=int(hp.get("kernel_size", 7)),
+                             regression=(task_kind == "reg"))
     elif name == "transformer":
-        mdl = SmallTransformer(n_channels=in_shape[1] if len(in_shape) == 2 else in_shape[-1],
-                                  n_out=n_out, regression=(task_kind == "reg"))
+        ch = in_shape[1] if len(in_shape) == 2 else in_shape[-1]
+        mdl = SmallTransformer(n_channels=ch, n_out=n_out,
+                                  d_model=int(hp.get("d_model", 48)),
+                                  n_layers=int(hp.get("n_layers", 2)),
+                                  regression=(task_kind == "reg"))
     elif name == "cnn2d":
         mdl = Conv2DStack(n_channels=in_shape[0], n_out=n_out,
+                              widths=tuple(hp.get("widths", (16, 32, 64))),
+                              kernel_size=int(hp.get("kernel_size", 5)),
                               regression=(task_kind == "reg"))
     else:
         raise ValueError(name)
@@ -294,11 +317,31 @@ def evaluate_all(features_path: Path, median_path: Path,
 
     # Build targets just like the training pipeline.
     from ml_pipeline.tasks import build_targets
+    from ml_pipeline.train import (load_labels, load_feature, make_split,
+                                       FEATURES_FLAT)
+    from sklearn.preprocessing import StandardScaler
     L = exp["labels"]
     tasks = build_targets(L["type_code"].astype(np.int64),
                             L["storey"].astype(np.int64),
                             L["end"].astype(np.int64),
                             L["severity"].astype(np.float32))
+
+    # Re-fit each (task, flat-feature) StandardScaler on the synthetic
+    # train fold — required because the .pt blobs don't embed it.
+    print("Fitting per-task scalers from the synthetic train fold …")
+    syn_labels = load_labels(features_path)
+    syn_tasks  = build_targets(syn_labels["type_code"], syn_labels["storey"],
+                                  syn_labels["end"], syn_labels["severity"])
+    scalers: Dict[str, Dict[str, "StandardScaler"]] = {}
+    flat_syn = {name: load_feature(features_path, name) for name in FEATURES_FLAT}
+    for tn, (sm, sy, sk_kind) in syn_tasks.items():
+        scalers[tn] = {}
+        ipool = np.where(sm)[0]
+        i_tr, _, _ = make_split(sy, sk_kind)
+        idx_tr = ipool[i_tr]
+        for feat in FEATURES_FLAT:
+            X_tr = flat_syn[feat][idx_tr].reshape(len(idx_tr), -1)
+            scalers[tn][feat] = StandardScaler().fit(X_tr)
 
     names_arr = np.array(exp["names"])
     rows: List[Dict] = []
@@ -332,7 +375,8 @@ def evaluate_all(features_path: Path, median_path: Path,
             continue
 
         try:
-            pred = predict(art, X, model_name, kind)
+            scaler = scalers.get(task_name, {}).get(feature)
+            pred = predict(art, X, model_name, kind, scaler=scaler)
         except Exception as e:
             print(f"  skip {tag}: {e}")
             continue

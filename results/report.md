@@ -84,10 +84,15 @@
 | model        | feature      | metric   | test    | val     | mae     |
 |--------------|--------------|----------|---------|---------|---------|
 | cnn2d        | cfdac        | accuracy | 0.8689  | —       | —       |
+| cnn          | frf_mag      | accuracy | 0.8689  | —       | —       |
+| mlp          | indicators   | accuracy | 0.8689  | —       | —       |
+| mlp          | modal        | accuracy | 0.8689  | —       | —       |
 | rf           | indicators   | accuracy | 0.8689  | —       | —       |
 | rf           | modal        | accuracy | 0.8689  | —       | —       |
+| transformer  | frf_mag      | accuracy | 0.8689  | —       | —       |
 | xgb          | indicators   | accuracy | 0.8689  | —       | —       |
 | xgb          | modal        | accuracy | 0.8689  | —       | —       |
+| transformer  | timeseries   | accuracy | 0.7377  | —       | —       |
 | cnn          | timeseries   | accuracy | 0.4098  | —       | —       |
 ### type — Damage type (Pristine/Bolt/Crack/Hole/Mass)
 
@@ -95,36 +100,57 @@
 |--------------|--------------|----------|---------|---------|---------|
 | rf           | modal        | accuracy | 0.4426  | —       | —       |
 | cnn2d        | cfdac        | accuracy | 0.4262  | —       | —       |
+| mlp          | modal        | accuracy | 0.4262  | —       | —       |
+| transformer  | frf_mag      | accuracy | 0.3934  | —       | —       |
 | cnn          | frf_mag      | accuracy | 0.3607  | —       | —       |
+| transformer  | timeseries   | accuracy | 0.2951  | —       | —       |
 | xgb          | modal        | accuracy | 0.2951  | —       | —       |
 | cnn          | timeseries   | accuracy | 0.2623  | —       | —       |
 | rf           | indicators   | accuracy | 0.1639  | —       | —       |
 | xgb          | indicators   | accuracy | 0.1475  | —       | —       |
+| mlp          | indicators   | accuracy | 0.0656  | —       | —       |
 ### severity — Severity regression (normalised [0,1] per type)
 
 | model        | feature      | metric   | test    | val     | mae     |
 |--------------|--------------|----------|---------|---------|---------|
+| transformer  | frf_mag      | R2       | -0.0390 | —       | 0.2843  |
 | xgb          | modal        | R2       | -0.0622 | —       | 0.2830  |
+| transformer  | timeseries   | R2       | -0.1008 | —       | 0.2882  |
 | rf           | modal        | R2       | -0.1513 | —       | 0.2994  |
+| cnn2d        | cfdac        | R2       | -0.2110 | —       | 0.3041  |
 | xgb          | indicators   | R2       | -0.2421 | —       | 0.2841  |
 | rf           | indicators   | R2       | -0.4224 | —       | 0.3007  |
+| cnn          | frf_mag      | R2       | -4.2455 | —       | 0.5502  |
+| cnn          | timeseries   | R2       | -22.3766 | —       | 0.9760  |
+| mlp          | modal        | R2       | -33.1857 | —       | 1.8363  |
+| mlp          | indicators   | R2       | -671.8231 | —       | 6.4814  |
 ### col_location — Column-damage location (storey x end)
 
 | model        | feature      | metric   | test    | val     | mae     |
 |--------------|--------------|----------|---------|---------|---------|
-| mlp          | modal        | accuracy | 0.3673  | —       | —       |
+| mlp          | modal        | accuracy | 0.4898  | —       | —       |
+| mlp          | indicators   | accuracy | 0.3673  | —       | —       |
+| cnn          | timeseries   | accuracy | 0.3469  | —       | —       |
 | cnn          | frf_mag      | accuracy | 0.2653  | —       | —       |
+| transformer  | timeseries   | accuracy | 0.2041  | —       | —       |
 | cnn2d        | cfdac        | accuracy | 0.1633  | —       | —       |
 | xgb          | indicators   | accuracy | 0.1633  | —       | —       |
 | rf           | modal        | accuracy | 0.0612  | —       | —       |
 | rf           | indicators   | accuracy | 0.0408  | —       | —       |
+| transformer  | frf_mag      | accuracy | 0.0408  | —       | —       |
 | xgb          | modal        | accuracy | 0.0204  | —       | —       |
 ### mass_location — Mass plate location (Base/F1/F2/F3)
 
 | model        | feature      | metric   | test    | val     | mae     |
 |--------------|--------------|----------|---------|---------|---------|
+| cnn2d        | cfdac        | accuracy | 0.2500  | —       | —       |
+| cnn          | frf_mag      | accuracy | 0.2500  | —       | —       |
+| cnn          | timeseries   | accuracy | 0.2500  | —       | —       |
+| mlp          | indicators   | accuracy | 0.2500  | —       | —       |
 | mlp          | modal        | accuracy | 0.2500  | —       | —       |
 | rf           | indicators   | accuracy | 0.2500  | —       | —       |
 | rf           | modal        | accuracy | 0.2500  | —       | —       |
+| transformer  | frf_mag      | accuracy | 0.2500  | —       | —       |
 | xgb          | modal        | accuracy | 0.2500  | —       | —       |
+| transformer  | timeseries   | accuracy | 0.0000  | —       | —       |
 | xgb          | indicators   | accuracy | 0.0000  | —       | —       |

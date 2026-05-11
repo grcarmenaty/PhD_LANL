@@ -52,6 +52,9 @@ from ml_pipeline.train import (   # noqa: E402
 )
 from ml_pipeline.models import MLP, Conv1DStack, SmallTransformer, Conv2DStack  # noqa: E402
 
+# Per-(task, flat-feature) StandardScaler table.  Populated in main().
+SCALERS: Dict[str, Dict[str, "StandardScaler"]] = {}
+
 
 # ── helpers ─────────────────────────────────────────────────────────────────
 def _safe_savefig(fig, path: Path, dpi: int = 110) -> None:
@@ -153,17 +156,23 @@ def plot_examples_per_class(features_path: Path, out_dir: Path) -> None:
 
 # ── confusion matrices, per-class F1, ROC/PR ────────────────────────────────
 def _load_model_predict(art_path: Path, X: np.ndarray, kind: str,
-                          n_out: int, in_shape: list[int] | None = None
+                          n_out: int, scaler=None
                           ) -> Tuple[np.ndarray, np.ndarray | None]:
-    """Return (predicted_labels_or_values, probabilities_if_cls)."""
+    """Return (predicted_labels_or_values, probabilities_if_cls).
+
+    ``scaler``: optional StandardScaler for flat features.  Sklearn
+    (.pkl) blobs already embed their own scaler; Torch (.pt) blobs do
+    not, so the caller must pass the same scaler that was fit on the
+    HPO train fold for flat features.
+    """
     if art_path.suffix == ".pkl":
         with open(art_path, "rb") as f:
             blob = pickle.load(f)
         mdl = blob["model"]
-        scaler = blob.get("scaler")
+        sk_scaler = blob.get("scaler") or scaler
         Xf = X.reshape(len(X), -1)
-        if scaler is not None:
-            Xf = scaler.transform(Xf)
+        if sk_scaler is not None:
+            Xf = sk_scaler.transform(Xf)
         if kind == "cls" and hasattr(mdl, "predict_proba"):
             proba = mdl.predict_proba(Xf)
         else:
@@ -172,23 +181,41 @@ def _load_model_predict(art_path: Path, X: np.ndarray, kind: str,
     # Torch.
     blob = torch.load(art_path, map_location="cpu", weights_only=False)
     in_shape = blob["in_shape"]; name = blob["model_name"]
+    hp = blob.get("hyperparams") or {}
     seq = X.ndim == 3; mat = X.ndim == 4
-    t = torch.as_tensor(X).float()
-    if seq:
+
+    # For flat features (modal / indicators) MLP models were trained on
+    # StandardScaler-transformed inputs — replicate that transform here.
+    Xa = X
+    if name == "mlp" and scaler is not None:
+        Xa = scaler.transform(X.reshape(len(X), -1))
+    t = torch.as_tensor(np.asarray(Xa)).float()
+    if seq and t.ndim == 3:
         t = t.permute(0, 2, 1)
+
     if name == "mlp":
+        in_dim = t.shape[-1] if t.ndim == 2 else int(np.prod(in_shape))
         if t.ndim == 3:
             t = t.flatten(1)
-        in_dim = int(np.prod(in_shape))
-        mdl = MLP(in_dim=in_dim, n_out=n_out, regression=(kind == "reg"))
+        hidden = tuple(hp.get("hidden", (256, 128, 64)))
+        mdl = MLP(in_dim=in_dim, n_out=n_out, hidden=hidden,
+                     regression=(kind == "reg"))
     elif name == "cnn":
-        mdl = Conv1DStack(n_channels=in_shape[1] if len(in_shape) == 2 else in_shape[-1],
-                              n_out=n_out, regression=(kind == "reg"))
+        ch = in_shape[1] if len(in_shape) == 2 else in_shape[-1]
+        mdl = Conv1DStack(n_channels=ch, n_out=n_out,
+                              widths=tuple(hp.get("widths", (32, 64, 128))),
+                              kernel_size=int(hp.get("kernel_size", 7)),
+                              regression=(kind == "reg"))
     elif name == "transformer":
-        mdl = SmallTransformer(n_channels=in_shape[1] if len(in_shape) == 2 else in_shape[-1],
-                                   n_out=n_out, regression=(kind == "reg"))
+        ch = in_shape[1] if len(in_shape) == 2 else in_shape[-1]
+        mdl = SmallTransformer(n_channels=ch, n_out=n_out,
+                                   d_model=int(hp.get("d_model", 48)),
+                                   n_layers=int(hp.get("n_layers", 2)),
+                                   regression=(kind == "reg"))
     elif name == "cnn2d":
         mdl = Conv2DStack(n_channels=in_shape[0], n_out=n_out,
+                              widths=tuple(hp.get("widths", (16, 32, 64))),
+                              kernel_size=int(hp.get("kernel_size", 5)),
                               regression=(kind == "reg"))
     else:
         raise ValueError(name)
@@ -199,6 +226,26 @@ def _load_model_predict(art_path: Path, X: np.ndarray, kind: str,
         proba = torch.softmax(out, dim=1).numpy()
         return out.argmax(1).numpy(), proba
     return out.squeeze(1).numpy(), None
+
+
+def _fit_scalers_per_task(features_path: Path) -> Dict[str, Dict[str, "StandardScaler"]]:
+    """Re-fit one StandardScaler per (task, flat-feature) on the same
+    train fold that HPO used.  Required because the Torch artefacts
+    don't embed their scaler.
+    """
+    L = load_labels(features_path)
+    tasks = build_targets(L["type_code"], L["storey"], L["end"], L["severity"])
+    out: Dict[str, Dict[str, "StandardScaler"]] = {}
+    flat_data = {name: load_feature(features_path, name) for name in FEATURES_FLAT}
+    for tn, (mask, y_pool, kind) in tasks.items():
+        out[tn] = {}
+        ipool = np.where(mask)[0]
+        i_tr, _, _ = make_split(y_pool, kind)
+        idx_tr = ipool[i_tr]
+        for feat in FEATURES_FLAT:
+            X_tr = flat_data[feat][idx_tr].reshape(len(idx_tr), -1)
+            out[tn][feat] = StandardScaler().fit(X_tr)
+    return out
 
 
 def plot_confusions(features_path: Path, results_dir: Path,
@@ -238,7 +285,9 @@ def plot_confusions(features_path: Path, results_dir: Path,
         X_te = feats[feature][sp["idx_te"]]
         n_out = TASK_N_CLASSES[task_name]
         try:
-            y_pred, _ = _load_model_predict(art, X_te, "cls", n_out)
+            scaler = SCALERS.get(task_name, {}).get(feature)
+            y_pred, _ = _load_model_predict(art, X_te, "cls", n_out,
+                                                  scaler=scaler)
         except Exception as e:
             print(f"  skip {tag}: {e}")
             continue
@@ -293,7 +342,9 @@ def plot_perclass_f1(features_path: Path, results_dir: Path,
         X_te = feats[feature][sp["idx_te"]]
         n_out = TASK_N_CLASSES[task_name]
         try:
-            y_pred, _ = _load_model_predict(art, X_te, "cls", n_out)
+            scaler = SCALERS.get(task_name, {}).get(feature)
+            y_pred, _ = _load_model_predict(art, X_te, "cls", n_out,
+                                                  scaler=scaler)
         except Exception as e:
             continue
         f1 = f1_score(sp["y_te"], y_pred,
@@ -351,7 +402,8 @@ def plot_roc_pr_binary(features_path: Path, results_dir: Path,
             continue
         X = feats[feat][idx_te]
         try:
-            _, proba = _load_model_predict(art, X, "cls", 2)
+            scaler = SCALERS.get("binary", {}).get(feat)
+            _, proba = _load_model_predict(art, X, "cls", 2, scaler=scaler)
         except Exception as e:
             continue
         if proba is None or proba.shape[1] < 2:
@@ -401,7 +453,8 @@ def plot_severity_scatter(features_path: Path, results_dir: Path,
             continue
         X = feats[feat][idx_te]
         try:
-            y_pred, _ = _load_model_predict(art, X, "reg", 1)
+            scaler = SCALERS.get("severity", {}).get(feat)
+            y_pred, _ = _load_model_predict(art, X, "reg", 1, scaler=scaler)
         except Exception:
             continue
         fig, axes = plt.subplots(1, 2, figsize=(11, 4))
@@ -565,6 +618,12 @@ def main() -> None:
     args = p.parse_args()
     out = args.results / "figures"; out.mkdir(parents=True, exist_ok=True)
     skip = {s.strip() for s in args.skip.split(",") if s.strip()}
+
+    # Module-global table of scalers, one per (task, flat-feature).
+    # Plot functions read SCALERS at call time.
+    global SCALERS
+    print("fitting per-task StandardScalers …")
+    SCALERS = _fit_scalers_per_task(args.features)
 
     stages = [
         ("dataset",         lambda: plot_dataset_summary(args.features, out)),

@@ -137,7 +137,9 @@
 ## Plots produced
 
 All plots live under [`figures/`](figures/).  Click any link to open the
-PNG on GitHub.
+PNG on GitHub.  See [`PLOTS.md`](PLOTS.md) for per-plot
+**what / how-to-read / what-is-shown / conclusion** commentary on
+every one of the 146 plots.
 
 ### Example signals (one sample per damage class)
 
