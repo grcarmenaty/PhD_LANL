@@ -142,8 +142,8 @@ def build_experimental_features(median_path: Path, features_path: Path
                                   ) -> Dict[str, np.ndarray]:
     with h5py.File(median_path, "r") as f:
         names = [c.decode() for c in f["case_names"][:]]
-        H_exp = f["frfs"][:]                     # (n_cases, 1601, 9) complex
-        f_src = f["freqs"][:]                    # 0..100 Hz, 1601 bins
+        H_exp = f["median_frf"][:]               # (n_cases, 1601, 9) complex
+        f_src = f["freq"][:]                     # 0..100 Hz, 1601 bins
     # Flip S2 (ch0) polarity (experimental sensor is mounted inverted).
     H_exp[:, :, 0] *= -1.0
     n_cases = H_exp.shape[0]

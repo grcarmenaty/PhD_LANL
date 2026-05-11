@@ -80,8 +80,8 @@ class SmallTransformer(nn.Module):
     """
 
     def __init__(self, n_channels: int, n_out: int,
-                  d_model: int = 64, n_heads: int = 4,
-                  n_layers: int = 2, downsample: int = 8,
+                  d_model: int = 48, n_heads: int = 4,
+                  n_layers: int = 2, downsample: int = 16,
                   regression: bool = False):
         super().__init__()
         self.downsample = downsample

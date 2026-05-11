@@ -1,0 +1,452 @@
+[
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.7049180327868853,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.3114754098360656,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "indicators",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "modal",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "rf",
+    "feature": "indicators",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "rf",
+    "feature": "modal",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.7868852459016393,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "xgb",
+    "feature": "indicators",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.8688524590163934,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.20408163265306123,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.42857142857142855,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "indicators",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.3673469387755102,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.3673469387755102,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "rf",
+    "feature": "indicators",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.08163265306122448,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.14285714285714285,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.2857142857142857,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.16326530612244897,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "indicators",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.12244897959183673,
+    "mae": null
+  },
+  {
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "modal",
+    "n": 49,
+    "metric": "accuracy",
+    "value": 0.061224489795918366,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.0,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.25,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "indicators",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.25,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "modal",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.25,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "indicators",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.25,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.25,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.0,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.0,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "xgb",
+    "feature": "indicators",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.0,
+    "mae": null
+  },
+  {
+    "task": "mass_location",
+    "model": "xgb",
+    "feature": "modal",
+    "n": 4,
+    "metric": "accuracy",
+    "value": 0.25,
+    "mae": null
+  },
+  {
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n": 53,
+    "metric": "R2",
+    "value": -9.735074043273926,
+    "mae": 0.8297808766365051
+  },
+  {
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n": 53,
+    "metric": "R2",
+    "value": -50.8301887512207,
+    "mae": 1.2889188528060913
+  },
+  {
+    "task": "severity",
+    "model": "mlp",
+    "feature": "indicators",
+    "n": 53,
+    "metric": "R2",
+    "value": -2245.54248046875,
+    "mae": 14.421945571899414
+  },
+  {
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "n": 53,
+    "metric": "R2",
+    "value": -1156.125244140625,
+    "mae": 11.183440208435059
+  },
+  {
+    "task": "severity",
+    "model": "rf",
+    "feature": "indicators",
+    "n": 53,
+    "metric": "R2",
+    "value": -0.42239508315191765,
+    "mae": 0.3006657838352821
+  },
+  {
+    "task": "severity",
+    "model": "rf",
+    "feature": "modal",
+    "n": 53,
+    "metric": "R2",
+    "value": -0.15127574641150487,
+    "mae": 0.2993883709225192
+  },
+  {
+    "task": "severity",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n": 53,
+    "metric": "R2",
+    "value": -0.04786944389343262,
+    "mae": 0.28395333886146545
+  },
+  {
+    "task": "severity",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n": 53,
+    "metric": "R2",
+    "value": 0.0172080397605896,
+    "mae": 0.2786901891231537
+  },
+  {
+    "task": "severity",
+    "model": "xgb",
+    "feature": "indicators",
+    "n": 53,
+    "metric": "R2",
+    "value": -2.988558530807495,
+    "mae": 0.5391414165496826
+  },
+  {
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "n": 53,
+    "metric": "R2",
+    "value": -0.08489346504211426,
+    "mae": 0.2887042760848999
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.36065573770491804,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.22950819672131148,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "indicators",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.06557377049180328,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.5737704918032787,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "rf",
+    "feature": "indicators",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.16393442622950818,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.47540983606557374,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.3770491803278688,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "timeseries",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.19672131147540983,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "xgb",
+    "feature": "indicators",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.14754098360655737,
+    "mae": null
+  },
+  {
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "n": 61,
+    "metric": "accuracy",
+    "value": 0.4262295081967213,
+    "mae": null
+  }
+]

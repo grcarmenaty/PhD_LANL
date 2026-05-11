@@ -4,8 +4,9 @@ Produces two markdown tables (training / experimental), one per task, and
 prints them to stdout.  Optionally writes ``results/report.md`` and a flat
 CSV with every row for downstream spreadsheet use.
 """
-import csv
 from __future__ import annotations
+
+import csv
 
 import argparse
 import json
@@ -14,6 +15,8 @@ from pathlib import Path
 from typing import Dict, List
 
 _REPO = Path(__file__).resolve().parent.parent
+if str(_REPO) not in sys.path:
+    sys.path.insert(0, str(_REPO))
 
 from ml_pipeline.tasks import TASK_DESCRIPTION   # noqa: E402
 
@@ -24,24 +27,30 @@ def _format_table(rows: List[Dict], task: str) -> str:
         return f"### {task}\n_(no rows)_\n"
     head = (
         f"### {task} — {TASK_DESCRIPTION.get(task, '')}\n\n"
-        "| model        | feature      | metric   | test  | val   | mae   |\n"
-        "|--------------|--------------|----------|-------|-------|-------|\n"
+        "| model        | feature      | metric   | test    | val     | mae     |\n"
+        "|--------------|--------------|----------|---------|---------|---------|\n"
     )
     out = [head]
-    rows.sort(key=lambda r: (-r["metric_test"] if "metric_test" in r else -r["value"]))
+
+    def _test_val(r: Dict) -> float:
+        v = r.get("metric_test", r.get("value"))
+        return -float(v) if v is not None else 0.0
+
+    rows.sort(key=_test_val)
     for r in rows:
         metric = r.get("metric_name") or r.get("metric") or ""
         test   = r.get("metric_test", r.get("value"))
-        val    = r.get("metric_val", "")
+        val    = r.get("metric_val", None)
         mae    = (r.get("extra") or {}).get("mae_test", r.get("mae"))
+        if mae is None and r.get("metric_name") == "R2":
+            mae = r.get("extra", {}).get("mae_test")
+        test_s = f"{test:.4f}" if isinstance(test, float) else "—"
+        val_s  = f"{val:.4f}"  if isinstance(val,  float) else "—"
+        mae_s  = f"{mae:.4f}"  if isinstance(mae,  float) else "—"
         out.append(
             f"| {r['model']:<12s} | {r['feature']:<12s} | {metric:<8s} | "
-            f"{test:.4f} | "
-            f"{val:.4f}" if isinstance(val, float) else f"{val}"
+            f"{test_s:<7s} | {val_s:<7s} | {mae_s:<7s} |\n"
         )
-        out[-1] += " | "
-        out[-1] += (f"{mae:.4f}" if isinstance(mae, float) else "")
-        out[-1] += " |\n"
     return "".join(out)
 
 

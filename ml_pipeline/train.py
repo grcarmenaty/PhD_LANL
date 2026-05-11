@@ -59,6 +59,10 @@ TORCH_SEQ      = ("cnn", "transformer")
 DEVICE = torch.device("cpu")
 SEED   = 20260511
 
+# Cap PyTorch BLAS to 4 threads — beyond that we get scheduler contention
+# on this CPU and per-epoch time goes up significantly.
+torch.set_num_threads(4)
+
 
 @dataclass
 class Result:
@@ -186,6 +190,9 @@ def train_torch(model_name: str, kind: str, n_out: int,
                  lr: float = 1e-3) -> Dict:
     t0 = time.time()
     seq = X_tr.ndim == 3
+    # Larger batches for sequence inputs to amortise per-iter Python overhead.
+    if seq and X_tr.shape[1] >= 256:
+        batch = 128
     Xtr = _to_tensor(X_tr, seq); Xva = _to_tensor(X_va, seq); Xte = _to_tensor(X_te, seq)
 
     if kind == "cls":
