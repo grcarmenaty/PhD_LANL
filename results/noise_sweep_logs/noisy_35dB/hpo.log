@@ -137,3 +137,75 @@ Parameters: { "use_label_encoder" } are not used.
 Parameters: { "use_label_encoder" } are not used.
 
   bst.update(dtrain, iteration=i, fobj=obj)
+  [22/255] type/xgb/modal  {'n_estimators': 100, 'max_depth': 8}  val=0.7653  test=0.7793  (3.3s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:41:57] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [23/255] type/xgb/modal  {'n_estimators': 300, 'max_depth': 4}  val=0.7673  test=0.7840  (2.7s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:42:00] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [24/255] type/xgb/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.7687  test=0.7880  (4.9s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:42:05] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [25/255] type/xgb/modal  {'n_estimators': 300, 'max_depth': 8}  val=0.7713  test=0.7847  (6.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:42:11] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [26/255] type/xgb/modal  {'n_estimators': 600, 'max_depth': 4}  val=0.7627  test=0.7873  (5.9s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:42:17] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [27/255] type/xgb/modal  {'n_estimators': 600, 'max_depth': 6}  val=0.7680  test=0.7880  (9.3s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:42:27] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [28/255] type/xgb/modal  {'n_estimators': 600, 'max_depth': 8}  val=0.7693  test=0.7827  (11.7s)
+  [29/255] type/mlp/modal  {'hidden': (128, 64), 'lr': 0.0005}  val=0.6520  test=0.6353  (0.9s)
+  [30/255] type/mlp/modal  {'hidden': (128, 64), 'lr': 0.001}  val=0.7393  test=0.7473  (0.9s)
+  [31/255] type/mlp/modal  {'hidden': (128, 64), 'lr': 0.003}  val=0.7893  test=0.8047  (0.9s)
+  [32/255] type/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.0005}  val=0.7080  test=0.6993  (1.3s)
+  [33/255] type/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.7533  test=0.7807  (1.3s)
+  [34/255] type/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.003}  val=0.8140  test=0.8273  (1.3s)
+  [35/255] type/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.0005}  val=0.7500  test=0.7613  (1.7s)
+  [36/255] type/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.001}  val=0.7887  test=0.8007  (1.7s)
+  [37/255] type/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.003}  val=0.8260  test=0.8400  (1.9s)
+  [38/255] type/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.6193  test=0.6227  (6.5s)
+  [39/255] type/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.6047  test=0.5987  (6.9s)
+  [40/255] type/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.5780  test=0.5920  (14.9s)
+  [41/255] type/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.6760  test=0.6747  (16.0s)
+  [42/255] type/transformer/frf_mag  {'d_model': 32, 'n_layers': 1}  val=0.3740  test=0.3687  (4.0s)
+  [43/255] type/transformer/frf_mag  {'d_model': 32, 'n_layers': 2}  val=0.4633  test=0.4720  (7.4s)
+  [44/255] type/transformer/frf_mag  {'d_model': 48, 'n_layers': 1}  val=0.3573  test=0.3467  (5.0s)
+  [45/255] type/transformer/frf_mag  {'d_model': 48, 'n_layers': 2}  val=0.4967  test=0.5233  (9.6s)
+  [46/255] type/transformer/frf_mag  {'d_model': 64, 'n_layers': 1}  val=0.4113  test=0.4360  (6.3s)
+  [47/255] type/transformer/frf_mag  {'d_model': 64, 'n_layers': 2}  val=0.4793  test=0.4927  (12.0s)
+  [48/255] type/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.4827  test=0.4887  (17.1s)
+  [49/255] type/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.6127  test=0.6020  (16.4s)
+  [50/255] type/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.5973  test=0.6047  (34.4s)
+  [51/255] type/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.5953  test=0.6113  (37.3s)
+  [52/255] type/transformer/timeseries  {'d_model': 32, 'n_layers': 1}  val=0.3740  test=0.3620  (12.1s)
+  [53/255] type/transformer/timeseries  {'d_model': 32, 'n_layers': 2}  val=0.4147  test=0.4093  (23.9s)
+  [54/255] type/transformer/timeseries  {'d_model': 48, 'n_layers': 1}  val=0.3707  test=0.3833  (15.0s)
+  [55/255] type/transformer/timeseries  {'d_model': 48, 'n_layers': 2}  val=0.5000  test=0.5180  (29.2s)
+  [56/255] type/transformer/timeseries  {'d_model': 64, 'n_layers': 1}  val=0.3673  test=0.3887  (18.3s)
+  [57/255] type/transformer/timeseries  {'d_model': 64, 'n_layers': 2}  val=0.4700  test=0.4793  (34.8s)
+  [58/255] type/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.6747  test=0.6733  (9.9s)
+  [59/255] type/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.7300  test=0.7433  (11.2s)
+  [60/255] type/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.7360  test=0.7493  (14.6s)
+  [61/255] type/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.7880  test=0.7993  (18.5s)
+  [62/255] severity/rf/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.3867  test=0.3570  (2.7s)
+  [63/255] severity/rf/modal  {'n_estimators': 100, 'max_depth': 12}  val=0.5073  test=0.4913  (4.6s)
+  [64/255] severity/rf/modal  {'n_estimators': 100, 'max_depth': None}  val=0.5239  test=0.5083  (6.2s)
+  [65/255] severity/rf/modal  {'n_estimators': 200, 'max_depth': 6}  val=0.3866  test=0.3575  (5.3s)
+  [66/255] severity/rf/modal  {'n_estimators': 200, 'max_depth': 12}  val=0.5065  test=0.4932  (9.1s)
+  [67/255] severity/rf/modal  {'n_estimators': 200, 'max_depth': None}  val=0.5230  test=0.5109  (12.1s)
+  [68/255] severity/rf/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.3863  test=0.3564  (8.1s)
+  [69/255] severity/rf/modal  {'n_estimators': 300, 'max_depth': 12}  val=0.5053  test=0.4928  (13.6s)
