@@ -3534,5 +3534,239 @@
     "model": "cnn3d",
     "feature": "cfdac3d_realimag",
     "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7393333333333333,
+    "runtime_s": 3.2083449363708496,
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.5206666666666667,
+    "runtime_s": 3.206918478012085,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7753333333333333,
+    "runtime_s": 2.955737590789795,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.6046666666666667,
+    "runtime_s": 3.064856767654419,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7366666666666667,
+    "runtime_s": 2.9319772720336914,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7826666666666666,
+    "runtime_s": 2.8104212284088135,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7953333333333333,
+    "runtime_s": 3.674027442932129,
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.772,
+    "runtime_s": 3.4360415935516357,
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7913333333333333,
+    "runtime_s": 3.5101351737976074,
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.784,
+    "runtime_s": 3.4706015586853027,
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.642,
+    "runtime_s": 3.132887601852417,
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.2833333333333333,
+    "runtime_s": 0.9638411998748779,
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.25866666666666666,
+    "runtime_s": 0.8759751319885254,
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.236,
+    "runtime_s": 0.879051685333252,
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.256,
+    "runtime_s": 0.9201350212097168,
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.26866666666666666,
+    "runtime_s": 0.8460874557495117,
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8113333333333334,
+    "runtime_s": 1.236955165863037,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7386666666666667,
+    "runtime_s": 1.5232985019683838,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7253333333333334,
+    "runtime_s": 1.3453149795532227,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7166666666666667,
+    "runtime_s": 1.3330025672912598,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7033333333333334,
+    "runtime_s": 1.148291826248169,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8046666666666666,
+    "runtime_s": 1.2709710597991943,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7406666666666667,
+    "runtime_s": 1.2064859867095947,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7373333333333333,
+    "runtime_s": 1.0505781173706055,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7206666666666667,
+    "runtime_s": 0.9859580993652344,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7166666666666667,
+    "runtime_s": 0.7518064975738525,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
