@@ -1,0 +1,77 @@
+{
+  "task": "binary",
+  "model": "cnn",
+  "feature": "timeseries",
+  "best_hyperparams": {
+    "widths": [
+      16,
+      32,
+      64
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.802,
+  "best_metric_test": 0.8086666666666666,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8,
+      "metric_test": 0.8,
+      "extras": {},
+      "runtime_s": 25.636900663375854
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.802,
+      "metric_test": 0.8086666666666666,
+      "extras": {},
+      "runtime_s": 13.31714677810669
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8,
+      "metric_test": 0.8,
+      "extras": {},
+      "runtime_s": 31.168938636779785
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8013333333333333,
+      "metric_test": 0.7973333333333333,
+      "extras": {},
+      "runtime_s": 29.532576322555542
+    }
+  ]
+}

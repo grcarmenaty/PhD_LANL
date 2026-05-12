@@ -79,3 +79,17 @@ Parameters: { "use_label_encoder" } are not used.
   [38/255] binary/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8000  test=0.8000  (21.6s)
   [39/255] binary/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.8000  test=0.8000  (20.3s)
   [40/255] binary/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.8020  test=0.7967  (43.9s)
+loading feature: modal
+loading feature: frf_mag
+loading feature: timeseries
+loading feature: cfdac
+HPO plan: 40 cells, 255 total trials
+  skip binary/rf/modal (cached)
+  skip binary/xgb/modal (cached)
+  skip binary/mlp/modal (cached)
+  skip binary/cnn/frf_mag (cached)
+  skip binary/transformer/frf_mag (cached)
+  [1/255] binary/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8000  test=0.8000  (25.6s)
+  [2/255] binary/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.8020  test=0.8087  (13.3s)
+  [3/255] binary/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.8000  test=0.8000  (31.2s)
+  [4/255] binary/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8013  test=0.7973  (29.5s)
