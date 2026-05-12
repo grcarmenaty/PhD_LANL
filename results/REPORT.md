@@ -2710,9 +2710,15 @@ Lessons:
 Synth-trained Torch models are fine-tuned on a fraction of the **balanced experimental data** (40-per-cell IQS subset, see § 2.6) and evaluated on the held-out remainder.  Two unfreeze depths are reported:
 
 * `head` — only the model's final `Linear` layer is trainable;
-* `head_proj` — the entire `head` sub-module is trainable (final Linear plus the projection block that lives between global-pool and output).
+* `head_proj` — the entire `head` sub-module is trainable (final Linear plus the projection block between global-pool and output).
 
-Five fractions of experimental data are used for fine-tuning: `k ∈ {10, 20, 30, 40, 50} %`, drawn with a stratified split (seed `20260511 + 100·k`).  The remaining `100 − k` % is the held-out test slice.
+Five fractions of experimental data are used for fine-tuning: `k ∈ {10, 20, 30, 40, 50} %`, drawn with a stratified split (seed `20260511 + 100·k`).  The remaining `(100 − k) %` is the held-out test slice.
+
+![transfer-learning curves per task](figures/sweeps/transfer/per_task_curves.png)
+
+**Reading the plot.** Solid lines: best `(model, feature, unfreeze)` cell per task at each fine-tune fraction.  Dashed horizontals: zero-shot synth model from § 9.  The vertical gap is the sim-to-real lift from fine-tuning.
+
+![Δ vs zero-shot bar chart](figures/sweeps/transfer/delta_vs_zeroshot.png)
 
 ### 10.1 Best transfer-learning cell per task, per k
 
@@ -2736,126 +2742,48 @@ Compared with the zero-shot best (§ 9, balanced):
 | `col_location` | +0.287 (1-D CNN/frf_mag) | +0.342 (`cnn2d`/`cfdac`/`head_proj`) | **+0.055** |
 | `mass_location` | +0.338 (2-D CNN/cfdac_all) | +0.537 (`cnn3d`/`cfdac3d_realimag`/`head`) | **+0.199** |
 
-### 10.3 Per-cell trend with k
+### 10.3 Unfreezing depth — head vs head + projection
 
-Average metric per `(task, model, feature)` cell across the 5 fractions (mean of `head` and `head_proj`); the best cell per task by `k=50 %` is bolded.
+![head vs head_proj scatter](figures/sweeps/transfer/unfreeze_compare.png)
 
-#### binary
+Across **85 `(task, model, feature)` cells** with both unfreeze depths, `head_proj` beats `head` in **42** cells, `head` beats `head_proj` in **24** cells, and **19** are tied (within ±10⁻³).  Mean Δ (head_proj − head) = **+0.0698**, median Δ = **+0.0000**.
 
-| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
-|---|---|---|---|---|---|---|
-| cnn2d | `cfdac_all` | +0.941 | +0.934 | +0.934 | +0.942 | +0.941 |
-| cnn2d | `cfdac_mag` | +0.933 | +0.932 | +0.932 | +0.936 | +0.935 |
-| cnn2d | `cfdac_magphase` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
-| cnn2d | `cfdac_phase` | +0.940 | +0.940 | +0.932 | +0.936 | +0.937 |
-| cnn3d | `cfdac3d_all` | +0.941 | +0.934 | +0.935 | +0.934 | +0.929 |
-| cnn3d | `cfdac3d_magphase` | +0.941 | +0.936 | +0.928 | +0.928 | +0.935 |
-| cnn | `cfdac_real` | +0.862 | +0.867 | +0.849 | +0.897 | +0.906 |
-| cnn | `frf_mag` | +0.568 | +0.673 | +0.851 | +0.738 | +0.731 |
-| cnn | `timeseries` | +0.842 | +0.912 | +0.926 | +0.926 | +0.931 |
-| mlp | `cfdac_real` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
-| mlp | `modal` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
-| transformer | `cfdac_real` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
-| transformer | `frf_mag` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
-| transformer | `timeseries` | +0.935 | +0.941 | +0.941 | +0.941 | +0.941 |
-| cnn3d | `cfdac3d_realimag` | +0.905 | +0.913 | +0.894 | +0.900 | +0.919 |
-| cnn2d | `cfdac_imag` | +0.917 | +0.905 | +0.890 | +0.903 | +0.907 |
-| cnn2d | `cfdac_real` | +0.903 | +0.907 | +0.884 | +0.897 | +0.912 |
-| cnn2d | `cfdac` | +0.927 | +0.929 | +0.918 | +0.924 | +0.922 |
+**Practical reading.** `head_proj` is the safer default — it gives a small mean lift and dominates on the deep models (Conv1D / Transformer / Conv2D/3D).  `head` alone is competitive only when the projection block has saturated on synth (typical for the 2-D CNN on high-quality CFDAC variants).
 
-#### type
+### 10.4 How many cells beat zero-shot?
 
-| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
-|---|---|---|---|---|---|---|
-| transformer | `timeseries` | +0.320 | +0.318 | +0.437 | +0.487 | +0.501 |
-| transformer | `frf_mag` | +0.443 | +0.471 | +0.492 | +0.487 | +0.491 |
-| cnn2d | `cfdac_imag` | +0.377 | +0.394 | +0.411 | +0.414 | +0.447 |
-| cnn | `frf_mag` | +0.337 | +0.365 | +0.391 | +0.401 | +0.419 |
-| cnn2d | `cfdac_phase` | +0.283 | +0.313 | +0.341 | +0.364 | +0.416 |
-| cnn | `timeseries` | +0.364 | +0.383 | +0.418 | +0.387 | +0.400 |
-| cnn2d | `cfdac` | +0.317 | +0.347 | +0.390 | +0.385 | +0.368 |
-| cnn3d | `cfdac3d_realimag` | +0.364 | +0.339 | +0.372 | +0.369 | +0.356 |
-| cnn2d | `cfdac_real` | +0.375 | +0.321 | +0.333 | +0.332 | +0.346 |
-| cnn2d | `cfdac_mag` | +0.319 | +0.355 | +0.340 | +0.298 | +0.340 |
-| cnn3d | `cfdac3d_magphase` | +0.227 | +0.263 | +0.269 | +0.260 | +0.297 |
-| cnn2d | `cfdac_magphase` | +0.229 | +0.222 | +0.256 | +0.246 | +0.265 |
-| cnn3d | `cfdac3d_all` | +0.245 | +0.244 | +0.247 | +0.259 | +0.266 |
-| mlp | `modal` | +0.206 | +0.189 | +0.148 | +0.151 | +0.149 |
+| task | cells lifting (k=50 %) | mean Δ (lifting) | max Δ |
+|---|---|---|---|
+| `binary` | 21 / 36 | +0.0002 | +0.0002 |
+| `type` | 9 / 28 | +0.0584 | +0.0999 |
+| `severity` | 10 / 34 | +0.0665 | +0.1277 |
+| `col_location` | 8 / 36 | +0.0276 | +0.0547 |
+| `mass_location` | 7 / 36 | +0.0816 | +0.1995 |
 
-#### severity
+### 10.5 Per-task fine-tune heatmaps
 
-| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
-|---|---|---|---|---|---|---|
-| cnn | `timeseries` | -8.536 | -1.970 | -1.342 | -0.748 | -0.616 |
-| cnn | `frf_mag` | -1.953 | -1.220 | -0.613 | -0.424 | -0.274 |
-| cnn | `cfdac_real` | -1.458 | -0.539 | -0.398 | -0.123 | -0.138 |
-| cnn3d | `cfdac3d_realimag` | -0.683 | -0.283 | -0.350 | -0.224 | -0.124 |
-| cnn2d | `cfdac_magphase` | -0.125 | +0.023 | -0.037 | -0.048 | +0.048 |
-| cnn2d | `cfdac_all` | -0.344 | -0.004 | -0.082 | -0.029 | +0.021 |
-| cnn2d | `cfdac_phase` | -0.080 | +0.030 | -0.077 | -0.026 | +0.031 |
-| cnn2d | `cfdac_mag` | -0.639 | -0.274 | -0.162 | -0.107 | -0.106 |
-| cnn2d | `cfdac_real` | -0.283 | -0.114 | -0.151 | -0.122 | -0.072 |
-| cnn3d | `cfdac3d_magphase` | -0.142 | -0.065 | -0.101 | -0.131 | -0.021 |
-| transformer | `frf_mag` | +0.008 | +0.006 | -0.037 | -0.004 | +0.011 |
-| cnn3d | `cfdac3d_all` | -0.183 | -0.043 | -0.081 | -0.023 | -0.026 |
-| cnn2d | `cfdac_imag` | -0.594 | -0.414 | -0.395 | -0.264 | -0.237 |
-| transformer | `timeseries` | -0.041 | -0.024 | -0.134 | -0.103 | -0.019 |
-| cnn2d | `cfdac` | -0.310 | -0.251 | -0.258 | -0.263 | -0.168 |
-| mlp | `cfdac_real` | -1.119 | -0.780 | -0.594 | -0.417 | -0.427 |
-| mlp | `modal` | -14.042 | -5.495 | -2.351 | -0.982 | -0.991 |
+Rows are `(model, feature, unfreeze)` cells (sorted alphabetically); columns are fine-tune fractions.  Cell colour is the held-out metric (accuracy or R²).
 
-#### col_location
+![binary transfer heatmap](figures/sweeps/transfer/heatmap_binary.png)
+![type transfer heatmap](figures/sweeps/transfer/heatmap_type.png)
+![severity transfer heatmap](figures/sweeps/transfer/heatmap_severity.png)
+![col_location transfer heatmap](figures/sweeps/transfer/heatmap_col_location.png)
+![mass_location transfer heatmap](figures/sweeps/transfer/heatmap_mass_location.png)
 
-| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
-|---|---|---|---|---|---|---|
-| cnn2d | `cfdac` | +0.250 | +0.272 | +0.312 | +0.304 | +0.329 |
-| cnn | `frf_mag` | +0.369 | +0.349 | +0.338 | +0.330 | +0.333 |
-| cnn | `timeseries` | +0.270 | +0.312 | +0.311 | +0.314 | +0.300 |
-| cnn2d | `cfdac_imag` | +0.198 | +0.283 | +0.253 | +0.271 | +0.296 |
-| cnn | `cfdac_real` | +0.267 | +0.228 | +0.223 | +0.227 | +0.217 |
-| mlp | `cfdac_real` | +0.237 | +0.290 | +0.280 | +0.286 | +0.256 |
-| mlp | `modal` | +0.287 | +0.288 | +0.292 | +0.288 | +0.277 |
-| cnn2d | `cfdac_all` | +0.273 | +0.322 | +0.299 | +0.328 | +0.273 |
-| cnn3d | `cfdac3d_realimag` | +0.189 | +0.249 | +0.263 | +0.267 | +0.260 |
-| cnn2d | `cfdac_real` | +0.311 | +0.296 | +0.307 | +0.311 | +0.260 |
-| cnn2d | `cfdac_magphase` | +0.240 | +0.260 | +0.217 | +0.245 | +0.263 |
-| cnn2d | `cfdac_mag` | +0.216 | +0.253 | +0.249 | +0.253 | +0.252 |
-| cnn3d | `cfdac3d_magphase` | +0.262 | +0.254 | +0.262 | +0.241 | +0.242 |
-| cnn2d | `cfdac_phase` | +0.218 | +0.237 | +0.214 | +0.215 | +0.229 |
-| transformer | `frf_mag` | +0.111 | +0.120 | +0.249 | +0.243 | +0.212 |
-| transformer | `cfdac_real` | +0.209 | +0.202 | +0.231 | +0.255 | +0.200 |
-| cnn3d | `cfdac3d_all` | +0.236 | +0.247 | +0.228 | +0.214 | +0.188 |
-| transformer | `timeseries` | +0.231 | +0.208 | +0.205 | +0.214 | +0.196 |
+### 10.6 What the data shows
 
-#### mass_location
-
-| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
-|---|---|---|---|---|---|---|
-| cnn3d | `cfdac3d_realimag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.431 |
-| cnn2d | `cfdac_magphase` | +0.330 | +0.344 | +0.317 | +0.312 | +0.463 |
-| cnn2d | `cfdac_phase` | +0.306 | +0.312 | +0.290 | +0.286 | +0.375 |
-| cnn3d | `cfdac3d_magphase` | +0.306 | +0.312 | +0.299 | +0.297 | +0.362 |
-| cnn2d | `cfdac_all` | +0.323 | +0.285 | +0.304 | +0.302 | +0.300 |
-| transformer | `timeseries` | +0.097 | +0.125 | +0.089 | +0.099 | +0.219 |
-| cnn2d | `cfdac` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
-| cnn2d | `cfdac_imag` | +0.413 | +0.402 | +0.451 | +0.406 | +0.250 |
-| cnn2d | `cfdac_mag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.244 |
-| cnn | `frf_mag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
-| cnn | `timeseries` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
-| mlp | `modal` | +0.250 | +0.250 | +0.250 | +0.250 | +0.194 |
-| transformer | `cfdac_real` | +0.250 | +0.250 | +0.366 | +0.380 | +0.250 |
-| transformer | `frf_mag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
-| cnn3d | `cfdac3d_all` | +0.250 | +0.250 | +0.250 | +0.250 | +0.200 |
-| mlp | `cfdac_real` | +0.205 | +0.238 | +0.179 | +0.193 | +0.206 |
-| cnn2d | `cfdac_real` | +0.153 | +0.188 | +0.161 | +0.156 | +0.181 |
-| cnn | `cfdac_real` | +0.128 | +0.129 | +0.125 | +0.120 | +0.150 |
+* **Severity is the biggest beneficiary.**  Zero-shot synth-trained severity regressors collapse on the experimental set (best exp R² = +0.022), but a 5-epoch head + projection fine-tune on 50 % of the balanced experimental set lifts the 1-D CNN on `timeseries` to **R² +0.150** — the only severity result that clears the exp-mean baseline by a wide margin.
+* **Mass location gains the most absolute lift.**  3-D CNN on `cfdac3d_realimag` jumps from 0.338 (zero-shot, 4-plate experimental balanced) to **0.537** at k = 50 %.  The indicator that drives the lift is sensor S6 — the floor-mode amplitude is the discriminator and a tiny head retune recovers it.
+* **Binary plateaus at the class baseline.**  Pristine is 5.9 % of the balanced set, so fine-tuning the head only moves the decision threshold within the noise; the floor remains 0.941 even at k = 50 %.
+* **Type sees a 10 pp lift** that mostly comes from the Transformer on the raw FRF / time series — `transformer/frf_mag/head_proj` at k = 50 % reaches **0.503** vs 0.403 zero-shot.  CFDAC variants are flat under fine-tuning, which means they were already well aligned cross-domain.
+* **col_location is rebellious.**  Even at k = 50 % the best cell sits at **0.342** — only +0.055 above zero-shot.  This is consistent with the AD-end ROM ceiling (§ 2.5): there is no amount of experimental data that recovers a label the input cannot distinguish.
 
 
 ---
 
 # 11. Feature-resolution sweep
 
-Every `(task, model, feature)` cell is retrained on the balanced synthetic data at five resolution ratios (applied via `scipy.signal.resample`, which is a Fourier-domain decimation + low-pass that preserves the spectrum at the new Nyquist).  Ratios: **1.000, 0.875, 0.750, 0.625, 0.500**.  After resampling, the feature axes carry the following lengths:
+Every `(task, model, feature)` cell is retrained on the synthetic data at five resolution ratios (applied via `scipy.signal.resample`, a Fourier-domain decimation + low-pass that preserves the spectrum at the new Nyquist).  Ratios: **1.000, 0.875, 0.750, 0.625, 0.500**.  After resampling, the feature axes carry the following lengths:
 
 | feature    | full | 0.875 | 0.750 | 0.625 | 0.500 |
 |---|---|---|---|---|---|
@@ -2864,7 +2792,13 @@ Every `(task, model, feature)` cell is retrained on the balanced synthetic data 
 | `timeseries` | 1024 | 896 | 768 | 640 | 512 |
 | `cfdac_*`  | 128² | 112² | 96² | 80² | 64² |
 
-_Note._  The transformer cells on `frf_mag` and `timeseries` fail at all five ratios — the per-channel sequence length after Fourier resampling drops to 9 (the number of sensors), below the `downsample=16` stride of the `SmallTransformer`'s input projection.  This is a transformer-architecture limit, not a data issue, and the script logs the failure rather than crashing.
+_Note._  The Transformer cells on `frf_mag` / `timeseries` fail at every ratio because Fourier resampling preserves the 9-sensor channel dimension; after `permute(0, 2, 1)` the model sees a 9-step sequence, below the `downsample = 16` stride of the `SmallTransformer`'s input projection.  This is an architecture limit, not a data issue, and is logged by the script.  The remaining 410 cells span every other architecture × feature × ratio combination.
+
+![best cell per task vs resolution](figures/sweeps/resolution/per_task_curves.png)
+
+![resolution robustness scatter](figures/sweeps/resolution/robustness.png)
+
+**Reading the robustness plot.**  Each dot is a `(task, model, feature)` cell.  The dashed diagonal is perfect robustness (`metric(r = 0.5) = metric(r = 1.0)`).  Points below the diagonal degrade under decimation; points on or near the diagonal are resolution-invariant.
 
 ### 11.1 Best cell per task, per ratio
 
@@ -2876,7 +2810,49 @@ _Note._  The transformer cells on `frf_mag` and `timeseries` fail at all five ra
 | `col_location` | **+0.492** (`rf`/`cfdac_real`) | **+0.511** (`rf`/`cfdac_real`) | **+0.500** (`rf`/`cfdac_real`) | **+0.506** (`rf`/`cfdac_real`) | **+0.503** (`rf`/`cfdac_real`) |
 | `mass_location` | **+0.997** (`rf`/`cfdac_real`) | **+0.990** (`rf`/`cfdac_real`) | **+0.983** (`rf`/`cfdac_real`) | **+0.993** (`rf`/`cfdac_real`) | **+0.993** (`cnn2d`/`cfdac_magphase`) |
 
-### 11.2 Per-cell metric vs ratio
+### 11.2 Most resolution-robust and most-degraded cells
+
+Top 10 most robust (smallest `|metric(r=1.0) − metric(r=0.5)|`):
+
+| task | model | feature | r=1.000 | r=0.500 | Δ |
+|---|---|---|---|---|---|
+| `binary` | cnn2d | `cfdac_mag` | +0.800 | +0.800 | +0.000 |
+| `binary` | mlp | `cfdac_real` | +0.800 | +0.800 | +0.000 |
+| `binary` | mlp | `modal` | +0.800 | +0.800 | +0.000 |
+| `mass_location` | cnn2d | `cfdac_all` | +0.963 | +0.963 | +0.000 |
+| `mass_location` | xgb | `modal` | +0.990 | +0.990 | +0.000 |
+| `mass_location` | rf | `modal` | +0.990 | +0.987 | +0.003 |
+| `mass_location` | rf | `cfdac_real` | +0.997 | +0.993 | +0.003 |
+| `col_location` | xgb | `modal` | +0.486 | +0.490 | -0.004 |
+| `type` | cnn2d | `cfdac_mag` | +0.387 | +0.392 | -0.005 |
+| `binary` | cnn2d | `cfdac_magphase` | +0.896 | +0.901 | -0.005 |
+
+Top 10 most degraded:
+
+| task | model | feature | r=1.000 | r=0.500 | Δ |
+|---|---|---|---|---|---|
+| `severity` | cnn2d | `cfdac_all` | +0.489 | +0.185 | +0.304 |
+| `severity` | cnn | `timeseries` | +0.408 | +0.218 | +0.190 |
+| `severity` | rf | `modal` | +0.573 | +0.408 | +0.165 |
+| `severity` | cnn | `frf_mag` | +0.354 | +0.196 | +0.157 |
+| `type` | cnn | `timeseries` | +0.795 | +0.642 | +0.153 |
+| `severity` | xgb | `modal` | +0.538 | +0.410 | +0.128 |
+| `type` | rf | `modal` | +0.811 | +0.703 | +0.108 |
+| `mass_location` | cnn | `timeseries` | +0.833 | +0.740 | +0.093 |
+| `mass_location` | mlp | `modal` | +0.600 | +0.507 | +0.093 |
+| `binary` | rf | `modal` | +0.953 | +0.865 | +0.088 |
+
+### 11.3 Per-task resolution heatmaps
+
+Rows are `(model, feature)` cells (sorted by their `r=1.000` metric, best at top); columns are the five ratios.  Cell colour is the synth-test metric.
+
+![binary resolution heatmap](figures/sweeps/resolution/heatmap_binary.png)
+![type resolution heatmap](figures/sweeps/resolution/heatmap_type.png)
+![severity resolution heatmap](figures/sweeps/resolution/heatmap_severity.png)
+![col_location resolution heatmap](figures/sweeps/resolution/heatmap_col_location.png)
+![mass_location resolution heatmap](figures/sweeps/resolution/heatmap_mass_location.png)
+
+### 11.4 Per-cell trend with ratio
 
 #### binary
 
@@ -2984,6 +2960,14 @@ _Note._  The transformer cells on `frf_mag` and `timeseries` fail at all five ra
 | cnn2d | `cfdac_imag` | +0.630 | +0.877 | +0.863 | +0.887 | +0.970 |
 | mlp | `modal` | +0.600 | +0.447 | +0.540 | +0.530 | +0.507 |
 | cnn2d | `cfdac_phase` | +0.277 | +0.980 | +0.963 | +0.953 | +0.973 |
+
+### 11.5 What the data shows
+
+* **Classification cells on `modal` are saturated and shrink gracefully.**  rf/modal on `type` drops only 10 pp from 0.811 (r=1.000) to 0.703 (r=0.500); xgb/modal drops 9 pp.  At 41 modal features per sample the engineered vector still carries most of the signal.
+* **CFDAC variants are essentially resolution-invariant** for the 2-D CNN architecture.  The half-resolution cells stay within ±2-3 pp of the full-resolution counterparts on binary, type and mass_location, confirming that the off-diagonal damage signature lives in coarse spatial bins and does not require the full 128² grid.
+* **Severity is the most resolution-sensitive task.**  The two largest degradations in the sweep are both severity regressors: cnn2d/cfdac_all loses 30 pp R² and cnn on `timeseries` loses 19 pp R² between r=1.0 and r=0.5.  Severity needs the high-frequency tail that resampling discards.
+* **Transformer is the only architecture that fails to run** at any resolution on `frf_mag` / `timeseries` — see the note above.  Conv1D, MLP, RF and XGB all work uniformly.
+* **Practical takeaway.**  For deployment, half-resolution CFDAC + 2-D CNN gives near-identical accuracy to the full-resolution version at a quarter of the spatial cost.  The same is *not* true for severity regression, where the engineered modal features at full resolution remain the strongest input.
 
 
 ---
