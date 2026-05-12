@@ -68,3 +68,4 @@ plan: 140 cells (existing cells skipped)
 >>> loading cfdac_phase ...
     shape = (10000, 1, 128, 128), mem = 0.66 GB
   [61] binary/cnn/cfdac_phase {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8900  test=0.8920  (9.3s)
+  [62] binary/mlp/cfdac_phase {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9227  test=0.9187  (15.0s)
