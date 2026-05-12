@@ -1,0 +1,47 @@
+[
+  {
+    "metric": "accuracy",
+    "value": 0.8866666666666667,
+    "runtime_s": 17.63431477546692,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.924,
+    "runtime_s": 10.720969676971436,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9153333333333333,
+    "runtime_s": 8.42529582977295,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.938,
+    "runtime_s": 6.23112678527832,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8766666666666667,
+    "runtime_s": 4.918045282363892,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.5
+  }
+]

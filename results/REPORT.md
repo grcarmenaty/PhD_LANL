@@ -24,9 +24,11 @@ the sim-to-real analysis, and per-plot commentary on all 146 plots.
    * [7.6 Indicator regression (22 separate predictors)](#76-indicator-regression-22-separate-predictors)
 8. [Cross-task takeaways](#8-cross-task-takeaways)
 9. [Sim-to-real summary](#9-sim-to-real-summary)
-10. [Per-plot commentary](#10-per-plot-commentary)
-11. [Reproducibility](#11-reproducibility)
-12. [Full HPO trial dump (all cells, all trials)](#12-full-hpo-trial-dump-all-cells-all-trials)
+10. [Sim-to-real transfer-learning sweep](#10-sim-to-real-transfer-learning-sweep)
+11. [Feature-resolution sweep](#11-feature-resolution-sweep)
+12. [Per-plot commentary](#12-per-plot-commentary)
+13. [Reproducibility](#13-reproducibility)
+14. [Full HPO trial dump (all cells, all trials)](#14-full-hpo-trial-dump-all-cells-all-trials)
 
 ---
 
@@ -2700,7 +2702,188 @@ Lessons:
 
 ---
 
-# 10. Per-plot commentary
+
+---
+
+# 10. Sim-to-real transfer-learning sweep
+
+Synth-trained Torch models are fine-tuned on a fraction of the **balanced experimental data** (40-per-cell IQS subset, see § 2.6) and evaluated on the held-out remainder.  Two unfreeze depths are reported:
+
+* `head` — only the model's final `Linear` layer is trainable;
+* `head_proj` — the entire `head` sub-module is trainable (final Linear plus the projection block that lives between global-pool and output).
+
+Five fractions of experimental data are used for fine-tuning: `k ∈ {10, 20, 30, 40, 50} %`, drawn with a stratified split (seed `20260511 + 100·k`).  The remaining `100 − k` % is the held-out test slice.
+
+### 10.1 Best transfer-learning cell per task, per k
+
+| task | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
+|---|---|---|---|---|---|
+| `binary` | **+0.941** (`cnn2d`/`cfdac_all`/`head`) | **+0.941** (`cnn2d`/`cfdac_all`/`head`) | **+0.941** (`cnn2d`/`cfdac_all`/`head`) | **+0.944** (`cnn2d`/`cfdac_all`/`head_proj`) | **+0.941** (`cnn2d`/`cfdac_all`/`head`) |
+| `type` | **+0.453** (`transformer`/`frf_mag`/`head_proj`) | **+0.472** (`transformer`/`frf_mag`/`head_proj`) | **+0.504** (`transformer`/`frf_mag`/`head`) | **+0.493** (`transformer`/`frf_mag`/`head_proj`) | **+0.503** (`transformer`/`timeseries`/`head_proj`) |
+| `severity` | **+0.009** (`transformer`/`frf_mag`/`head_proj`) | **+0.125** (`cnn`/`timeseries`/`head_proj`) | **+0.078** (`cnn`/`frf_mag`/`head_proj`) | **+0.148** (`cnn`/`frf_mag`/`head_proj`) | **+0.150** (`cnn`/`timeseries`/`head_proj`) |
+| `col_location` | **+0.370** (`cnn`/`frf_mag`/`head_proj`) | **+0.362** (`cnn`/`frf_mag`/`head`) | **+0.345** (`cnn2d`/`cfdac`/`head_proj`) | **+0.340** (`cnn`/`timeseries`/`head_proj`) | **+0.342** (`cnn2d`/`cfdac`/`head_proj`) |
+| `mass_location` | **+0.451** (`cnn2d`/`cfdac_imag`/`head_proj`) | **+0.461** (`cnn2d`/`cfdac_imag`/`head_proj`) | **+0.482** (`transformer`/`cfdac_real`/`head_proj`) | **+0.458** (`cnn2d`/`cfdac_imag`/`head_proj`) | **+0.537** (`cnn3d`/`cfdac3d_realimag`/`head`) |
+
+### 10.2 Headline lifts vs zero-shot synth model
+
+Compared with the zero-shot best (§ 9, balanced):
+
+| task | zero-shot exp | best fine-tuned at k=50 % | Δ |
+|---|---|---|---|
+| `binary` | +0.941 (MLP/modal) | +0.941 (`cnn2d`/`cfdac_all`/`head`) | **+0.000** |
+| `type` | +0.403 (2-D CNN/cfdac_mag) | +0.503 (`transformer`/`timeseries`/`head_proj`) | **+0.100** |
+| `severity` | +0.022 (XGB/modal) | +0.150 (`cnn`/`timeseries`/`head_proj`) | **+0.128** |
+| `col_location` | +0.287 (1-D CNN/frf_mag) | +0.342 (`cnn2d`/`cfdac`/`head_proj`) | **+0.055** |
+| `mass_location` | +0.338 (2-D CNN/cfdac_all) | +0.537 (`cnn3d`/`cfdac3d_realimag`/`head`) | **+0.199** |
+
+### 10.3 Per-cell trend with k
+
+Average metric per `(task, model, feature)` cell across the 5 fractions (mean of `head` and `head_proj`); the best cell per task by `k=50 %` is bolded.
+
+#### binary
+
+| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
+|---|---|---|---|---|---|---|
+| cnn2d | `cfdac_all` | +0.941 | +0.934 | +0.934 | +0.942 | +0.941 |
+| cnn2d | `cfdac_mag` | +0.933 | +0.932 | +0.932 | +0.936 | +0.935 |
+| cnn2d | `cfdac_magphase` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
+| cnn2d | `cfdac_phase` | +0.940 | +0.940 | +0.932 | +0.936 | +0.937 |
+| cnn3d | `cfdac3d_all` | +0.941 | +0.934 | +0.935 | +0.934 | +0.929 |
+| cnn3d | `cfdac3d_magphase` | +0.941 | +0.936 | +0.928 | +0.928 | +0.935 |
+| cnn | `cfdac_real` | +0.862 | +0.867 | +0.849 | +0.897 | +0.906 |
+| cnn | `frf_mag` | +0.568 | +0.673 | +0.851 | +0.738 | +0.731 |
+| cnn | `timeseries` | +0.842 | +0.912 | +0.926 | +0.926 | +0.931 |
+| mlp | `cfdac_real` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
+| mlp | `modal` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
+| transformer | `cfdac_real` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
+| transformer | `frf_mag` | +0.941 | +0.941 | +0.941 | +0.941 | +0.941 |
+| transformer | `timeseries` | +0.935 | +0.941 | +0.941 | +0.941 | +0.941 |
+| cnn3d | `cfdac3d_realimag` | +0.905 | +0.913 | +0.894 | +0.900 | +0.919 |
+| cnn2d | `cfdac_imag` | +0.917 | +0.905 | +0.890 | +0.903 | +0.907 |
+| cnn2d | `cfdac_real` | +0.903 | +0.907 | +0.884 | +0.897 | +0.912 |
+| cnn2d | `cfdac` | +0.927 | +0.929 | +0.918 | +0.924 | +0.922 |
+
+#### type
+
+| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
+|---|---|---|---|---|---|---|
+| transformer | `timeseries` | +0.320 | +0.318 | +0.437 | +0.487 | +0.501 |
+| transformer | `frf_mag` | +0.443 | +0.471 | +0.492 | +0.487 | +0.491 |
+| cnn2d | `cfdac_imag` | +0.377 | +0.394 | +0.411 | +0.414 | +0.447 |
+| cnn | `frf_mag` | +0.337 | +0.365 | +0.391 | +0.401 | +0.419 |
+| cnn2d | `cfdac_phase` | +0.283 | +0.313 | +0.341 | +0.364 | +0.416 |
+| cnn | `timeseries` | +0.364 | +0.383 | +0.418 | +0.387 | +0.400 |
+| cnn2d | `cfdac` | +0.317 | +0.347 | +0.390 | +0.385 | +0.368 |
+| cnn3d | `cfdac3d_realimag` | +0.364 | +0.339 | +0.372 | +0.369 | +0.356 |
+| cnn2d | `cfdac_real` | +0.375 | +0.321 | +0.333 | +0.332 | +0.346 |
+| cnn2d | `cfdac_mag` | +0.319 | +0.355 | +0.340 | +0.298 | +0.340 |
+| cnn3d | `cfdac3d_magphase` | +0.227 | +0.263 | +0.269 | +0.260 | +0.297 |
+| cnn2d | `cfdac_magphase` | +0.229 | +0.222 | +0.256 | +0.246 | +0.265 |
+| cnn3d | `cfdac3d_all` | +0.245 | +0.244 | +0.247 | +0.259 | +0.266 |
+| mlp | `modal` | +0.206 | +0.189 | +0.148 | +0.151 | +0.149 |
+
+#### severity
+
+| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
+|---|---|---|---|---|---|---|
+| cnn | `timeseries` | -8.536 | -1.970 | -1.342 | -0.748 | -0.616 |
+| cnn | `frf_mag` | -1.953 | -1.220 | -0.613 | -0.424 | -0.274 |
+| cnn | `cfdac_real` | -1.458 | -0.539 | -0.398 | -0.123 | -0.138 |
+| cnn3d | `cfdac3d_realimag` | -0.683 | -0.283 | -0.350 | -0.224 | -0.124 |
+| cnn2d | `cfdac_magphase` | -0.125 | +0.023 | -0.037 | -0.048 | +0.048 |
+| cnn2d | `cfdac_all` | -0.344 | -0.004 | -0.082 | -0.029 | +0.021 |
+| cnn2d | `cfdac_phase` | -0.080 | +0.030 | -0.077 | -0.026 | +0.031 |
+| cnn2d | `cfdac_mag` | -0.639 | -0.274 | -0.162 | -0.107 | -0.106 |
+| cnn2d | `cfdac_real` | -0.283 | -0.114 | -0.151 | -0.122 | -0.072 |
+| cnn3d | `cfdac3d_magphase` | -0.142 | -0.065 | -0.101 | -0.131 | -0.021 |
+| transformer | `frf_mag` | +0.008 | +0.006 | -0.037 | -0.004 | +0.011 |
+| cnn3d | `cfdac3d_all` | -0.183 | -0.043 | -0.081 | -0.023 | -0.026 |
+| cnn2d | `cfdac_imag` | -0.594 | -0.414 | -0.395 | -0.264 | -0.237 |
+| transformer | `timeseries` | -0.041 | -0.024 | -0.134 | -0.103 | -0.019 |
+| cnn2d | `cfdac` | -0.310 | -0.251 | -0.258 | -0.263 | -0.168 |
+| mlp | `cfdac_real` | -1.119 | -0.780 | -0.594 | -0.417 | -0.427 |
+| mlp | `modal` | -14.042 | -5.495 | -2.351 | -0.982 | -0.991 |
+
+#### col_location
+
+| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
+|---|---|---|---|---|---|---|
+| cnn2d | `cfdac` | +0.250 | +0.272 | +0.312 | +0.304 | +0.329 |
+| cnn | `frf_mag` | +0.369 | +0.349 | +0.338 | +0.330 | +0.333 |
+| cnn | `timeseries` | +0.270 | +0.312 | +0.311 | +0.314 | +0.300 |
+| cnn2d | `cfdac_imag` | +0.198 | +0.283 | +0.253 | +0.271 | +0.296 |
+| cnn | `cfdac_real` | +0.267 | +0.228 | +0.223 | +0.227 | +0.217 |
+| mlp | `cfdac_real` | +0.237 | +0.290 | +0.280 | +0.286 | +0.256 |
+| mlp | `modal` | +0.287 | +0.288 | +0.292 | +0.288 | +0.277 |
+| cnn2d | `cfdac_all` | +0.273 | +0.322 | +0.299 | +0.328 | +0.273 |
+| cnn3d | `cfdac3d_realimag` | +0.189 | +0.249 | +0.263 | +0.267 | +0.260 |
+| cnn2d | `cfdac_real` | +0.311 | +0.296 | +0.307 | +0.311 | +0.260 |
+| cnn2d | `cfdac_magphase` | +0.240 | +0.260 | +0.217 | +0.245 | +0.263 |
+| cnn2d | `cfdac_mag` | +0.216 | +0.253 | +0.249 | +0.253 | +0.252 |
+| cnn3d | `cfdac3d_magphase` | +0.262 | +0.254 | +0.262 | +0.241 | +0.242 |
+| cnn2d | `cfdac_phase` | +0.218 | +0.237 | +0.214 | +0.215 | +0.229 |
+| transformer | `frf_mag` | +0.111 | +0.120 | +0.249 | +0.243 | +0.212 |
+| transformer | `cfdac_real` | +0.209 | +0.202 | +0.231 | +0.255 | +0.200 |
+| cnn3d | `cfdac3d_all` | +0.236 | +0.247 | +0.228 | +0.214 | +0.188 |
+| transformer | `timeseries` | +0.231 | +0.208 | +0.205 | +0.214 | +0.196 |
+
+#### mass_location
+
+| model | feature | k=10 % | k=20 % | k=30 % | k=40 % | k=50 % |
+|---|---|---|---|---|---|---|
+| cnn3d | `cfdac3d_realimag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.431 |
+| cnn2d | `cfdac_magphase` | +0.330 | +0.344 | +0.317 | +0.312 | +0.463 |
+| cnn2d | `cfdac_phase` | +0.306 | +0.312 | +0.290 | +0.286 | +0.375 |
+| cnn3d | `cfdac3d_magphase` | +0.306 | +0.312 | +0.299 | +0.297 | +0.362 |
+| cnn2d | `cfdac_all` | +0.323 | +0.285 | +0.304 | +0.302 | +0.300 |
+| transformer | `timeseries` | +0.097 | +0.125 | +0.089 | +0.099 | +0.219 |
+| cnn2d | `cfdac` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
+| cnn2d | `cfdac_imag` | +0.413 | +0.402 | +0.451 | +0.406 | +0.250 |
+| cnn2d | `cfdac_mag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.244 |
+| cnn | `frf_mag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
+| cnn | `timeseries` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
+| mlp | `modal` | +0.250 | +0.250 | +0.250 | +0.250 | +0.194 |
+| transformer | `cfdac_real` | +0.250 | +0.250 | +0.366 | +0.380 | +0.250 |
+| transformer | `frf_mag` | +0.250 | +0.250 | +0.250 | +0.250 | +0.250 |
+| cnn3d | `cfdac3d_all` | +0.250 | +0.250 | +0.250 | +0.250 | +0.200 |
+| mlp | `cfdac_real` | +0.205 | +0.238 | +0.179 | +0.193 | +0.206 |
+| cnn2d | `cfdac_real` | +0.153 | +0.188 | +0.161 | +0.156 | +0.181 |
+| cnn | `cfdac_real` | +0.128 | +0.129 | +0.125 | +0.120 | +0.150 |
+
+
+---
+
+# 11. Feature-resolution sweep
+
+Every `(task, model, feature)` cell is retrained on the balanced synthetic data at five resolution ratios (applied via `scipy.signal.resample`, which is a Fourier-domain decimation + low-pass that preserves the spectrum at the new Nyquist).  Ratios: **1.000, 0.875, 0.750, 0.625, 0.500**.  After resampling, the feature axes carry the following lengths:
+
+| feature    | full | 0.875 | 0.750 | 0.625 | 0.500 |
+|---|---|---|---|---|---|
+| `modal`    | 81  | 71  | 61  | 51  | 41  |
+| `frf_mag`  | 381 | 333 | 286 | 238 | 191 |
+| `timeseries` | 1024 | 896 | 768 | 640 | 512 |
+| `cfdac_*`  | 128² | 112² | 96² | 80² | 64² |
+
+### 11.1 Best cell per task, per ratio
+
+| task | r=1.000 | r=0.875 | r=0.750 | r=0.625 | r=0.500 |
+|---|---|---|---|---|---|
+| `binary` | **+0.887** (`cnn2d`/`cfdac`) | **+0.924** (`cnn2d`/`cfdac`) | **+0.915** (`cnn2d`/`cfdac`) | **+0.938** (`cnn2d`/`cfdac`) | **+0.877** (`cnn2d`/`cfdac`) |
+| `type` | — | — | — | — | — |
+| `severity` | — | — | — | — | — |
+| `col_location` | — | — | — | — | — |
+| `mass_location` | — | — | — | — | — |
+
+### 11.2 Per-cell metric vs ratio
+
+#### binary
+
+| model | feature | r=1.000 | r=0.875 | r=0.750 | r=0.625 | r=0.500 |
+|---|---|---|---|---|---|---|
+| cnn2d | `cfdac` | +0.887 | +0.924 | +0.915 | +0.938 | +0.877 |
+
+
+# 12. Per-plot commentary
 
 Compact one-paragraph commentary for every plot.  See § 6 for
 the generic how-to-read for each category, and § 7 for the
@@ -2709,7 +2892,7 @@ narrative use of each plot inside its task.
 The headline plots are also already embedded above; this
 section is the index for fast browsing.
 
-## 10.1 Dataset and example signals
+## 12.1 Dataset and example signals
 
 * [`figures/dataset/class_severity.png`](figures/dataset/class_severity.png)
   — 5 equal bars at 2 000; flat severity histograms inside each
@@ -2725,7 +2908,7 @@ section is the index for fast browsing.
   — Pristine ≈ identity; damaged classes light up
   structurally-localised off-diagonal blocks.
 
-## 10.2 Synth-vs-real feature panels
+## 12.2 Synth-vs-real feature panels
 
 * [`figures/feature_examples/modal.png`](figures/feature_examples/modal.png)
 * [`figures/feature_examples/frf_mag.png`](figures/feature_examples/frf_mag.png)
@@ -2741,7 +2924,7 @@ to spot calibration mismatch between the synthetic dataset and
 the IQS data — channels / indicators where the bars or curves
 diverge between columns are sim-to-real liabilities.
 
-## 10.3 Global metric bars
+## 12.3 Global metric bars
 
 * [`figures/train_metrics_by_task.png`](figures/train_metrics_by_task.png)
   — modal-feature bars (RF / XGB / MLP) at the top of every
@@ -2751,7 +2934,7 @@ diverge between columns are sim-to-real liabilities.
   sim-to-real "ceiling" imposed by composite IQS labels and
   domain shift.
 
-## 10.4 Confusion matrices
+## 12.4 Confusion matrices
 
 Per-cell numbers are in § 7.  Quick summary by task:
 
@@ -2771,7 +2954,7 @@ Per-cell numbers are in § 7.  Quick summary by task:
 All 44 individual confusion matrices live under
 [`figures/confusion/`](figures/confusion/).
 
-## 10.5 Per-class F1 heatmaps
+## 12.5 Per-class F1 heatmaps
 
 * [`figures/perclass_f1/binary.png`](figures/perclass_f1/binary.png)
   — vertical dark column on Pristine for raw-feature deep cells.
@@ -2784,7 +2967,7 @@ All 44 individual confusion matrices live under
   — tabular rows uniformly bright; raw-feature deep rows show
   binary `1 / 0` pattern (Base/F1 only).
 
-## 10.6 ROC and PR
+## 12.6 ROC and PR
 
 * [`figures/roc/binary_roc.png`](figures/roc/binary_roc.png)
   — `mlp/modal` and `xgb/modal` overlap at the top-left
@@ -2794,7 +2977,7 @@ All 44 individual confusion matrices live under
   — modal-feature curves are near-rectangular; the worst cells
   drop from the precision-1 corner immediately.
 
-## 10.7 Severity scatter
+## 12.7 Severity scatter
 
 * [`figures/scatter/severity_rf_modal.png`](figures/scatter/severity_rf_modal.png)
   — diagonal cloud, R² 0.57, slight negative skew in residuals.
@@ -2810,7 +2993,7 @@ All 44 individual confusion matrices live under
 Other 6 scatters in [`figures/scatter/`](figures/scatter/) follow
 the same patterns but with progressively worse R².
 
-## 10.8 Feature-importance bars
+## 12.8 Feature-importance bars
 
 Tree-based models only.  Common patterns:
 
@@ -2823,7 +3006,7 @@ Tree-based models only.  Common patterns:
 
 All 20 plots in [`figures/feat_importance/`](figures/feat_importance/).
 
-## 10.9 PCA / t-SNE embeddings
+## 12.9 PCA / t-SNE embeddings
 
 * [`figures/embedding/pca_modal.png`](figures/embedding/pca_modal.png)
   — three classes separable, Crack/Hole tangled.
@@ -2834,7 +3017,7 @@ All 20 plots in [`figures/feat_importance/`](figures/feat_importance/).
 (The legacy `*_indicators` embedding plots have been removed
 because indicators are no longer used as an input feature.)
 
-## 10.10 HPO response surfaces
+## 12.10 HPO response surfaces
 
 55 surfaces in [`figures/hpo/`](figures/hpo/).  By task /
 representation:
@@ -2853,7 +3036,7 @@ representation:
 
 ---
 
-# 11. Reproducibility
+# 13. Reproducibility
 
 Branch on the repository: `claude/create-ml-dataset-rMOoj`.
 
@@ -2890,7 +3073,7 @@ Output locations:
 
 ---
 
-# 12. Full HPO trial dump (all cells, all trials)
+# 14. Full HPO trial dump (all cells, all trials)
 
 Every trial for every (task, model, feature) cell.  Rows are sorted by val (descending) within each cell.  See § 7 for narrative context.
 
