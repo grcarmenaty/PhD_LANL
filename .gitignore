@@ -46,3 +46,5 @@ results/balanced/experimental_full_per_case.json
 dataset/noisy_*dB/
 dataset/features_noisy_*dB.h5
 results/noisy_*dB/balanced/experimental_full_per_case.json
+results/noisy_*dB/models/*.pkl
+results/noisy_*dB/models_indicators/*.pkl
