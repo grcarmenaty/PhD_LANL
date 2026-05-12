@@ -52,21 +52,22 @@ trains 22 regressors that *predict* each indicator value.  The
 classification / severity HPO grid covers every
 `(task, model, feature)` cell in a single sweep.
 
-Cross-domain test uses **two** experimental views: the
-**full 2 638-case** IQS dataset (heavily skewed) and a matched
-**balanced 680-case subset** built by elimination so every
-`(type, location)` cell carries 40 cases (see § 2.6).  The
-balanced subset is the fair sim-to-real metric; the full set
-shows the deployable-population score.
+Cross-domain test uses the **balanced 680-case** experimental
+subset (built by elimination so every `(type, location)` cell
+carries 40 cases — see § 2.6).  The unbalanced 2 638-case IQS
+dataset is intentionally **not** reported here because the
+asymmetric per-cell populations make raw accuracy / R² figures
+hard to compare across tasks; the balanced subset gives the
+fair sim-to-real metric.
 
-| task          | best cell                    | synth test    | full exp (n)                              | balanced exp (n, 40/cell)                    |
-|---------------|------------------------------|---------------|-------------------------------------------|----------------------------------------------|
-| binary        | MLP + modal                  | 0.989         | 0.825 = class baseline (2 638)            | 0.941 = class baseline (680)                 |
-| type          | **2-D CNN + cfdac_mag**      | 0.630         | **0.470** (2 638)                          | 0.403 (680)                                  |
-| severity      | RF + modal                   | R² 0.573      | R² −0.02 (transformer/frf_mag, 2 176)     | **R² +0.02 (XGB/modal, 640)**                |
-| col_location  | MLP + modal                  | 0.494         | 0.453 (1 938)                              | 0.287 (1-D CNN/frf_mag, 480)                 |
-| mass_location | 2-D CNN + cfdac_magphase     | 0.987         | 0.282 (2-D CNN + cfdac_all, 238)           | **0.338 (2-D CNN + cfdac_all, 160)**         |
-| indicators    | XGB + modal                  | R² ≥ 0.99 ×20 | M2L_abs_sum R² 0.756 best of 22 (2 176)    | M2L_abs_sum R² 0.78 / RVAC_min 0.60 (640)    |
+| task          | best cell                    | synth test    | balanced exp (n, 40/cell)              |
+|---------------|------------------------------|---------------|----------------------------------------|
+| binary        | MLP + modal                  | 0.989         | 0.941 = class baseline (680)            |
+| type          | **2-D CNN + cfdac_mag**      | 0.630         | **0.403** (680)                         |
+| severity      | RF + modal                   | R² 0.573      | **R² +0.02 (XGB/modal, 640)**           |
+| col_location  | MLP + modal                  | 0.494         | 0.287 (1-D CNN/frf_mag, 480)            |
+| mass_location | 2-D CNN + cfdac_magphase     | 0.987         | **0.338 (2-D CNN + cfdac_all, 160)**    |
+| indicators    | XGB + modal                  | R² ≥ 0.99 ×20 | M2L_abs_sum R² 0.78 / RVAC_min 0.60 (640) |
 
 > **Every trial** for every `(task, model, feature)` cell is
 > tabulated inline in § 12 of this report — hyperparameters,
@@ -78,9 +79,9 @@ shows the deployable-population score.
 Headline takeaways:
 
 * **CFDAC-magnitude beats modal features on the 5-class type
-  task experimentally** (full exp 0.470 vs MLP+modal 0.384;
-  balanced 0.403 vs 0.251).  This is a flip from the 61-case
-  median dataset and is robust to per-cell rebalancing.
+  task experimentally** (balanced 0.403 vs MLP+modal 0.251).
+  This is a flip from the 61-case median dataset and is robust
+  to per-cell rebalancing.
 * **Severity regression breaks the zero barrier only on the
   balanced subset** — XGB+modal hits exp R² +0.02 vs every
   unbalanced cell's negative R².  Removing the per-cell
@@ -211,7 +212,7 @@ Every BD / AD location and every plate has the same prior, so
 class-balance is **not** a complicating factor in the synthetic
 location tasks.
 
-### Experimental distribution (full 2 638 cases)
+### Experimental distribution
 
 The IQS protocol prioritised certain damage configurations.  The
 result is a **strongly biased** distribution that no longer maps
@@ -348,7 +349,7 @@ training script that consumes `features_balanced.h5` (otherwise
 val / test will receive bootstrap copies of train).
 
 The balanced eval results in §§ 7 – 8 are denoted "**balanced
-exp**" to distinguish from the full 2 638-case "exp" numbers.
+exp**" to distinguish from the balanced 680-case "exp" numbers.
 Build the balanced datasets with:
 
 ```
@@ -368,10 +369,12 @@ python ml_pipeline/rebalance_datasets.py
 
 The earlier evaluation used a 61-case `median_frfs.h5` slice (one
 trial per damage configuration).  All "experimental" numbers in
-this report use the **full** 2 638-case dataset produced by the
-IQS protocol, so the cross-domain estimates rest on a population
-that is two orders of magnitude larger.  See § 2.5 for the
-location / type distribution within those 2 638 cases.
+this report use the **balanced 680-case subset** built from the
+2 638-case IQS dataset by per-cell elimination (40 cases per
+`(type, location)` cell — see § 2.6).  The raw 2 638-case
+distribution is described in § 2.5 for context, but the cross-
+domain metrics in §§ 7, 9 are computed only on the balanced
+subset.
 
 The 10 000-sample synthetic dataset is split 70 / 15 / 15 with
 seed `20260511`.  Classification splits are stratified on class;
@@ -384,12 +387,13 @@ regression splits are randomised.  See
 Earlier feedback proposed "train + validate on synth, test on
 experimental".  What's shipped is a strict superset of that:
 
-* The experimental cases are tested exactly as proposed —
-  `evaluate_full_experimental.py` runs every HPO-selected model
-  on all 2 638 IQS cases and reports accuracy / R² in
-  [`experimental_full_evaluation.json`](experimental_full_evaluation.json).
-  The legacy 61-case `experimental_evaluation.json` is kept for
-  reference.
+* The experimental cases are tested on the **balanced 680-case
+  subset** (40 per `(type, location)` cell — see § 2.6).
+  `evaluate_full_experimental.py --exp dataset/experimental_features_balanced.h5`
+  runs every HPO-selected model and reports accuracy / R² in
+  [`balanced/experimental_full_evaluation.json`](balanced/experimental_full_evaluation.json).
+  Per-cell balance is required for cross-cell comparison; the
+  raw 2 638-case eval is no longer shown in this report.
 * In addition, a 15 % slice of the synthetic data is held out
   from HPO and only scored once after HPO ends.  That extra
   slice is the "synth test" / "test" column throughout this
@@ -963,7 +967,7 @@ not viable for the severity task — a single 16 384-dim regression
 fit costs > 6 min, so MLP is the only tabular regressor reported
 for severity.)
 
-| variant            | architecture       | input shape        | val   | test  | exp (full 2 638) |
+| variant            | architecture       | input shape        | val   | test  | exp (balanced 680) |
 |--------------------|--------------------|---------------------|-------|-------|------------------|
 | `cfdac`            | 2-D CNN, 2-ch      | (2, 128, 128)        | 0.961 | 0.944 | 0.821            |
 | `cfdac_real`       | 2-D CNN, 1-ch      | (1, 128, 128)        | 0.952 | 0.957 | 0.803            |
@@ -991,26 +995,26 @@ small Bolt damage on synth.
 |---|---|---|---|---|
 | xgb         | `cfdac_real` | 0.999 | 0.995 | — |
 | rf          | `cfdac_real` | 1.000 | 0.991 | — |
-| mlp         | `modal` | 0.995 | 0.989 | 0.825 |
+| mlp         | `modal` | 0.995 | 0.989 | 0.941 |
 | mlp         | `cfdac_real` | 0.992 | 0.986 | — |
-| xgb         | `modal` | 0.975 | 0.965 | 0.825 |
-| cnn3d       | `cfdac3d_magphase` | 0.959 | 0.959 | 0.825 |
-| cnn2d       | `cfdac_real` | 0.952 | 0.957 | 0.803 |
-| cnn2d       | `cfdac_phase` | 0.953 | 0.953 | 0.825 |
-| rf          | `modal` | 0.958 | 0.949 | 0.825 |
-| cnn2d       | `cfdac_imag` | 0.957 | 0.946 | 0.818 |
-| cnn2d       | `cfdac` | 0.961 | 0.944 | 0.821 |
-| cnn3d       | `cfdac3d_realimag` | 0.954 | 0.939 | 0.784 |
-| cnn2d       | `cfdac_magphase` | 0.936 | 0.935 | 0.825 |
-| cnn3d       | `cfdac3d_all` | 0.931 | 0.935 | 0.825 |
-| cnn2d       | `cfdac_all` | 0.924 | 0.920 | 0.825 |
-| transformer | `timeseries` | 0.890 | 0.876 | 0.750 |
-| cnn         | `frf_mag` | 0.839 | 0.853 | 0.825 |
-| cnn         | `timeseries` | 0.845 | 0.842 | 0.415 |
+| xgb         | `modal` | 0.975 | 0.965 | 0.941 |
+| cnn3d       | `cfdac3d_magphase` | 0.959 | 0.959 | 0.941 |
+| cnn2d       | `cfdac_real` | 0.952 | 0.957 | 0.904 |
+| cnn2d       | `cfdac_phase` | 0.953 | 0.953 | 0.941 |
+| rf          | `modal` | 0.958 | 0.949 | 0.941 |
+| cnn2d       | `cfdac_imag` | 0.957 | 0.946 | 0.928 |
+| cnn2d       | `cfdac` | 0.961 | 0.944 | 0.929 |
+| cnn3d       | `cfdac3d_realimag` | 0.954 | 0.939 | 0.878 |
+| cnn2d       | `cfdac_magphase` | 0.936 | 0.935 | 0.941 |
+| cnn3d       | `cfdac3d_all` | 0.931 | 0.935 | 0.941 |
+| cnn2d       | `cfdac_all` | 0.924 | 0.920 | 0.941 |
+| transformer | `timeseries` | 0.890 | 0.876 | 0.837 |
+| cnn         | `frf_mag` | 0.839 | 0.853 | 0.941 |
+| cnn         | `timeseries` | 0.845 | 0.842 | 0.293 |
 | cnn         | `cfdac_real` | 0.800 | 0.800 | — |
 | transformer | `cfdac_real` | 0.800 | 0.800 | — |
-| transformer | `frf_mag` | 0.800 | 0.800 | 0.825 |
-| cnn2d       | `cfdac_mag` | 0.801 | 0.799 | 0.821 |
+| transformer | `frf_mag` | 0.800 | 0.800 | 0.941 |
+| cnn2d       | `cfdac_mag` | 0.801 | 0.799 | 0.934 |
 
 ![HPO — binary/xgb/cfdac_real](figures/hpo/binary__xgb__cfdac_real.png)
 ![confusion — binary/xgb/cfdac_real](figures/confusion/binary_xgb_cfdac_real.png)
@@ -1235,7 +1239,7 @@ The cross-domain breakthrough of this report lands here.  Every
 2-D / 3-D / 4-channel variant trained at 4 epochs on the
 standard `Conv2DStack` / `Conv3DStack` HPO grid:
 
-| variant            | architecture       | val   | test  | exp (full 2 638) |
+| variant            | architecture       | val   | test  | exp (balanced 680) |
 |--------------------|--------------------|-------|-------|------------------|
 | `cfdac`            | 2-D CNN, 2-ch      | 0.796 | 0.803 | 0.415            |
 | `cfdac_real`       | 2-D CNN, 1-ch      | 0.769 | 0.778 | 0.417            |
@@ -1287,22 +1291,22 @@ synth precision for cross-domain robustness.
 
 | model | feature | val acc | test acc | exp acc |
 |---|---|---|---|---|
-| mlp         | `modal` | 0.869 | 0.877 | 0.384 |
-| xgb         | `modal` | 0.807 | 0.822 | 0.328 |
-| cnn3d       | `cfdac3d_realimag` | 0.808 | 0.812 | 0.339 |
-| rf          | `modal` | 0.815 | 0.811 | 0.421 |
-| cnn2d       | `cfdac` | 0.796 | 0.803 | 0.415 |
-| cnn2d       | `cfdac_imag` | 0.799 | 0.802 | 0.331 |
-| cnn3d       | `cfdac3d_all` | 0.778 | 0.782 | 0.227 |
-| cnn2d       | `cfdac_real` | 0.769 | 0.778 | 0.417 |
-| cnn3d       | `cfdac3d_magphase` | 0.771 | 0.778 | 0.125 |
-| cnn2d       | `cfdac_phase` | 0.775 | 0.769 | 0.184 |
-| cnn2d       | `cfdac_magphase` | 0.770 | 0.767 | 0.266 |
-| cnn         | `frf_mag` | 0.677 | 0.689 | 0.333 |
-| cnn         | `timeseries` | 0.654 | 0.657 | 0.288 |
-| cnn2d       | `cfdac_mag` | 0.618 | 0.630 | 0.470 |
-| transformer | `timeseries` | 0.557 | 0.576 | 0.294 |
-| transformer | `frf_mag` | 0.476 | 0.501 | 0.347 |
+| mlp         | `modal` | 0.869 | 0.877 | 0.251 |
+| xgb         | `modal` | 0.807 | 0.822 | 0.216 |
+| cnn3d       | `cfdac3d_realimag` | 0.808 | 0.812 | 0.338 |
+| rf          | `modal` | 0.815 | 0.811 | 0.271 |
+| cnn2d       | `cfdac` | 0.796 | 0.803 | 0.299 |
+| cnn2d       | `cfdac_imag` | 0.799 | 0.802 | 0.316 |
+| cnn3d       | `cfdac3d_all` | 0.778 | 0.782 | 0.257 |
+| cnn2d       | `cfdac_real` | 0.769 | 0.778 | 0.357 |
+| cnn3d       | `cfdac3d_magphase` | 0.771 | 0.778 | 0.244 |
+| cnn2d       | `cfdac_phase` | 0.775 | 0.769 | 0.238 |
+| cnn2d       | `cfdac_magphase` | 0.770 | 0.767 | 0.216 |
+| cnn         | `frf_mag` | 0.677 | 0.689 | 0.390 |
+| cnn         | `timeseries` | 0.654 | 0.657 | 0.201 |
+| cnn2d       | `cfdac_mag` | 0.618 | 0.630 | 0.403 |
+| transformer | `timeseries` | 0.557 | 0.576 | 0.246 |
+| transformer | `frf_mag` | 0.476 | 0.501 | 0.351 |
 
 ![HPO — type/mlp/modal](figures/hpo/type__mlp__modal.png)
 ![confusion — type/mlp/modal](figures/confusion/type_mlp_modal.png)
@@ -1502,25 +1506,25 @@ regression is broken cross-domain regardless of representation
 
 | model | feature | val R² | test R² | exp R² |
 |---|---|---|---|---|
-| rf          | `modal` | 0.593 | 0.573 | -0.175 |
-| mlp         | `modal` | 0.551 | 0.542 | -24188615174025006546944.000 |
-| xgb         | `modal` | 0.551 | 0.532 | -0.045 |
-| cnn2d       | `cfdac_all` | 0.498 | 0.508 | -0.383 |
-| cnn2d       | `cfdac_magphase` | 0.484 | 0.506 | -0.025 |
-| cnn3d       | `cfdac3d_all` | 0.496 | 0.480 | -0.262 |
-| cnn3d       | `cfdac3d_magphase` | 0.484 | 0.472 | -0.130 |
-| cnn2d       | `cfdac_phase` | 0.467 | 0.470 | -0.031 |
-| cnn2d       | `cfdac_imag` | 0.423 | 0.420 | -0.581 |
-| cnn2d       | `cfdac` | 0.398 | 0.420 | -0.215 |
-| cnn2d       | `cfdac_real` | 0.410 | 0.400 | -0.104 |
-| cnn3d       | `cfdac3d_realimag` | 0.373 | 0.353 | -0.648 |
-| cnn         | `timeseries` | 0.258 | 0.227 | -5450889216.000 |
-| cnn2d       | `cfdac_mag` | 0.256 | 0.222 | -0.906 |
+| rf          | `modal` | 0.593 | 0.573 | -0.039 |
+| mlp         | `modal` | 0.551 | 0.542 | -52.585 |
+| xgb         | `modal` | 0.551 | 0.532 | 0.022 |
+| cnn2d       | `cfdac_all` | 0.498 | 0.508 | -0.388 |
+| cnn2d       | `cfdac_magphase` | 0.484 | 0.506 | -0.053 |
+| cnn3d       | `cfdac3d_all` | 0.496 | 0.480 | -0.255 |
+| cnn3d       | `cfdac3d_magphase` | 0.484 | 0.472 | -0.173 |
+| cnn2d       | `cfdac_phase` | 0.467 | 0.470 | -0.020 |
+| cnn2d       | `cfdac_imag` | 0.423 | 0.420 | -0.617 |
+| cnn2d       | `cfdac` | 0.398 | 0.420 | -0.429 |
+| cnn2d       | `cfdac_real` | 0.410 | 0.400 | -0.189 |
+| cnn3d       | `cfdac3d_realimag` | 0.373 | 0.353 | -0.546 |
+| cnn         | `timeseries` | 0.258 | 0.227 | -34.774 |
+| cnn2d       | `cfdac_mag` | 0.256 | 0.222 | -0.877 |
 | cnn         | `cfdac_real` | 0.277 | 0.214 | — |
-| cnn         | `frf_mag` | 0.253 | 0.213 | -11885453312.000 |
+| cnn         | `frf_mag` | 0.253 | 0.213 | -5.114 |
 | mlp         | `cfdac_real` | 0.256 | 0.205 | — |
-| transformer | `timeseries` | 0.202 | 0.168 | -0.077 |
-| transformer | `frf_mag` | 0.028 | 0.013 | -0.020 |
+| transformer | `timeseries` | 0.202 | 0.168 | -0.253 |
+| transformer | `frf_mag` | 0.028 | 0.013 | -0.133 |
 
 ![HPO — severity/rf/modal](figures/hpo/severity__rf__modal.png)
 ![scatter — severity/rf/modal](figures/scatter/severity_rf_modal.png)
@@ -1722,7 +1726,7 @@ timeseries wins.
 
 ### 7.4.19 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
 
-| variant            | architecture       | val   | test  | exp (full 1 938) |
+| variant            | architecture       | val   | test  | exp (balanced 480) |
 |--------------------|--------------------|-------|-------|------------------|
 | `cfdac`            | 2-D CNN, 2-ch      | 0.492 | 0.494 | 0.165            |
 | `cfdac_real`       | 2-D CNN, 1-ch      | 0.492 | 0.478 | 0.212            |
@@ -1748,26 +1752,26 @@ experimental score to 0.24+, behind only `cfdac_mag`.
 
 | model | feature | val acc | test acc | exp acc |
 |---|---|---|---|---|
-| cnn2d       | `cfdac_all` | 0.505 | 0.504 | 0.155 |
-| cnn2d       | `cfdac_imag` | 0.478 | 0.500 | 0.104 |
+| cnn2d       | `cfdac_all` | 0.505 | 0.504 | 0.227 |
+| cnn2d       | `cfdac_imag` | 0.478 | 0.500 | 0.171 |
 | rf          | `cfdac_real` | 0.511 | 0.497 | — |
-| cnn2d       | `cfdac` | 0.492 | 0.494 | 0.165 |
-| mlp         | `modal` | 0.507 | 0.494 | 0.453 |
-| rf          | `modal` | 0.509 | 0.492 | 0.101 |
+| cnn2d       | `cfdac` | 0.492 | 0.494 | 0.250 |
+| mlp         | `modal` | 0.507 | 0.494 | 0.285 |
+| rf          | `modal` | 0.509 | 0.492 | 0.083 |
 | mlp         | `cfdac_real` | 0.518 | 0.490 | — |
-| xgb         | `modal` | 0.509 | 0.488 | 0.059 |
-| cnn2d       | `cfdac_phase` | 0.504 | 0.487 | 0.230 |
-| cnn3d       | `cfdac3d_all` | 0.509 | 0.484 | 0.125 |
-| cnn3d       | `cfdac3d_magphase` | 0.496 | 0.479 | 0.170 |
-| cnn2d       | `cfdac_real` | 0.492 | 0.478 | 0.212 |
-| cnn2d       | `cfdac_magphase` | 0.512 | 0.474 | 0.119 |
-| cnn         | `timeseries` | 0.488 | 0.473 | 0.301 |
-| cnn         | `frf_mag` | 0.489 | 0.469 | 0.239 |
-| cnn2d       | `cfdac_mag` | 0.492 | 0.463 | 0.416 |
-| cnn3d       | `cfdac3d_realimag` | 0.496 | 0.457 | 0.149 |
+| xgb         | `modal` | 0.509 | 0.488 | 0.102 |
+| cnn2d       | `cfdac_phase` | 0.504 | 0.487 | 0.206 |
+| cnn3d       | `cfdac3d_all` | 0.509 | 0.484 | 0.215 |
+| cnn3d       | `cfdac3d_magphase` | 0.496 | 0.479 | 0.250 |
+| cnn2d       | `cfdac_real` | 0.492 | 0.478 | 0.179 |
+| cnn2d       | `cfdac_magphase` | 0.512 | 0.474 | 0.108 |
+| cnn         | `timeseries` | 0.488 | 0.473 | 0.194 |
+| cnn         | `frf_mag` | 0.489 | 0.469 | 0.287 |
+| cnn2d       | `cfdac_mag` | 0.492 | 0.463 | 0.263 |
+| cnn3d       | `cfdac3d_realimag` | 0.496 | 0.457 | 0.231 |
 | cnn         | `cfdac_real` | 0.443 | 0.449 | — |
-| transformer | `timeseries` | 0.387 | 0.368 | 0.204 |
-| transformer | `frf_mag` | 0.267 | 0.251 | 0.040 |
+| transformer | `timeseries` | 0.387 | 0.368 | 0.210 |
+| transformer | `frf_mag` | 0.267 | 0.251 | 0.108 |
 | transformer | `cfdac_real` | 0.236 | 0.230 | — |
 
 ![HPO — col_location/cnn2d/cfdac_all](figures/hpo/col_location__cnn2d__cfdac_all.png)
@@ -1949,7 +1953,7 @@ timeseries wins by a wide margin.
 
 ### 7.5.18 2-D CNN, 3-D CNN and 4-channel CNN on CFDAC variants
 
-| variant            | architecture       | val   | test  | exp (full 238) |
+| variant            | architecture       | val   | test  | exp (balanced 160) |
 |--------------------|--------------------|-------|-------|----------------|
 | `cfdac`            | 2-D CNN, 2-ch      | 0.977 | 0.953 | 0.197          |
 | `cfdac_real`       | 2-D CNN, 1-ch      | 0.893 | 0.863 | 0.231          |
@@ -1977,25 +1981,25 @@ from Conv3d at D = 2 / 4.
 |---|---|---|---|---|
 | mlp         | `cfdac_real` | 1.000 | 0.997 | — |
 | rf          | `cfdac_real` | 0.997 | 0.997 | — |
-| rf          | `modal` | 1.000 | 0.990 | 0.168 |
-| cnn2d       | `cfdac_magphase` | 0.990 | 0.987 | 0.168 |
-| mlp         | `modal` | 1.000 | 0.987 | 0.256 |
-| xgb         | `modal` | 1.000 | 0.987 | 0.256 |
-| cnn2d       | `cfdac_phase` | 0.983 | 0.973 | 0.168 |
-| cnn2d       | `cfdac_all` | 0.977 | 0.970 | 0.282 |
-| cnn2d       | `cfdac_imag` | 0.973 | 0.970 | 0.168 |
-| cnn3d       | `cfdac3d_all` | 0.987 | 0.970 | 0.256 |
-| cnn3d       | `cfdac3d_magphase` | 0.987 | 0.970 | 0.168 |
+| rf          | `modal` | 1.000 | 0.990 | 0.250 |
+| cnn2d       | `cfdac_magphase` | 0.990 | 0.987 | 0.250 |
+| mlp         | `modal` | 1.000 | 0.987 | 0.250 |
+| xgb         | `modal` | 1.000 | 0.987 | 0.250 |
+| cnn2d       | `cfdac_phase` | 0.983 | 0.973 | 0.250 |
+| cnn2d       | `cfdac_all` | 0.977 | 0.970 | 0.338 |
+| cnn2d       | `cfdac_imag` | 0.973 | 0.970 | 0.250 |
+| cnn3d       | `cfdac3d_all` | 0.987 | 0.970 | 0.250 |
+| cnn3d       | `cfdac3d_magphase` | 0.987 | 0.970 | 0.250 |
 | cnn         | `cfdac_real` | 0.990 | 0.967 | — |
-| cnn2d       | `cfdac` | 0.977 | 0.953 | 0.168 |
-| cnn3d       | `cfdac3d_realimag` | 0.937 | 0.937 | 0.168 |
-| cnn2d       | `cfdac_mag` | 0.953 | 0.927 | 0.256 |
-| cnn2d       | `cfdac_real` | 0.893 | 0.863 | 0.218 |
-| transformer | `timeseries` | 0.683 | 0.637 | 0.059 |
+| cnn2d       | `cfdac` | 0.977 | 0.953 | 0.250 |
+| cnn3d       | `cfdac3d_realimag` | 0.937 | 0.937 | 0.250 |
+| cnn2d       | `cfdac_mag` | 0.953 | 0.927 | 0.250 |
+| cnn2d       | `cfdac_real` | 0.893 | 0.863 | 0.163 |
+| transformer | `timeseries` | 0.683 | 0.637 | 0.075 |
 | transformer | `cfdac_real` | 0.553 | 0.560 | — |
-| transformer | `frf_mag` | 0.477 | 0.480 | 0.168 |
-| cnn         | `timeseries` | 0.477 | 0.473 | 0.256 |
-| cnn         | `frf_mag` | 0.427 | 0.413 | 0.256 |
+| transformer | `frf_mag` | 0.477 | 0.480 | 0.250 |
+| cnn         | `timeseries` | 0.477 | 0.473 | 0.250 |
+| cnn         | `frf_mag` | 0.427 | 0.413 | 0.250 |
 
 ![HPO — mass_location/mlp/cfdac_real](figures/hpo/mass_location__mlp__cfdac_real.png)
 ![confusion — mass_location/mlp/cfdac_real](figures/confusion/mass_location_mlp_cfdac_real.png)
@@ -2099,7 +2103,7 @@ brief.
   combinations per indicator.  Modal features are
   `StandardScaler`-fit on the synth train fold and the same
   scaler is reused for val / test / experimental.
-* **Experimental test.** The full 2 638-case experimental set
+* **Experimental test.** The balanced 680-case experimental set
   filtered to its 2 176 damage cases; metric is
   R² + MAE against the indicators that pymodal computes from
   the *experimental* FRF (not from any model prediction).
@@ -2130,7 +2134,7 @@ the relationship is noisier (SCI, FRFSM_6dB).
 | M2L_{mean,min,max,abs_sum} | XGB + modal | 0.997–0.999 | 0.997–0.999 |
 | M2L_std       | XGB + modal   | 0.994     | 0.994      |
 
-### 7.6.4 Cross-domain (full experimental) performance
+### 7.6.4 Cross-domain (balanced experimental) performance
 
 | indicator     | best model  | exp R²   | exp MAE       |
 |---------------|-------------|----------|---------------|
@@ -2578,7 +2582,7 @@ predictor would absorb.
 
 Per-cell results in
 [`hpo_indicators/`](hpo_indicators/) and
-[`indicator_predictions_full.json`](indicator_predictions_full.json).
+[`balanced/indicator_predictions_full.json`](balanced/indicator_predictions_full.json).
 
 ---
 # 8. Cross-task takeaways
@@ -2653,14 +2657,14 @@ analogues.
 
 # 9. Sim-to-real summary
 
-| task          | best synth test                | best **full exp** (n)                           | best **balanced exp** (n, 40/cell)           | notes |
-|---------------|--------------------------------|-------------------------------------------------|----------------------------------------------|-------|
-| binary        | 0.989 (MLP/modal)              | 0.825 (MLP/modal = baseline, 2 638)             | 0.941 (4 deep CFDAC cells tied = baseline, 680) | both denominators force collapse to "predict damage"; baseline drifts with the per-cell sub-sample |
-| type          | 0.877 (MLP/modal)              | **0.470 (2-D CNN/cfdac_mag, 2 638)**            | 0.403 (2-D CNN/cfdac_mag, 680)                  | `cfdac_mag` is still the best deep cell on the balanced subset |
-| severity      | R² 0.573 (RF/modal)            | R² −0.02 (Transformer/frf_mag, 2 176)           | **R² +0.02 (XGB/modal, 640)**                   | the only configuration that lifts above zero exp R² is XGB+modal on the per-cell-balanced subset |
-| col_location  | 0.494 (MLP/modal)              | 0.453 (MLP/modal, 1 938)                        | 0.287 (1-D CNN/frf_mag, 480)                    | balanced subset makes the task harder (40/cell × all six locations) — accuracy drops, but the dispersion across cells is meaningful again |
-| mass_location | 0.990 (RF/modal)               | 0.282 (2-D CNN/cfdac_all, 238)                  | **0.338 (2-D CNN/cfdac_all, 160)**              | rebalancing helps: every plate is given equal weight |
-| indicators    | R² 0.99 ×20 (XGB/modal)        | M2L_abs_sum R² 0.756 (RF/modal, 2 176)          | M2L_abs_sum R² 0.78 / RVAC_min R² 0.60 (xgb)    | bounded correlation indicators still transfer; unbounded ones (ODS_diff, FRFSF, r2_imag) still collapse |
+| task          | best synth test                | best **balanced exp** (n, 40/cell)           | notes |
+|---------------|--------------------------------|----------------------------------------------|-------|
+| binary        | 0.989 (MLP/modal)              | 0.941 (4 deep CFDAC cells tied = baseline, 680) | balanced Pristine slice still forces the prior to dominate; baseline is the "predict damage" floor |
+| type          | 0.877 (MLP/modal)              | **0.403 (2-D CNN/cfdac_mag, 680)**            | `cfdac_mag` is the best deep cell on the balanced subset |
+| severity      | R² 0.573 (RF/modal)            | **R² +0.02 (XGB/modal, 640)**                   | the only configuration that lifts above zero exp R² is XGB+modal on the per-cell-balanced subset |
+| col_location  | 0.494 (MLP/modal)              | 0.287 (1-D CNN/frf_mag, 480)                    | balanced subset stress-tests every location uniformly; accuracy drops because the AD-side cells now carry real weight |
+| mass_location | 0.990 (RF/modal)               | **0.338 (2-D CNN/cfdac_all, 160)**              | balanced subset gives each Mass plate equal weight |
+| indicators    | R² 0.99 ×20 (XGB/modal)        | M2L_abs_sum R² 0.78 / RVAC_min R² 0.60 (xgb, 640) | bounded correlation indicators still transfer; unbounded ones (ODS_diff, FRFSF, r2_imag) still collapse |
 
 Lessons:
 

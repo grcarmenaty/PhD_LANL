@@ -250,7 +250,7 @@ def main() -> None:
     args.out.mkdir(parents=True, exist_ok=True)
 
     hpo_cells = _read_hpo_cells(args.results / "hpo")
-    exp_cells = _read_exp_metrics(args.results / "experimental_full_evaluation.json")
+    exp_cells = _read_exp_metrics(args.results / "balanced" / "experimental_full_evaluation.json")
     cross_model_tables(hpo_cells, exp_cells, args.out)
     variant_plots(hpo_cells, args.out)
     indicator_subsections(args.out)

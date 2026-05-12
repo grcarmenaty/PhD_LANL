@@ -54,8 +54,8 @@ def main() -> None:
     p.add_argument("--results", type=Path, default=_REPO / "results")
     args = p.parse_args()
 
-    ind_path = args.results / "indicator_predictions_full.json"
-    dmg_path = args.results / "experimental_full_evaluation.json"
+    ind_path = args.results / "balanced" / "indicator_predictions_full.json"
+    dmg_path = args.results / "balanced" / "experimental_full_evaluation.json"
     if not ind_path.exists() or not dmg_path.exists():
         sys.exit(f"missing {ind_path} or {dmg_path}")
 

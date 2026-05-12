@@ -175,7 +175,8 @@ def main() -> None:
     p.add_argument("--hpo", type=Path,
                       default=_REPO / "results" / "hpo")
     p.add_argument("--exp", type=Path,
-                      default=_REPO / "results" / "experimental_full_evaluation.json")
+                      default=_REPO / "results" / "balanced"
+                              / "experimental_full_evaluation.json")
     p.add_argument("--ind-subs", type=Path,
                       default=Path("/tmp/indicator_subsections.md"))
     p.add_argument("--ind-vs-dmg", type=Path,
