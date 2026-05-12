@@ -334,3 +334,84 @@ Parameters: { "use_label_encoder" } are not used.
   [156/255] col_location/transformer/timeseries  {'d_model': 48, 'n_layers': 1}  val=0.3019  test=0.3056  (8.9s)
   [157/255] col_location/transformer/timeseries  {'d_model': 48, 'n_layers': 2}  val=0.3307  test=0.3178  (17.2s)
   [158/255] col_location/transformer/timeseries  {'d_model': 64, 'n_layers': 1}  val=0.2475  test=0.2567  (11.1s)
+  [159/255] col_location/transformer/timeseries  {'d_model': 64, 'n_layers': 2}  val=0.3607  test=0.3633  (20.8s)
+  [160/255] col_location/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.4750  test=0.4722  (5.6s)
+  [161/255] col_location/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.4750  test=0.4667  (7.0s)
+  [162/255] col_location/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.4562  test=0.4678  (9.1s)
+  [163/255] col_location/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.4229  test=0.4322  (11.7s)
+  [164/255] mass_location/rf/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.9933  test=0.9867  (0.4s)
+  [165/255] mass_location/rf/modal  {'n_estimators': 100, 'max_depth': 12}  val=1.0000  test=0.9900  (0.3s)
+  [166/255] mass_location/rf/modal  {'n_estimators': 100, 'max_depth': None}  val=1.0000  test=0.9900  (0.3s)
+  [167/255] mass_location/rf/modal  {'n_estimators': 200, 'max_depth': 6}  val=0.9933  test=0.9867  (0.6s)
+  [168/255] mass_location/rf/modal  {'n_estimators': 200, 'max_depth': 12}  val=1.0000  test=0.9933  (0.6s)
+  [169/255] mass_location/rf/modal  {'n_estimators': 200, 'max_depth': None}  val=1.0000  test=0.9933  (0.6s)
+  [170/255] mass_location/rf/modal  {'n_estimators': 300, 'max_depth': 6}  val=1.0000  test=0.9867  (0.8s)
+  [171/255] mass_location/rf/modal  {'n_estimators': 300, 'max_depth': 12}  val=1.0000  test=0.9933  (0.9s)
+  [172/255] mass_location/rf/modal  {'n_estimators': 300, 'max_depth': None}  val=1.0000  test=0.9933  (0.9s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:07] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [173/255] mass_location/xgb/modal  {'n_estimators': 100, 'max_depth': 4}  val=0.9967  test=0.9933  (0.3s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:07] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [174/255] mass_location/xgb/modal  {'n_estimators': 100, 'max_depth': 6}  val=1.0000  test=0.9900  (0.4s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:07] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [175/255] mass_location/xgb/modal  {'n_estimators': 100, 'max_depth': 8}  val=1.0000  test=0.9900  (0.4s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:08] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [176/255] mass_location/xgb/modal  {'n_estimators': 300, 'max_depth': 4}  val=1.0000  test=0.9933  (0.5s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:08] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [177/255] mass_location/xgb/modal  {'n_estimators': 300, 'max_depth': 6}  val=1.0000  test=0.9933  (0.6s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:09] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [178/255] mass_location/xgb/modal  {'n_estimators': 300, 'max_depth': 8}  val=1.0000  test=0.9900  (0.6s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:10] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [179/255] mass_location/xgb/modal  {'n_estimators': 600, 'max_depth': 4}  val=1.0000  test=0.9933  (0.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:10] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [180/255] mass_location/xgb/modal  {'n_estimators': 600, 'max_depth': 6}  val=1.0000  test=0.9933  (0.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [23:01:11] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [181/255] mass_location/xgb/modal  {'n_estimators': 600, 'max_depth': 8}  val=1.0000  test=0.9900  (0.8s)
+  [182/255] mass_location/mlp/modal  {'hidden': (128, 64), 'lr': 0.0005}  val=0.9367  test=0.9233  (0.2s)
+  [183/255] mass_location/mlp/modal  {'hidden': (128, 64), 'lr': 0.001}  val=0.9933  test=0.9767  (0.2s)
+  [184/255] mass_location/mlp/modal  {'hidden': (128, 64), 'lr': 0.003}  val=1.0000  test=0.9800  (0.2s)
+  [185/255] mass_location/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.0005}  val=0.9867  test=0.9733  (0.2s)
+  [186/255] mass_location/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9967  test=0.9900  (0.2s)
+  [187/255] mass_location/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.003}  val=1.0000  test=0.9833  (0.3s)
+  [188/255] mass_location/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.0005}  val=0.9967  test=0.9767  (0.3s)
+  [189/255] mass_location/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.001}  val=0.9967  test=0.9833  (0.3s)
+  [190/255] mass_location/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.003}  val=1.0000  test=0.9933  (0.4s)
+  [191/255] mass_location/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.2500  test=0.2500  (1.2s)
+  [192/255] mass_location/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.5800  test=0.6033  (1.3s)
+  [193/255] mass_location/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.2500  test=0.2500  (2.3s)
+  [194/255] mass_location/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.4100  test=0.3900  (2.6s)
+  [195/255] mass_location/transformer/frf_mag  {'d_model': 32, 'n_layers': 1}  val=0.4600  test=0.4733  (0.8s)
+  [196/255] mass_location/transformer/frf_mag  {'d_model': 32, 'n_layers': 2}  val=0.6000  test=0.6267  (1.5s)
+  [197/255] mass_location/transformer/frf_mag  {'d_model': 48, 'n_layers': 1}  val=0.4733  test=0.4933  (1.0s)
+  [198/255] mass_location/transformer/frf_mag  {'d_model': 48, 'n_layers': 2}  val=0.6400  test=0.6467  (1.9s)
+  [199/255] mass_location/transformer/frf_mag  {'d_model': 64, 'n_layers': 1}  val=0.4767  test=0.5000  (1.2s)
+  [200/255] mass_location/transformer/frf_mag  {'d_model': 64, 'n_layers': 2}  val=0.5233  test=0.5033  (2.5s)
+  [201/255] mass_location/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.5733  test=0.5667  (2.5s)
+  [202/255] mass_location/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.6133  test=0.5700  (2.7s)
+  [203/255] mass_location/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.2567  test=0.2567  (8.4s)

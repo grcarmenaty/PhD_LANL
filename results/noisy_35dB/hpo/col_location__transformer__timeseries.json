@@ -1,0 +1,79 @@
+{
+  "task": "col_location",
+  "model": "transformer",
+  "feature": "timeseries",
+  "best_hyperparams": {
+    "d_model": 64,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.3607103218645949,
+  "best_metric_test": 0.36333333333333334,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 32,
+        "n_layers": 1
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.29411764705882354,
+      "metric_test": 0.27,
+      "extras": {},
+      "runtime_s": 7.330942392349243
+    },
+    {
+      "hyperparams": {
+        "d_model": 32,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.33074361820199777,
+      "metric_test": 0.34,
+      "extras": {},
+      "runtime_s": 14.056467056274414
+    },
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 1
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.3018867924528302,
+      "metric_test": 0.3055555555555556,
+      "extras": {},
+      "runtime_s": 8.853453636169434
+    },
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.33074361820199777,
+      "metric_test": 0.31777777777777777,
+      "extras": {},
+      "runtime_s": 17.1627836227417
+    },
+    {
+      "hyperparams": {
+        "d_model": 64,
+        "n_layers": 1
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.24750277469478357,
+      "metric_test": 0.25666666666666665,
+      "extras": {},
+      "runtime_s": 11.095608234405518
+    },
+    {
+      "hyperparams": {
+        "d_model": 64,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.3607103218645949,
+      "metric_test": 0.36333333333333334,
+      "extras": {},
+      "runtime_s": 20.82706093788147
+    }
+  ]
+}
