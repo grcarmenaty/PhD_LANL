@@ -92,3 +92,25 @@ plan: 22 indicators × 3 cells, ~264 trials
   mlp/modal           val R²=0.988  test R²=0.986  MAE=0.024  best={'hidden': [256, 128, 64], 'lr': 0.003}
 
 === indicator 18 / 22  'M2L_std'  std(train)=0.0607 ===
+  rf/modal           val R²=0.972  test R²=0.975  MAE=0.007  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.977  test R²=0.978  MAE=0.007  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.953  test R²=0.952  MAE=0.010  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 19 / 22  'M2L_min'  std(train)=0.3056 ===
+  rf/modal           val R²=0.985  test R²=0.985  MAE=0.026  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.989  test R²=0.988  MAE=0.023  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.986  test R²=0.985  MAE=0.028  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 20 / 22  'M2L_max'  std(train)=0.2149 ===
+  rf/modal           val R²=0.974  test R²=0.975  MAE=0.024  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.984  test R²=0.982  MAE=0.020  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.972  test R²=0.972  MAE=0.028  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 21 / 22  'M2L_abs_sum'  std(train)=2.3115 ===
+  rf/modal           val R²=0.985  test R²=0.984  MAE=0.200  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.988  test R²=0.986  MAE=0.177  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.983  test R²=0.981  MAE=0.237  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+done — 264 trials.
+
+--- $ /usr/local/bin/python ml_pipeline/train_indicator_predictors.py --features /home/user/PhD_LANL/dataset/features_noisy_20dB.h5 --out /home/user/PhD_LANL/results/noisy_20dB
