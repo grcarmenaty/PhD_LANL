@@ -1,0 +1,4 @@
+using 8000 damage samples out of 10000
+plan: 22 indicators × 3 cells, ~264 trials
+
+=== indicator  0 / 22  'SCI'  std(train)=0.1117 ===
