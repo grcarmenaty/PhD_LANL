@@ -1,0 +1,66 @@
+{
+  "indicator": "ODS_diff",
+  "model": "rf",
+  "feature": "modal",
+  "best_hyperparams": {
+    "n_estimators": 300,
+    "max_depth": null
+  },
+  "best_metric_val": 0.9787872511686958,
+  "best_metric_test": 0.9781148459661662,
+  "best_mae_test": 6.560305445162455,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 100,
+        "max_depth": 12
+      },
+      "metric_name": "R2",
+      "metric_val": 0.9771785104901177,
+      "metric_test": 0.9766701400595056,
+      "extras": {
+        "mae_test": 6.880836827401825
+      },
+      "runtime_s": 4.998025417327881
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 100,
+        "max_depth": null
+      },
+      "metric_name": "R2",
+      "metric_val": 0.9780054549431605,
+      "metric_test": 0.9780066776973688,
+      "extras": {
+        "mae_test": 6.618736043294271
+      },
+      "runtime_s": 6.4335033893585205
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 12
+      },
+      "metric_name": "R2",
+      "metric_val": 0.9777621422422718,
+      "metric_test": 0.9767011748321011,
+      "extras": {
+        "mae_test": 6.843042893938737
+      },
+      "runtime_s": 14.646557092666626
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": null
+      },
+      "metric_name": "R2",
+      "metric_val": 0.9787872511686958,
+      "metric_test": 0.9781148459661662,
+      "extras": {
+        "mae_test": 6.560305445162455
+      },
+      "runtime_s": 18.697669506072998
+    }
+  ]
+}
