@@ -48,3 +48,6 @@ dataset/features_noisy_*dB.h5
 results/noisy_*dB/balanced/experimental_full_per_case.json
 results/noisy_*dB/models/*.pkl
 results/noisy_*dB/models_indicators/*.pkl
+
+# Sweep launcher logs (kept locally only)
+logs/
