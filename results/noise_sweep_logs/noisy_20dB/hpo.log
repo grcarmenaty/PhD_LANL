@@ -223,3 +223,6 @@ Parameters: { "use_label_encoder" } are not used.
   [146/255] severity/transformer/timeseries  {'d_model': 48, 'n_layers': 1}  val=0.0978  test=0.0955  (14.8s)
   [147/255] severity/transformer/timeseries  {'d_model': 48, 'n_layers': 2}  val=0.1234  test=0.1092  (30.2s)
   [148/255] severity/transformer/timeseries  {'d_model': 64, 'n_layers': 1}  val=0.0952  test=0.0851  (20.1s)
+  [149/255] severity/transformer/timeseries  {'d_model': 64, 'n_layers': 2}  val=0.1026  test=0.0908  (76.8s)
+  [150/255] severity/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.2630  test=0.2327  (8.7s)
+  [151/255] severity/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.3591  test=0.3517  (10.0s)
