@@ -1,0 +1,32 @@
+{
+  "task": "mass_location",
+  "model": "mlp",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.9766666666666667,
+  "best_metric_test": 0.95,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9766666666666667,
+      "metric_test": 0.95,
+      "extras": {},
+      "runtime_s": 3.4461286067962646
+    }
+  ]
+}
