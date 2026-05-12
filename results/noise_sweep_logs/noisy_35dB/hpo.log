@@ -234,3 +234,4 @@ Parameters: { "use_label_encoder" } are not used.
   [92/255] severity/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.2878  test=0.2451  (11.4s)
   [93/255] severity/transformer/frf_mag  {'d_model': 32, 'n_layers': 1}  val=0.0035  test=0.0025  (3.4s)
   [94/255] severity/transformer/frf_mag  {'d_model': 32, 'n_layers': 2}  val=0.0046  test=0.0031  (6.3s)
+  [95/255] severity/transformer/frf_mag  {'d_model': 48, 'n_layers': 1}  val=0.0167  test=0.0129  (4.6s)
