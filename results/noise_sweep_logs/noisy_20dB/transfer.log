@@ -1615,3 +1615,10 @@
   type_transformer_timeseries__head__k50                  accuracy +0.300  (1.2s)
   type_transformer_timeseries__head_proj__k10             accuracy +0.306  (0.3s)
   type_transformer_timeseries__head_proj__k20             accuracy +0.289  (0.6s)
+  type_transformer_timeseries__head_proj__k30             accuracy +0.290  (1.3s)
+  type_transformer_timeseries__head_proj__k40             accuracy +0.299  (1.1s)
+  type_transformer_timeseries__head_proj__k50             accuracy +0.306  (1.3s)
+
+wrote results/transfer_learning.json  (1220 rows)
+
+--- $ /usr/local/bin/python ml_pipeline/transfer_learn.py --syn /home/user/PhD_LANL/dataset/features_noisy_20dB.h5 --exp /home/user/PhD_LANL/dataset/experimental_features_balanced.h5 --results /home/user/PhD_LANL/results/noisy_20dB --epochs 4
