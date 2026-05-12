@@ -57,3 +57,4 @@ plan: 25 cells, 100 trials
   [50/100] mass_location/cnn2d/cfdac_magphase {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.7533  test=0.8267  (2.3s)
   [51/100] mass_location/cnn2d/cfdac_magphase {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.8367  test=0.8700  (3.0s)
   [52/100] mass_location/cnn2d/cfdac_magphase {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.9167  test=0.9300  (3.9s)
+  [53/100] severity/cnn2d/cfdac_magphase {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.2390  test=0.2207  (10.0s)
