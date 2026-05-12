@@ -16,3 +16,12 @@
    .. 8000/10000
    .. 8500/10000
    .. 9000/10000
+   .. 9500/10000
+   .. 10000/10000
+
+Wrote CFDAC datasets → /home/user/PhD_LANL/dataset/features_noisy_35dB.h5
+
+--- $ /usr/local/bin/python ml_pipeline/cfdac.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5
+   .. 500/10000
+   .. 1000/10000
+   .. 1500/10000

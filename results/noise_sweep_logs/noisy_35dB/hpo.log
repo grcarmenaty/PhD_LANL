@@ -1,0 +1,81 @@
+loading feature: modal
+loading feature: frf_mag
+loading feature: timeseries
+loading feature: cfdac
+HPO plan: 40 cells, 255 total trials
+  [1/255] binary/rf/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.7487  test=0.7640  (0.6s)
+  [2/255] binary/rf/modal  {'n_estimators': 100, 'max_depth': 12}  val=0.8267  test=0.8327  (0.9s)
+  [3/255] binary/rf/modal  {'n_estimators': 100, 'max_depth': None}  val=0.8960  test=0.8960  (1.2s)
+  [4/255] binary/rf/modal  {'n_estimators': 200, 'max_depth': 6}  val=0.7473  test=0.7613  (1.3s)
+  [5/255] binary/rf/modal  {'n_estimators': 200, 'max_depth': 12}  val=0.8280  test=0.8287  (1.7s)
+  [6/255] binary/rf/modal  {'n_estimators': 200, 'max_depth': None}  val=0.8880  test=0.8927  (2.5s)
+  [7/255] binary/rf/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.7473  test=0.7640  (1.9s)
+  [8/255] binary/rf/modal  {'n_estimators': 300, 'max_depth': 12}  val=0.8313  test=0.8293  (2.5s)
+  [9/255] binary/rf/modal  {'n_estimators': 300, 'max_depth': None}  val=0.8927  test=0.8947  (3.7s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:04:58] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [10/255] binary/xgb/modal  {'n_estimators': 100, 'max_depth': 4}  val=0.9060  test=0.9100  (0.2s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:04:58] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [11/255] binary/xgb/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.9287  test=0.9213  (0.5s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:04:59] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [12/255] binary/xgb/modal  {'n_estimators': 100, 'max_depth': 8}  val=0.9267  test=0.9180  (0.7s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:04:59] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [13/255] binary/xgb/modal  {'n_estimators': 300, 'max_depth': 4}  val=0.9307  test=0.9287  (0.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:05:00] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [14/255] binary/xgb/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.9327  test=0.9313  (1.4s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:05:02] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [15/255] binary/xgb/modal  {'n_estimators': 300, 'max_depth': 8}  val=0.9227  test=0.9247  (1.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:05:03] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [16/255] binary/xgb/modal  {'n_estimators': 600, 'max_depth': 4}  val=0.9287  test=0.9273  (1.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:05:05] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [17/255] binary/xgb/modal  {'n_estimators': 600, 'max_depth': 6}  val=0.9267  test=0.9320  (2.6s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [20:05:08] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [18/255] binary/xgb/modal  {'n_estimators': 600, 'max_depth': 8}  val=0.9260  test=0.9240  (3.2s)
+  [19/255] binary/mlp/modal  {'hidden': (128, 64), 'lr': 0.0005}  val=0.8093  test=0.8107  (2.2s)
+  [20/255] binary/mlp/modal  {'hidden': (128, 64), 'lr': 0.001}  val=0.8507  test=0.8647  (1.1s)
+  [21/255] binary/mlp/modal  {'hidden': (128, 64), 'lr': 0.003}  val=0.9307  test=0.9387  (1.1s)
+  [22/255] binary/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.0005}  val=0.8207  test=0.8440  (1.7s)
+  [23/255] binary/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9100  test=0.9107  (1.7s)
+  [24/255] binary/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.003}  val=0.9360  test=0.9407  (1.7s)
+  [25/255] binary/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.0005}  val=0.8853  test=0.8880  (2.3s)
+  [26/255] binary/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.001}  val=0.9393  test=0.9413  (2.4s)
+  [27/255] binary/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.003}  val=0.9453  test=0.9467  (2.5s)
+  [28/255] binary/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8167  test=0.8300  (8.0s)
+  [29/255] binary/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.8067  test=0.8353  (8.5s)
+  [30/255] binary/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.8000  test=0.8000  (19.6s)
+  [31/255] binary/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8087  test=0.8180  (18.6s)
+  [32/255] binary/transformer/frf_mag  {'d_model': 32, 'n_layers': 1}  val=0.8000  test=0.8000  (5.7s)
+  [33/255] binary/transformer/frf_mag  {'d_model': 32, 'n_layers': 2}  val=0.8000  test=0.8000  (10.1s)
+  [34/255] binary/transformer/frf_mag  {'d_model': 48, 'n_layers': 1}  val=0.8000  test=0.8000  (6.8s)
+  [35/255] binary/transformer/frf_mag  {'d_model': 48, 'n_layers': 2}  val=0.8000  test=0.8000  (12.1s)
+  [36/255] binary/transformer/frf_mag  {'d_model': 64, 'n_layers': 1}  val=0.8000  test=0.8000  (8.1s)
+  [37/255] binary/transformer/frf_mag  {'d_model': 64, 'n_layers': 2}  val=0.8000  test=0.8000  (15.0s)
+  [38/255] binary/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8000  test=0.8000  (21.6s)
+  [39/255] binary/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.8000  test=0.8000  (20.3s)
+  [40/255] binary/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.8020  test=0.7967  (43.9s)
