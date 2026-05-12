@@ -69,3 +69,5 @@ plan: 140 cells (existing cells skipped)
     shape = (10000, 1, 128, 128), mem = 0.66 GB
   [61] binary/cnn/cfdac_phase {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8900  test=0.8920  (9.3s)
   [62] binary/mlp/cfdac_phase {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9227  test=0.9187  (15.0s)
+  [63] binary/rf/cfdac_phase {'n_estimators': 200, 'max_depth': None}  val=0.9087  test=0.9080  (35.3s)
+  [64] binary/transformer/cfdac_phase {'d_model': 48, 'n_layers': 2}  val=0.8187  test=0.8480  (8.9s)
