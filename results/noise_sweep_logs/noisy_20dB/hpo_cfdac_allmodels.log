@@ -1,0 +1,5 @@
+plan: 140 cells (existing cells skipped)
+>>> loading cfdac_real ...
+    shape = (10000, 1, 128, 128), mem = 0.66 GB
+  [1] binary/cnn/cfdac_real {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8573  test=0.8433  (11.5s)
+  [2] binary/mlp/cfdac_real {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.8927  test=0.9033  (17.5s)
