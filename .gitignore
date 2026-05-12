@@ -41,3 +41,8 @@ results/models_indicators/*.pkl
 results/experimental_full_per_case.json
 results/balanced/experimental_full_per_case.json
 
+
+# Noisy synth pipeline outputs (regeneratable)
+dataset/noisy_*dB/
+dataset/features_noisy_*dB.h5
+results/noisy_*dB/balanced/experimental_full_per_case.json

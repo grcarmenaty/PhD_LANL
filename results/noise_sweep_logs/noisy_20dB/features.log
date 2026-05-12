@@ -1,0 +1,38 @@
+  band freqs: 5.00 .. 100.00 Hz (381 bins)
+  building pristine reference …
+  10000 samples across 20 chunks
+/home/user/pymodal/pymodal/utils.py:686: ComplexWarning: Casting complex values to real discards the imaginary part
+  M2L_value[x] = CFDAC [x, x]
+/home/user/pymodal/pymodal/utils.py:687: ComplexWarning: Casting complex values to real discards the imaginary part
+  M2L_value[y] = CFDAC [y, y]
+/home/user/pymodal/pymodal/utils.py:699: ComplexWarning: Casting complex values to real discards the imaginary part
+  M2L_value[x] = M2L_value[x] + M2L_func(unmod_value_inf, i)
+/home/user/pymodal/pymodal/utils.py:700: ComplexWarning: Casting complex values to real discards the imaginary part
+  M2L_value[y] = M2L_value[y] + M2L_func(unmod_value_sup, i)
+/home/user/pymodal/pymodal/utils.py:701: ComplexWarning: Casting complex values to real discards the imaginary part
+  M2L_value[0] = CFDAC[0, 0] + M2L_func(CFDAC[0, 1] - CFDAC[1, 0], 1)
+/home/user/pymodal/pymodal/utils.py:702: ComplexWarning: Casting complex values to real discards the imaginary part
+  M2L_value[m - 1] = (CFDAC[m - 1, m - 1] + M2L_func(CFDAC[m - 2, m - 1] -
+   .. 511/10000
+   .. 1022/10000
+   .. 1533/10000
+   .. 2044/10000
+   .. 2555/10000
+   .. 3066/10000
+   .. 3577/10000
+   .. 4088/10000
+   .. 4599/10000
+   .. 5110/10000
+   .. 5621/10000
+   .. 6132/10000
+   .. 6643/10000
+   .. 7154/10000
+   .. 7665/10000
+   .. 8176/10000
+   .. 8687/10000
+   .. 9198/10000
+   .. 9709/10000
+   .. 10000/10000
+Wrote features → /home/user/PhD_LANL/dataset/features_noisy_20dB.h5  (696.2 MB)
+
+--- $ /usr/local/bin/python ml_pipeline/features.py --dataset /home/user/PhD_LANL/dataset/noisy_20dB --out /home/user/PhD_LANL/dataset/features_noisy_20dB.h5
