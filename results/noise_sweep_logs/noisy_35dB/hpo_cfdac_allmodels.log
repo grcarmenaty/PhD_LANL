@@ -46,3 +46,6 @@ plan: 140 cells (existing cells skipped)
 >>> loading cfdac_mag ...
     shape = (10000, 1, 128, 128), mem = 0.66 GB
   [41] binary/cnn/cfdac_mag {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8000  test=0.8000  (9.3s)
+  [42] binary/mlp/cfdac_mag {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9293  test=0.9167  (18.9s)
+  [43] binary/rf/cfdac_mag {'n_estimators': 200, 'max_depth': None}  val=0.9293  test=0.9340  (34.3s)
+  [44] binary/transformer/cfdac_mag {'d_model': 48, 'n_layers': 2}  val=0.8000  test=0.8000  (8.5s)
