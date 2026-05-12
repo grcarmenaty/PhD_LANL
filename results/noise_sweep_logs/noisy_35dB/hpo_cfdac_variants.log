@@ -62,3 +62,4 @@ plan: 25 cells, 100 trials
   [55/100] severity/cnn2d/cfdac_magphase {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.3663  test=0.3587  (12.2s)
   [56/100] severity/cnn2d/cfdac_magphase {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.4336  test=0.4302  (15.8s)
   [57/100] type/cnn2d/cfdac_magphase {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.6293  test=0.6327  (10.1s)
+  [58/100] type/cnn2d/cfdac_magphase {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.6467  test=0.6460  (13.4s)
