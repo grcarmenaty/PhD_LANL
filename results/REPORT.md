@@ -2868,7 +2868,7 @@ Every `(task, model, feature)` cell is retrained on the balanced synthetic data 
 
 | task | r=1.000 | r=0.875 | r=0.750 | r=0.625 | r=0.500 |
 |---|---|---|---|---|---|
-| `binary` | **+0.931** (`cnn2d`/`cfdac_all`) | **+0.933** (`cnn2d`/`cfdac_imag`) | **+0.915** (`cnn2d`/`cfdac`) | **+0.938** (`cnn2d`/`cfdac`) | **+0.877** (`cnn2d`/`cfdac`) |
+| `binary` | **+0.931** (`cnn2d`/`cfdac_all`) | **+0.933** (`cnn2d`/`cfdac_imag`) | **+0.933** (`cnn2d`/`cfdac_phase`) | **+0.938** (`cnn2d`/`cfdac`) | **+0.921** (`cnn2d`/`cfdac_phase`) |
 | `type` | — | — | — | — | — |
 | `severity` | — | — | — | — | — |
 | `col_location` | — | — | — | — | — |
@@ -2882,8 +2882,10 @@ Every `(task, model, feature)` cell is retrained on the balanced synthetic data 
 |---|---|---|---|---|---|---|
 | cnn2d | `cfdac_all` | +0.931 | +0.800 | +0.869 | +0.801 | +0.854 |
 | cnn2d | `cfdac_imag` | +0.928 | +0.933 | +0.841 | +0.928 | +0.842 |
-| cnn2d | `cfdac_magphase` | +0.896 | +0.800 | — | — | — |
+| cnn2d | `cfdac_magphase` | +0.896 | +0.800 | +0.897 | +0.837 | +0.901 |
 | cnn2d | `cfdac` | +0.887 | +0.924 | +0.915 | +0.938 | +0.877 |
+| cnn2d | `cfdac_phase` | +0.865 | +0.909 | +0.933 | +0.932 | +0.921 |
+| cnn2d | `cfdac_real` | +0.847 | +0.865 | +0.898 | +0.892 | — |
 | cnn2d | `cfdac_mag` | +0.800 | +0.800 | +0.801 | +0.800 | +0.800 |
 
 
