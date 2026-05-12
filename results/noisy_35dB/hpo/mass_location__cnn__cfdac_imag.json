@@ -1,0 +1,32 @@
+{
+  "task": "mass_location",
+  "model": "cnn",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.98,
+  "best_metric_test": 0.9666666666666667,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.98,
+      "metric_test": 0.9666666666666667,
+      "extras": {},
+      "runtime_s": 1.7616524696350098
+    }
+  ]
+}

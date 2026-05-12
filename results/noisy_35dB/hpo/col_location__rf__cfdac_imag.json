@@ -1,0 +1,24 @@
+{
+  "task": "col_location",
+  "model": "rf",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": null
+  },
+  "best_metric_val": 0.48501664816870144,
+  "best_metric_test": 0.47888888888888886,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.48501664816870144,
+      "metric_test": 0.47888888888888886,
+      "extras": {},
+      "runtime_s": 21.982346773147583
+    }
+  ]
+}
