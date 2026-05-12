@@ -415,3 +415,6 @@ Parameters: { "use_label_encoder" } are not used.
   [201/255] mass_location/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.5733  test=0.5667  (2.5s)
   [202/255] mass_location/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.6133  test=0.5700  (2.7s)
   [203/255] mass_location/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.2567  test=0.2567  (8.4s)
+  [204/255] mass_location/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.4933  test=0.4800  (9.6s)
+  [205/255] mass_location/transformer/timeseries  {'d_model': 32, 'n_layers': 1}  val=0.5433  test=0.5000  (2.5s)
+  [206/255] mass_location/transformer/timeseries  {'d_model': 32, 'n_layers': 2}  val=0.4633  test=0.4467  (4.7s)
