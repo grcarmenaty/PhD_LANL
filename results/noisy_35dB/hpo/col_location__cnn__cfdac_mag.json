@@ -1,0 +1,32 @@
+{
+  "task": "col_location",
+  "model": "cnn",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.48057713651498335,
+  "best_metric_test": 0.4811111111111111,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.48057713651498335,
+      "metric_test": 0.4811111111111111,
+      "extras": {},
+      "runtime_s": 5.578327178955078
+    }
+  ]
+}
