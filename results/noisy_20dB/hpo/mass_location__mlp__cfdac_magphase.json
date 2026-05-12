@@ -1,0 +1,32 @@
+{
+  "task": "mass_location",
+  "model": "mlp",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.9833333333333333,
+  "best_metric_test": 0.97,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9833333333333333,
+      "metric_test": 0.97,
+      "extras": {},
+      "runtime_s": 8.434440612792969
+    }
+  ]
+}
