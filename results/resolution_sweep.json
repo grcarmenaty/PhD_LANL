@@ -3516,5 +3516,23 @@
     "model": "cnn3d",
     "feature": "cfdac3d_realimag",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.42533333333333334,
+    "runtime_s": 5.396858215332031,
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.712,
+    "runtime_s": 3.734663486480713,
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "ratio": 0.625
   }
 ]
