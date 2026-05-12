@@ -121,3 +121,19 @@ HPO plan: 40 cells, 255 total trials
   [15/255] type/rf/modal  {'n_estimators': 200, 'max_depth': 12}  val=0.7193  test=0.7220  (2.0s)
   [16/255] type/rf/modal  {'n_estimators': 200, 'max_depth': None}  val=0.7533  test=0.7593  (2.7s)
   [17/255] type/rf/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.6273  test=0.6500  (1.9s)
+  [18/255] type/rf/modal  {'n_estimators': 300, 'max_depth': 12}  val=0.7140  test=0.7233  (2.9s)
+  [19/255] type/rf/modal  {'n_estimators': 300, 'max_depth': None}  val=0.7520  test=0.7640  (4.0s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:41:51] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [20/255] type/xgb/modal  {'n_estimators': 100, 'max_depth': 4}  val=0.7380  test=0.7493  (0.9s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:41:52] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [21/255] type/xgb/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.7633  test=0.7780  (1.6s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [22:41:54] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
