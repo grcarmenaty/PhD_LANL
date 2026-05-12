@@ -404,3 +404,5 @@ Parameters: { "use_label_encoder" } are not used.
   [255/255] mass_location/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8400  test=0.8467  (3.8s)
 
 HPO complete.
+
+--- $ /usr/local/bin/python ml_pipeline/hpo.py --features /home/user/PhD_LANL/dataset/features_noisy_20dB.h5 --out /home/user/PhD_LANL/results/noisy_20dB
