@@ -15,3 +15,11 @@ adding noise at 35.0 dB to 20 chunks → /home/user/PhD_LANL/dataset/noisy_35dB
   [14/20] chunk_0013.h5  n=511  achieved SNR=35.00 dB
   [15/20] chunk_0014.h5  n=511  achieved SNR=35.00 dB
   [16/20] chunk_0015.h5  n=511  achieved SNR=35.00 dB
+  [17/20] chunk_0016.h5  n=511  achieved SNR=35.00 dB
+  [18/20] chunk_0017.h5  n=511  achieved SNR=35.00 dB
+  [19/20] chunk_0018.h5  n=511  achieved SNR=35.00 dB
+  [20/20] chunk_0019.h5  n=291  achieved SNR=35.00 dB
+
+wrote 10000 noisy samples; mean achieved SNR = 35.00 dB
+
+--- $ /usr/local/bin/python ml_pipeline/build_noisy_chunks.py --snr-db 35.0
