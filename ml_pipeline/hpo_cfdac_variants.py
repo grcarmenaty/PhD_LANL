@@ -157,6 +157,10 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     plan.sort(key=lambda r: (r[2], r[0], r[1]))
     current_feat, X_full = None, None
     for tname, model_name, feat in plan:
+        out_json = hpo_dir / f"{tname}__{model_name}__{feat}.json"
+        if out_json.exists():
+            print(f"  skip {tname}/{model_name}/{feat} (cached)")
+            continue
         mask, y_pool, kind = tasks[tname]
         ipool = np.where(mask)[0]
         i_tr, i_va, i_te = make_split(y_pool, kind)

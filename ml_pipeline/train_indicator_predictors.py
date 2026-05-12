@@ -193,6 +193,10 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         print(f"\n=== indicator {ind_idx:>2d} / 22  '{ind_name}'  "
                 f"std(train)={y_train.std():.4f} ===")
         for model_name, feat_name in CELLS:
+            tag = f"{ind_name}__{model_name}__{feat_name}"
+            if (hpo_dir / f"{tag}.json").exists():
+                print(f"  skip {tag} (cached)")
+                continue
             X = feats_loaded[feat_name]
             X_tr = X[idx_train]; X_va = X[idx_val]; X_te = X[idx_test]
             scaler = None

@@ -257,6 +257,10 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     print(f"HPO plan: {len(plan)} cells, {grand_total} total trials")
 
     for task_name, model_name, feat_name in plan:
+        out_json = hpo_dir / f"{task_name}__{model_name}__{feat_name}.json"
+        if out_json.exists():
+            print(f"  skip {task_name}/{model_name}/{feat_name} (cached)")
+            continue
         mask, y_all, kind = tasks[task_name]
         idx_pool = np.where(mask)[0]
         y_pool   = y_all
