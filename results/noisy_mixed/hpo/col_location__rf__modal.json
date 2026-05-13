@@ -1,0 +1,112 @@
+{
+  "task": "col_location",
+  "model": "rf",
+  "feature": "modal",
+  "best_hyperparams": {
+    "n_estimators": 300,
+    "max_depth": null
+  },
+  "best_metric_val": 0.7837037037037037,
+  "best_metric_test": 0.7762962962962963,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 100,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.5105555555555555,
+      "metric_test": 0.49925925925925924,
+      "extras": {},
+      "runtime_s": 2.0827393531799316
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 100,
+        "max_depth": 12
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.6624074074074074,
+      "metric_test": 0.6507407407407407,
+      "extras": {},
+      "runtime_s": 3.547302484512329
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 100,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.7616666666666667,
+      "metric_test": 0.7575925925925926,
+      "extras": {},
+      "runtime_s": 4.766725301742554
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.5040740740740741,
+      "metric_test": 0.5003703703703704,
+      "extras": {},
+      "runtime_s": 4.01754903793335
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 12
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.6694444444444444,
+      "metric_test": 0.6562962962962963,
+      "extras": {},
+      "runtime_s": 7.013339281082153
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.7783333333333333,
+      "metric_test": 0.7716666666666666,
+      "extras": {},
+      "runtime_s": 9.495351314544678
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.5070370370370371,
+      "metric_test": 0.5027777777777778,
+      "extras": {},
+      "runtime_s": 6.056922912597656
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 12
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.6716666666666666,
+      "metric_test": 0.662962962962963,
+      "extras": {},
+      "runtime_s": 10.640682220458984
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.7837037037037037,
+      "metric_test": 0.7762962962962963,
+      "extras": {},
+      "runtime_s": 14.36199140548706
+    }
+  ]
+}
