@@ -483,3 +483,20 @@ plan: 189 cells × 5 ratios = 945 retrains
   [240] col_location/rf/cfdac_mag r=0.500  accuracy=+0.466  (5.3s)
 >>> lazy cfdac_magphase  H=128 W=128
   [241] col_location/rf/cfdac_magphase r=1.000  accuracy=+0.478  (16.8s)
+  [242] col_location/rf/cfdac_magphase r=0.875  accuracy=+0.494  (14.4s)
+  [243] col_location/rf/cfdac_magphase r=0.750  accuracy=+0.492  (12.1s)
+  [244] col_location/rf/cfdac_magphase r=0.625  accuracy=+0.513  (9.8s)
+  [245] col_location/rf/cfdac_magphase r=0.500  accuracy=+0.488  (7.9s)
+>>> lazy cfdac_phase  H=128 W=128
+  [246] col_location/rf/cfdac_phase r=1.000  accuracy=+0.476  (10.3s)
+  [247] col_location/rf/cfdac_phase r=0.875  accuracy=+0.483  (8.9s)
+  [248] col_location/rf/cfdac_phase r=0.750  accuracy=+0.513  (7.5s)
+  [249] col_location/rf/cfdac_phase r=0.625  accuracy=+0.471  (6.2s)
+  [250] col_location/rf/cfdac_phase r=0.500  accuracy=+0.480  (4.8s)
+>>> lazy cfdac_real  H=128 W=128
+  [251] col_location/rf/cfdac_real r=1.000  accuracy=+0.459  (11.2s)
+  [252] col_location/rf/cfdac_real r=0.875  accuracy=+0.486  (9.7s)
+  [253] col_location/rf/cfdac_real r=0.750  accuracy=+0.478  (9.1s)
+  [254] col_location/rf/cfdac_real r=0.625  accuracy=+0.493  (6.8s)
+  [255] col_location/rf/cfdac_real r=0.500  accuracy=+0.474  (5.8s)
+>>> lazy cfdac_realimag  H=128 W=128
