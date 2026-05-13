@@ -233,6 +233,100 @@ def _train_torch(model_name: str, kind: str, n_out: int, params: dict,
     }, mdl)
 
 
+def _train_torch_streaming(model_name: str, kind: str, n_out: int, params: dict,
+                            tr_ds, va_ds, te_ds,
+                            epochs: int = 4,
+                            batch_size: int = 64) -> Tuple[dict, nn.Module]:
+    """Train a torch model using DataLoader streaming from HDF5 — never
+    materialises the full split tensor in RAM.
+
+    ``tr_ds`` / ``va_ds`` / ``te_ds`` are torch.utils.data.Dataset (typically
+    ``LazyCFDACDataset`` with reshape='seq' for cnn/transformer or 'flat'
+    for mlp).  Labels are read from each dataset via ``ds[i] -> (x, y)``.
+    """
+    t0 = time.time()
+    # Probe sample shape from a single read.
+    x0, y0 = tr_ds[0]
+    sample_shape = tuple(x0.shape)
+    if model_name == "mlp":
+        in_dim = int(np.prod(sample_shape))
+        mdl = MLP(in_dim=in_dim, n_out=n_out,
+                      hidden=tuple(params["hidden"]), dropout=0.2,
+                      regression=(kind == "reg"))
+        opt = torch.optim.AdamW(mdl.parameters(), lr=float(params["lr"]),
+                                    weight_decay=1e-4)
+    elif model_name == "cnn":
+        ch = sample_shape[0]
+        mdl = Conv1DStack(n_channels=ch, n_out=n_out,
+                              widths=tuple(params["widths"]),
+                              kernel_size=int(params["kernel_size"]),
+                              regression=(kind == "reg"))
+        opt = torch.optim.AdamW(mdl.parameters(), lr=1e-3, weight_decay=1e-4)
+    elif model_name == "transformer":
+        ch = sample_shape[0]
+        mdl = SmallTransformer(n_channels=ch, n_out=n_out,
+                                  d_model=int(params["d_model"]),
+                                  n_layers=int(params["n_layers"]),
+                                  downsample=16,
+                                  regression=(kind == "reg"))
+        opt = torch.optim.AdamW(mdl.parameters(), lr=5e-4, weight_decay=1e-4)
+    else:
+        raise ValueError(model_name)
+
+    loss_fn = nn.CrossEntropyLoss() if kind == "cls" else nn.MSELoss()
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
+    tr_dl = DataLoader(tr_ds, batch_size=batch_size, shuffle=True, num_workers=0)
+    va_dl = DataLoader(va_ds, batch_size=batch_size, shuffle=False, num_workers=0)
+    te_dl = DataLoader(te_ds, batch_size=batch_size, shuffle=False, num_workers=0)
+
+    def _eval(dl):
+        outs, ys = [], []
+        mdl.eval()
+        with torch.no_grad():
+            for xb, yb in dl:
+                if model_name == "mlp":
+                    xb = xb.reshape(xb.shape[0], -1)
+                outs.append(mdl(xb).cpu())
+                ys.append(yb)
+        return torch.cat(outs, 0), torch.cat(ys, 0)
+
+    best, best_state = -np.inf, None
+    for _ep in range(epochs):
+        mdl.train()
+        for xb, yb in tr_dl:
+            if model_name == "mlp":
+                xb = xb.reshape(xb.shape[0], -1)
+            opt.zero_grad()
+            loss_fn(mdl(xb), yb).backward()
+            opt.step()
+        sched.step()
+        out_va, y_va_t = _eval(va_dl)
+        if kind == "cls":
+            metric = accuracy_score(y_va_t.numpy(), out_va.argmax(1).numpy())
+        else:
+            metric = r2_score(y_va_t.numpy(), out_va.squeeze(1).numpy())
+        if metric > best:
+            best = float(metric)
+            best_state = {k: v.detach().clone() for k, v in mdl.state_dict().items()}
+    if best_state is not None:
+        mdl.load_state_dict(best_state)
+    out_te, y_te_t = _eval(te_dl)
+    if kind == "cls":
+        test = float(accuracy_score(y_te_t.numpy(), out_te.argmax(1).numpy()))
+        extras = {}; mname = "accuracy"
+    else:
+        test = float(r2_score(y_te_t.numpy(), out_te.squeeze(1).numpy()))
+        extras = {"mae_test": float(mean_absolute_error(
+            y_te_t.numpy(), out_te.squeeze(1).numpy()))}
+        mname = "R2"
+    return ({
+        "hyperparams": {k: (list(v) if isinstance(v, tuple) else v)
+                            for k, v in params.items()},
+        "metric_name": mname, "metric_val": best, "metric_test": test,
+        "extras": extras, "runtime_s": time.time() - t0,
+    }, mdl)
+
+
 def _existing_cell_done(path: Path) -> bool:
     """Skip-existing guard: if the JSON file already has a non-null
     `best_metric_val`, the cell is considered completed by an earlier
@@ -276,7 +370,7 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     # (smallest → largest) so the 4-channel `cfdac_all` is last.
     variant_rank = {v: i for i, v in enumerate(VARIANTS)}
     plan.sort(key=lambda r: (variant_rank[r[2]], r[0], r[1]))
-    current_feat, ds = None, None
+    current_feat = None
     done = 0
     for tname, model_name, feat in plan:
         mask, y_pool, kind = tasks[tname]
@@ -285,16 +379,48 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         idx_tr = ipool[i_tr]; idx_va = ipool[i_va]; idx_te = ipool[i_te]
         y_tr = y_pool[i_tr]; y_va = y_pool[i_va]; y_te = y_pool[i_te]
         if feat != current_feat:
-            ds = LazyCFDACDataset(features_path, feat)
             current_feat = feat
             gc.collect()
-            print(f">>> lazy {feat}  H={ds.h} W={ds.w}", flush=True)
+            print(f">>> {feat}", flush=True)
 
-        X_tr_raw = ds.batch_read(idx_tr)
-        X_va_raw = ds.batch_read(idx_va)
-        X_te_raw = ds.batch_read(idx_te)
-
-        if model_name in ("rf", "xgb", "mlp"):
+        # Torch models with stream-friendly inputs: stream from HDF5 via
+        # DataLoader so the 60k-sample 4-channel CFDAC variant never has to
+        # land in RAM all at once.
+        if model_name in ("cnn", "transformer"):
+            tr_ds = LazyCFDACDataset(features_path, feat,
+                                          rows=idx_tr, labels=y_tr, kind=kind,
+                                          reshape="seq")
+            va_ds = LazyCFDACDataset(features_path, feat,
+                                          rows=idx_va, labels=y_va, kind=kind,
+                                          reshape="seq")
+            te_ds = LazyCFDACDataset(features_path, feat,
+                                          rows=idx_te, labels=y_te, kind=kind,
+                                          reshape="seq")
+            scaler = None
+            x0, _ = tr_ds[0]
+            in_shape = list(x0.shape)
+            flat_in_dim = int(np.prod(x0.shape))
+            stream = True
+        elif model_name == "mlp":
+            tr_ds = LazyCFDACDataset(features_path, feat,
+                                          rows=idx_tr, labels=y_tr, kind=kind,
+                                          reshape="flat")
+            va_ds = LazyCFDACDataset(features_path, feat,
+                                          rows=idx_va, labels=y_va, kind=kind,
+                                          reshape="flat")
+            te_ds = LazyCFDACDataset(features_path, feat,
+                                          rows=idx_te, labels=y_te, kind=kind,
+                                          reshape="flat")
+            scaler = None
+            x0, _ = tr_ds[0]
+            in_shape = list(x0.shape)
+            flat_in_dim = int(np.prod(x0.shape))
+            stream = True
+        else:  # rf / xgb — sklearn needs full numpy in memory
+            ds = LazyCFDACDataset(features_path, feat)
+            X_tr_raw = ds.batch_read(idx_tr)
+            X_va_raw = ds.batch_read(idx_va)
+            X_te_raw = ds.batch_read(idx_te)
             X_tr = _flatten(X_tr_raw); del X_tr_raw
             X_va = _flatten(X_va_raw); del X_va_raw
             X_te = _flatten(X_te_raw); del X_te_raw
@@ -303,15 +429,9 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
             X_tr_s = scaler.transform(X_tr); del X_tr
             X_va_s = scaler.transform(X_va); del X_va
             X_te_s = scaler.transform(X_te); del X_te
+            in_shape = [flat_in_dim]
+            stream = False
             gc.collect()
-        else:  # cnn / transformer
-            X_tr_s = _to_seq(X_tr_raw); del X_tr_raw
-            X_va_s = _to_seq(X_va_raw); del X_va_raw
-            X_te_s = _to_seq(X_te_raw); del X_te_raw
-            scaler = None
-            flat_in_dim = X_tr_s.shape[1] * X_tr_s.shape[2]
-            gc.collect()
-        in_shape = list(X_tr_s.shape[1:])
 
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1
         # RF regression uses the slimmer grid.
@@ -328,6 +448,10 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                                                    X_tr_s, y_tr,
                                                    X_va_s, y_va,
                                                    X_te_s, y_te)
+                elif stream:
+                    row, mdl = _train_torch_streaming(
+                        model_name, kind, n_out, params,
+                        tr_ds, va_ds, te_ds, epochs=epochs)
                 else:
                     row, mdl = _train_torch(model_name, kind, n_out, params,
                                                  X_tr_s, y_tr,
