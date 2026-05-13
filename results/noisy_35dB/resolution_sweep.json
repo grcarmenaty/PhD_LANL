@@ -4263,5 +4263,55 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.5261635184288025,
+    "mae": 0.14678329229354858,
+    "runtime_s": 114.68142652511597,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.4898500442504883,
+    "mae": 0.15359415113925934,
+    "runtime_s": 64.8166823387146,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "cfdac_imag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.5010271072387695,
+    "mae": 0.15176941454410553,
+    "runtime_s": 46.35779142379761,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.49315959215164185,
+    "mae": 0.15240521728992462,
+    "runtime_s": 31.009591341018677,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "cfdac_imag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.5064117908477783,
+    "mae": 0.14973849058151245,
+    "runtime_s": 23.635756969451904,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "cfdac_imag",
+    "ratio": 0.5
   }
 ]

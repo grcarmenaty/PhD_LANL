@@ -931,3 +931,11 @@ plan: 189 cells × 5 ratios = 945 retrains
   FAIL severity/transformer/timeseries r=0.625: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
   FAIL severity/transformer/timeseries r=0.5: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
 >>> lazy cfdac_imag  H=128 W=128
+  [466] severity/xgb/cfdac_imag r=1.000  R2=+0.526  (114.7s)
+  [467] severity/xgb/cfdac_imag r=0.875  R2=+0.490  (64.8s)
+  [468] severity/xgb/cfdac_imag r=0.750  R2=+0.501  (46.4s)
+  [469] severity/xgb/cfdac_imag r=0.625  R2=+0.493  (31.0s)
+  [470] severity/xgb/cfdac_imag r=0.500  R2=+0.506  (23.6s)
+>>> lazy cfdac_mag  H=128 W=128
+
+--- $ /usr/local/bin/python ml_pipeline/resolution_sweep.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB --epochs 3
