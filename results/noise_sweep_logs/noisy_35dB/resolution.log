@@ -214,3 +214,4 @@ plan: 189 cells × 5 ratios = 945 retrains
 >>> lazy cfdac_mag  H=128 W=128
   [91] binary/rf/cfdac_mag r=1.000  accuracy=+0.925  (17.8s)
   [92] binary/rf/cfdac_mag r=0.875  accuracy=+0.891  (14.8s)
+  [93] binary/rf/cfdac_mag r=0.750  accuracy=+0.896  (12.7s)
