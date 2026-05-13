@@ -107,3 +107,6 @@ plan: 140 cells (existing cells skipped)
   [96] severity/xgb/cfdac_realimag {'n_estimators': 200, 'max_depth': 6}  val=0.5260  test=0.5379  (433.5s)
   [97] type/cnn/cfdac_realimag {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.7540  test=0.7653  (10.9s)
   [98] type/mlp/cfdac_realimag {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.7900  test=0.8067  (23.6s)
+  [99] type/rf/cfdac_realimag {'n_estimators': 200, 'max_depth': None}  val=0.7940  test=0.8073  (81.3s)
+  [100] type/transformer/cfdac_realimag {'d_model': 48, 'n_layers': 2}  val=0.6727  test=0.6707  (10.1s)
+>>> loading cfdac_magphase ...
