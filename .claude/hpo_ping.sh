@@ -12,17 +12,30 @@ while true; do
     disown
     sleep 2
     proc=$(pgrep -af 'hpo\.py.*features_mixed' | grep -v 'hpo_ping' | head -1)
-    relaunch=" [relaunched]"
+    relaunch=" [RELAUNCHED]"
   else
     relaunch=""
   fi
   pid=$(awk '{print $1}' <<<"$proc")
-  elapsed=$(ps -o etime= -p "$pid" 2>/dev/null | tr -d ' ')
+  ps_line=$(ps -o etime=,rss=,pcpu= -p "$pid" 2>/dev/null)
+  elapsed=$(awk '{print $1}' <<<"$ps_line")
+  rss_kb=$(awk '{print $2}' <<<"$ps_line")
+  pcpu=$(awk '{print $3}' <<<"$ps_line")
+  rss_gb=$(awk -v r="${rss_kb:-0}" 'BEGIN{printf "%.1f", r/1024/1024}')
   latest=$(ls -t logs/mixed_hpo_*.log 2>/dev/null | head -1)
-  tail_lines=$(tail -3 "$latest" 2>/dev/null | tr '\n' '|')
-  done_cells=$(find results/noisy_mixed -name best.json 2>/dev/null | wc -l)
-  mem=$(free -m | awk '/^Mem:/ {printf "free=%dMB used=%dMB", $7, $3}')
-  printf "PING %s%s pid=%s etime=%s done=%s/40 %s | log: %s\n" \
-    "$ts" "$relaunch" "$pid" "$elapsed" "$done_cells" "$mem" "$tail_lines"
+  last_log=$(tail -1 "$latest" 2>/dev/null | head -c 140)
+  done_cells=$(find results/noisy_mixed/hpo -name best.json 2>/dev/null | wc -l)
+  last_cell=$(ls -t results/noisy_mixed/hpo/*/best.json 2>/dev/null | head -1 | sed 's|results/noisy_mixed/hpo/||;s|/best.json||')
+  cur_feat=$(grep -oE 'loading feature: [a-z_]+' "$latest" 2>/dev/null | tail -1 | awk '{print $3}')
+  free_mb=$(free -m | awk '/^Mem:/ {print $7}')
+  used_mb=$(free -m | awk '/^Mem:/ {print $3}')
+  disk_free=$(df -BG /home/user 2>/dev/null | awk 'NR==2 {print $4}')
+  echo "============================================================"
+  echo "PING $ts$relaunch"
+  echo "  hpo.py pid=$pid etime=$elapsed rss=${rss_gb}GB cpu=${pcpu}%"
+  echo "  cells: $done_cells/40 done   feature loaded: ${cur_feat:-none}   last cell: ${last_cell:-none}"
+  echo "  vm: ram free=${free_mb}MB used=${used_mb}MB   disk free=${disk_free:-?}"
+  echo "  log: ${last_log:-(no log lines)}"
+  echo "============================================================"
   sleep 600
 done
