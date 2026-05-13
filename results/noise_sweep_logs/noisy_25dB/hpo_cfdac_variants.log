@@ -108,3 +108,6 @@ plan: 25 cells, 100 trials
   [97/100] type/cnn2d/cfdac_real {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.5120  test=0.5153  (8.9s)
   [98/100] type/cnn2d/cfdac_real {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.7587  test=0.7600  (11.1s)
   [99/100] type/cnn2d/cfdac_real {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.7073  test=0.7267  (14.5s)
+  [100/100] type/cnn2d/cfdac_real {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8033  test=0.8060  (20.4s)
+
+done.
