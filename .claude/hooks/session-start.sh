@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # SessionStart hook: bootstrap env for the ml_pipeline and auto-resume the
-# noise sweep if one is in progress.
+# mixed-training noise pipeline if one is in progress.
 #
 # This is synchronous (no `{"async": true}` line) so deps and pymodal are
-# guaranteed ready before Claude takes over.  The sweep itself is launched
-# detached so it survives the hook's exit (and dies on session disconnect,
-# which is fine - the next session-start picks up where it left off).
+# guaranteed ready before Claude takes over.  The pipeline itself is launched
+# detached so it survives the hook's exit.
 set -euo pipefail
 
 # Only run inside Claude Code on the web (where the VM is ephemeral).
@@ -39,53 +38,43 @@ fi
 # Make pymodal importable from any subprocess started by Claude.
 echo "export PYTHONPATH=\"$PYMODAL_DIR:\${PYTHONPATH:-}\"" >> "${CLAUDE_ENV_FILE:-/dev/null}"
 
-# ---------- 3.  resume noise sweep (background, detached) ----------------
+# ---------- 3.  resume mixed-training pipeline ----------------------------
 PAUSE_FLAG="$REPO/.claude/PAUSE_SWEEP"
-SWEEP_PIDFILE="/tmp/noise_sweep.pid"
-WATCHDOG_PIDFILE="/tmp/noise_sweep_watchdog.pid"
+MIXED_FEATURES="$REPO/dataset/features_mixed.h5"
+MIXED_OUT="$REPO/results/noisy_mixed"
 
 if [ -f "$PAUSE_FLAG" ]; then
-  log "PAUSE_SWEEP flag present; not launching sweep"
+  log "PAUSE_SWEEP flag present; not launching mixed pipeline"
   exit 0
 fi
 
-# If a previous sweep is still alive (shouldn't happen on web - VM is fresh
-# - but matters for local testing), don't launch a duplicate.
-if [ -f "$SWEEP_PIDFILE" ] && kill -0 "$(cat "$SWEEP_PIDFILE")" 2>/dev/null; then
-  log "sweep already running (pid $(cat "$SWEEP_PIDFILE")); not relaunching"
+if [ ! -f "$MIXED_FEATURES" ]; then
+  log "mixed features VDS missing ($MIXED_FEATURES); skipping auto-launch"
   exit 0
 fi
 
-# Has the sweep already completed for every target SNR?  If so, nothing to do.
-ALL_DONE=true
-for snr in 35 25 15 10; do
-  if [ ! -f "$REPO/results/noisy_${snr}dB/transfer_learning.json" ]; then
-    ALL_DONE=false
-    break
-  fi
-done
-if $ALL_DONE; then
-  log "all four SNR levels complete; nothing to resume"
+# If hpo.py for mixed is already alive, don't relaunch.
+if pgrep -af "hpo.py --features $MIXED_FEATURES" >/dev/null; then
+  log "hpo.py on mixed already running; not relaunching"
   exit 0
 fi
 
-mkdir -p "$REPO/logs"
-SWEEP_LOG="$REPO/logs/sweep_$(date -u +%Y%m%d_%H%M%S).log"
-WATCHDOG_LOG="$REPO/logs/watchdog_$(date -u +%Y%m%d_%H%M%S).log"
+# Run hpo.py if its task is not fully done.  189 cells = full coverage.
+HPO_CELLS_DONE=$(ls "$MIXED_OUT/hpo/" 2>/dev/null | wc -l)
+if [ "$HPO_CELLS_DONE" -lt 189 ]; then
+  mkdir -p "$REPO/logs" "$MIXED_OUT"
+  LOG="$REPO/logs/mixed_hpo_resume_$(date -u +%Y%m%d_%H%M%S).log"
+  log "resuming hpo.py on mixed ($HPO_CELLS_DONE/189 cells done) -> $LOG"
+  setsid nohup python "$REPO/ml_pipeline/hpo.py" \
+      --features "$MIXED_FEATURES" \
+      --out "$MIXED_OUT" \
+      > "$LOG" 2>&1 < /dev/null &
+  PID=$!
+  echo "$PID" > /tmp/mixed_hpo.pid
+  disown $PID 2>/dev/null || true
+  log "mixed-hpo pid=$PID"
+else
+  log "hpo.py cells already complete (189/189)"
+fi
 
-log "launching sweep + watchdog (logs in $REPO/logs/)"
-setsid nohup python "$REPO/ml_pipeline/run_noise_sweep.py" \
-    --snr-db 35 25 15 10 \
-    > "$SWEEP_LOG" 2>&1 < /dev/null &
-SWEEP_PID=$!
-echo "$SWEEP_PID" > "$SWEEP_PIDFILE"
-disown $SWEEP_PID 2>/dev/null || true
-
-setsid nohup bash "$REPO/ml_pipeline/_sweep_watchdog.sh" "$SWEEP_PID" 600 \
-    > "$WATCHDOG_LOG" 2>&1 < /dev/null &
-WATCH_PID=$!
-echo "$WATCH_PID" > "$WATCHDOG_PIDFILE"
-disown $WATCH_PID 2>/dev/null || true
-
-log "sweep pid=$SWEEP_PID watchdog pid=$WATCH_PID"
 exit 0

@@ -235,10 +235,12 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     tasks  = build_targets(labels["type_code"], labels["storey"],
                             labels["end"], labels["severity"])
 
+    # Lazy feature load: load each feature only when its first cell starts,
+    # and drop the previous feature to keep RAM use bounded.  This matters
+    # for big mixed-training datasets (60k samples) where preloading every
+    # feature up front costs > 30 min and blocks the per-cell skip path
+    # from making progress through VM suspends.
     feats: Dict[str, np.ndarray] = {}
-    for name in (*FEATURES_FLAT, *FEATURES_SEQ, *FEATURES_MAT):
-        print(f"loading feature: {name}")
-        feats[name] = load_feature(features_path, name)
 
     grand_total = 0
     grand_done  = 0
@@ -254,6 +256,8 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
             for m in model_list:
                 grand_total += int(np.prod([len(v) for v in HPO_GRIDS[m].values()]))
                 plan.append((task, m, feat_name))
+    # Sort by feature so each feature is loaded into RAM at most once.
+    plan.sort(key=lambda r: (r[2], r[0], r[1]))
     print(f"HPO plan: {len(plan)} cells, {grand_total} total trials")
 
     for task_name, model_name, feat_name in plan:
@@ -270,6 +274,13 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         y_tr = y_pool[idx_tr_local]; y_va = y_pool[idx_va_local]
         y_te = y_pool[idx_te_local]
 
+        if feat_name not in feats:
+            # Drop previously held feature first to keep RAM bounded.
+            for old in list(feats.keys()):
+                del feats[old]
+            import gc; gc.collect()
+            print(f"loading feature: {feat_name}", flush=True)
+            feats[feat_name] = load_feature(features_path, feat_name)
         X = feats[feat_name]
         X_tr = X[idx_tr]; X_va = X[idx_va]; X_te = X[idx_te]
         scaler = None
