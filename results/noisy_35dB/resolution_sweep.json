@@ -808,5 +808,23 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9253333333333333,
+    "runtime_s": 17.75664734840393,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8913333333333333,
+    "runtime_s": 14.828350067138672,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 0.875
   }
 ]
