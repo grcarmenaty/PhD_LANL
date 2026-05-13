@@ -2293,5 +2293,410 @@
     "model": "rf",
     "feature": "cfdac_real",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.49444444444444446,
+    "runtime_s": 16.500306844711304,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.5,
+    "runtime_s": 14.00146770477295,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.47888888888888886,
+    "runtime_s": 11.72501516342163,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.47555555555555556,
+    "runtime_s": 9.813204526901245,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.48333333333333334,
+    "runtime_s": 8.00740671157837,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4722222222222222,
+    "runtime_s": 0.7345485687255859,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4822222222222222,
+    "runtime_s": 0.7843434810638428,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4622222222222222,
+    "runtime_s": 0.6869664192199707,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4488888888888889,
+    "runtime_s": 0.7036981582641602,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4477777777777778,
+    "runtime_s": 0.6330881118774414,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4622222222222222,
+    "runtime_s": 1.303894281387329,
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.47888888888888886,
+    "runtime_s": 1.1819262504577637,
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.46,
+    "runtime_s": 1.0697603225708008,
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.45111111111111113,
+    "runtime_s": 0.9344103336334229,
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4666666666666667,
+    "runtime_s": 0.8212308883666992,
+    "task": "col_location",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.78,
+    "runtime_s": 2.5743982791900635,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.88,
+    "runtime_s": 1.9883205890655518,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9466666666666667,
+    "runtime_s": 1.6784694194793701,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9066666666666666,
+    "runtime_s": 1.2812294960021973,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8733333333333333,
+    "runtime_s": 0.9946954250335693,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9133333333333333,
+    "runtime_s": 2.4106407165527344,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.91,
+    "runtime_s": 1.9449894428253174,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8733333333333333,
+    "runtime_s": 1.5292632579803467,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9266666666666666,
+    "runtime_s": 1.2298033237457275,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9433333333333334,
+    "runtime_s": 0.9051544666290283,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7833333333333333,
+    "runtime_s": 2.4885568618774414,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.64,
+    "runtime_s": 1.913444995880127,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.87,
+    "runtime_s": 1.6162519454956055,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8666666666666667,
+    "runtime_s": 1.2245159149169922,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.6833333333333333,
+    "runtime_s": 0.9112427234649658,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.54,
+    "runtime_s": 2.5204055309295654,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9066666666666666,
+    "runtime_s": 2.0130198001861572,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9666666666666667,
+    "runtime_s": 1.7059381008148193,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9533333333333334,
+    "runtime_s": 1.41434645652771,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9833333333333333,
+    "runtime_s": 0.9277105331420898,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8166666666666667,
+    "runtime_s": 2.5299270153045654,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8966666666666666,
+    "runtime_s": 2.0441277027130127,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9733333333333334,
+    "runtime_s": 1.5020182132720947,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9433333333333334,
+    "runtime_s": 1.230914831161499,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9833333333333333,
+    "runtime_s": 0.9155259132385254,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.97,
+    "runtime_s": 2.436094045639038,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9133333333333333,
+    "runtime_s": 1.8719098567962646,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.95,
+    "runtime_s": 1.4715244770050049,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9333333333333333,
+    "runtime_s": 1.1513171195983887,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9,
+    "runtime_s": 0.9196019172668457,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 0.5
   }
 ]

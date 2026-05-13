@@ -500,3 +500,129 @@ plan: 189 cells × 5 ratios = 945 retrains
   [254] col_location/rf/cfdac_real r=0.625  accuracy=+0.493  (6.8s)
   [255] col_location/rf/cfdac_real r=0.500  accuracy=+0.474  (5.8s)
 >>> lazy cfdac_realimag  H=128 W=128
+  [256] col_location/rf/cfdac_realimag r=1.000  accuracy=+0.494  (16.5s)
+  [257] col_location/rf/cfdac_realimag r=0.875  accuracy=+0.500  (14.0s)
+  [258] col_location/rf/cfdac_realimag r=0.750  accuracy=+0.479  (11.7s)
+  [259] col_location/rf/cfdac_realimag r=0.625  accuracy=+0.476  (9.8s)
+  [260] col_location/rf/cfdac_realimag r=0.500  accuracy=+0.483  (8.0s)
+>>> modal  shape=(10000, 81)
+  [261] col_location/rf/modal r=1.000  accuracy=+0.472  (0.7s)
+  [262] col_location/rf/modal r=0.875  accuracy=+0.482  (0.8s)
+  [263] col_location/rf/modal r=0.750  accuracy=+0.462  (0.7s)
+  [264] col_location/rf/modal r=0.625  accuracy=+0.449  (0.7s)
+  [265] col_location/rf/modal r=0.500  accuracy=+0.448  (0.6s)
+>>> lazy cfdac_imag  H=128 W=128
+  FAIL col_location/transformer/cfdac_imag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/transformer/cfdac_imag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/transformer/cfdac_imag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/transformer/cfdac_imag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/transformer/cfdac_imag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_mag  H=128 W=128
+  FAIL col_location/transformer/cfdac_mag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/transformer/cfdac_mag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/transformer/cfdac_mag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/transformer/cfdac_mag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/transformer/cfdac_mag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_magphase  H=128 W=128
+  FAIL col_location/transformer/cfdac_magphase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL col_location/transformer/cfdac_magphase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL col_location/transformer/cfdac_magphase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL col_location/transformer/cfdac_magphase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL col_location/transformer/cfdac_magphase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> lazy cfdac_phase  H=128 W=128
+  FAIL col_location/transformer/cfdac_phase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/transformer/cfdac_phase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/transformer/cfdac_phase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/transformer/cfdac_phase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/transformer/cfdac_phase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_real  H=128 W=128
+  FAIL col_location/transformer/cfdac_real r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/transformer/cfdac_real r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/transformer/cfdac_real r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/transformer/cfdac_real r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/transformer/cfdac_real r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_realimag  H=128 W=128
+  FAIL col_location/transformer/cfdac_realimag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL col_location/transformer/cfdac_realimag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL col_location/transformer/cfdac_realimag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL col_location/transformer/cfdac_realimag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL col_location/transformer/cfdac_realimag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> frf_mag  shape=(10000, 381, 9)
+  FAIL col_location/transformer/frf_mag r=1.0: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/frf_mag r=0.875: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/frf_mag r=0.75: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/frf_mag r=0.625: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/frf_mag r=0.5: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+>>> timeseries  shape=(10000, 1024, 9)
+  FAIL col_location/transformer/timeseries r=1.0: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/timeseries r=0.875: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/timeseries r=0.75: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/timeseries r=0.625: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+  FAIL col_location/transformer/timeseries r=0.5: Calculated padded input size per channel: (9). Kernel size: (16). Kernel size can't be greater than actual input size
+>>> modal  shape=(10000, 81)
+  [266] col_location/xgb/modal r=1.000  accuracy=+0.462  (1.3s)
+  [267] col_location/xgb/modal r=0.875  accuracy=+0.479  (1.2s)
+  [268] col_location/xgb/modal r=0.750  accuracy=+0.460  (1.1s)
+  [269] col_location/xgb/modal r=0.625  accuracy=+0.451  (0.9s)
+  [270] col_location/xgb/modal r=0.500  accuracy=+0.467  (0.8s)
+>>> cfdac  shape=(10000, 2, 128, 128)
+  [271] mass_location/cnn2d/cfdac r=1.000  accuracy=+0.780  (2.6s)
+  [272] mass_location/cnn2d/cfdac r=0.875  accuracy=+0.880  (2.0s)
+  [273] mass_location/cnn2d/cfdac r=0.750  accuracy=+0.947  (1.7s)
+  [274] mass_location/cnn2d/cfdac r=0.625  accuracy=+0.907  (1.3s)
+  [275] mass_location/cnn2d/cfdac r=0.500  accuracy=+0.873  (1.0s)
+>>> lazy cfdac_imag  H=128 W=128
+  [276] mass_location/cnn2d/cfdac_imag r=1.000  accuracy=+0.913  (2.4s)
+  [277] mass_location/cnn2d/cfdac_imag r=0.875  accuracy=+0.910  (1.9s)
+  [278] mass_location/cnn2d/cfdac_imag r=0.750  accuracy=+0.873  (1.5s)
+  [279] mass_location/cnn2d/cfdac_imag r=0.625  accuracy=+0.927  (1.2s)
+  [280] mass_location/cnn2d/cfdac_imag r=0.500  accuracy=+0.943  (0.9s)
+>>> lazy cfdac_mag  H=128 W=128
+  [281] mass_location/cnn2d/cfdac_mag r=1.000  accuracy=+0.783  (2.5s)
+  [282] mass_location/cnn2d/cfdac_mag r=0.875  accuracy=+0.640  (1.9s)
+  [283] mass_location/cnn2d/cfdac_mag r=0.750  accuracy=+0.870  (1.6s)
+  [284] mass_location/cnn2d/cfdac_mag r=0.625  accuracy=+0.867  (1.2s)
+  [285] mass_location/cnn2d/cfdac_mag r=0.500  accuracy=+0.683  (0.9s)
+>>> lazy cfdac_magphase  H=128 W=128
+  [286] mass_location/cnn2d/cfdac_magphase r=1.000  accuracy=+0.540  (2.5s)
+  [287] mass_location/cnn2d/cfdac_magphase r=0.875  accuracy=+0.907  (2.0s)
+  [288] mass_location/cnn2d/cfdac_magphase r=0.750  accuracy=+0.967  (1.7s)
+  [289] mass_location/cnn2d/cfdac_magphase r=0.625  accuracy=+0.953  (1.4s)
+  [290] mass_location/cnn2d/cfdac_magphase r=0.500  accuracy=+0.983  (0.9s)
+>>> lazy cfdac_phase  H=128 W=128
+  [291] mass_location/cnn2d/cfdac_phase r=1.000  accuracy=+0.817  (2.5s)
+  [292] mass_location/cnn2d/cfdac_phase r=0.875  accuracy=+0.897  (2.0s)
+  [293] mass_location/cnn2d/cfdac_phase r=0.750  accuracy=+0.973  (1.5s)
+  [294] mass_location/cnn2d/cfdac_phase r=0.625  accuracy=+0.943  (1.2s)
+  [295] mass_location/cnn2d/cfdac_phase r=0.500  accuracy=+0.983  (0.9s)
+>>> lazy cfdac_real  H=128 W=128
+  [296] mass_location/cnn2d/cfdac_real r=1.000  accuracy=+0.970  (2.4s)
+  [297] mass_location/cnn2d/cfdac_real r=0.875  accuracy=+0.913  (1.9s)
+  [298] mass_location/cnn2d/cfdac_real r=0.750  accuracy=+0.950  (1.5s)
+  [299] mass_location/cnn2d/cfdac_real r=0.625  accuracy=+0.933  (1.2s)
+  [300] mass_location/cnn2d/cfdac_real r=0.500  accuracy=+0.900  (0.9s)
+>>> lazy cfdac_imag  H=128 W=128
+  FAIL mass_location/cnn/cfdac_imag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL mass_location/cnn/cfdac_imag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL mass_location/cnn/cfdac_imag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL mass_location/cnn/cfdac_imag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL mass_location/cnn/cfdac_imag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_mag  H=128 W=128
+  FAIL mass_location/cnn/cfdac_mag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL mass_location/cnn/cfdac_mag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL mass_location/cnn/cfdac_mag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL mass_location/cnn/cfdac_mag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL mass_location/cnn/cfdac_mag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_magphase  H=128 W=128
+  FAIL mass_location/cnn/cfdac_magphase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL mass_location/cnn/cfdac_magphase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL mass_location/cnn/cfdac_magphase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL mass_location/cnn/cfdac_magphase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL mass_location/cnn/cfdac_magphase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> lazy cfdac_phase  H=128 W=128
+  FAIL mass_location/cnn/cfdac_phase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL mass_location/cnn/cfdac_phase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL mass_location/cnn/cfdac_phase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL mass_location/cnn/cfdac_phase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL mass_location/cnn/cfdac_phase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_real  H=128 W=128
