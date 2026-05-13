@@ -1,0 +1,46 @@
+plan: 189 cells × 5 ratios = 945 retrains
+>>> cfdac  shape=(10000, 2, 128, 128)
+  [1] binary/cnn2d/cfdac r=1.000  accuracy=+0.874  (15.8s)
+  [2] binary/cnn2d/cfdac r=0.875  accuracy=+0.901  (10.4s)
+  [3] binary/cnn2d/cfdac r=0.750  accuracy=+0.917  (8.3s)
+  [4] binary/cnn2d/cfdac r=0.625  accuracy=+0.944  (6.5s)
+  [5] binary/cnn2d/cfdac r=0.500  accuracy=+0.871  (4.8s)
+>>> cfdac_imag  shape=(10000, 1, 128, 128)
+  [6] binary/cnn2d/cfdac_imag r=1.000  accuracy=+0.915  (12.7s)
+  [7] binary/cnn2d/cfdac_imag r=0.875  accuracy=+0.907  (9.9s)
+  [8] binary/cnn2d/cfdac_imag r=0.750  accuracy=+0.885  (8.2s)
+  [9] binary/cnn2d/cfdac_imag r=0.625  accuracy=+0.905  (6.3s)
+  [10] binary/cnn2d/cfdac_imag r=0.500  accuracy=+0.861  (4.4s)
+>>> cfdac_mag  shape=(10000, 1, 128, 128)
+  [11] binary/cnn2d/cfdac_mag r=1.000  accuracy=+0.551  (12.7s)
+  [12] binary/cnn2d/cfdac_mag r=0.875  accuracy=+0.503  (10.1s)
+  [13] binary/cnn2d/cfdac_mag r=0.750  accuracy=+0.801  (8.1s)
+  [14] binary/cnn2d/cfdac_mag r=0.625  accuracy=+0.800  (6.1s)
+  [15] binary/cnn2d/cfdac_mag r=0.500  accuracy=+0.803  (4.5s)
+>>> cfdac_magphase  shape=(10000, 2, 128, 128)
+  [16] binary/cnn2d/cfdac_magphase r=1.000  accuracy=+0.878  (13.1s)
+  [17] binary/cnn2d/cfdac_magphase r=0.875  accuracy=+0.886  (11.0s)
+  [18] binary/cnn2d/cfdac_magphase r=0.750  accuracy=+0.819  (8.6s)
+  [19] binary/cnn2d/cfdac_magphase r=0.625  accuracy=+0.876  (6.6s)
+  [20] binary/cnn2d/cfdac_magphase r=0.500  accuracy=+0.825  (4.6s)
+>>> cfdac_phase  shape=(10000, 1, 128, 128)
+  [21] binary/cnn2d/cfdac_phase r=1.000  accuracy=+0.293  (12.7s)
+  [22] binary/cnn2d/cfdac_phase r=0.875  accuracy=+0.800  (10.4s)
+  [23] binary/cnn2d/cfdac_phase r=0.750  accuracy=+0.881  (8.2s)
+  [24] binary/cnn2d/cfdac_phase r=0.625  accuracy=+0.863  (6.3s)
+  [25] binary/cnn2d/cfdac_phase r=0.500  accuracy=+0.844  (4.8s)
+>>> cfdac_real  shape=(10000, 1, 128, 128)
+  [26] binary/cnn2d/cfdac_real r=1.000  accuracy=+0.871  (12.2s)
+  [27] binary/cnn2d/cfdac_real r=0.875  accuracy=+0.859  (9.7s)
+  [28] binary/cnn2d/cfdac_real r=0.750  accuracy=+0.797  (7.8s)
+  [29] binary/cnn2d/cfdac_real r=0.625  accuracy=+0.800  (6.2s)
+  [30] binary/cnn2d/cfdac_real r=0.500  accuracy=+0.902  (4.5s)
+>>> cfdac_all  shape=(10000, 4, 128, 128)
+  FAIL binary/cnn/cfdac_all r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 4, 128, 128]
+  FAIL binary/cnn/cfdac_all r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 4, 112, 112]
+  FAIL binary/cnn/cfdac_all r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 4, 96, 96]
+  FAIL binary/cnn/cfdac_all r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 4, 80, 80]
+  FAIL binary/cnn/cfdac_all r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 4, 64, 64]
+>>> cfdac_imag  shape=(10000, 1, 128, 128)
+  FAIL binary/cnn/cfdac_imag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL binary/cnn/cfdac_imag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]

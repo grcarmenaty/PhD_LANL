@@ -102,3 +102,15 @@ plan: 22 indicators × 3 cells, ~264 trials
   mlp/modal           val R²=0.994  test R²=0.994  MAE=0.018  best={'hidden': [256, 128, 64], 'lr': 0.003}
 
 === indicator 20 / 22  'M2L_max'  std(train)=0.2185 ===
+  rf/modal           val R²=0.988  test R²=0.987  MAE=0.018  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.991  test R²=0.991  MAE=0.015  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.985  test R²=0.984  MAE=0.022  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 21 / 22  'M2L_abs_sum'  std(train)=2.3351 ===
+  rf/modal           val R²=0.994  test R²=0.992  MAE=0.143  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.996  test R²=0.994  MAE=0.118  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.990  test R²=0.990  MAE=0.172  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+done — 264 trials.
+
+--- $ /usr/local/bin/python ml_pipeline/train_indicator_predictors.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
