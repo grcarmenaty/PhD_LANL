@@ -111,3 +111,5 @@ plan: 25 cells, 100 trials
   [100/100] type/cnn2d/cfdac_real {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.8033  test=0.8060  (20.4s)
 
 done.
+
+--- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_variants.py --features /home/user/PhD_LANL/dataset/features_noisy_25dB.h5 --out /home/user/PhD_LANL/results/noisy_25dB
