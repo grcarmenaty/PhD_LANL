@@ -36,6 +36,20 @@ while true; do
   echo "  cells: $done_cells/40 done   feature loaded: ${cur_feat:-none}   last cell: ${last_cell:-none}"
   echo "  vm: ram free=${free_mb}MB used=${used_mb}MB   disk free=${disk_free:-?}"
   echo "  log: ${last_log:-(no log lines)}"
+  # Auto-commit any new HPO artefacts so they're durable through VM reboots.
+  new_files=$(git ls-files --others --exclude-standard results/noisy_mixed/ 2>/dev/null)
+  if [ -n "$new_files" ]; then
+    n_new=$(wc -l <<<"$new_files")
+    git add results/noisy_mixed/ >/dev/null 2>&1
+    git -c user.email=claude@local -c user.name=claude \
+        commit -m "noisy_mixed: auto-commit +${n_new} cell artefacts ($ts)" \
+        >/dev/null 2>&1
+    if git push origin HEAD >/dev/null 2>&1; then
+      echo "  auto-commit: +${n_new} files pushed"
+    else
+      echo "  auto-commit: +${n_new} files committed locally (push failed)"
+    fi
+  fi
   echo "============================================================"
   sleep 600
 done
