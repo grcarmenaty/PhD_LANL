@@ -1,0 +1,32 @@
+{
+  "task": "type",
+  "model": "mlp",
+  "feature": "cfdac_realimag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.79,
+  "best_metric_test": 0.8066666666666666,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.79,
+      "metric_test": 0.8066666666666666,
+      "extras": {},
+      "runtime_s": 23.59483027458191
+    }
+  ]
+}
