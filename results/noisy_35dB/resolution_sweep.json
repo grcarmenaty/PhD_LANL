@@ -1339,5 +1339,77 @@
     "model": "xgb",
     "feature": "cfdac_realimag",
     "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9593333333333334,
+    "runtime_s": 105.9115858078003,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_realimag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9233333333333333,
+    "runtime_s": 32.15994048118591,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.884,
+    "runtime_s": 32.599390268325806,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8726666666666667,
+    "runtime_s": 24.625490427017212,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.87,
+    "runtime_s": 6.0233728885650635,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8673333333333333,
+    "runtime_s": 32.70964860916138,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.3422222222222222,
+    "runtime_s": 163.4765543937683,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4822222222222222,
+    "runtime_s": 159.9940857887268,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.875
   }
 ]
