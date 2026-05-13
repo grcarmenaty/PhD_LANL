@@ -1213,5 +1213,14 @@
     "model": "xgb",
     "feature": "cfdac_magphase",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9226666666666666,
+    "runtime_s": 187.19386434555054,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_phase",
+    "ratio": 1.0
   }
 ]
