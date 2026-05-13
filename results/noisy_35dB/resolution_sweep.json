@@ -1411,5 +1411,95 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.45666666666666667,
+    "runtime_s": 157.90410041809082,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4488888888888889,
+    "runtime_s": 157.8055498600006,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.44222222222222224,
+    "runtime_s": 153.4106731414795,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.36777777777777776,
+    "runtime_s": 127.77736496925354,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.20444444444444446,
+    "runtime_s": 5.970566034317017,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.35,
+    "runtime_s": 4.752069711685181,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.43444444444444447,
+    "runtime_s": 3.803021192550659,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.46444444444444444,
+    "runtime_s": 2.6683197021484375,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.3711111111111111,
+    "runtime_s": 7.200472593307495,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.31555555555555553,
+    "runtime_s": 5.74958348274231,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.875
   }
 ]

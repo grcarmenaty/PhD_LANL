@@ -346,3 +346,15 @@ plan: 189 cells × 5 ratios = 945 retrains
 >>> cfdac  shape=(10000, 2, 128, 128)
   [156] col_location/cnn2d/cfdac r=1.000  accuracy=+0.342  (163.5s)
   [157] col_location/cnn2d/cfdac r=0.875  accuracy=+0.482  (160.0s)
+  [158] col_location/cnn2d/cfdac r=0.750  accuracy=+0.457  (157.9s)
+  [159] col_location/cnn2d/cfdac r=0.625  accuracy=+0.449  (157.8s)
+  [160] col_location/cnn2d/cfdac r=0.500  accuracy=+0.442  (153.4s)
+>>> lazy cfdac_imag  H=128 W=128
+  [161] col_location/cnn2d/cfdac_imag r=1.000  accuracy=+0.368  (127.8s)
+  [162] col_location/cnn2d/cfdac_imag r=0.875  accuracy=+0.204  (6.0s)
+  [163] col_location/cnn2d/cfdac_imag r=0.750  accuracy=+0.350  (4.8s)
+  [164] col_location/cnn2d/cfdac_imag r=0.625  accuracy=+0.434  (3.8s)
+  [165] col_location/cnn2d/cfdac_imag r=0.500  accuracy=+0.464  (2.7s)
+>>> lazy cfdac_mag  H=128 W=128
+  [166] col_location/cnn2d/cfdac_mag r=1.000  accuracy=+0.371  (7.2s)
+  [167] col_location/cnn2d/cfdac_mag r=0.875  accuracy=+0.316  (5.7s)
