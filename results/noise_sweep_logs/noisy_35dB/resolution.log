@@ -842,3 +842,45 @@ plan: 189 cells × 5 ratios = 945 retrains
   FAIL severity/cnn/cfdac_magphase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
   FAIL severity/cnn/cfdac_magphase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
 >>> lazy cfdac_phase  H=128 W=128
+  FAIL severity/cnn/cfdac_phase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL severity/cnn/cfdac_phase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL severity/cnn/cfdac_phase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL severity/cnn/cfdac_phase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL severity/cnn/cfdac_phase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_real  H=128 W=128
+  FAIL severity/cnn/cfdac_real r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL severity/cnn/cfdac_real r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL severity/cnn/cfdac_real r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL severity/cnn/cfdac_real r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL severity/cnn/cfdac_real r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_realimag  H=128 W=128
+  FAIL severity/cnn/cfdac_realimag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL severity/cnn/cfdac_realimag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL severity/cnn/cfdac_realimag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL severity/cnn/cfdac_realimag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL severity/cnn/cfdac_realimag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> frf_mag  shape=(10000, 381, 9)
+  [416] severity/cnn/frf_mag r=1.000  R2=+0.374  (2.1s)
+  [417] severity/cnn/frf_mag r=0.875  R2=-0.050  (2.2s)
+  [418] severity/cnn/frf_mag r=0.750  R2=+0.268  (2.2s)
+  [419] severity/cnn/frf_mag r=0.625  R2=+0.344  (2.1s)
+  [420] severity/cnn/frf_mag r=0.500  R2=+0.306  (2.0s)
+>>> timeseries  shape=(10000, 1024, 9)
+  [421] severity/cnn/timeseries r=1.000  R2=+0.409  (2.6s)
+  [422] severity/cnn/timeseries r=0.875  R2=+0.405  (2.6s)
+  [423] severity/cnn/timeseries r=0.750  R2=+0.345  (2.5s)
+  [424] severity/cnn/timeseries r=0.625  R2=+0.415  (2.4s)
+  [425] severity/cnn/timeseries r=0.500  R2=+0.215  (2.3s)
+>>> lazy cfdac_imag  H=128 W=128
+  [426] severity/mlp/cfdac_imag r=1.000  R2=+0.211  (3.9s)
+  [427] severity/mlp/cfdac_imag r=0.875  R2=+0.221  (2.7s)
+  [428] severity/mlp/cfdac_imag r=0.750  R2=+0.201  (2.2s)
+  [429] severity/mlp/cfdac_imag r=0.625  R2=+0.219  (1.7s)
+  [430] severity/mlp/cfdac_imag r=0.500  R2=+0.210  (1.4s)
+>>> lazy cfdac_mag  H=128 W=128
+  [431] severity/mlp/cfdac_mag r=1.000  R2=-0.035  (3.6s)
+  [432] severity/mlp/cfdac_mag r=0.875  R2=+0.028  (3.3s)
+  [433] severity/mlp/cfdac_mag r=0.750  R2=+0.055  (2.9s)
+  [434] severity/mlp/cfdac_mag r=0.625  R2=+0.043  (1.8s)
+  [435] severity/mlp/cfdac_mag r=0.500  R2=+0.043  (1.4s)
+>>> lazy cfdac_magphase  H=128 W=128

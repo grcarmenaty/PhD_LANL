@@ -3763,5 +3763,205 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.37408673763275146,
+    "mae": 0.18028320372104645,
+    "runtime_s": 2.146667242050171,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": -0.049843788146972656,
+    "mae": 0.23573897778987885,
+    "runtime_s": 2.2142832279205322,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.2684284448623657,
+    "mae": 0.19433382153511047,
+    "runtime_s": 2.219966173171997,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.34391123056411743,
+    "mae": 0.18452481925487518,
+    "runtime_s": 2.109368324279785,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.30591636896133423,
+    "mae": 0.19571441411972046,
+    "runtime_s": 2.0062057971954346,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.4091765880584717,
+    "mae": 0.1717788428068161,
+    "runtime_s": 2.5828287601470947,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.40450960397720337,
+    "mae": 0.17485569417476654,
+    "runtime_s": 2.554173707962036,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.3445258140563965,
+    "mae": 0.1826104372739792,
+    "runtime_s": 2.472409248352051,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.4148184657096863,
+    "mae": 0.1651293933391571,
+    "runtime_s": 2.3848679065704346,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.21526622772216797,
+    "mae": 0.21200254559516907,
+    "runtime_s": 2.3199732303619385,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.21095234155654907,
+    "mae": 0.2059044986963272,
+    "runtime_s": 3.893238067626953,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.22107666730880737,
+    "mae": 0.21352986991405487,
+    "runtime_s": 2.6952099800109863,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.20145541429519653,
+    "mae": 0.2119043916463852,
+    "runtime_s": 2.1724798679351807,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.21889859437942505,
+    "mae": 0.21228976547718048,
+    "runtime_s": 1.6846528053283691,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.21031689643859863,
+    "mae": 0.21006403863430023,
+    "runtime_s": 1.403385877609253,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": -0.03467988967895508,
+    "mae": 0.25212571024894714,
+    "runtime_s": 3.639697313308716,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.028358399868011475,
+    "mae": 0.2439098358154297,
+    "runtime_s": 3.300910472869873,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.05519777536392212,
+    "mae": 0.2420734167098999,
+    "runtime_s": 2.851074695587158,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.04294884204864502,
+    "mae": 0.23777338862419128,
+    "runtime_s": 1.8034930229187012,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.04275304079055786,
+    "mae": 0.23799042403697968,
+    "runtime_s": 1.4410171508789062,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 0.5
   }
 ]
