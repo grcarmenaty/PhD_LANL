@@ -276,8 +276,11 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
             for m in model_list:
                 grand_total += int(np.prod([len(v) for v in HPO_GRIDS[m].values()]))
                 plan.append((task, m, feat_name))
-    # Sort by feature so each feature is loaded into RAM at most once.
-    plan.sort(key=lambda r: (r[2], r[0], r[1]))
+    # Sort by feature *cost* so cheap cells finish first and we get early
+    # durable wins.  cfdac is the slowest (gzip per-row chunks, 7.5 GB);
+    # modal is tiny; frf_mag and timeseries are mid-sized SEQ features.
+    _FEATURE_COST = {"modal": 0, "frf_mag": 1, "timeseries": 2, "cfdac": 3}
+    plan.sort(key=lambda r: (_FEATURE_COST.get(r[2], 99), r[0], r[1]))
     print(f"HPO plan: {len(plan)} cells, {grand_total} total trials")
 
     for task_name, model_name, feat_name in plan:
