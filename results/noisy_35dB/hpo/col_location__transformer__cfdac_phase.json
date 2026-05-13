@@ -1,0 +1,24 @@
+{
+  "task": "col_location",
+  "model": "transformer",
+  "feature": "cfdac_phase",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.4750277469478357,
+  "best_metric_test": 0.47555555555555556,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.4750277469478357,
+      "metric_test": 0.47555555555555556,
+      "extras": {},
+      "runtime_s": 5.00794243812561
+    }
+  ]
+}
