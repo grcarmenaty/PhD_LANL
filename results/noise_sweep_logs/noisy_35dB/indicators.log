@@ -114,3 +114,119 @@ plan: 22 indicators × 3 cells, ~264 trials
 done — 264 trials.
 
 --- $ /usr/local/bin/python ml_pipeline/train_indicator_predictors.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
+using 8000 damage samples out of 10000
+plan: 22 indicators × 3 cells, ~264 trials
+
+=== indicator  0 / 22  'SCI'  std(train)=0.1110 ===
+  skip SCI__rf__modal (cached)
+  skip SCI__xgb__modal (cached)
+  skip SCI__mlp__modal (cached)
+
+=== indicator  1 / 22  'unsigned_SCI'  std(train)=0.0982 ===
+  skip unsigned_SCI__rf__modal (cached)
+  skip unsigned_SCI__xgb__modal (cached)
+  skip unsigned_SCI__mlp__modal (cached)
+
+=== indicator  2 / 22  'DRQ'  std(train)=0.2123 ===
+  skip DRQ__rf__modal (cached)
+  skip DRQ__xgb__modal (cached)
+  skip DRQ__mlp__modal (cached)
+
+=== indicator  3 / 22  'AIGAC'  std(train)=0.1532 ===
+  skip AIGAC__rf__modal (cached)
+  skip AIGAC__xgb__modal (cached)
+  skip AIGAC__mlp__modal (cached)
+
+=== indicator  4 / 22  'FRFRMS'  std(train)=0.0511 ===
+  skip FRFRMS__rf__modal (cached)
+  skip FRFRMS__xgb__modal (cached)
+  skip FRFRMS__mlp__modal (cached)
+
+=== indicator  5 / 22  'FRFSF'  std(train)=0.0344 ===
+  skip FRFSF__rf__modal (cached)
+  skip FRFSF__xgb__modal (cached)
+  skip FRFSF__mlp__modal (cached)
+
+=== indicator  6 / 22  'FRFSM_6dB'  std(train)=0.0033 ===
+  skip FRFSM_6dB__rf__modal (cached)
+  skip FRFSM_6dB__xgb__modal (cached)
+  skip FRFSM_6dB__mlp__modal (cached)
+
+=== indicator  7 / 22  'ODS_diff'  std(train)=67.2670 ===
+  skip ODS_diff__rf__modal (cached)
+  skip ODS_diff__xgb__modal (cached)
+  skip ODS_diff__mlp__modal (cached)
+
+=== indicator  8 / 22  'r2_imag'  std(train)=0.5632 ===
+  skip r2_imag__rf__modal (cached)
+  skip r2_imag__xgb__modal (cached)
+  skip r2_imag__mlp__modal (cached)
+
+=== indicator  9 / 22  'RVAC_mean'  std(train)=0.2123 ===
+  skip RVAC_mean__rf__modal (cached)
+  skip RVAC_mean__xgb__modal (cached)
+  skip RVAC_mean__mlp__modal (cached)
+
+=== indicator 10 / 22  'RVAC_std'  std(train)=0.0275 ===
+  skip RVAC_std__rf__modal (cached)
+  skip RVAC_std__xgb__modal (cached)
+  skip RVAC_std__mlp__modal (cached)
+
+=== indicator 11 / 22  'RVAC_min'  std(train)=0.2384 ===
+  skip RVAC_min__rf__modal (cached)
+  skip RVAC_min__xgb__modal (cached)
+  skip RVAC_min__mlp__modal (cached)
+
+=== indicator 12 / 22  'RVAC_max'  std(train)=0.1839 ===
+  skip RVAC_max__rf__modal (cached)
+  skip RVAC_max__xgb__modal (cached)
+  skip RVAC_max__mlp__modal (cached)
+
+=== indicator 13 / 22  'GAC_mean'  std(train)=0.1532 ===
+  skip GAC_mean__rf__modal (cached)
+  skip GAC_mean__xgb__modal (cached)
+  skip GAC_mean__mlp__modal (cached)
+
+=== indicator 14 / 22  'GAC_std'  std(train)=0.0315 ===
+  skip GAC_std__rf__modal (cached)
+  skip GAC_std__xgb__modal (cached)
+  skip GAC_std__mlp__modal (cached)
+
+=== indicator 15 / 22  'GAC_min'  std(train)=0.1886 ===
+  skip GAC_min__rf__modal (cached)
+  skip GAC_min__xgb__modal (cached)
+  skip GAC_min__mlp__modal (cached)
+
+=== indicator 16 / 22  'GAC_max'  std(train)=0.1188 ===
+  skip GAC_max__rf__modal (cached)
+  skip GAC_max__xgb__modal (cached)
+  skip GAC_max__mlp__modal (cached)
+
+=== indicator 17 / 22  'M2L_mean'  std(train)=0.2829 ===
+  skip M2L_mean__rf__modal (cached)
+  skip M2L_mean__xgb__modal (cached)
+  skip M2L_mean__mlp__modal (cached)
+
+=== indicator 18 / 22  'M2L_std'  std(train)=0.0606 ===
+  skip M2L_std__rf__modal (cached)
+  skip M2L_std__xgb__modal (cached)
+  skip M2L_std__mlp__modal (cached)
+
+=== indicator 19 / 22  'M2L_min'  std(train)=0.3038 ===
+  skip M2L_min__rf__modal (cached)
+  skip M2L_min__xgb__modal (cached)
+  skip M2L_min__mlp__modal (cached)
+
+=== indicator 20 / 22  'M2L_max'  std(train)=0.2185 ===
+  skip M2L_max__rf__modal (cached)
+  skip M2L_max__xgb__modal (cached)
+  skip M2L_max__mlp__modal (cached)
+
+=== indicator 21 / 22  'M2L_abs_sum'  std(train)=2.3351 ===
+  skip M2L_abs_sum__rf__modal (cached)
+  skip M2L_abs_sum__xgb__modal (cached)
+  skip M2L_abs_sum__mlp__modal (cached)
+
+done — 0 trials.
+
+--- $ /usr/local/bin/python ml_pipeline/train_indicator_predictors.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB

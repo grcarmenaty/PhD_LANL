@@ -113,3 +113,63 @@ plan: 25 cells, 100 trials
 done.
 
 --- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_variants.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
+plan: 25 cells, 100 trials
+  skip binary/cnn2d/cfdac_imag (cached)
+  skip col_location/cnn2d/cfdac_imag (cached)
+  skip mass_location/cnn2d/cfdac_imag (cached)
+  skip severity/cnn2d/cfdac_imag (cached)
+  skip type/cnn2d/cfdac_imag (cached)
+  skip binary/cnn2d/cfdac_mag (cached)
+  skip col_location/cnn2d/cfdac_mag (cached)
+  skip mass_location/cnn2d/cfdac_mag (cached)
+  skip severity/cnn2d/cfdac_mag (cached)
+  skip type/cnn2d/cfdac_mag (cached)
+  skip binary/cnn2d/cfdac_magphase (cached)
+  skip col_location/cnn2d/cfdac_magphase (cached)
+  skip mass_location/cnn2d/cfdac_magphase (cached)
+  skip severity/cnn2d/cfdac_magphase (cached)
+  skip type/cnn2d/cfdac_magphase (cached)
+  skip binary/cnn2d/cfdac_phase (cached)
+  skip col_location/cnn2d/cfdac_phase (cached)
+  skip mass_location/cnn2d/cfdac_phase (cached)
+  skip severity/cnn2d/cfdac_phase (cached)
+  skip type/cnn2d/cfdac_phase (cached)
+  skip binary/cnn2d/cfdac_real (cached)
+  skip col_location/cnn2d/cfdac_real (cached)
+  skip mass_location/cnn2d/cfdac_real (cached)
+  skip severity/cnn2d/cfdac_real (cached)
+  skip type/cnn2d/cfdac_real (cached)
+
+done.
+
+--- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_variants.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
+plan: 25 cells, 100 trials
+  skip binary/cnn2d/cfdac_imag (cached)
+  skip col_location/cnn2d/cfdac_imag (cached)
+  skip mass_location/cnn2d/cfdac_imag (cached)
+  skip severity/cnn2d/cfdac_imag (cached)
+  skip type/cnn2d/cfdac_imag (cached)
+  skip binary/cnn2d/cfdac_mag (cached)
+  skip col_location/cnn2d/cfdac_mag (cached)
+  skip mass_location/cnn2d/cfdac_mag (cached)
+  skip severity/cnn2d/cfdac_mag (cached)
+  skip type/cnn2d/cfdac_mag (cached)
+  skip binary/cnn2d/cfdac_magphase (cached)
+  skip col_location/cnn2d/cfdac_magphase (cached)
+  skip mass_location/cnn2d/cfdac_magphase (cached)
+  skip severity/cnn2d/cfdac_magphase (cached)
+  skip type/cnn2d/cfdac_magphase (cached)
+  skip binary/cnn2d/cfdac_phase (cached)
+  skip col_location/cnn2d/cfdac_phase (cached)
+  skip mass_location/cnn2d/cfdac_phase (cached)
+  skip severity/cnn2d/cfdac_phase (cached)
+  skip type/cnn2d/cfdac_phase (cached)
+  skip binary/cnn2d/cfdac_real (cached)
+  skip col_location/cnn2d/cfdac_real (cached)
+  skip mass_location/cnn2d/cfdac_real (cached)
+  skip severity/cnn2d/cfdac_real (cached)
+  skip type/cnn2d/cfdac_real (cached)
+
+done.
+
+--- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_variants.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB

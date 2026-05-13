@@ -139,3 +139,11 @@ plan: 140 cells (existing cells skipped)
   [124] binary/transformer/cfdac_all {'d_model': 48, 'n_layers': 2}  val=0.8027  test=0.8033  (12.1s)
 
 --- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_allmodels.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
+plan: 16 cells (existing cells skipped)
+>>> loading cfdac_all ...
+    shape = (10000, 4, 128, 128), mem = 2.62 GB
+plan: 16 cells (existing cells skipped)
+>>> loading cfdac_all ...
+    shape = (10000, 4, 128, 128), mem = 2.62 GB
+
+--- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_allmodels.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB

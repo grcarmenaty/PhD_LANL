@@ -430,3 +430,101 @@ Parameters: { "use_label_encoder" } are not used.
 HPO complete.
 
 --- $ /usr/local/bin/python ml_pipeline/hpo.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
+loading feature: modal
+loading feature: frf_mag
+loading feature: timeseries
+loading feature: cfdac
+HPO plan: 40 cells, 255 total trials
+  skip binary/rf/modal (cached)
+  skip binary/xgb/modal (cached)
+  skip binary/mlp/modal (cached)
+  skip binary/cnn/frf_mag (cached)
+  skip binary/transformer/frf_mag (cached)
+  skip binary/cnn/timeseries (cached)
+  skip binary/transformer/timeseries (cached)
+  skip binary/cnn2d/cfdac (cached)
+  skip type/rf/modal (cached)
+  skip type/xgb/modal (cached)
+  skip type/mlp/modal (cached)
+  skip type/cnn/frf_mag (cached)
+  skip type/transformer/frf_mag (cached)
+  skip type/cnn/timeseries (cached)
+  skip type/transformer/timeseries (cached)
+  skip type/cnn2d/cfdac (cached)
+  skip severity/rf/modal (cached)
+  skip severity/xgb/modal (cached)
+  skip severity/mlp/modal (cached)
+  skip severity/cnn/frf_mag (cached)
+  skip severity/transformer/frf_mag (cached)
+  skip severity/cnn/timeseries (cached)
+  skip severity/transformer/timeseries (cached)
+  skip severity/cnn2d/cfdac (cached)
+  skip col_location/rf/modal (cached)
+  skip col_location/xgb/modal (cached)
+  skip col_location/mlp/modal (cached)
+  skip col_location/cnn/frf_mag (cached)
+  skip col_location/transformer/frf_mag (cached)
+  skip col_location/cnn/timeseries (cached)
+  skip col_location/transformer/timeseries (cached)
+  skip col_location/cnn2d/cfdac (cached)
+  skip mass_location/rf/modal (cached)
+  skip mass_location/xgb/modal (cached)
+  skip mass_location/mlp/modal (cached)
+  skip mass_location/cnn/frf_mag (cached)
+  skip mass_location/transformer/frf_mag (cached)
+  skip mass_location/cnn/timeseries (cached)
+  skip mass_location/transformer/timeseries (cached)
+  skip mass_location/cnn2d/cfdac (cached)
+
+HPO complete.
+
+--- $ /usr/local/bin/python ml_pipeline/hpo.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
+loading feature: modal
+loading feature: frf_mag
+loading feature: timeseries
+loading feature: cfdac
+HPO plan: 40 cells, 255 total trials
+  skip binary/rf/modal (cached)
+  skip binary/xgb/modal (cached)
+  skip binary/mlp/modal (cached)
+  skip binary/cnn/frf_mag (cached)
+  skip binary/transformer/frf_mag (cached)
+  skip binary/cnn/timeseries (cached)
+  skip binary/transformer/timeseries (cached)
+  skip binary/cnn2d/cfdac (cached)
+  skip type/rf/modal (cached)
+  skip type/xgb/modal (cached)
+  skip type/mlp/modal (cached)
+  skip type/cnn/frf_mag (cached)
+  skip type/transformer/frf_mag (cached)
+  skip type/cnn/timeseries (cached)
+  skip type/transformer/timeseries (cached)
+  skip type/cnn2d/cfdac (cached)
+  skip severity/rf/modal (cached)
+  skip severity/xgb/modal (cached)
+  skip severity/mlp/modal (cached)
+  skip severity/cnn/frf_mag (cached)
+  skip severity/transformer/frf_mag (cached)
+  skip severity/cnn/timeseries (cached)
+  skip severity/transformer/timeseries (cached)
+  skip severity/cnn2d/cfdac (cached)
+  skip col_location/rf/modal (cached)
+  skip col_location/xgb/modal (cached)
+  skip col_location/mlp/modal (cached)
+  skip col_location/cnn/frf_mag (cached)
+  skip col_location/transformer/frf_mag (cached)
+  skip col_location/cnn/timeseries (cached)
+  skip col_location/transformer/timeseries (cached)
+  skip col_location/cnn2d/cfdac (cached)
+  skip mass_location/rf/modal (cached)
+  skip mass_location/xgb/modal (cached)
+  skip mass_location/mlp/modal (cached)
+  skip mass_location/cnn/frf_mag (cached)
+  skip mass_location/transformer/frf_mag (cached)
+  skip mass_location/cnn/timeseries (cached)
+  skip mass_location/transformer/timeseries (cached)
+  skip mass_location/cnn2d/cfdac (cached)
+
+HPO complete.
+
+--- $ /usr/local/bin/python ml_pipeline/hpo.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
