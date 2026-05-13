@@ -370,3 +370,111 @@ plan: 189 cells × 5 ratios = 945 retrains
 >>> lazy cfdac_phase  H=128 W=128
   [176] col_location/cnn2d/cfdac_phase r=1.000  accuracy=+0.228  (7.6s)
   [177] col_location/cnn2d/cfdac_phase r=0.875  accuracy=+0.460  (6.1s)
+  [178] col_location/cnn2d/cfdac_phase r=0.750  accuracy=+0.414  (5.2s)
+  [179] col_location/cnn2d/cfdac_phase r=0.625  accuracy=+0.471  (3.7s)
+  [180] col_location/cnn2d/cfdac_phase r=0.500  accuracy=+0.483  (2.7s)
+>>> lazy cfdac_real  H=128 W=128
+  [181] col_location/cnn2d/cfdac_real r=1.000  accuracy=+0.433  (7.4s)
+  [182] col_location/cnn2d/cfdac_real r=0.875  accuracy=+0.463  (6.0s)
+  [183] col_location/cnn2d/cfdac_real r=0.750  accuracy=+0.396  (4.5s)
+  [184] col_location/cnn2d/cfdac_real r=0.625  accuracy=+0.398  (3.6s)
+  [185] col_location/cnn2d/cfdac_real r=0.500  accuracy=+0.414  (2.7s)
+>>> lazy cfdac_imag  H=128 W=128
+  FAIL col_location/cnn/cfdac_imag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/cnn/cfdac_imag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/cnn/cfdac_imag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/cnn/cfdac_imag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/cnn/cfdac_imag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_mag  H=128 W=128
+  FAIL col_location/cnn/cfdac_mag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/cnn/cfdac_mag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/cnn/cfdac_mag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/cnn/cfdac_mag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/cnn/cfdac_mag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_magphase  H=128 W=128
+  FAIL col_location/cnn/cfdac_magphase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL col_location/cnn/cfdac_magphase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL col_location/cnn/cfdac_magphase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL col_location/cnn/cfdac_magphase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL col_location/cnn/cfdac_magphase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> lazy cfdac_phase  H=128 W=128
+  FAIL col_location/cnn/cfdac_phase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/cnn/cfdac_phase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/cnn/cfdac_phase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/cnn/cfdac_phase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/cnn/cfdac_phase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_real  H=128 W=128
+  FAIL col_location/cnn/cfdac_real r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL col_location/cnn/cfdac_real r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL col_location/cnn/cfdac_real r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL col_location/cnn/cfdac_real r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL col_location/cnn/cfdac_real r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_realimag  H=128 W=128
+  FAIL col_location/cnn/cfdac_realimag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL col_location/cnn/cfdac_realimag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL col_location/cnn/cfdac_realimag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL col_location/cnn/cfdac_realimag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL col_location/cnn/cfdac_realimag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> frf_mag  shape=(10000, 381, 9)
+  [186] col_location/cnn/frf_mag r=1.000  accuracy=+0.403  (1.9s)
+  [187] col_location/cnn/frf_mag r=0.875  accuracy=+0.459  (1.9s)
+  [188] col_location/cnn/frf_mag r=0.750  accuracy=+0.423  (1.7s)
+  [189] col_location/cnn/frf_mag r=0.625  accuracy=+0.473  (1.7s)
+  [190] col_location/cnn/frf_mag r=0.500  accuracy=+0.464  (1.6s)
+>>> timeseries  shape=(10000, 1024, 9)
+  [191] col_location/cnn/timeseries r=1.000  accuracy=+0.458  (2.0s)
+  [192] col_location/cnn/timeseries r=0.875  accuracy=+0.417  (2.0s)
+  [193] col_location/cnn/timeseries r=0.750  accuracy=+0.437  (1.9s)
+  [194] col_location/cnn/timeseries r=0.625  accuracy=+0.461  (2.0s)
+  [195] col_location/cnn/timeseries r=0.500  accuracy=+0.456  (1.9s)
+>>> lazy cfdac_imag  H=128 W=128
+  [196] col_location/mlp/cfdac_imag r=1.000  accuracy=+0.473  (2.9s)
+  [197] col_location/mlp/cfdac_imag r=0.875  accuracy=+0.452  (2.4s)
+  [198] col_location/mlp/cfdac_imag r=0.750  accuracy=+0.441  (1.8s)
+  [199] col_location/mlp/cfdac_imag r=0.625  accuracy=+0.433  (1.3s)
+  [200] col_location/mlp/cfdac_imag r=0.500  accuracy=+0.500  (1.0s)
+>>> lazy cfdac_mag  H=128 W=128
+  [201] col_location/mlp/cfdac_mag r=1.000  accuracy=+0.450  (2.6s)
+  [202] col_location/mlp/cfdac_mag r=0.875  accuracy=+0.403  (2.1s)
+  [203] col_location/mlp/cfdac_mag r=0.750  accuracy=+0.421  (1.6s)
+  [204] col_location/mlp/cfdac_mag r=0.625  accuracy=+0.406  (1.3s)
+  [205] col_location/mlp/cfdac_mag r=0.500  accuracy=+0.407  (1.1s)
+>>> lazy cfdac_magphase  H=128 W=128
+  [206] col_location/mlp/cfdac_magphase r=1.000  accuracy=+0.411  (11.3s)
+  [207] col_location/mlp/cfdac_magphase r=0.875  accuracy=+0.461  (8.6s)
+  [208] col_location/mlp/cfdac_magphase r=0.750  accuracy=+0.447  (3.0s)
+  [209] col_location/mlp/cfdac_magphase r=0.625  accuracy=+0.462  (2.1s)
+  [210] col_location/mlp/cfdac_magphase r=0.500  accuracy=+0.462  (1.5s)
+>>> lazy cfdac_phase  H=128 W=128
+  [211] col_location/mlp/cfdac_phase r=1.000  accuracy=+0.438  (2.6s)
+  [212] col_location/mlp/cfdac_phase r=0.875  accuracy=+0.453  (2.4s)
+  [213] col_location/mlp/cfdac_phase r=0.750  accuracy=+0.467  (1.8s)
+  [214] col_location/mlp/cfdac_phase r=0.625  accuracy=+0.480  (1.3s)
+  [215] col_location/mlp/cfdac_phase r=0.500  accuracy=+0.470  (1.1s)
+>>> lazy cfdac_real  H=128 W=128
+  [216] col_location/mlp/cfdac_real r=1.000  accuracy=+0.444  (2.8s)
+  [217] col_location/mlp/cfdac_real r=0.875  accuracy=+0.480  (2.3s)
+  [218] col_location/mlp/cfdac_real r=0.750  accuracy=+0.458  (1.7s)
+  [219] col_location/mlp/cfdac_real r=0.625  accuracy=+0.462  (1.3s)
+  [220] col_location/mlp/cfdac_real r=0.500  accuracy=+0.427  (1.0s)
+>>> lazy cfdac_realimag  H=128 W=128
+  [221] col_location/mlp/cfdac_realimag r=1.000  accuracy=+0.464  (10.9s)
+  [222] col_location/mlp/cfdac_realimag r=0.875  accuracy=+0.471  (8.4s)
+  [223] col_location/mlp/cfdac_realimag r=0.750  accuracy=+0.452  (3.1s)
+  [224] col_location/mlp/cfdac_realimag r=0.625  accuracy=+0.439  (2.4s)
+  [225] col_location/mlp/cfdac_realimag r=0.500  accuracy=+0.423  (1.7s)
+>>> modal  shape=(10000, 81)
+  [226] col_location/mlp/modal r=1.000  accuracy=+0.219  (0.6s)
+  [227] col_location/mlp/modal r=0.875  accuracy=+0.208  (0.6s)
+  [228] col_location/mlp/modal r=0.750  accuracy=+0.259  (0.6s)
+  [229] col_location/mlp/modal r=0.625  accuracy=+0.206  (0.5s)
+  [230] col_location/mlp/modal r=0.500  accuracy=+0.250  (0.5s)
+>>> lazy cfdac_imag  H=128 W=128
+  [231] col_location/rf/cfdac_imag r=1.000  accuracy=+0.479  (10.6s)
+  [232] col_location/rf/cfdac_imag r=0.875  accuracy=+0.480  (9.4s)
+  [233] col_location/rf/cfdac_imag r=0.750  accuracy=+0.474  (7.8s)
+  [234] col_location/rf/cfdac_imag r=0.625  accuracy=+0.480  (6.4s)
+  [235] col_location/rf/cfdac_imag r=0.500  accuracy=+0.464  (5.0s)
+>>> lazy cfdac_mag  H=128 W=128
+  [236] col_location/rf/cfdac_mag r=1.000  accuracy=+0.483  (11.5s)
+  [237] col_location/rf/cfdac_mag r=0.875  accuracy=+0.484  (9.8s)
