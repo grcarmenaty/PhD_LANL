@@ -175,3 +175,4 @@ Parameters: { "use_label_encoder" } are not used.
   [98/255] type/transformer/timeseries  {'d_model': 64, 'n_layers': 2}  val=0.4153  test=0.4427  (34.6s)
   [99/255] type/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.6567  test=0.6920  (9.1s)
   [100/255] type/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.7613  test=0.7680  (11.3s)
+  [101/255] type/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.7273  test=0.7307  (16.2s)
