@@ -110,3 +110,4 @@ plan: 140 cells (existing cells skipped)
   [99] type/rf/cfdac_realimag {'n_estimators': 200, 'max_depth': None}  val=0.7940  test=0.8073  (81.3s)
   [100] type/transformer/cfdac_realimag {'d_model': 48, 'n_layers': 2}  val=0.6727  test=0.6707  (10.1s)
 >>> loading cfdac_magphase ...
+    shape = (10000, 2, 128, 128), mem = 1.31 GB
