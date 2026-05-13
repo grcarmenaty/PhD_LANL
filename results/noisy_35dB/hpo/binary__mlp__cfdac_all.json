@@ -1,0 +1,32 @@
+{
+  "task": "binary",
+  "model": "mlp",
+  "feature": "cfdac_all",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.9553333333333334,
+  "best_metric_test": 0.954,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9553333333333334,
+      "metric_test": 0.954,
+      "extras": {},
+      "runtime_s": 52.92917776107788
+    }
+  ]
+}

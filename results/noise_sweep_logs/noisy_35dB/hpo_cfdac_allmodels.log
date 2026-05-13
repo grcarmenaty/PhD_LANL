@@ -133,3 +133,9 @@ plan: 140 cells (existing cells skipped)
   [120] type/transformer/cfdac_magphase {'d_model': 48, 'n_layers': 2}  val=0.6473  test=0.6300  (9.9s)
 >>> loading cfdac_all ...
     shape = (10000, 4, 128, 128), mem = 2.62 GB
+  [121] binary/cnn/cfdac_all {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8733  test=0.8820  (17.4s)
+  [122] binary/mlp/cfdac_all {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9553  test=0.9540  (52.9s)
+  [123] binary/rf/cfdac_all {'n_estimators': 200, 'max_depth': None}  val=0.9553  test=0.9480  (86.5s)
+  [124] binary/transformer/cfdac_all {'d_model': 48, 'n_layers': 2}  val=0.8027  test=0.8033  (12.1s)
+
+--- $ /usr/local/bin/python ml_pipeline/hpo_cfdac_allmodels.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB
