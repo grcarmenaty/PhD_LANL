@@ -82,7 +82,14 @@ class LazyCFDACDataset(Dataset):
     def __init__(self, h5_path, variant: str,
                   rows: np.ndarray | None = None,
                   labels: np.ndarray | None = None,
-                  kind: str = "cls"):
+                  kind: str = "cls",
+                  reshape: str = "conv2d"):
+        """``reshape`` controls how each sample is presented:
+            "conv2d" → (C, H, W) — default, suits Conv2DStack
+            "conv3d" → (1, D, H, W) where D = C — for Conv3DStack
+            "seq"    → (C*W, H) — for Conv1DStack / SmallTransformer
+            "flat"   → (C*H*W,) — for MLP / RF / XGB
+        """
         if variant not in _CFDAC_PARTS:
             raise ValueError(f"unknown variant {variant!r}")
         self.h5_path = str(h5_path)
@@ -94,17 +101,35 @@ class LazyCFDACDataset(Dataset):
         self.rows = np.asarray(rows) if rows is not None else np.arange(n_total)
         self.labels = labels
         self.kind = kind
+        if reshape not in ("conv2d", "conv3d", "seq", "flat"):
+            raise ValueError(f"unknown reshape {reshape!r}")
+        self.reshape = reshape
 
     def __len__(self):
         return len(self.rows)
+
+    def _reshape(self, x: np.ndarray) -> np.ndarray:
+        """Apply the requested reshape to a single (C, H, W) sample."""
+        if self.reshape == "conv2d":
+            return x
+        if self.reshape == "conv3d":
+            return x[np.newaxis, ...]                          # (1, D, H, W)
+        if self.reshape == "seq":
+            C, H, W = x.shape
+            return x.transpose(0, 2, 1).reshape(C * W, H)       # (C*W, H)
+        if self.reshape == "flat":
+            return x.reshape(-1)                                # (C*H*W,)
+        raise AssertionError
 
     def __getitem__(self, i):
         row = int(self.rows[i])
         with h5py.File(self.h5_path, "r") as f:
             layers = [f[p][row] for p in self.parts]
-        x = np.stack(layers, axis=0).astype(np.float32)   # (C, H, W)
-        if self.mode == "stack3d":
-            x = x[np.newaxis, ...]                          # (1, D, H, W)
+        x = np.stack(layers, axis=0).astype(np.float32)        # (C, H, W)
+        if self.mode == "stack3d" and self.reshape == "conv2d":
+            x = x[np.newaxis, ...]                              # legacy default
+        else:
+            x = self._reshape(x)
         if self.labels is None:
             return torch.from_numpy(x)
         y = self.labels[i]
@@ -116,7 +141,8 @@ class LazyCFDACDataset(Dataset):
 
     def batch_read(self, rows: Sequence[int]) -> np.ndarray:
         """Bulk-read a set of rows; used by the trainer to construct the
-        validation / test tensors without spawning DataLoader workers."""
+        validation / test tensors without spawning DataLoader workers.
+        Returns the raw (n, C, H, W) layout regardless of ``reshape``."""
         rows = np.asarray(rows, dtype=int)
         order = np.argsort(rows)
         with h5py.File(self.h5_path, "r") as f:
@@ -125,9 +151,9 @@ class LazyCFDACDataset(Dataset):
                 tmp = f[p][rows[order]]
                 arr = np.empty_like(tmp); arr[order] = tmp
                 layers.append(arr)
-        x = np.stack(layers, axis=1).astype(np.float32)   # (n, C, H, W)
+        x = np.stack(layers, axis=1).astype(np.float32)        # (n, C, H, W)
         if self.mode == "stack3d":
-            x = x[:, np.newaxis, ...]                       # (n, 1, D, H, W)
+            x = x[:, np.newaxis, ...]                           # (n, 1, D, H, W)
         return x
 
 
