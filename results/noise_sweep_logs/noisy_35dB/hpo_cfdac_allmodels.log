@@ -132,3 +132,4 @@ plan: 140 cells (existing cells skipped)
   [119] type/rf/cfdac_magphase {'n_estimators': 200, 'max_depth': None}  val=0.8193  test=0.8320  (82.6s)
   [120] type/transformer/cfdac_magphase {'d_model': 48, 'n_layers': 2}  val=0.6473  test=0.6300  (9.9s)
 >>> loading cfdac_all ...
+    shape = (10000, 4, 128, 128), mem = 2.62 GB
