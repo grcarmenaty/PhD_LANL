@@ -240,3 +240,11 @@ plan: 189 cells × 5 ratios = 945 retrains
   [112] binary/rf/cfdac_realimag r=0.875  accuracy=+0.956  (25.2s)
   [113] binary/rf/cfdac_realimag r=0.750  accuracy=+0.957  (20.8s)
   [114] binary/rf/cfdac_realimag r=0.625  accuracy=+0.953  (16.2s)
+  [115] binary/rf/cfdac_realimag r=0.500  accuracy=+0.955  (12.7s)
+>>> modal  shape=(10000, 81)
+  [116] binary/rf/modal r=1.000  accuracy=+0.896  (0.8s)
+  [117] binary/rf/modal r=0.875  accuracy=+0.869  (1.0s)
+  [118] binary/rf/modal r=0.750  accuracy=+0.873  (0.8s)
+  [119] binary/rf/modal r=0.625  accuracy=+0.861  (0.8s)
+  [120] binary/rf/modal r=0.500  accuracy=+0.860  (0.8s)
+>>> lazy cfdac_all  H=128 W=128
