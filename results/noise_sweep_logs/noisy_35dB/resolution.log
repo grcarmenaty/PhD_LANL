@@ -828,3 +828,17 @@ plan: 189 cells × 5 ratios = 945 retrains
   FAIL severity/cnn/cfdac_imag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
   FAIL severity/cnn/cfdac_imag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
   FAIL severity/cnn/cfdac_imag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL severity/cnn/cfdac_imag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_mag  H=128 W=128
+  FAIL severity/cnn/cfdac_mag r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 128, 128]
+  FAIL severity/cnn/cfdac_mag r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 112, 112]
+  FAIL severity/cnn/cfdac_mag r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 96, 96]
+  FAIL severity/cnn/cfdac_mag r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 80, 80]
+  FAIL severity/cnn/cfdac_mag r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 1, 64, 64]
+>>> lazy cfdac_magphase  H=128 W=128
+  FAIL severity/cnn/cfdac_magphase r=1.0: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 128, 128]
+  FAIL severity/cnn/cfdac_magphase r=0.875: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 112, 112]
+  FAIL severity/cnn/cfdac_magphase r=0.75: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 96, 96]
+  FAIL severity/cnn/cfdac_magphase r=0.625: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 80, 80]
+  FAIL severity/cnn/cfdac_magphase r=0.5: Expected 2D (unbatched) or 3D (batched) input to conv1d, but got input of size: [64, 2, 64, 64]
+>>> lazy cfdac_phase  H=128 W=128
