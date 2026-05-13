@@ -51,3 +51,6 @@ results/noisy_*dB/models_indicators/*.pkl
 
 # Sweep launcher logs (kept locally only)
 logs/
+
+# Mixed-training VDS pointer file (regenerate via build_mixed_features.py)
+dataset/features_mixed.h5
