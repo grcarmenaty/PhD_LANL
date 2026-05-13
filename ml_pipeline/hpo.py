@@ -135,40 +135,57 @@ def _train_torch(model_name: str, kind: str, n_out: int,
                   X_tr, y_tr, X_va, y_va, X_te, y_te,
                   epochs: int) -> Tuple[TrialResult, nn.Module]:
     t0 = time.time()
-    Xtr = _to_tensor(X_tr); Xva = _to_tensor(X_va); Xte = _to_tensor(X_te)
-    if kind == "cls":
-        ytr = torch.as_tensor(y_tr).long(); yva = torch.as_tensor(y_va).long()
-        yte = torch.as_tensor(y_te).long(); loss_fn = nn.CrossEntropyLoss()
+    # X_tr may be either a numpy/tensor array (eager) or a torch Dataset
+    # (lazy, streaming from HDF5 row-by-row).  Detect and route.
+    from torch.utils.data import Dataset as _TorchDataset
+    streaming = isinstance(X_tr, _TorchDataset)
+    if streaming:
+        # Probe one sample for shape; the dataset already encodes y.
+        x0, _ = X_tr[0]
+        # x0 is already in tensor layout produced by LazyCFDACDataset
+        Xtr_shape = (len(X_tr),) + tuple(x0.shape)
+        ds_tr = X_tr
     else:
-        ytr = torch.as_tensor(y_tr).float().unsqueeze(1)
+        Xtr = _to_tensor(X_tr)
+        Xtr_shape = tuple(Xtr.shape)
+        if kind == "cls":
+            ytr = torch.as_tensor(y_tr).long()
+        else:
+            ytr = torch.as_tensor(y_tr).float().unsqueeze(1)
+        ds_tr = TensorDataset(Xtr, ytr)
+    Xva = _to_tensor(X_va); Xte = _to_tensor(X_te)
+    if kind == "cls":
+        yva = torch.as_tensor(y_va).long(); yte = torch.as_tensor(y_te).long()
+        loss_fn = nn.CrossEntropyLoss()
+    else:
         yva = torch.as_tensor(y_va).float().unsqueeze(1)
         yte = torch.as_tensor(y_te).float().unsqueeze(1)
         loss_fn = nn.MSELoss()
 
-    seq = Xtr.ndim == 3; mat = Xtr.ndim == 4
+    seq = len(Xtr_shape) == 3; mat = len(Xtr_shape) == 4
     batch = 64
-    if seq and Xtr.shape[2] >= 256:
+    if seq and Xtr_shape[2] >= 256:
         batch = 128
     if model_name == "mlp":
-        in_dim = Xtr.shape[1] * Xtr.shape[2] if seq else Xtr.shape[1]
+        in_dim = Xtr_shape[1] * Xtr_shape[2] if seq else Xtr_shape[1]
         model = MLP(in_dim=in_dim, n_out=n_out,
                      hidden=tuple(params["hidden"]), dropout=0.2,
                      regression=(kind == "reg"))
         lr = float(params["lr"])
     elif model_name == "cnn":
-        model = Conv1DStack(n_channels=Xtr.shape[1], n_out=n_out,
+        model = Conv1DStack(n_channels=Xtr_shape[1], n_out=n_out,
                               widths=tuple(params["widths"]),
                               kernel_size=int(params["kernel_size"]),
                               regression=(kind == "reg"))
         lr = 1e-3
     elif model_name == "transformer":
-        model = SmallTransformer(n_channels=Xtr.shape[1], n_out=n_out,
+        model = SmallTransformer(n_channels=Xtr_shape[1], n_out=n_out,
                                    d_model=int(params["d_model"]),
                                    n_layers=int(params["n_layers"]),
                                    regression=(kind == "reg"))
         lr = 1e-3
     elif model_name == "cnn2d":
-        model = Conv2DStack(n_channels=Xtr.shape[1], n_out=n_out,
+        model = Conv2DStack(n_channels=Xtr_shape[1], n_out=n_out,
                               widths=tuple(params["widths"]),
                               kernel_size=int(params["kernel_size"]),
                               regression=(kind == "reg"))
@@ -179,8 +196,10 @@ def _train_torch(model_name: str, kind: str, n_out: int,
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
 
-    ds_tr = TensorDataset(Xtr, ytr)
-    dl_tr = DataLoader(ds_tr, batch_size=batch, shuffle=True, num_workers=0)
+    n_workers = 2 if streaming else 0
+    dl_tr = DataLoader(ds_tr, batch_size=batch, shuffle=True,
+                       num_workers=n_workers,
+                       persistent_workers=bool(n_workers))
 
     best_metric = -np.inf
     best_state = None
@@ -235,12 +254,13 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     tasks  = build_targets(labels["type_code"], labels["storey"],
                             labels["end"], labels["severity"])
 
-    # Lazy feature load: load each feature only when its first cell starts,
-    # and drop the previous feature to keep RAM use bounded.  This matters
-    # for big mixed-training datasets (60k samples) where preloading every
-    # feature up front costs > 30 min and blocks the per-cell skip path
-    # from making progress through VM suspends.
-    feats: Dict[str, np.ndarray] = {}
+    # Per-cell lazy load (pymodal-style).  No global preload of any feature.
+    # FEATURES_FLAT/SEQ: read only the rows this cell needs (tr ∪ va ∪ te).
+    # FEATURES_MAT (cfdac, 7.5 GB): stream via LazyCFDACDataset for train
+    # and bulk-read just val/test via batch_read().
+    # Each cell is self-contained: a VM reboot mid-cell loses only that
+    # cell, and finished cells are durable via best.json.
+    from ml_pipeline.lazy_datasets import LazyCFDACDataset
 
     grand_total = 0
     grand_done  = 0
@@ -274,21 +294,36 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         y_tr = y_pool[idx_tr_local]; y_va = y_pool[idx_va_local]
         y_te = y_pool[idx_te_local]
 
-        if feat_name not in feats:
-            # Drop previously held feature first to keep RAM bounded.
-            for old in list(feats.keys()):
-                del feats[old]
-            import gc; gc.collect()
-            print(f"loading feature: {feat_name}", flush=True)
-            feats[feat_name] = load_feature(features_path, feat_name)
-        X = feats[feat_name]
-        X_tr = X[idx_tr]; X_va = X[idx_va]; X_te = X[idx_te]
         scaler = None
-        if feat_name in FEATURES_FLAT:
-            scaler = StandardScaler().fit(X_tr.reshape(len(X_tr), -1))
-            X_tr = scaler.transform(X_tr.reshape(len(X_tr), -1))
-            X_va = scaler.transform(X_va.reshape(len(X_va), -1))
-            X_te = scaler.transform(X_te.reshape(len(X_te), -1))
+        t_load = time.time()
+        if feat_name in FEATURES_MAT:
+            # Stream cfdac during training; bulk-read only val/test.
+            ds_tr = LazyCFDACDataset(features_path, feat_name,
+                                      rows=idx_tr, labels=y_tr, kind=kind,
+                                      reshape="conv2d")
+            X_tr = ds_tr  # marker — _train_torch detects Dataset
+            X_va = ds_tr.batch_read(idx_va)
+            X_te = ds_tr.batch_read(idx_te)
+            print(f"  load(cfdac, va+te only)={time.time()-t_load:.1f}s "
+                  f"tr=streaming({len(idx_tr)} rows) "
+                  f"va={X_va.shape} te={X_te.shape}", flush=True)
+        else:
+            # Per-cell subset read for FEATURES_FLAT and FEATURES_SEQ.
+            rows_all = np.concatenate([idx_tr, idx_va, idx_te])
+            X_all = load_feature(features_path, feat_name, rows=rows_all)
+            n_tr, n_va = len(idx_tr), len(idx_va)
+            X_tr = X_all[:n_tr]
+            X_va = X_all[n_tr:n_tr + n_va]
+            X_te = X_all[n_tr + n_va:]
+            del X_all
+            if feat_name in FEATURES_FLAT:
+                scaler = StandardScaler().fit(X_tr.reshape(len(X_tr), -1))
+                X_tr = scaler.transform(X_tr.reshape(len(X_tr), -1))
+                X_va = scaler.transform(X_va.reshape(len(X_va), -1))
+                X_te = scaler.transform(X_te.reshape(len(X_te), -1))
+            print(f"  load({feat_name})={time.time()-t_load:.1f}s "
+                  f"tr={X_tr.shape} va={X_va.shape} te={X_te.shape}",
+                  flush=True)
 
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1
         grid  = HPO_GRIDS[model_name]
@@ -344,11 +379,16 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                 with open(models_dir / f"{tag}.pkl", "wb") as f:
                     pickle.dump({"model": best_obj, "scaler": scaler}, f)
             else:
+                if hasattr(X_tr, "shape"):
+                    in_shape = list(X_tr.shape[1:])
+                else:
+                    # X_tr is a LazyCFDACDataset; probe a sample.
+                    in_shape = list(X_tr[0][0].shape)
                 torch.save({
                     "state_dict": best_obj.state_dict(),
                     "model_name": model_name,
                     "n_out": n_out,
-                    "in_shape": list(X_tr.shape[1:]),
+                    "in_shape": in_shape,
                     "hyperparams": best_trial.hyperparams,
                 }, models_dir / f"{tag}.pt")
 

@@ -50,6 +50,8 @@ _CFDAC_PARTS = {
     "cfdac3d_magphase": (("cfdac_mag",  "cfdac_phase"),                 "stack3d"),
     "cfdac3d_all":      (("cfdac_real", "cfdac_imag",
                             "cfdac_mag",  "cfdac_phase"),                "stack3d"),
+    # Legacy alias used by hpo.py for the default FEATURES_MAT entry.
+    "cfdac":          (("cfdac_real", "cfdac_imag"),             "stack2d"),
 }
 
 
