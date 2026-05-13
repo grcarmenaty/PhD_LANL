@@ -82,3 +82,4 @@ Parameters: { "use_label_encoder" } are not used.
   [41/255] binary/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8000  test=0.8000  (37.4s)
   [42/255] binary/transformer/timeseries  {'d_model': 32, 'n_layers': 1}  val=0.8000  test=0.8000  (12.5s)
   [43/255] binary/transformer/timeseries  {'d_model': 32, 'n_layers': 2}  val=0.8600  test=0.8573  (24.9s)
+  [44/255] binary/transformer/timeseries  {'d_model': 48, 'n_layers': 1}  val=0.8000  test=0.8000  (16.1s)
