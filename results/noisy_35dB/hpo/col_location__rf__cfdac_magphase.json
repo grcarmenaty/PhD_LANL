@@ -1,0 +1,24 @@
+{
+  "task": "col_location",
+  "model": "rf",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": null
+  },
+  "best_metric_val": 0.4816870144284129,
+  "best_metric_test": 0.48777777777777775,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.4816870144284129,
+      "metric_test": 0.48777777777777775,
+      "extras": {},
+      "runtime_s": 32.974796772003174
+    }
+  ]
+}

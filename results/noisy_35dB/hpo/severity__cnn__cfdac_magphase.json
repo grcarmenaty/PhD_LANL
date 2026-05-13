@@ -1,0 +1,34 @@
+{
+  "task": "severity",
+  "model": "cnn",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.4376130700111389,
+  "best_metric_test": 0.4348795413970947,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "R2",
+      "metric_val": 0.4376130700111389,
+      "metric_test": 0.4348795413970947,
+      "extras": {
+        "mae_test": 0.16573978960514069
+      },
+      "runtime_s": 9.090691566467285
+    }
+  ]
+}
