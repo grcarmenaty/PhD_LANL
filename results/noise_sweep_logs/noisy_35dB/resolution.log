@@ -478,3 +478,8 @@ plan: 189 cells × 5 ratios = 945 retrains
 >>> lazy cfdac_mag  H=128 W=128
   [236] col_location/rf/cfdac_mag r=1.000  accuracy=+0.483  (11.5s)
   [237] col_location/rf/cfdac_mag r=0.875  accuracy=+0.484  (9.8s)
+  [238] col_location/rf/cfdac_mag r=0.750  accuracy=+0.484  (8.3s)
+  [239] col_location/rf/cfdac_mag r=0.625  accuracy=+0.459  (6.8s)
+  [240] col_location/rf/cfdac_mag r=0.500  accuracy=+0.466  (5.3s)
+>>> lazy cfdac_magphase  H=128 W=128
+  [241] col_location/rf/cfdac_magphase r=1.000  accuracy=+0.478  (16.8s)

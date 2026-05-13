@@ -2131,5 +2131,41 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.48444444444444446,
+    "runtime_s": 8.269466876983643,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4588888888888889,
+    "runtime_s": 6.820477724075317,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.46555555555555556,
+    "runtime_s": 5.339134931564331,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4777777777777778,
+    "runtime_s": 16.798499584197998,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "cfdac_magphase",
+    "ratio": 1.0
   }
 ]
