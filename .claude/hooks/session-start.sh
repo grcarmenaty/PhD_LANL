@@ -53,28 +53,21 @@ if [ ! -f "$MIXED_FEATURES" ]; then
   exit 0
 fi
 
-# If hpo.py for mixed is already alive, don't relaunch.
-if pgrep -af "hpo.py --features $MIXED_FEATURES" >/dev/null; then
-  log "hpo.py on mixed already running; not relaunching"
-  exit 0
-fi
-
-# Run hpo.py if its task is not fully done.  189 cells = full coverage.
-HPO_CELLS_DONE=$(ls "$MIXED_OUT/hpo/" 2>/dev/null | wc -l)
-if [ "$HPO_CELLS_DONE" -lt 189 ]; then
-  mkdir -p "$REPO/logs" "$MIXED_OUT"
-  LOG="$REPO/logs/mixed_hpo_resume_$(date -u +%Y%m%d_%H%M%S).log"
-  log "resuming hpo.py on mixed ($HPO_CELLS_DONE/189 cells done) -> $LOG"
-  setsid nohup python "$REPO/ml_pipeline/hpo.py" \
-      --features "$MIXED_FEATURES" \
-      --out "$MIXED_OUT" \
+# If the orchestrator script is running, don't relaunch (it owns hpo.py).
+if pgrep -af "run_noisy_mixed_pipeline.sh" >/dev/null; then
+  log "noisy-mixed orchestrator already running; not relaunching"
+elif pgrep -af "hpo.py --features $MIXED_FEATURES" >/dev/null; then
+  log "hpo.py on mixed already running; not relaunching orchestrator"
+else
+  mkdir -p "$REPO/logs"
+  LOG="$REPO/logs/orchestrator_$(date -u +%Y%m%d_%H%M%S).log"
+  log "starting noisy-mixed orchestrator -> $LOG"
+  setsid nohup bash "$REPO/.claude/run_noisy_mixed_pipeline.sh" \
       > "$LOG" 2>&1 < /dev/null &
   PID=$!
-  echo "$PID" > /tmp/mixed_hpo.pid
+  echo "$PID" > /tmp/mixed_orchestrator.pid
   disown $PID 2>/dev/null || true
-  log "mixed-hpo pid=$PID"
-else
-  log "hpo.py cells already complete (189/189)"
+  log "orchestrator pid=$PID"
 fi
 
 # ---------- 4.  remind Claude to re-arm the 10-min heartbeat --------------

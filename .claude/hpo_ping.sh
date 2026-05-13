@@ -22,16 +22,25 @@ auto_commit() {
 emit_ping() {
   local ts proc relaunch=""
   ts=$(TZ=Europe/Madrid date +'%H:%M:%S %Z')
-  proc=$(pgrep -af 'hpo\.py.*features_mixed' | grep -v 'hpo_ping' | head -1)
+  # Find the active orchestrator step (any python process started by
+  # run_noisy_mixed_pipeline.sh).  Falls back to hpo.py for backward compat.
+  proc=$(pgrep -af 'python.*ml_pipeline\.(hpo|hpo_cfdac_variants|hpo_cfdac_allmodels|train_indicator_predictors|evaluate_full_experimental|transfer_learn|resolution_sweep|build_report_noise)' | head -1)
   if [ -z "$proc" ]; then
-    local LOG="logs/mixed_hpo_resume_$(date -u +%Y%m%d_%H%M%S).log"
-    setsid nohup python ml_pipeline/hpo.py \
-        --features dataset/features_mixed.h5 \
-        --out results/noisy_mixed > "$LOG" 2>&1 < /dev/null &
-    disown
-    sleep 2
     proc=$(pgrep -af 'hpo\.py.*features_mixed' | grep -v 'hpo_ping' | head -1)
-    relaunch=" [RELAUNCHED]"
+  fi
+  if [ -z "$proc" ]; then
+    # Nothing running: start the orchestrator (covers VM-reboot recovery
+    # for any step, not just hpo.py).
+    local LOG="logs/orchestrator_$(date -u +%Y%m%d_%H%M%S).log"
+    if ! pgrep -af 'run_noisy_mixed_pipeline.sh' >/dev/null; then
+      setsid nohup bash /home/user/PhD_LANL/.claude/run_noisy_mixed_pipeline.sh \
+          > "$LOG" 2>&1 < /dev/null &
+      disown
+      relaunch=" [ORCHESTRATOR RELAUNCHED]"
+      sleep 3
+    fi
+    proc=$(pgrep -af 'python.*ml_pipeline\.' | head -1)
+    [ -z "$proc" ] && proc=$(pgrep -af 'run_noisy_mixed_pipeline.sh' | head -1)
   fi
   local pid ps_line elapsed rss_kb pcpu rss_gb latest last_log
   local done_cells last_cell free_mb used_mb disk_free
