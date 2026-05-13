@@ -835,5 +835,194 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8973333333333333,
+    "runtime_s": 20.260992288589478,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8946666666666667,
+    "runtime_s": 15.3543381690979,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9526666666666667,
+    "runtime_s": 57.76589608192444,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_magphase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9353333333333333,
+    "runtime_s": 28.860125303268433,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_magphase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9486666666666667,
+    "runtime_s": 21.496975898742676,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_magphase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.94,
+    "runtime_s": 16.79949116706848,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_magphase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9366666666666666,
+    "runtime_s": 12.632674217224121,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_magphase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.91,
+    "runtime_s": 17.803621292114258,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_phase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9206666666666666,
+    "runtime_s": 17.652565479278564,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.914,
+    "runtime_s": 14.849860191345215,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_phase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.916,
+    "runtime_s": 10.897239208221436,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9106666666666666,
+    "runtime_s": 8.798274755477905,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9333333333333333,
+    "runtime_s": 17.76335120201111,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_real",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9566666666666667,
+    "runtime_s": 15.656953573226929,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_real",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.95,
+    "runtime_s": 12.47557282447815,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_real",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9546666666666667,
+    "runtime_s": 10.421727657318115,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_real",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9533333333333334,
+    "runtime_s": 8.12882399559021,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_real",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9386666666666666,
+    "runtime_s": 27.541345357894897,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.956,
+    "runtime_s": 25.15384078025818,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9573333333333334,
+    "runtime_s": 20.809131383895874,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9526666666666667,
+    "runtime_s": 16.213665008544922,
+    "task": "binary",
+    "model": "rf",
+    "feature": "cfdac_realimag",
+    "ratio": 0.625
   }
 ]

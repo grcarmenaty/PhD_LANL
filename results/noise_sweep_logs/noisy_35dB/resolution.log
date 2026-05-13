@@ -215,3 +215,28 @@ plan: 189 cells × 5 ratios = 945 retrains
   [91] binary/rf/cfdac_mag r=1.000  accuracy=+0.925  (17.8s)
   [92] binary/rf/cfdac_mag r=0.875  accuracy=+0.891  (14.8s)
   [93] binary/rf/cfdac_mag r=0.750  accuracy=+0.896  (12.7s)
+  [94] binary/rf/cfdac_mag r=0.625  accuracy=+0.897  (20.3s)
+  [95] binary/rf/cfdac_mag r=0.500  accuracy=+0.895  (15.4s)
+>>> lazy cfdac_magphase  H=128 W=128
+  [96] binary/rf/cfdac_magphase r=1.000  accuracy=+0.953  (57.8s)
+  [97] binary/rf/cfdac_magphase r=0.875  accuracy=+0.935  (28.9s)
+  [98] binary/rf/cfdac_magphase r=0.750  accuracy=+0.949  (21.5s)
+  [99] binary/rf/cfdac_magphase r=0.625  accuracy=+0.940  (16.8s)
+  [100] binary/rf/cfdac_magphase r=0.500  accuracy=+0.937  (12.6s)
+>>> lazy cfdac_phase  H=128 W=128
+  [101] binary/rf/cfdac_phase r=1.000  accuracy=+0.910  (17.8s)
+  [102] binary/rf/cfdac_phase r=0.875  accuracy=+0.921  (17.7s)
+  [103] binary/rf/cfdac_phase r=0.750  accuracy=+0.914  (14.8s)
+  [104] binary/rf/cfdac_phase r=0.625  accuracy=+0.916  (10.9s)
+  [105] binary/rf/cfdac_phase r=0.500  accuracy=+0.911  (8.8s)
+>>> lazy cfdac_real  H=128 W=128
+  [106] binary/rf/cfdac_real r=1.000  accuracy=+0.933  (17.8s)
+  [107] binary/rf/cfdac_real r=0.875  accuracy=+0.957  (15.7s)
+  [108] binary/rf/cfdac_real r=0.750  accuracy=+0.950  (12.5s)
+  [109] binary/rf/cfdac_real r=0.625  accuracy=+0.955  (10.4s)
+  [110] binary/rf/cfdac_real r=0.500  accuracy=+0.953  (8.1s)
+>>> lazy cfdac_realimag  H=128 W=128
+  [111] binary/rf/cfdac_realimag r=1.000  accuracy=+0.939  (27.5s)
+  [112] binary/rf/cfdac_realimag r=0.875  accuracy=+0.956  (25.2s)
+  [113] binary/rf/cfdac_realimag r=0.750  accuracy=+0.957  (20.8s)
+  [114] binary/rf/cfdac_realimag r=0.625  accuracy=+0.953  (16.2s)
