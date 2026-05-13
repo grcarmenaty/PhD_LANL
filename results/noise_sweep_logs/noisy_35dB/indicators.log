@@ -37,3 +37,68 @@ plan: 22 indicators × 3 cells, ~264 trials
   mlp/modal           val R²=-0.867  test R²=-0.765  MAE=0.003  best={'hidden': [256, 128, 64], 'lr': 0.003}
 
 === indicator  7 / 22  'ODS_diff'  std(train)=67.2670 ===
+  rf/modal           val R²=0.990  test R²=0.988  MAE=5.537  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.994  test R²=0.993  MAE=4.473  best={'n_estimators': 300, 'max_depth': 4}
+  mlp/modal           val R²=0.946  test R²=0.941  MAE=12.782  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator  8 / 22  'r2_imag'  std(train)=0.5632 ===
+  rf/modal           val R²=0.995  test R²=0.995  MAE=0.028  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.997  test R²=0.997  MAE=0.023  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.996  test R²=0.995  MAE=0.029  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator  9 / 22  'RVAC_mean'  std(train)=0.2123 ===
+  rf/modal           val R²=0.995  test R²=0.996  MAE=0.009  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.997  test R²=0.997  MAE=0.008  best={'n_estimators': 300, 'max_depth': 4}
+  mlp/modal           val R²=0.993  test R²=0.993  MAE=0.013  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 10 / 22  'RVAC_std'  std(train)=0.0275 ===
+  rf/modal           val R²=0.971  test R²=0.971  MAE=0.003  best={'n_estimators': 100, 'max_depth': None}
+  xgb/modal           val R²=0.979  test R²=0.979  MAE=0.003  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.962  test R²=0.953  MAE=0.004  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 11 / 22  'RVAC_min'  std(train)=0.2384 ===
+  rf/modal           val R²=0.995  test R²=0.995  MAE=0.011  best={'n_estimators': 100, 'max_depth': None}
+  xgb/modal           val R²=0.997  test R²=0.997  MAE=0.010  best={'n_estimators': 300, 'max_depth': 4}
+  mlp/modal           val R²=0.994  test R²=0.993  MAE=0.014  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 12 / 22  'RVAC_max'  std(train)=0.1839 ===
+  rf/modal           val R²=0.994  test R²=0.994  MAE=0.009  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.996  test R²=0.996  MAE=0.008  best={'n_estimators': 300, 'max_depth': 4}
+  mlp/modal           val R²=0.991  test R²=0.991  MAE=0.013  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 13 / 22  'GAC_mean'  std(train)=0.1532 ===
+  rf/modal           val R²=0.996  test R²=0.997  MAE=0.006  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.998  test R²=0.998  MAE=0.005  best={'n_estimators': 300, 'max_depth': 4}
+  mlp/modal           val R²=0.986  test R²=0.986  MAE=0.015  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 14 / 22  'GAC_std'  std(train)=0.0315 ===
+  rf/modal           val R²=0.987  test R²=0.985  MAE=0.003  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.991  test R²=0.989  MAE=0.002  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.975  test R²=0.973  MAE=0.004  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 15 / 22  'GAC_min'  std(train)=0.1886 ===
+  rf/modal           val R²=0.996  test R²=0.996  MAE=0.008  best={'n_estimators': 100, 'max_depth': None}
+  xgb/modal           val R²=0.997  test R²=0.997  MAE=0.006  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.989  test R²=0.989  MAE=0.015  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 16 / 22  'GAC_max'  std(train)=0.1188 ===
+  rf/modal           val R²=0.994  test R²=0.994  MAE=0.005  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.996  test R²=0.996  MAE=0.005  best={'n_estimators': 300, 'max_depth': 4}
+  mlp/modal           val R²=0.988  test R²=0.988  MAE=0.010  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 17 / 22  'M2L_mean'  std(train)=0.2829 ===
+  rf/modal           val R²=0.993  test R²=0.993  MAE=0.018  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.996  test R²=0.995  MAE=0.014  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.990  test R²=0.989  MAE=0.023  best={'hidden': [128, 64], 'lr': 0.003}
+
+=== indicator 18 / 22  'M2L_std'  std(train)=0.0606 ===
+  rf/modal           val R²=0.982  test R²=0.984  MAE=0.006  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.988  test R²=0.988  MAE=0.005  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.975  test R²=0.973  MAE=0.008  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 19 / 22  'M2L_min'  std(train)=0.3038 ===
+  rf/modal           val R²=0.993  test R²=0.993  MAE=0.018  best={'n_estimators': 300, 'max_depth': None}
+  xgb/modal           val R²=0.995  test R²=0.995  MAE=0.015  best={'n_estimators': 300, 'max_depth': 8}
+  mlp/modal           val R²=0.994  test R²=0.994  MAE=0.018  best={'hidden': [256, 128, 64], 'lr': 0.003}
+
+=== indicator 20 / 22  'M2L_max'  std(train)=0.2185 ===
