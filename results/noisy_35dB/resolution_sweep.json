@@ -1303,5 +1303,14 @@
     "model": "xgb",
     "feature": "cfdac_real",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9493333333333334,
+    "runtime_s": 331.6017551422119,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_realimag",
+    "ratio": 1.0
   }
 ]
