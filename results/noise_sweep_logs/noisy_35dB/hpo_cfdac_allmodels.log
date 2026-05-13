@@ -90,3 +90,12 @@ plan: 140 cells (existing cells skipped)
 >>> loading cfdac_realimag ...
     shape = (10000, 2, 128, 128), mem = 1.31 GB
   [81] binary/cnn/cfdac_realimag {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8640  test=0.8600  (12.4s)
+  [82] binary/mlp/cfdac_realimag {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.9560  test=0.9480  (26.4s)
+  [83] binary/rf/cfdac_realimag {'n_estimators': 200, 'max_depth': None}  val=0.9407  test=0.9427  (52.3s)
+  [84] binary/transformer/cfdac_realimag {'d_model': 48, 'n_layers': 2}  val=0.8000  test=0.8000  (9.6s)
+  [85] binary/xgb/cfdac_realimag {'n_estimators': 200, 'max_depth': 6}  val=0.9493  test=0.9467  (372.2s)
+  [86] col_location/cnn/cfdac_realimag {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.4417  test=0.4400  (7.2s)
+  [87] col_location/mlp/cfdac_realimag {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.5061  test=0.4878  (16.4s)
+  [88] col_location/rf/cfdac_realimag {'n_estimators': 200, 'max_depth': None}  val=0.4750  test=0.4767  (31.9s)
+  [89] col_location/transformer/cfdac_realimag {'d_model': 48, 'n_layers': 2}  val=0.3452  test=0.3422  (5.8s)
+  [90] mass_location/cnn/cfdac_realimag {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.9767  test=0.9667  (2.3s)

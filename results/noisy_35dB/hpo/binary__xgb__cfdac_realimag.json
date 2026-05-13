@@ -1,0 +1,24 @@
+{
+  "task": "binary",
+  "model": "xgb",
+  "feature": "cfdac_realimag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": 6
+  },
+  "best_metric_val": 0.9493333333333334,
+  "best_metric_test": 0.9466666666666667,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9493333333333334,
+      "metric_test": 0.9466666666666667,
+      "extras": {},
+      "runtime_s": 372.183806180954
+    }
+  ]
+}
