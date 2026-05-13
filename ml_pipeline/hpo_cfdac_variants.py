@@ -133,6 +133,80 @@ def _train_torch(model_name: str, feat_name: str, kind: str, n_out: int,
     }, model)
 
 
+def _train_torch_streaming(model_name: str, feat_name: str, kind: str,
+                            n_out: int, params, tr_ds, va_ds, te_ds,
+                            epochs: int = 4,
+                            batch_size: int = 64) -> tuple[dict, nn.Module]:
+    """Streaming variant — train a Conv2DStack / Conv3DStack over a
+    DataLoader fed by LazyCFDACDataset. The full (n, C, H, W) tensor
+    is never materialised."""
+    t0 = time.time()
+    x0, _ = tr_ds[0]
+    if model_name == "cnn2d":
+        model = Conv2DStack(n_channels=x0.shape[0], n_out=n_out,
+                              widths=tuple(params["widths"]),
+                              kernel_size=int(params["kernel_size"]),
+                              regression=(kind == "reg"))
+    else:  # cnn3d, x0 shape (1, D, H, W)
+        depth = x0.shape[1]
+        model = Conv3DStack(depth=depth, n_out=n_out,
+                              widths=tuple(params["widths"]),
+                              kernel_size=int(params["kernel_size"]),
+                              regression=(kind == "reg"))
+
+    loss_fn = nn.CrossEntropyLoss() if kind == "cls" else nn.MSELoss()
+    opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
+    tr_dl = DataLoader(tr_ds, batch_size=batch_size, shuffle=True, num_workers=0)
+    va_dl = DataLoader(va_ds, batch_size=batch_size, shuffle=False, num_workers=0)
+    te_dl = DataLoader(te_ds, batch_size=batch_size, shuffle=False, num_workers=0)
+
+    def _eval(dl):
+        outs, ys = [], []
+        model.eval()
+        with torch.no_grad():
+            for xb, yb in dl:
+                outs.append(model(xb).cpu())
+                ys.append(yb)
+        return torch.cat(outs, 0), torch.cat(ys, 0)
+
+    best, best_state = -np.inf, None
+    for _ in range(epochs):
+        model.train()
+        for xb, yb in tr_dl:
+            opt.zero_grad()
+            loss_fn(model(xb), yb).backward()
+            opt.step()
+        sched.step()
+        out_va, y_va_t = _eval(va_dl)
+        if kind == "cls":
+            metric = accuracy_score(y_va_t.numpy(), out_va.argmax(1).numpy())
+        else:
+            metric = r2_score(y_va_t.numpy(), out_va.squeeze(1).numpy())
+        if metric > best:
+            best = float(metric)
+            best_state = {k: v.detach().clone() for k, v in model.state_dict().items()}
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    out_te, y_te_t = _eval(te_dl)
+    if kind == "cls":
+        mt = float(accuracy_score(y_te_t.numpy(), out_te.argmax(1).numpy()))
+        extras = {}
+    else:
+        mt = float(r2_score(y_te_t.numpy(), out_te.squeeze(1).numpy()))
+        extras = {"mae_test": float(mean_absolute_error(
+            y_te_t.numpy(), out_te.squeeze(1).numpy()))}
+    return ({
+        "hyperparams": {k: (list(v) if isinstance(v, tuple) else v)
+                          for k, v in params.items()},
+        "metric_name": "accuracy" if kind == "cls" else "R2",
+        "metric_val":  best,
+        "metric_test": mt,
+        "extras":      extras,
+        "runtime_s":   time.time() - t0,
+    }, model)
+
+
 def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     hpo_dir    = out_dir / "hpo"
     models_dir = out_dir / "models"
@@ -169,13 +243,22 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         idx_tr = ipool[i_tr]; idx_va = ipool[i_va]; idx_te = ipool[i_te]
         y_tr = y_pool[i_tr]; y_va = y_pool[i_va]; y_te = y_pool[i_te]
         if feat != current_feat:
-            ds = LazyCFDACDataset(features_path, feat)
             current_feat = feat
             import gc; gc.collect()
-            print(f">>> lazy {feat}  H={ds.h} W={ds.w}", flush=True)
-        X_tr = ds.batch_read(idx_tr)
-        X_va = ds.batch_read(idx_va)
-        X_te = ds.batch_read(idx_te)
+            print(f">>> {feat}", flush=True)
+
+        # Stream every cell via LazyCFDACDataset + DataLoader so the
+        # 60k-sample CFDAC variants never have to fit fully in RAM.
+        reshape = "conv3d" if model_name == "cnn3d" else "conv2d"
+        tr_ds = LazyCFDACDataset(features_path, feat,
+                                      rows=idx_tr, labels=y_tr, kind=kind,
+                                      reshape=reshape)
+        va_ds = LazyCFDACDataset(features_path, feat,
+                                      rows=idx_va, labels=y_va, kind=kind,
+                                      reshape=reshape)
+        te_ds = LazyCFDACDataset(features_path, feat,
+                                      rows=idx_te, labels=y_te, kind=kind,
+                                      reshape=reshape)
 
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1
         grid  = GRIDS[model_name]
@@ -185,10 +268,9 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         for combo in itertools.product(*vals):
             params = dict(zip(keys, combo))
             try:
-                row, mdl = _train_torch(model_name, feat, kind, n_out,
-                                            params, X_tr, y_tr,
-                                            X_va, y_va, X_te, y_te,
-                                            epochs=epochs)
+                row, mdl = _train_torch_streaming(
+                    model_name, feat, kind, n_out, params,
+                    tr_ds, va_ds, te_ds, epochs=epochs)
             except Exception as e:
                 print(f"  FAIL {tname}/{model_name}/{feat} {params}: {e}")
                 continue
