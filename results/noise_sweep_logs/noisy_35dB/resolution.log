@@ -308,3 +308,11 @@ plan: 189 cells × 5 ratios = 945 retrains
   [124] binary/xgb/cfdac_imag r=0.625  accuracy=+0.946  (24.5s)
   [125] binary/xgb/cfdac_imag r=0.500  accuracy=+0.950  (19.7s)
 >>> lazy cfdac_mag  H=128 W=128
+  [126] binary/xgb/cfdac_mag r=1.000  accuracy=+0.956  (116.1s)
+  [127] binary/xgb/cfdac_mag r=0.875  accuracy=+0.916  (53.6s)
+  [128] binary/xgb/cfdac_mag r=0.750  accuracy=+0.908  (38.6s)
+  [129] binary/xgb/cfdac_mag r=0.625  accuracy=+0.906  (25.9s)
+  [130] binary/xgb/cfdac_mag r=0.500  accuracy=+0.907  (20.9s)
+>>> lazy cfdac_magphase  H=128 W=128
+  [131] binary/xgb/cfdac_magphase r=1.000  accuracy=+0.968  (187.1s)
+  [132] binary/xgb/cfdac_magphase r=0.875  accuracy=+0.955  (101.9s)

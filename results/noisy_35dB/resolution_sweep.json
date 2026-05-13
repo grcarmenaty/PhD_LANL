@@ -1123,5 +1123,68 @@
     "model": "xgb",
     "feature": "cfdac_imag",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.956,
+    "runtime_s": 116.12527084350586,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.916,
+    "runtime_s": 53.62382984161377,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.908,
+    "runtime_s": 38.6155469417572,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.906,
+    "runtime_s": 25.921462297439575,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9066666666666666,
+    "runtime_s": 20.88437008857727,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.968,
+    "runtime_s": 187.12987899780273,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_magphase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9553333333333334,
+    "runtime_s": 101.91326379776001,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_magphase",
+    "ratio": 0.875
   }
 ]
