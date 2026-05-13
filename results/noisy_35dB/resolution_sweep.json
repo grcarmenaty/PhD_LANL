@@ -1546,5 +1546,50 @@
     "model": "cnn2d",
     "feature": "cfdac_magphase",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.47,
+    "runtime_s": 4.8330371379852295,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4577777777777778,
+    "runtime_s": 3.8035056591033936,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.41888888888888887,
+    "runtime_s": 2.8402702808380127,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.22777777777777777,
+    "runtime_s": 7.643460512161255,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.46,
+    "runtime_s": 6.145104646682739,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
   }
 ]
