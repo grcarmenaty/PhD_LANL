@@ -21,7 +21,7 @@ auto_commit() {
 
 emit_ping() {
   local ts proc relaunch=""
-  ts=$(date -u +%H:%M:%SZ)
+  ts=$(TZ=Europe/Madrid date +'%H:%M:%S %Z')
   proc=$(pgrep -af 'hpo\.py.*features_mixed' | grep -v 'hpo_ping' | head -1)
   if [ -z "$proc" ]; then
     local LOG="logs/mixed_hpo_resume_$(date -u +%Y%m%d_%H%M%S).log"
