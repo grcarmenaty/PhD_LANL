@@ -141,3 +141,4 @@ plan: 189 cells × 5 ratios = 945 retrains
   [81] binary/rf/cfdac_all r=1.000  accuracy=+0.951  (43.7s)
 
 --- $ /usr/local/bin/python ml_pipeline/resolution_sweep.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB --epochs 3
+plan: 189 cells × 5 ratios = 945 retrains
