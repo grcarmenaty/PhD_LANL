@@ -85,3 +85,7 @@ plan: 140 cells (existing cells skipped)
   [76] severity/xgb/cfdac_phase {'n_estimators': 200, 'max_depth': 6}  val=0.4798  test=0.4803  (208.8s)
   [77] type/cnn/cfdac_phase {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.7373  test=0.7420  (9.5s)
   [78] type/mlp/cfdac_phase {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.7267  test=0.7340  (11.2s)
+  [79] type/rf/cfdac_phase {'n_estimators': 200, 'max_depth': None}  val=0.7747  test=0.7880  (51.7s)
+  [80] type/transformer/cfdac_phase {'d_model': 48, 'n_layers': 2}  val=0.6960  test=0.6887  (8.1s)
+>>> loading cfdac_realimag ...
+    shape = (10000, 2, 128, 128), mem = 1.31 GB
