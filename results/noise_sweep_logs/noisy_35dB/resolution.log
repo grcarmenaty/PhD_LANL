@@ -196,3 +196,19 @@ plan: 189 cells × 5 ratios = 945 retrains
 >>> lazy cfdac_imag  H=128 W=128
 >>> lazy cfdac_mag  H=128 W=128
 >>> lazy cfdac_magphase  H=128 W=128
+>>> lazy cfdac_phase  H=128 W=128
+>>> lazy cfdac_real  H=128 W=128
+>>> lazy cfdac_realimag  H=128 W=128
+>>> modal  shape=(10000, 81)
+>>> lazy cfdac_all  H=128 W=128
+  [82] binary/rf/cfdac_all r=0.875  accuracy=+0.961  (80.1s)
+  [83] binary/rf/cfdac_all r=0.750  accuracy=+0.954  (58.5s)
+  [84] binary/rf/cfdac_all r=0.625  accuracy=+0.947  (26.7s)
+  [85] binary/rf/cfdac_all r=0.500  accuracy=+0.955  (22.6s)
+>>> lazy cfdac_imag  H=128 W=128
+  [86] binary/rf/cfdac_imag r=1.000  accuracy=+0.928  (17.7s)
+  [87] binary/rf/cfdac_imag r=0.875  accuracy=+0.947  (15.6s)
+  [88] binary/rf/cfdac_imag r=0.750  accuracy=+0.937  (13.3s)
+  [89] binary/rf/cfdac_imag r=0.625  accuracy=+0.943  (10.2s)
+  [90] binary/rf/cfdac_imag r=0.500  accuracy=+0.937  (7.7s)
+>>> lazy cfdac_mag  H=128 W=128
