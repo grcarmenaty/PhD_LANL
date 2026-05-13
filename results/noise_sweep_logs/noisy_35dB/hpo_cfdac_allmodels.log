@@ -89,3 +89,4 @@ plan: 140 cells (existing cells skipped)
   [80] type/transformer/cfdac_phase {'d_model': 48, 'n_layers': 2}  val=0.6960  test=0.6887  (8.1s)
 >>> loading cfdac_realimag ...
     shape = (10000, 2, 128, 128), mem = 1.31 GB
+  [81] binary/cnn/cfdac_realimag {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.8640  test=0.8600  (12.4s)
