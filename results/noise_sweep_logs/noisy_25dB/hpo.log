@@ -83,3 +83,95 @@ Parameters: { "use_label_encoder" } are not used.
   [42/255] binary/transformer/timeseries  {'d_model': 32, 'n_layers': 1}  val=0.8000  test=0.8000  (12.5s)
   [43/255] binary/transformer/timeseries  {'d_model': 32, 'n_layers': 2}  val=0.8600  test=0.8573  (24.9s)
   [44/255] binary/transformer/timeseries  {'d_model': 48, 'n_layers': 1}  val=0.8000  test=0.8000  (16.1s)
+  [45/255] binary/transformer/timeseries  {'d_model': 48, 'n_layers': 2}  val=0.8013  test=0.7987  (30.7s)
+  [46/255] binary/transformer/timeseries  {'d_model': 64, 'n_layers': 1}  val=0.8000  test=0.8000  (18.3s)
+  [47/255] binary/transformer/timeseries  {'d_model': 64, 'n_layers': 2}  val=0.8000  test=0.8000  (34.1s)
+  [48/255] binary/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.8813  test=0.8807  (8.9s)
+  [49/255] binary/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.9160  test=0.9087  (11.5s)
+  [50/255] binary/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.9307  test=0.9213  (15.1s)
+  [51/255] binary/cnn2d/cfdac  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.9493  test=0.9413  (18.6s)
+  [52/255] type/rf/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.6340  test=0.6420  (0.7s)
+  [53/255] type/rf/modal  {'n_estimators': 100, 'max_depth': 12}  val=0.6913  test=0.7140  (1.0s)
+  [54/255] type/rf/modal  {'n_estimators': 100, 'max_depth': None}  val=0.7173  test=0.7327  (1.4s)
+  [55/255] type/rf/modal  {'n_estimators': 200, 'max_depth': 6}  val=0.6260  test=0.6353  (1.2s)
+  [56/255] type/rf/modal  {'n_estimators': 200, 'max_depth': 12}  val=0.6907  test=0.7140  (1.8s)
+  [57/255] type/rf/modal  {'n_estimators': 200, 'max_depth': None}  val=0.7200  test=0.7340  (2.7s)
+  [58/255] type/rf/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.6247  test=0.6340  (1.9s)
+  [59/255] type/rf/modal  {'n_estimators': 300, 'max_depth': 12}  val=0.6853  test=0.7107  (2.8s)
+  [60/255] type/rf/modal  {'n_estimators': 300, 'max_depth': None}  val=0.7187  test=0.7460  (4.0s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:20] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [61/255] type/xgb/modal  {'n_estimators': 100, 'max_depth': 4}  val=0.7147  test=0.7420  (0.9s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:21] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [62/255] type/xgb/modal  {'n_estimators': 100, 'max_depth': 6}  val=0.7327  test=0.7507  (1.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:22] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [63/255] type/xgb/modal  {'n_estimators': 100, 'max_depth': 8}  val=0.7400  test=0.7607  (3.1s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:26] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [64/255] type/xgb/modal  {'n_estimators': 300, 'max_depth': 4}  val=0.7513  test=0.7647  (2.7s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:28] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [65/255] type/xgb/modal  {'n_estimators': 300, 'max_depth': 6}  val=0.7420  test=0.7627  (4.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:33] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [66/255] type/xgb/modal  {'n_estimators': 300, 'max_depth': 8}  val=0.7513  test=0.7647  (7.4s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:41] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [67/255] type/xgb/modal  {'n_estimators': 600, 'max_depth': 4}  val=0.7473  test=0.7593  (5.8s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:46] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [68/255] type/xgb/modal  {'n_estimators': 600, 'max_depth': 6}  val=0.7513  test=0.7600  (9.4s)
+/usr/local/lib/python3.11/dist-packages/xgboost/training.py:200: UserWarning: [01:35:56] WARNING: /__w/xgboost/xgboost/src/learner.cc:782: 
+Parameters: { "use_label_encoder" } are not used.
+
+  bst.update(dtrain, iteration=i, fobj=obj)
+  [69/255] type/xgb/modal  {'n_estimators': 600, 'max_depth': 8}  val=0.7553  test=0.7680  (12.2s)
+  [70/255] type/mlp/modal  {'hidden': (128, 64), 'lr': 0.0005}  val=0.6360  test=0.6273  (0.9s)
+  [71/255] type/mlp/modal  {'hidden': (128, 64), 'lr': 0.001}  val=0.7040  test=0.7073  (0.9s)
+  [72/255] type/mlp/modal  {'hidden': (128, 64), 'lr': 0.003}  val=0.7660  test=0.7740  (0.9s)
+  [73/255] type/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.0005}  val=0.6913  test=0.6927  (1.2s)
+  [74/255] type/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.001}  val=0.7293  test=0.7573  (1.3s)
+  [75/255] type/mlp/modal  {'hidden': (256, 128, 64), 'lr': 0.003}  val=0.7700  test=0.7880  (1.2s)
+  [76/255] type/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.0005}  val=0.7253  test=0.7420  (1.7s)
+  [77/255] type/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.001}  val=0.7740  test=0.7820  (1.8s)
+  [78/255] type/mlp/modal  {'hidden': (512, 256, 128), 'lr': 0.003}  val=0.7887  test=0.7980  (1.9s)
+  [79/255] type/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.5867  test=0.5927  (6.5s)
+  [80/255] type/cnn/frf_mag  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.6307  test=0.6273  (6.7s)
+  [81/255] type/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.5613  test=0.5707  (12.8s)
+  [82/255] type/cnn/frf_mag  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.6053  test=0.6233  (14.4s)
+  [83/255] type/transformer/frf_mag  {'d_model': 32, 'n_layers': 1}  val=0.3980  test=0.4167  (4.2s)
+  [84/255] type/transformer/frf_mag  {'d_model': 32, 'n_layers': 2}  val=0.4240  test=0.4333  (7.5s)
+  [85/255] type/transformer/frf_mag  {'d_model': 48, 'n_layers': 1}  val=0.3813  test=0.3873  (5.1s)
+  [86/255] type/transformer/frf_mag  {'d_model': 48, 'n_layers': 2}  val=0.4707  test=0.5033  (9.5s)
+  [87/255] type/transformer/frf_mag  {'d_model': 64, 'n_layers': 1}  val=0.3887  test=0.3927  (6.2s)
+  [88/255] type/transformer/frf_mag  {'d_model': 64, 'n_layers': 2}  val=0.4907  test=0.5013  (11.5s)
+  [89/255] type/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.5933  test=0.5900  (14.0s)
+  [90/255] type/cnn/timeseries  {'widths': (16, 32, 64), 'kernel_size': 7}  val=0.5813  test=0.5793  (14.9s)
+  [91/255] type/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 5}  val=0.6040  test=0.6047  (38.7s)
+  [92/255] type/cnn/timeseries  {'widths': (32, 64, 128), 'kernel_size': 7}  val=0.4373  test=0.4407  (42.2s)
+  [93/255] type/transformer/timeseries  {'d_model': 32, 'n_layers': 1}  val=0.3780  test=0.3773  (12.1s)
+  [94/255] type/transformer/timeseries  {'d_model': 32, 'n_layers': 2}  val=0.4233  test=0.4327  (23.3s)
+  [95/255] type/transformer/timeseries  {'d_model': 48, 'n_layers': 1}  val=0.3813  test=0.3760  (14.9s)
+  [96/255] type/transformer/timeseries  {'d_model': 48, 'n_layers': 2}  val=0.4160  test=0.4213  (28.8s)
+  [97/255] type/transformer/timeseries  {'d_model': 64, 'n_layers': 1}  val=0.3727  test=0.3633  (17.4s)
+  [98/255] type/transformer/timeseries  {'d_model': 64, 'n_layers': 2}  val=0.4153  test=0.4427  (34.6s)
+  [99/255] type/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.6567  test=0.6920  (9.1s)
+  [100/255] type/cnn2d/cfdac  {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.7613  test=0.7680  (11.3s)
