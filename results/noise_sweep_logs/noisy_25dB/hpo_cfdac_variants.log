@@ -42,3 +42,6 @@ plan: 25 cells, 100 trials
   [37/100] type/cnn2d/cfdac_mag {'widths': (8, 16, 32), 'kernel_size': 3}  val=0.3533  test=0.3893  (9.0s)
   [38/100] type/cnn2d/cfdac_mag {'widths': (8, 16, 32), 'kernel_size': 5}  val=0.5233  test=0.5387  (11.3s)
   [39/100] type/cnn2d/cfdac_mag {'widths': (16, 32, 64), 'kernel_size': 3}  val=0.5080  test=0.5147  (14.3s)
+  [40/100] type/cnn2d/cfdac_mag {'widths': (16, 32, 64), 'kernel_size': 5}  val=0.5120  test=0.5107  (21.1s)
+>>> loading cfdac_magphase ...
+    shape = (10000, 2, 128, 128), mem = 1.31 GB
