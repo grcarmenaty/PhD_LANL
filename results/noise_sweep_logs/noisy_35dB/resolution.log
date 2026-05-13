@@ -127,3 +127,17 @@ plan: 189 cells × 5 ratios = 945 retrains
   [70] binary/mlp/cfdac_real r=0.500  accuracy=+0.800  (1.9s)
 >>> cfdac_realimag  shape=(10000, 2, 128, 128)
   [71] binary/mlp/cfdac_realimag r=1.000  accuracy=+0.800  (16.8s)
+  [72] binary/mlp/cfdac_realimag r=0.875  accuracy=+0.800  (13.8s)
+  [73] binary/mlp/cfdac_realimag r=0.750  accuracy=+0.800  (9.8s)
+  [74] binary/mlp/cfdac_realimag r=0.625  accuracy=+0.800  (3.7s)
+  [75] binary/mlp/cfdac_realimag r=0.500  accuracy=+0.800  (2.5s)
+>>> modal  shape=(10000, 81)
+  [76] binary/mlp/modal r=1.000  accuracy=+0.800  (0.9s)
+  [77] binary/mlp/modal r=0.875  accuracy=+0.800  (0.9s)
+  [78] binary/mlp/modal r=0.750  accuracy=+0.800  (0.9s)
+  [79] binary/mlp/modal r=0.625  accuracy=+0.800  (0.9s)
+  [80] binary/mlp/modal r=0.500  accuracy=+0.800  (0.9s)
+>>> cfdac_all  shape=(10000, 4, 128, 128)
+  [81] binary/rf/cfdac_all r=1.000  accuracy=+0.951  (43.7s)
+
+--- $ /usr/local/bin/python ml_pipeline/resolution_sweep.py --features /home/user/PhD_LANL/dataset/features_noisy_35dB.h5 --out /home/user/PhD_LANL/results/noisy_35dB --epochs 3
