@@ -34,6 +34,7 @@ if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
 from ml_pipeline.models import Conv2DStack, Conv3DStack       # noqa: E402
+from ml_pipeline.lazy_datasets import LazyCFDACDataset         # noqa: E402
 from ml_pipeline.tasks import build_targets                    # noqa: E402
 from ml_pipeline.train import (                                  # noqa: E402
     load_labels, load_feature, make_split, SEED,
@@ -153,9 +154,10 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     print(f"plan: {len(plan)} cells, {grand_total} trials")
 
     done = 0
-    # Group plan by feature so each variant is loaded into RAM only once.
+    # Group plan by feature so each variant is loaded from disk only once
+    # per (variant, task) pair via LazyCFDACDataset.batch_read().
     plan.sort(key=lambda r: (r[2], r[0], r[1]))
-    current_feat, X_full = None, None
+    current_feat, ds = None, None
     for tname, model_name, feat in plan:
         out_json = hpo_dir / f"{tname}__{model_name}__{feat}.json"
         if out_json.exists():
@@ -167,14 +169,13 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         idx_tr = ipool[i_tr]; idx_va = ipool[i_va]; idx_te = ipool[i_te]
         y_tr = y_pool[i_tr]; y_va = y_pool[i_va]; y_te = y_pool[i_te]
         if feat != current_feat:
-            del X_full
-            import gc; gc.collect()
-            print(f">>> loading {feat} ...", flush=True)
-            X_full = load_feature(features_path, feat)
+            ds = LazyCFDACDataset(features_path, feat)
             current_feat = feat
-            print(f"    shape = {X_full.shape}, "
-                    f"mem = {X_full.nbytes / 1e9:.2f} GB", flush=True)
-        X_tr = X_full[idx_tr]; X_va = X_full[idx_va]; X_te = X_full[idx_te]
+            import gc; gc.collect()
+            print(f">>> lazy {feat}  H={ds.h} W={ds.w}", flush=True)
+        X_tr = ds.batch_read(idx_tr)
+        X_va = ds.batch_read(idx_va)
+        X_te = ds.batch_read(idx_te)
 
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1
         grid  = GRIDS[model_name]

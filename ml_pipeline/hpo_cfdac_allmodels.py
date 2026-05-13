@@ -51,6 +51,7 @@ _REPO = Path(__file__).resolve().parent.parent
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
+from ml_pipeline.lazy_datasets import LazyCFDACDataset                # noqa: E402
 from ml_pipeline.models import (                                       # noqa: E402
     MLP, Conv1DStack, SmallTransformer,
 )
@@ -275,7 +276,7 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
     # (smallest → largest) so the 4-channel `cfdac_all` is last.
     variant_rank = {v: i for i, v in enumerate(VARIANTS)}
     plan.sort(key=lambda r: (variant_rank[r[2]], r[0], r[1]))
-    current_feat, X_full = None, None
+    current_feat, ds = None, None
     done = 0
     for tname, model_name, feat in plan:
         mask, y_pool, kind = tasks[tname]
@@ -284,18 +285,19 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         idx_tr = ipool[i_tr]; idx_va = ipool[i_va]; idx_te = ipool[i_te]
         y_tr = y_pool[i_tr]; y_va = y_pool[i_va]; y_te = y_pool[i_te]
         if feat != current_feat:
-            del X_full; gc.collect()
-            print(f">>> loading {feat} ...", flush=True)
-            X_full = load_feature(features_path, feat)
+            ds = LazyCFDACDataset(features_path, feat)
             current_feat = feat
-            print(f"    shape = {X_full.shape}, "
-                    f"mem = {X_full.nbytes / 1e9:.2f} GB", flush=True)
+            gc.collect()
+            print(f">>> lazy {feat}  H={ds.h} W={ds.w}", flush=True)
 
-        # Reshape view depends on model family.
+        X_tr_raw = ds.batch_read(idx_tr)
+        X_va_raw = ds.batch_read(idx_va)
+        X_te_raw = ds.batch_read(idx_te)
+
         if model_name in ("rf", "xgb", "mlp"):
-            X_tr = _flatten(X_full[idx_tr])
-            X_va = _flatten(X_full[idx_va])
-            X_te = _flatten(X_full[idx_te])
+            X_tr = _flatten(X_tr_raw); del X_tr_raw
+            X_va = _flatten(X_va_raw); del X_va_raw
+            X_te = _flatten(X_te_raw); del X_te_raw
             flat_in_dim = X_tr.shape[1]
             scaler = StandardScaler().fit(X_tr)
             X_tr_s = scaler.transform(X_tr); del X_tr
@@ -303,11 +305,12 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
             X_te_s = scaler.transform(X_te); del X_te
             gc.collect()
         else:  # cnn / transformer
-            X_tr_s = _to_seq(X_full[idx_tr])
-            X_va_s = _to_seq(X_full[idx_va])
-            X_te_s = _to_seq(X_full[idx_te])
+            X_tr_s = _to_seq(X_tr_raw); del X_tr_raw
+            X_va_s = _to_seq(X_va_raw); del X_va_raw
+            X_te_s = _to_seq(X_te_raw); del X_te_raw
             scaler = None
             flat_in_dim = X_tr_s.shape[1] * X_tr_s.shape[2]
+            gc.collect()
         in_shape = list(X_tr_s.shape[1:])
 
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1

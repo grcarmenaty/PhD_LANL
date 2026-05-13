@@ -53,6 +53,7 @@ from ml_pipeline.tasks import build_targets                               # noqa
 from ml_pipeline.train import (                                            # noqa: E402
     load_labels, load_feature, make_split, SEED, _CFDAC_VARIANTS,
 )
+from ml_pipeline.lazy_datasets import LazyCFDACDataset, _CFDAC_PARTS    # noqa: E402
 
 RATIOS = (1.000, 0.875, 0.750, 0.625, 0.500)
 torch.set_num_threads(4)
@@ -229,35 +230,57 @@ def main() -> None:
                 for r in existing}
 
     rows: List[Dict[str, Any]] = list(existing)
-    current_feat, X_full = None, None
+    current_feat = None
+    X_full = None       # eager array for small (non-CFDAC) features
+    ds = None           # LazyCFDACDataset for CFDAC variants
+    cached_task = None  # for CFDAC: cache materialised tr/va/te slices per task
+    X_tr_raw = X_va_raw = X_te_raw = None
     for task, model, feat in cells:
+        is_cfdac = feat in _CFDAC_PARTS
         if feat != current_feat:
-            del X_full
+            del X_full; X_full = None
+            ds = None
+            X_tr_raw = X_va_raw = X_te_raw = None
+            cached_task = None
             import gc; gc.collect()
             try:
-                X_full = load_feature(args.features, feat)
+                if is_cfdac:
+                    ds = LazyCFDACDataset(args.features, feat)
+                    print(f">>> lazy {feat}  H={ds.h} W={ds.w}", flush=True)
+                else:
+                    X_full = load_feature(args.features, feat)
+                    print(f">>> {feat}  shape={X_full.shape}", flush=True)
             except Exception as e:
                 print(f"  skip feat {feat}: {e}", flush=True)
-                X_full = None
                 current_feat = feat
                 continue
             current_feat = feat
-            print(f">>> {feat}  shape={X_full.shape}", flush=True)
-        if X_full is None:
+        if not is_cfdac and X_full is None:
             continue
         mask, y_pool, kind = tasks[task]
         ipool = np.where(mask)[0]
         i_tr, i_va, i_te = make_split(y_pool, kind)
         idx_tr = ipool[i_tr]; idx_va = ipool[i_va]; idx_te = ipool[i_te]
         y_tr = y_pool[i_tr]; y_va = y_pool[i_va]; y_te = y_pool[i_te]
+        # For CFDAC: read tr/va/te once per (variant, task); reuse across ratios + models.
+        if is_cfdac and cached_task != task:
+            X_tr_raw = ds.batch_read(idx_tr)
+            X_va_raw = ds.batch_read(idx_va)
+            X_te_raw = ds.batch_read(idx_te)
+            cached_task = task
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1
         for ratio in RATIOS:
             if (task, model, feat, ratio) in done:
                 continue
             t0 = time.time()
             try:
-                Xr = _apply_ratio(feat, X_full, ratio)
-                X_tr = Xr[idx_tr]; X_va = Xr[idx_va]; X_te = Xr[idx_te]
+                if is_cfdac:
+                    X_tr = _apply_ratio(feat, X_tr_raw, ratio)
+                    X_va = _apply_ratio(feat, X_va_raw, ratio)
+                    X_te = _apply_ratio(feat, X_te_raw, ratio)
+                else:
+                    Xr = _apply_ratio(feat, X_full, ratio)
+                    X_tr = Xr[idx_tr]; X_va = Xr[idx_va]; X_te = Xr[idx_te]
                 if model in ("rf", "xgb"):
                     Xtr_s = X_tr.reshape(len(X_tr), -1).astype(np.float32)
                     Xte_s = X_te.reshape(len(X_te), -1).astype(np.float32)
