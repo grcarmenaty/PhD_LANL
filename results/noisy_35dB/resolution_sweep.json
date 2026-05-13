@@ -1222,5 +1222,50 @@
     "model": "xgb",
     "feature": "cfdac_phase",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9293333333333333,
+    "runtime_s": 113.29792428016663,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.912,
+    "runtime_s": 94.94247460365295,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_phase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9166666666666666,
+    "runtime_s": 71.77790760993958,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9173333333333333,
+    "runtime_s": 66.24481010437012,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9453333333333334,
+    "runtime_s": 183.76393055915833,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "cfdac_real",
+    "ratio": 1.0
   }
 ]
