@@ -57,11 +57,13 @@ emit_ping() {
   free_mb=$(free -m | awk '/^Mem:/ {print $7}')
   used_mb=$(free -m | awk '/^Mem:/ {print $3}')
   disk_free=$(df -BG /home/user 2>/dev/null | awk 'NR==2 {print $4}')
+  eta_line=$(python3 /home/user/PhD_LANL/.claude/eta.py 2>/dev/null)
   echo "============================================================"
   echo "PING $ts$relaunch"
   echo "  hpo.py pid=$pid etime=$elapsed rss=${rss_gb}GB cpu=${pcpu}%"
   echo "  cells: $done_cells/40 done   last cell: ${last_cell:-none}"
   echo "  vm: ram free=${free_mb}MB used=${used_mb}MB   disk free=${disk_free:-?}"
+  [ -n "$eta_line" ] && echo "  eta: $eta_line"
   echo "  log: ${last_log:-(no log lines)}"
   echo "============================================================"
 }
