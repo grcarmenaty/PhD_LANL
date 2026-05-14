@@ -7,14 +7,14 @@
 cd /home/user/PhD_LANL
 
 auto_commit() {
-  local new_files
-  new_files=$(git ls-files --others --exclude-standard results/noisy_mixed/ 2>/dev/null)
-  [ -z "$new_files" ] && return 0
+  local changes
+  changes=$(git status --porcelain results/noisy_mixed/ 2>/dev/null)
+  [ -z "$changes" ] && return 0
   local n_new
-  n_new=$(wc -l <<<"$new_files")
+  n_new=$(wc -l <<<"$changes")
   git add results/noisy_mixed/ >/dev/null 2>&1
   git -c user.email=claude@local -c user.name=claude \
-      commit -m "noisy_mixed: auto-commit +${n_new} cell artefacts" \
+      commit -m "noisy_mixed: auto-commit ${n_new} cell artefact change(s)" \
       >/dev/null 2>&1 || return 0
   git push origin HEAD >/dev/null 2>&1
 }

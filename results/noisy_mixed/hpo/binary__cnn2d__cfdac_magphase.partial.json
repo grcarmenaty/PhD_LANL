@@ -17,6 +17,21 @@
       "metric_test": 0.9225555555555556,
       "extras": {},
       "runtime_s": 570.6048333644867
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9445555555555556,
+      "metric_test": 0.9493333333333334,
+      "extras": {},
+      "runtime_s": 510.87127137184143
     }
   ]
 }
