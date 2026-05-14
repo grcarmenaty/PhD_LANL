@@ -2,6 +2,16 @@
   "task": "mass_location",
   "model": "cnn2d",
   "feature": "cfdac_real",
+  "best_hyperparams": {
+    "widths": [
+      16,
+      32,
+      64
+    ],
+    "kernel_size": 5
+  },
+  "best_metric_val": 0.9777901166018879,
+  "best_metric_test": 0.9811111111111112,
   "trials": [
     {
       "hyperparams": {
@@ -47,6 +57,21 @@
       "metric_test": 0.9705555555555555,
       "extras": {},
       "runtime_s": 78.82340693473816
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9777901166018879,
+      "metric_test": 0.9811111111111112,
+      "extras": {},
+      "runtime_s": 83.20269536972046
     }
   ]
 }
