@@ -1,0 +1,24 @@
+{
+  "task": "severity",
+  "model": "cnn2d",
+  "feature": "cfdac_magphase",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "R2",
+      "metric_val": 0.37961310148239136,
+      "metric_test": 0.373134970664978,
+      "extras": {
+        "mae_test": 0.1746964454650879
+      },
+      "runtime_s": 416.1192831993103
+    }
+  ]
+}
