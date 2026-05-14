@@ -1,0 +1,24 @@
+{
+  "task": "severity",
+  "model": "cnn2d",
+  "feature": "cfdac_real",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "R2",
+      "metric_val": 0.4867992401123047,
+      "metric_test": 0.4761872887611389,
+      "extras": {
+        "mae_test": 0.15612369775772095
+      },
+      "runtime_s": 264.5294692516327
+    }
+  ]
+}
