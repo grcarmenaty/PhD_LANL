@@ -1,0 +1,22 @@
+{
+  "task": "binary",
+  "model": "cnn2d",
+  "feature": "cfdac_phase",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8895555555555555,
+      "metric_test": 0.8957777777777778,
+      "extras": {},
+      "runtime_s": 318.6074421405792
+    }
+  ]
+}
