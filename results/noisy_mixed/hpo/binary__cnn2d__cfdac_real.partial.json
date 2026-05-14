@@ -1,0 +1,22 @@
+{
+  "task": "binary",
+  "model": "cnn2d",
+  "feature": "cfdac_real",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9362222222222222,
+      "metric_test": 0.9386666666666666,
+      "extras": {},
+      "runtime_s": 1002.3354668617249
+    }
+  ]
+}
