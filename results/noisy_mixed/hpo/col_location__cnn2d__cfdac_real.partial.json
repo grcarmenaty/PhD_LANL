@@ -1,0 +1,22 @@
+{
+  "task": "col_location",
+  "model": "cnn2d",
+  "feature": "cfdac_real",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.48777777777777775,
+      "metric_test": 0.48444444444444446,
+      "extras": {},
+      "runtime_s": 195.94193720817566
+    }
+  ]
+}
