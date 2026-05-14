@@ -19,6 +19,23 @@
         "mae_test": 0.1746964454650879
       },
       "runtime_s": 416.1192831993103
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "R2",
+      "metric_val": 0.4864687919616699,
+      "metric_test": 0.48561161756515503,
+      "extras": {
+        "mae_test": 0.15463979542255402
+      },
+      "runtime_s": 424.67056345939636
     }
   ]
 }
