@@ -1,0 +1,22 @@
+{
+  "task": "mass_location",
+  "model": "cnn2d",
+  "feature": "cfdac_phase",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9561354802887285,
+      "metric_test": 0.9583333333333334,
+      "extras": {},
+      "runtime_s": 63.99503207206726
+    }
+  ]
+}
