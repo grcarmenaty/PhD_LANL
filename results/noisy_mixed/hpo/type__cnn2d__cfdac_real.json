@@ -2,6 +2,16 @@
   "task": "type",
   "model": "cnn2d",
   "feature": "cfdac_real",
+  "best_hyperparams": {
+    "widths": [
+      16,
+      32,
+      64
+    ],
+    "kernel_size": 5
+  },
+  "best_metric_val": 0.8494444444444444,
+  "best_metric_test": 0.8531111111111112,
   "trials": [
     {
       "hyperparams": {
@@ -47,6 +57,21 @@
       "metric_test": 0.8442222222222222,
       "extras": {},
       "runtime_s": 318.69324469566345
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8494444444444444,
+      "metric_test": 0.8531111111111112,
+      "extras": {},
+      "runtime_s": 352.6387207508087
     }
   ]
 }
