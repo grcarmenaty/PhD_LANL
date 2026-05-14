@@ -2,6 +2,16 @@
   "task": "col_location",
   "model": "cnn2d",
   "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "widths": [
+      16,
+      32,
+      64
+    ],
+    "kernel_size": 5
+  },
+  "best_metric_val": 0.5196296296296297,
+  "best_metric_test": 0.5012962962962964,
   "trials": [
     {
       "hyperparams": {
@@ -47,6 +57,21 @@
       "metric_test": 0.5005555555555555,
       "extras": {},
       "runtime_s": 335.5969944000244
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.5196296296296297,
+      "metric_test": 0.5012962962962964,
+      "extras": {},
+      "runtime_s": 342.81602215766907
     }
   ]
 }
