@@ -296,7 +296,7 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                 "state_dict": best_obj.state_dict(),
                 "model_name": model_name,
                 "n_out": n_out,
-                "in_shape": list(X_tr.shape[1:]),
+                "in_shape": list(tr_ds[0][0].shape),
                 "hyperparams": best_trial["hyperparams"],
             }, models_dir / f"{tag}.pt")
 
