@@ -19,9 +19,12 @@ HPO_DIR = REPO / "results" / "noisy_mixed" / "hpo"
 
 # Trials planned per step where we know the number.  hpo and
 # hpo_cfdac_variants come directly from their log banners.
+# hpo_cfdac_allmodels uses single-point grids (1 trial per cell),
+# 140 cells per its banner.
 STEP_TOTAL_TRIALS = {
     "hpo":                  255,
     "hpo_cfdac_variants":   100,
+    "hpo_cfdac_allmodels":  140,
 }
 
 
@@ -51,6 +54,15 @@ def _belongs_to_variants(name: str) -> bool:
     return ("__cnn2d__cfdac_" in name) or ("__cnn3d__cfdac3d_" in name)
 
 
+_ALLMODELS_MODELS = ("__rf__", "__xgb__", "__mlp__", "__cnn__", "__transformer__")
+
+
+def _belongs_to_allmodels(name: str) -> bool:
+    """True iff this hpo cell was produced by hpo_cfdac_allmodels
+    (rf/xgb/mlp/cnn/transformer on any cfdac_<variant>)."""
+    return any(m in name for m in _ALLMODELS_MODELS) and "__cfdac" in name
+
+
 def main() -> int:
     step = _active_step()
     if step is None or step not in STEP_TOTAL_TRIALS:
@@ -63,8 +75,11 @@ def main() -> int:
         if step == "hpo_cfdac_variants":
             if not _belongs_to_variants(name):
                 continue
+        elif step == "hpo_cfdac_allmodels":
+            if not _belongs_to_allmodels(name):
+                continue
         elif step == "hpo":
-            if _belongs_to_variants(name):
+            if _belongs_to_variants(name) or _belongs_to_allmodels(name):
                 continue
         try:
             data = json.loads(Path(path).read_text())
