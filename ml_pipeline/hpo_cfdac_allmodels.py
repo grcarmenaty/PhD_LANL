@@ -63,6 +63,20 @@ from ml_pipeline.train import (                                           # noqa
 torch.set_num_threads(4)
 
 
+def _hp_key(hp: dict) -> str:
+    """Canonical, JSON-stable key for a hyperparameter dict (handles
+    tuples vs. lists after a partial JSON round-trip)."""
+    norm = {k: (list(v) if isinstance(v, (tuple, list)) else v)
+            for k, v in hp.items()}
+    return json.dumps(norm, sort_keys=True, default=str)
+
+
+def _atomic_write_json(path: Path, obj) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=2, default=str))
+    tmp.replace(path)
+
+
 GRIDS = {
     "rf":  {"n_estimators": [200], "max_depth": [None]},
     # RF regression on 16 384-dim flat CFDAC is much slower than RF
@@ -438,50 +452,82 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         grid_key = "rf_reg" if (model_name == "rf" and kind == "reg") else model_name
         grid  = GRIDS[grid_key]
         keys  = list(grid.keys()); vals = [grid[k] for k in keys]
+        def _retrain(params):
+            if model_name in ("rf", "xgb"):
+                return _train_sklearn(model_name, kind, params,
+                                      X_tr_s, y_tr, X_va_s, y_va,
+                                      X_te_s, y_te)
+            elif stream:
+                return _train_torch_streaming(
+                    model_name, kind, n_out, params,
+                    tr_ds, va_ds, te_ds, epochs=epochs)
+            else:
+                return _train_torch(model_name, kind, n_out, params,
+                                    X_tr_s, y_tr, X_va_s, y_va,
+                                    X_te_s, y_te, epochs=epochs)
+
+        out_partial = hpo_dir / f"{tname}__{model_name}__{feat}.partial.json"
         trials: List[Dict[str, Any]] = []
+        done_keys: set = set()
         best_trial, best_obj = None, None
+        if out_partial.exists():
+            try:
+                prev = json.loads(out_partial.read_text())
+                for r in prev.get("trials", []):
+                    trials.append(r)
+                    done_keys.add(_hp_key(r["hyperparams"]))
+                    done += 1
+                    if best_trial is None or r["metric_val"] > best_trial["metric_val"]:
+                        best_trial = r
+                print(f"  resume {tname}/{model_name}/{feat}: "
+                      f"{len(trials)} trials from partial", flush=True)
+            except Exception as e:
+                print(f"  WARN partial read failed ({out_partial.name}): {e}",
+                      flush=True)
         for combo in itertools.product(*vals):
             params = dict(zip(keys, combo))
+            if _hp_key(params) in done_keys:
+                continue
             try:
-                if model_name in ("rf", "xgb"):
-                    row, mdl = _train_sklearn(model_name, kind, params,
-                                                   X_tr_s, y_tr,
-                                                   X_va_s, y_va,
-                                                   X_te_s, y_te)
-                elif stream:
-                    row, mdl = _train_torch_streaming(
-                        model_name, kind, n_out, params,
-                        tr_ds, va_ds, te_ds, epochs=epochs)
-                else:
-                    row, mdl = _train_torch(model_name, kind, n_out, params,
-                                                 X_tr_s, y_tr,
-                                                 X_va_s, y_va,
-                                                 X_te_s, y_te,
-                                                 epochs=epochs)
+                row, mdl = _retrain(params)
             except Exception as e:
                 print(f"  FAIL {tname}/{model_name}/{feat} {params}: {e}",
                           flush=True)
                 continue
-            trials.append(row); done += 1
+            trials.append(row); done_keys.add(_hp_key(params)); done += 1
             print(f"  [{done}] {tname}/{model_name}/{feat} "
                     f"{params}  val={row['metric_val']:.4f}  "
                     f"test={row['metric_test']:.4f}  ({row['runtime_s']:.1f}s)",
                     flush=True)
             if best_trial is None or row["metric_val"] > best_trial["metric_val"]:
                 best_trial = row; best_obj = mdl
+            _atomic_write_json(out_partial, {
+                "task": tname, "model": model_name, "feature": feat,
+                "trials": trials,
+            })
 
         if best_trial is None:
+            out_partial.unlink(missing_ok=True)
             continue
         out_json = hpo_dir / f"{tname}__{model_name}__{feat}.json"
-        out_json.write_text(json.dumps({
+        _atomic_write_json(out_json, {
             "task": tname, "model": model_name, "feature": feat,
             "best_hyperparams": best_trial["hyperparams"],
             "best_metric_val":  best_trial["metric_val"],
             "best_metric_test": best_trial["metric_test"],
             "trials": trials,
-        }, indent=2, default=str))
+        })
+        out_partial.unlink(missing_ok=True)
+        if best_obj is None:
+            try:
+                _, best_obj = _retrain(best_trial["hyperparams"])
+            except Exception as e:
+                print(f"  WARN: rematerialise of best model failed: {e}",
+                      flush=True)
         tag = f"{tname}_{model_name}_{feat}"
-        if model_name in ("rf", "xgb"):
+        if best_obj is None:
+            pass
+        elif model_name in ("rf", "xgb"):
             with open(models_dir / f"{tag}.pkl", "wb") as fh:
                 pickle.dump({"model": best_obj, "scaler": scaler}, fh)
         else:

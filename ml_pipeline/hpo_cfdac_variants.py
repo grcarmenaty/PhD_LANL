@@ -42,6 +42,20 @@ from ml_pipeline.train import (                                  # noqa: E402
 
 torch.set_num_threads(4)
 
+
+def _hp_key(hp: dict) -> str:
+    """Canonical, JSON-stable key for a hyperparameter dict (handles
+    tuples vs. lists after a partial JSON round-trip)."""
+    norm = {k: (list(v) if isinstance(v, (tuple, list)) else v)
+            for k, v in hp.items()}
+    return json.dumps(norm, sort_keys=True, default=str)
+
+
+def _atomic_write_json(path: Path, obj) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=2, default=str))
+    tmp.replace(path)
+
 # (model_name, feature_name)  → grid
 GRIDS = {
     "cnn2d": {"widths": [(8, 16, 32), (16, 32, 64)],
@@ -263,10 +277,26 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
         n_out = (int(y_pool.max()) + 1) if kind == "cls" else 1
         grid  = GRIDS[model_name]
         keys  = list(grid.keys()); vals = [grid[k] for k in keys]
-        trials = []
+        out_partial = hpo_dir / f"{tname}__{model_name}__{feat}.partial.json"
+        trials, done_keys = [], set()
         best_trial, best_obj = None, None
+        if out_partial.exists():
+            try:
+                prev = json.loads(out_partial.read_text())
+                for r in prev.get("trials", []):
+                    trials.append(r)
+                    done_keys.add(_hp_key(r["hyperparams"]))
+                    done += 1
+                    if best_trial is None or r["metric_val"] > best_trial["metric_val"]:
+                        best_trial = r
+                print(f"  resume {tname}/{model_name}/{feat}: "
+                      f"{len(trials)} trials from partial")
+            except Exception as e:
+                print(f"  WARN partial read failed ({out_partial.name}): {e}")
         for combo in itertools.product(*vals):
             params = dict(zip(keys, combo))
+            if _hp_key(params) in done_keys:
+                continue
             try:
                 row, mdl = _train_torch_streaming(
                     model_name, feat, kind, n_out, params,
@@ -275,21 +305,34 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                 print(f"  FAIL {tname}/{model_name}/{feat} {params}: {e}")
                 continue
             trials.append(row)
+            done_keys.add(_hp_key(params))
             done += 1
             print(f"  [{done}/{grand_total}] {tname}/{model_name}/{feat} "
                     f"{params}  val={row['metric_val']:.4f}  "
                     f"test={row['metric_test']:.4f}  ({row['runtime_s']:.1f}s)")
             if best_trial is None or row["metric_val"] > best_trial["metric_val"]:
                 best_trial = row; best_obj = mdl
+            _atomic_write_json(out_partial, {
+                "task": tname, "model": model_name, "feature": feat,
+                "trials": trials,
+            })
 
         out_json = hpo_dir / f"{tname}__{model_name}__{feat}.json"
-        out_json.write_text(json.dumps({
+        _atomic_write_json(out_json, {
             "task": tname, "model": model_name, "feature": feat,
             "best_hyperparams": best_trial["hyperparams"] if best_trial else None,
             "best_metric_val":  best_trial["metric_val"]  if best_trial else None,
             "best_metric_test": best_trial["metric_test"] if best_trial else None,
             "trials": trials,
-        }, indent=2, default=str))
+        })
+        out_partial.unlink(missing_ok=True)
+        if best_obj is None and best_trial is not None:
+            try:
+                _, best_obj = _train_torch_streaming(
+                    model_name, feat, kind, n_out, best_trial["hyperparams"],
+                    tr_ds, va_ds, te_ds, epochs=epochs)
+            except Exception as e:
+                print(f"  WARN: rematerialise of best model failed: {e}")
         if best_obj is not None:
             tag = f"{tname}_{model_name}_{feat}"
             torch.save({
