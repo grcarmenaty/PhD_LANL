@@ -61,6 +61,7 @@ RATIOS = (1.000, 0.875, 0.750, 0.625, 0.500)
 # resolution: tr/va/te raw cache + the per-ratio downsampled copy peak
 # around 16-32 GB.  Skip them here (same set excluded from HPO step 3).
 SKIP_MULTICH_VARIANTS = {
+    "cfdac",  # legacy alias for cfdac_realimag (2-ch) in lazy_datasets._CFDAC_PARTS
     "cfdac_realimag", "cfdac_magphase", "cfdac_all",
     "cfdac3d_realimag", "cfdac3d_magphase", "cfdac3d_all",
 }
