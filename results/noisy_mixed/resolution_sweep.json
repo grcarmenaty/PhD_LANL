@@ -1,0 +1,11 @@
+[
+  {
+    "metric": "accuracy",
+    "value": 0.9605555555555556,
+    "runtime_s": 157.49800658226013,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
+  }
+]
