@@ -1,0 +1,24 @@
+{
+  "task": "col_location",
+  "model": "transformer",
+  "feature": "cfdac_realimag",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.5003703703703704,
+  "best_metric_test": 0.4824074074074074,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.5003703703703704,
+      "metric_test": 0.4824074074074074,
+      "extras": {},
+      "runtime_s": 273.4151756763458
+    }
+  ]
+}
