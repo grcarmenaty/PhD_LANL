@@ -56,6 +56,14 @@ from ml_pipeline.train import (                                            # noq
 from ml_pipeline.lazy_datasets import LazyCFDACDataset, _CFDAC_PARTS    # noqa: E402
 
 RATIOS = (1.000, 0.875, 0.750, 0.625, 0.500)
+
+# Multi-channel CFDAC variants don't fit in the 16 GB sandbox at full
+# resolution: tr/va/te raw cache + the per-ratio downsampled copy peak
+# around 16-32 GB.  Skip them here (same set excluded from HPO step 3).
+SKIP_MULTICH_VARIANTS = {
+    "cfdac_realimag", "cfdac_magphase", "cfdac_all",
+    "cfdac3d_realimag", "cfdac3d_magphase", "cfdac3d_all",
+}
 torch.set_num_threads(4)
 
 
@@ -216,6 +224,8 @@ def main() -> None:
     for hpo_path in sorted((args.out / "hpo").glob("*.json")):
         blob = json.loads(hpo_path.read_text())
         key = (blob["task"], blob["model"], blob["feature"])
+        if blob["feature"] in SKIP_MULTICH_VARIANTS:
+            continue
         if key not in seen:
             seen.add(key); cells.append(key)
     print(f"plan: {len(cells)} cells × {len(RATIOS)} ratios = "
