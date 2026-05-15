@@ -1,0 +1,24 @@
+{
+  "task": "binary",
+  "model": "xgb",
+  "feature": "cfdac_phase",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": 6
+  },
+  "best_metric_val": 0.9841111111111112,
+  "best_metric_test": 0.9841111111111112,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9841111111111112,
+      "metric_test": 0.9841111111111112,
+      "extras": {},
+      "runtime_s": 792.8326690196991
+    }
+  ]
+}
