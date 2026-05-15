@@ -7,5 +7,14 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9621111111111111,
+    "runtime_s": 102.46674656867981,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.875
   }
 ]
