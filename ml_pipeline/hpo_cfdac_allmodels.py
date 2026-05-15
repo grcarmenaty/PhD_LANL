@@ -114,6 +114,14 @@ SKIP_TRANSFORMER_TASKS = {"severity"}
 # on the severity task.  Skip it and keep the cnn / mlp severity
 # rows that do finish.
 SKIP_RF_TASKS = {"severity"}
+# RF/XGB load the full flat CFDAC tensor into a numpy array for
+# sklearn.  2-channel (cfdac_realimag / cfdac_magphase) doubles the
+# flat dimension to 32 768 and 4-channel (cfdac_all) quadruples it to
+# 65 536 — at 60 k samples that is 7.9 GB / 15.7 GB just for the
+# training set, which OOM-kills the 16 GB sandbox.  Skip these
+# combinations; CNN / Transformer / MLP still cover the multi-channel
+# variants via streaming.
+SKIP_RFXGB_MULTICH_VARIANTS = {"cfdac_realimag", "cfdac_magphase", "cfdac_all"}
 
 
 def _flatten(X: np.ndarray) -> np.ndarray:
@@ -373,6 +381,8 @@ def run(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                 if m == "transformer" and tname in SKIP_TRANSFORMER_TASKS:
                     continue
                 if m == "rf" and tname in SKIP_RF_TASKS:
+                    continue
+                if m in ("rf", "xgb") and variant in SKIP_RFXGB_MULTICH_VARIANTS:
                     continue
                 cell_path = hpo_dir / f"{tname}__{m}__{variant}.json"
                 if _existing_cell_done(cell_path):

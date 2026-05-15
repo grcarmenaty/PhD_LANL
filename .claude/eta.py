@@ -24,7 +24,7 @@ HPO_DIR = REPO / "results" / "noisy_mixed" / "hpo"
 STEP_TOTAL_TRIALS = {
     "hpo":                  255,
     "hpo_cfdac_variants":   100,
-    "hpo_cfdac_allmodels":  140,
+    "hpo_cfdac_allmodels":  122,
 }
 
 
