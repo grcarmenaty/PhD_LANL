@@ -1,0 +1,24 @@
+{
+  "task": "type",
+  "model": "transformer",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.7527777777777778,
+  "best_metric_test": 0.7545555555555555,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.7527777777777778,
+      "metric_test": 0.7545555555555555,
+      "extras": {},
+      "runtime_s": 463.34735774993896
+    }
+  ]
+}
