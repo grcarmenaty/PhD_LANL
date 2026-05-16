@@ -2934,5 +2934,23 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.788,
+    "runtime_s": 39.40892720222473,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7872222222222223,
+    "runtime_s": 35.013123989105225,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
