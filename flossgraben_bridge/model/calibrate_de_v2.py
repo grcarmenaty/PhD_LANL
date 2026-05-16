@@ -11,6 +11,15 @@ Knobs (10):
   log10(k_pier_rot)     bending rotational pier spring
 """
 from __future__ import annotations
+import os
+# Single-threaded BLAS — when scipy.optimize uses workers=-1 (multiprocess)
+# multi-threaded BLAS causes catastrophic thread oversubscription
+# (workers × threads = 16+ threads fighting on 4 cores), turning a 160 ms
+# eigh into a 2.7 s eigh. Must be set BEFORE importing numpy/scipy.
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"]      = "1"
+os.environ["OMP_NUM_THREADS"]      = "1"
+
 import json, sys, time
 from pathlib import Path
 
@@ -75,7 +84,11 @@ _EXP_CACHE: dict = load_experimental_cfdac()
 
 
 def loss(x):
-    """Module-level loss function (picklable for workers=-1 parallel DE)."""
+    """Module-level loss function (picklable for workers=-1 parallel DE).
+
+    Safety: reject parameter sets that produce sub-Hz modes (degenerate)
+    or non-finite spectra, return a constant penalty so DE can move on.
+    """
     (e_gpa, I_yy, log_GJ, log_rho_Ip,
      z_lo, z_mid, z_hi, y_off, f_cut, log_krot) = x
     params = dict(
@@ -93,8 +106,13 @@ def loss(x):
     f1 = 0.0
     for sc in ("reference", "field3", "field4"):
         try:
-            Y, f1_, _, _ = bf2.auto_spectrum_v2(sc, params, FREQ_GRID, BAND)
+            Y, f1_, fb, ft = bf2.auto_spectrum_v2(sc, params, FREQ_GRID, BAND)
         except Exception:
+            return 10.0
+        if not np.all(np.isfinite(Y)):
+            return 10.0
+        # Reject degenerate modal structure
+        if fb[0] < 0.2 or ft[0] < 0.2:
             return 10.0
         if sc == "reference":
             f1 = f1_
@@ -145,9 +163,12 @@ def main():
               f"x={np.array2string(xk, precision=3, separator=',')}",
               flush=True)
 
+    # Parallel: single-thread BLAS (env above) prevents oversubscription.
+    # popsize=15 × 10 = 150 individuals; 80 generations × 150 evals
+    # at 160 ms / 4 cores ≈ 12 minutes wall time.
     res = differential_evolution(
-        loss, bounds, seed=20260516, maxiter=60, popsize=12,
-        tol=1e-3, workers=-1, polish=False, disp=False,
+        loss, bounds, seed=20260516, maxiter=80, popsize=15,
+        tol=1e-4, workers=-1, polish=False, disp=False,
         updating='deferred', callback=cb)
     print(f"\nDone. Best score = {-res.fun:.4f}, n_evals={res.nfev}")
     summary = {
