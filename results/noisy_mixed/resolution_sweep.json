@@ -2952,5 +2952,50 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7406666666666667,
+    "runtime_s": 7.17085862159729,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7207777777777777,
+    "runtime_s": 6.818487644195557,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7057777777777777,
+    "runtime_s": 5.863212585449219,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7024444444444444,
+    "runtime_s": 4.976546764373779,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.6953333333333334,
+    "runtime_s": 4.055429697036743,
+    "task": "type",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
