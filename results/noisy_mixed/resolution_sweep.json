@@ -70,5 +70,14 @@
     "model": "cnn2d",
     "feature": "cfdac_mag",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7691111111111111,
+    "runtime_s": 60.54147291183472,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
   }
 ]
