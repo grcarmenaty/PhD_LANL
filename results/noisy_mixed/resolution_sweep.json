@@ -2252,5 +2252,65 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.28583502769470215,
+    "mae": 0.1903013437986374,
+    "runtime_s": 12.707423448562622,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.12296676635742188,
+    "mae": 0.227806955575943,
+    "runtime_s": 6.77469539642334,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.10403937101364136,
+    "mae": 0.2312103509902954,
+    "runtime_s": 6.810930490493774,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.05801898241043091,
+    "mae": 0.23833848536014557,
+    "runtime_s": 6.939649820327759,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.0975828766822815,
+    "mae": 0.23252156376838684,
+    "runtime_s": 7.03068733215332,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.08235722780227661,
+    "mae": 0.2347400188446045,
+    "runtime_s": 6.918816804885864,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
