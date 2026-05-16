@@ -2907,5 +2907,23 @@
     "model": "mlp",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.792,
+    "runtime_s": 43.74377727508545,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7852222222222223,
+    "runtime_s": 47.38162183761597,
+    "task": "type",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.875
   }
 ]
