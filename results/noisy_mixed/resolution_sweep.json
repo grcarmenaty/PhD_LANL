@@ -97,5 +97,14 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9383333333333334,
+    "runtime_s": 92.66882276535034,
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
   }
 ]
