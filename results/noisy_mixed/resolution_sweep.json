@@ -2763,5 +2763,14 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.5814444444444444,
+    "runtime_s": 16.706825256347656,
+    "task": "type",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 0.5
   }
 ]
