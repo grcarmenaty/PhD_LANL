@@ -1582,5 +1582,122 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9444444444444444,
+    "runtime_s": 7.235646486282349,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.925,
+    "runtime_s": 5.831939220428467,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9555555555555556,
+    "runtime_s": 4.404081106185913,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9388888888888889,
+    "runtime_s": 3.55914568901062,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9438888888888889,
+    "runtime_s": 3.095318555831909,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.86,
+    "runtime_s": 1.6880338191986084,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8588888888888889,
+    "runtime_s": 1.690788745880127,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8527777777777777,
+    "runtime_s": 1.672372817993164,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8927777777777778,
+    "runtime_s": 1.649139642715454,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8033333333333333,
+    "runtime_s": 1.6454801559448242,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9922222222222222,
+    "runtime_s": 2.9187169075012207,
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9861111111111112,
+    "runtime_s": 3.722352981567383,
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.985,
+    "runtime_s": 3.2636396884918213,
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.75
   }
 ]
