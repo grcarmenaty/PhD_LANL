@@ -118,7 +118,7 @@ def loss_verbose(x, log_state):
 
 
 def main():
-    print(f"Experimental CFDAC cache loaded at import (3 scenarios)")
+    print(f"Experimental CFDAC cache loaded at import (3 scenarios)", flush=True)
     bounds = [
         (5.0,  45.0),
         (3.0,  40.0),
@@ -132,21 +132,22 @@ def main():
         ( 0.0,  11.0),
     ]
     log_state = {"n": 0, "best": -np.inf, "t0": time.time()}
-    print("Starting DE…")
+    print("Starting DE…", flush=True)
 
-    # Custom callback to report per-generation best
     def cb(xk, convergence):
         v = loss(xk)
         log_state["n"] += 1
+        marker = " *" if -v > log_state["best"] else "  "
         if -v > log_state["best"]:
             log_state["best"] = -v
-            print(f"  [gen-best t={time.time()-log_state['t0']:6.1f}s] "
-                  f"score={-v:.4f} conv={convergence:.3g} "
-                  f"x={np.array2string(xk, precision=3)}")
+        print(f"  [gen {log_state['n']:3d} t={time.time()-log_state['t0']:6.1f}s] "
+              f"score={-v:.4f}{marker} conv={convergence:.3g} "
+              f"x={np.array2string(xk, precision=3, separator=',')}",
+              flush=True)
 
     res = differential_evolution(
-        loss, bounds, seed=20260516, maxiter=80, popsize=20,
-        tol=1e-4, workers=-1, polish=True, disp=False,
+        loss, bounds, seed=20260516, maxiter=60, popsize=12,
+        tol=1e-3, workers=-1, polish=False, disp=False,
         updating='deferred', callback=cb)
     print(f"\nDone. Best score = {-res.fun:.4f}, n_evals={res.nfev}")
     summary = {
