@@ -2312,5 +2312,15 @@
     "model": "mlp",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.5831242021740803,
+    "mae": 0.1276203365046938,
+    "runtime_s": 197.26089763641357,
+    "task": "severity",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 1.0
   }
 ]
