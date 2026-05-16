@@ -1294,5 +1294,32 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.975,
+    "runtime_s": 9.860652446746826,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.97,
+    "runtime_s": 7.281820774078369,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9072222222222223,
+    "runtime_s": 20.369370698928833,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 1.0
   }
 ]
