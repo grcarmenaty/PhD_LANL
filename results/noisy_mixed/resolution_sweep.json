@@ -223,5 +223,14 @@
     "model": "cnn",
     "feature": "frf_mag",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9621111111111111,
+    "runtime_s": 34.81755590438843,
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 1.0
   }
 ]
