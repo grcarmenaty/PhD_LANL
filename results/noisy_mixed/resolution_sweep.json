@@ -1069,5 +1069,41 @@
     "model": "mlp",
     "feature": "modal",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.33870370370370373,
+    "runtime_s": 4.837907552719116,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.3553703703703704,
+    "runtime_s": 4.621615886688232,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7646296296296297,
+    "runtime_s": 18.02047610282898,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7031481481481482,
+    "runtime_s": 20.13360595703125,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.875
   }
 ]
