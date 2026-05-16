@@ -2012,5 +2012,25 @@
     "model": "cnn",
     "feature": "frf_mag",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.6003195643424988,
+    "mae": 0.13121549785137177,
+    "runtime_s": 22.128681182861328,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.5844095349311829,
+    "mae": 0.13554921746253967,
+    "runtime_s": 22.444390773773193,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.875
   }
 ]
