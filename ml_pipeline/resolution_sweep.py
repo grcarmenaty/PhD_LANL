@@ -111,9 +111,9 @@ def _train_sklearn(model_name: str, kind: str, params: dict,
               else XGBClassifier if kind == "cls"
               else XGBRegressor)
     if model_name == "rf":
-        mdl = cls(n_jobs=-1, random_state=SEED, **params)
+        mdl = cls(n_jobs=1, random_state=SEED, **params)
     else:
-        mdl = cls(n_jobs=-1, random_state=SEED, learning_rate=0.1,
+        mdl = cls(n_jobs=1, random_state=SEED, learning_rate=0.1,
                      tree_method="hist", max_bin=128, **params)
     mdl.fit(X_tr, y_tr)
     pred_te = mdl.predict(X_te)
@@ -323,6 +323,17 @@ def main() -> None:
                       f"{row['metric']}={row['value']:+.3f}  "
                       f"({row['runtime_s']:.1f}s)",
                       flush=True)
+            # Free per-ratio tensors before next iter so peak stays bounded
+            # for the multi-fit sequence (esp. RF on flattened CFDAC).
+            try:
+                del X_tr, X_va, X_te
+            except NameError:
+                pass
+            try:
+                del Xtr_s, Xte_s
+            except NameError:
+                pass
+            import gc; gc.collect()
     out_path.write_text(json.dumps(rows, indent=2))
     print(f"\nwrote {out_path}  ({len(rows)} rows)")
 
