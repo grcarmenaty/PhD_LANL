@@ -2062,5 +2062,15 @@
     "model": "cnn",
     "feature": "timeseries",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.4351283311843872,
+    "mae": 0.16945183277130127,
+    "runtime_s": 32.90167951583862,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
   }
 ]
