@@ -247,6 +247,11 @@ def main() -> None:
     cached_task = None  # for CFDAC: cache materialised tr/va/te slices per task
     X_tr_raw = X_va_raw = X_te_raw = None
     for task, model, feat in cells:
+        # Skip the whole (task, model, feat) cell early when every ratio is
+        # already persisted in `done`.  Avoids re-loading multi-GB CFDAC
+        # arrays on each orchestrator restart while we resume the sweep.
+        if all((task, model, feat, r) in done for r in RATIOS):
+            continue
         is_cfdac = feat in _CFDAC_PARTS
         if feat != current_feat:
             del X_full; X_full = None
