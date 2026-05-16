@@ -1537,5 +1537,50 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9727777777777777,
+    "runtime_s": 7.678955316543579,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9755555555555555,
+    "runtime_s": 5.769895792007446,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9688888888888889,
+    "runtime_s": 4.323687314987183,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9777777777777777,
+    "runtime_s": 3.310105323791504,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9772222222222222,
+    "runtime_s": 2.735840320587158,
+    "task": "mass_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
   }
 ]
