@@ -961,5 +961,23 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.49648148148148147,
+    "runtime_s": 21.12020254135132,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.49574074074074076,
+    "runtime_s": 14.637728929519653,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.75
   }
 ]
