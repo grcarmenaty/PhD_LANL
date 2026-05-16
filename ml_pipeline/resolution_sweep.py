@@ -227,6 +227,11 @@ def main() -> None:
         key = (blob["task"], blob["model"], blob["feature"])
         if blob["feature"] in SKIP_MULTICH_VARIANTS:
             continue
+        # RF/XGB on flattened CFDAC (16 384 features) take ~50 min/cell at
+        # n_jobs=1 and OOM at higher concurrency.  The 30-min orchestrator
+        # cycle in this sandbox can't fit them, so skip in the sweep.
+        if blob["model"] in ("rf", "xgb") and blob["feature"].startswith("cfdac"):
+            continue
         if key not in seen:
             seen.add(key); cells.append(key)
     print(f"plan: {len(cells)} cells × {len(RATIOS)} ratios = "
