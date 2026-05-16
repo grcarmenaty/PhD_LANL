@@ -2192,5 +2192,25 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.45113104581832886,
+    "mae": 0.16132931411266327,
+    "runtime_s": 15.977255582809448,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.45622992515563965,
+    "mae": 0.16294290125370026,
+    "runtime_s": 11.399580478668213,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
   }
 ]
