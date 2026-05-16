@@ -2601,5 +2601,32 @@
     "model": "cnn",
     "feature": "frf_mag",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8385555555555556,
+    "runtime_s": 19.22354292869568,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.6337777777777778,
+    "runtime_s": 18.921266078948975,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8461111111111111,
+    "runtime_s": 18.254976987838745,
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.625
   }
 ]
