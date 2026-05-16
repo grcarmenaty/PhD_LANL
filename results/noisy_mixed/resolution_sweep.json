@@ -2799,5 +2799,23 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7665555555555555,
+    "runtime_s": 16.68098473548889,
+    "task": "type",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7783333333333333,
+    "runtime_s": 13.271222591400146,
+    "task": "type",
+    "model": "mlp",
+    "feature": "cfdac_phase",
+    "ratio": 0.5
   }
 ]
