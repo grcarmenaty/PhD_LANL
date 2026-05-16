@@ -835,5 +835,23 @@
     "model": "cnn",
     "feature": "timeseries",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.5094444444444445,
+    "runtime_s": 16.24582052230835,
+    "task": "col_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.49537037037037035,
+    "runtime_s": 15.91321849822998,
+    "task": "col_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.625
   }
 ]
