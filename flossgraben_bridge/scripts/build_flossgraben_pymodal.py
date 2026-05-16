@@ -507,100 +507,6 @@ def write_chunk_format(signals_per_state: Dict[str, np.ndarray],
     return out_dir
 
 
-def write_noisy_pymodal(clean_path: Path, noisy_path: Path,
-                         snr_levels_db: List[float], log: logging.Logger) -> Path:
-    """Add Gaussian noise (mixed-SNR) to time-domain signals stored next to the
-    pymodal collection, recompute spectra, write a parallel pymodal frf file.
-    """
-    if noisy_path.exists():
-        noisy_path.unlink()
-
-    log.info(f"building noisy pymodal collection at {noisy_path}")
-    rng = np.random.default_rng(20260515 + 7)
-
-    # Read clean signals from the companion HDF5 in output/chunks
-    chunks_dir = clean_path.parent / "chunks"
-    chunk_paths = sorted(chunks_dir.glob("chunk_*.h5"))
-    if not chunk_paths:
-        raise SystemExit("no chunk files found — clean dataset not built")
-
-    # Concatenate signals across chunks (10 k samples × 1024 × 9 ≈ 360 MB)
-    all_sig: List[np.ndarray] = []
-    all_label_type: List[int] = []
-    all_label_end: List[int] = []
-    all_sev: List[float] = []
-    all_meta_src: List[str] = []
-    all_meta_dm: List[float] = []
-    all_meta_temp: List[float] = []
-    all_meta_wind: List[float] = []
-    for p in chunk_paths:
-        with h5py.File(p, "r") as f:
-            all_sig.append(f["signals"][:])
-            all_label_type.extend(f["labels/type_code"][:].tolist())
-            all_label_end.extend(f["labels/end"][:].tolist())
-            all_sev.extend(f["labels/severity"][:].tolist())
-            all_meta_src.extend(f["params/source_file"][:].tolist())
-            all_meta_dm.extend(f["params/dM_kg"][:].tolist())
-            all_meta_temp.extend(f["params/surface_temp_c"][:].tolist())
-            all_meta_wind.extend(f["params/wind_ms"][:].tolist())
-    signals = np.concatenate(all_sig, axis=0)              # (n, N_T, N_CH)
-    n = signals.shape[0]
-    log.info(f"  loaded {n} clean signals: {signals.nbytes/1e6:.1f} MB")
-
-    # Per-sample SNR draw — uniform over the requested set
-    snr_db = rng.choice(snr_levels_db, size=n).astype(np.float32)
-    sig_power = np.mean(signals ** 2, axis=(1, 2))         # (n,)
-    noise_power = sig_power / (10 ** (snr_db / 10.0))      # (n,)
-    noise_std = np.sqrt(noise_power).astype(np.float32)
-    noise = rng.standard_normal(signals.shape).astype(np.float32)
-    noise *= noise_std[:, None, None]
-    noisy = signals + noise
-
-    # Recompute spectra
-    log.info("  computing spectra on noisy signals")
-    spectra = windows_to_spectra(noisy)                    # (n, N_F, N_CH, 1)
-
-    # Build pymodal collection
-    # Rebuild per-state name / label list in the same order as the chunks
-    label_map = {(0, -1): 0.0, (4, 3): 1.0, (4, 4): 2.0}
-    labels = [label_map[(t, e)] for t, e in zip(all_label_type, all_label_end)]
-    state_map = {0.0: "reference", 1.0: "field3", 2.0: "field4"}
-    names = [f"{state_map[l]}_noisy_{i:05d}" for i, l in enumerate(labels)]
-
-    measurements = [spectra[i] for i in range(n)]
-    coll = PMF(
-        measurements=measurements,
-        freq_resolution=DF,
-        measurements_units="meter / second ** 2",
-        freq_units="hertz",
-        method="SIMO",
-        names=names,
-        labels=labels,
-        path=noisy_path,
-    )
-    coll.close(keep=True)
-    with h5py.File(noisy_path, "a") as f:
-        grp = f.require_group("aux_metadata")
-        grp.create_dataset("snr_db", data=snr_db)
-        grp.create_dataset("type_code", data=np.array(all_label_type, dtype=np.int32))
-        grp.create_dataset("end",       data=np.array(all_label_end,  dtype=np.int32))
-        grp.create_dataset("severity",  data=np.array(all_sev, dtype=np.float32))
-        grp.create_dataset("dM_kg",     data=np.array(all_meta_dm, dtype=np.float32))
-        grp.create_dataset("surface_temp_c", data=np.array(all_meta_temp, dtype=np.float32))
-        grp.create_dataset("wind_ms",   data=np.array(all_meta_wind, dtype=np.float32))
-        srcs = np.array([s.decode() if isinstance(s, bytes) else str(s) for s in all_meta_src],
-                         dtype=h5py.string_dtype())
-        grp.create_dataset("source_file", data=srcs)
-        f.attrs["dataset"]   = "Flossgraben Bridge — OPARA-767 (noisy variant)"
-        f.attrs["snr_levels_db"] = np.array(snr_levels_db, dtype=np.float32)
-        f.attrs["sensor_channels_1indexed"] = np.array(SENSOR_CHANNELS, dtype=np.int32)
-        f.attrs["fs_hz"] = float(FS_TARGET)
-        f.attrs["n_t"]   = int(N_T)
-        f.attrs["class_legend"] = "0=Reference 1=Field3 2=Field4"
-    log.info(f"  → wrote {noisy_path.stat().st_size/1e6:.1f} MB")
-    return noisy_path
-
-
 # ── Main ────────────────────────────────────────────────────────────────────
 def main() -> None:
     global FETCH_WORKERS_DEFAULT
@@ -611,9 +517,6 @@ def main() -> None:
     parser.add_argument("--targets", type=int, nargs=3, default=None,
                           metavar=("REF", "FIELD3", "FIELD4"),
                           help="Override per-state sample targets.")
-    parser.add_argument("--snr-db", type=float, nargs="+",
-                          default=[35.0, 25.0, 20.0, 15.0, 10.0],
-                          help="SNR levels (mixed) for the noisy variant.")
     parser.add_argument("--workers", type=int, default=FETCH_WORKERS_DEFAULT,
                           help="Parallel HTTP fetch workers per state.")
     args = parser.parse_args()
@@ -643,18 +546,13 @@ def main() -> None:
     clean_pm = out_dir / "flossgraben_collection.h5"
     write_pymodal_collection(spectra_per, meta_per, clean_pm, log)
 
-    # Chunk-format dataset (3SBB-compatible) — needed for the noisy step too
+    # Chunk-format dataset (3SBB-compatible)
     chunks_dir = out_dir / "chunks"
     write_chunk_format(signals_per, meta_per, chunks_dir, log)
-
-    # Noisy variant
-    noisy_pm = out_dir / "flossgraben_collection_noisy.h5"
-    write_noisy_pymodal(clean_pm, noisy_pm, args.snr_db, log)
 
     # Summary
     log.info("\n=== SUMMARY ===")
     log.info(f"  pymodal clean : {clean_pm}  ({clean_pm.stat().st_size/1e6:.1f} MB)")
-    log.info(f"  pymodal noisy : {noisy_pm}  ({noisy_pm.stat().st_size/1e6:.1f} MB)")
     log.info(f"  chunks dir    : {chunks_dir}  ({len(list(chunks_dir.glob('chunk_*.h5')))} files)")
     log.info(f"  manifest      : {chunks_dir / 'manifest.json'}")
 
