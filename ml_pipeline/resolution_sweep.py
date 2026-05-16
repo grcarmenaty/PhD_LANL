@@ -232,6 +232,12 @@ def main() -> None:
         # cycle in this sandbox can't fit them, so skip in the sweep.
         if blob["model"] in ("rf", "xgb") and blob["feature"].startswith("cfdac"):
             continue
+        # `cnn` is Conv1DStack here, which barfs on the 4D CFDAC tensor
+        # ([N, 1, H, W]).  Pre-existing bug; cnn2d covers the same input.
+        # Skip in the plan so we don't burn a 10-min batch_read just to
+        # discover the FAIL.
+        if blob["model"] == "cnn" and blob["feature"].startswith("cfdac"):
+            continue
         if key not in seen:
             seen.add(key); cells.append(key)
     print(f"plan: {len(cells)} cells × {len(RATIOS)} ratios = "
