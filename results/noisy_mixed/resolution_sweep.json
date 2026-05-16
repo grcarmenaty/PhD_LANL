@@ -286,5 +286,14 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9451111111111111,
+    "runtime_s": 31.269140243530273,
+    "task": "binary",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
   }
 ]
