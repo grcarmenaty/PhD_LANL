@@ -23,3 +23,6 @@ test_write.tmp
 # Allow chunked splits
 !experimental_frfs_chunks/
 !experimental_frfs_chunks/**
+
+# DE optimiser run logs
+flossgraben_bridge/model/*.log
