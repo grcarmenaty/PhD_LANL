@@ -68,9 +68,10 @@ def load_experimental_cfdac():
     return cache
 
 
-# Module-level cache populated in main() so worker subprocesses can pickle
-# the loss function and inherit the cache via fork.
-_EXP_CACHE: dict | None = None
+# Module-level cache populated at import time so worker subprocesses
+# (whether forked or spawned) see a fully populated cache after they
+# import this module.
+_EXP_CACHE: dict = load_experimental_cfdac()
 
 
 def loss(x):
@@ -117,9 +118,7 @@ def loss_verbose(x, log_state):
 
 
 def main():
-    global _EXP_CACHE
-    print("Loading experimental CFDAC cache…")
-    _EXP_CACHE = load_experimental_cfdac()
+    print(f"Experimental CFDAC cache loaded at import (3 scenarios)")
     bounds = [
         (5.0,  45.0),
         (3.0,  40.0),
