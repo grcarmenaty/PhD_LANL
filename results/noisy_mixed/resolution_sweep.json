@@ -2332,5 +2332,15 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.5831659632857729,
+    "mae": 0.1286098006047891,
+    "runtime_s": 178.97662949562073,
+    "task": "severity",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.75
   }
 ]
