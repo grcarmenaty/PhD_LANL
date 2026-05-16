@@ -1699,5 +1699,23 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9805555555555555,
+    "runtime_s": 3.30342960357666,
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.98,
+    "runtime_s": 2.893954277038574,
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
