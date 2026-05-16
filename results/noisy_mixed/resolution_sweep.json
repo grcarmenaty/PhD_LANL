@@ -592,5 +592,14 @@
     "model": "xgb",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.49944444444444447,
+    "runtime_s": 62.736669301986694,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
   }
 ]
