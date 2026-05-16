@@ -745,5 +745,23 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4837037037037037,
+    "runtime_s": 37.44698715209961,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4905555555555556,
+    "runtime_s": 29.215503215789795,
+    "task": "col_location",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "ratio": 0.625
   }
 ]
