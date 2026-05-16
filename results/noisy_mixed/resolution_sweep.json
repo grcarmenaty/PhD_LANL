@@ -1982,5 +1982,35 @@
     "model": "cnn",
     "feature": "frf_mag",
     "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.4081401824951172,
+    "mae": 0.16193033754825592,
+    "runtime_s": 18.289707899093628,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.5866512060165405,
+    "mae": 0.12816596031188965,
+    "runtime_s": 18.177391529083252,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.5835181474685669,
+    "mae": 0.13347673416137695,
+    "runtime_s": 17.71671462059021,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.5
   }
 ]
