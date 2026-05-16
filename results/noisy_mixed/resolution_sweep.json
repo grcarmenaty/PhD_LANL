@@ -1186,5 +1186,41 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9227777777777778,
+    "runtime_s": 16.96451187133789,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8072222222222222,
+    "runtime_s": 13.430937767028809,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9072222222222223,
+    "runtime_s": 10.097091674804688,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7877777777777778,
+    "runtime_s": 7.8801939487457275,
+    "task": "mass_location",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 0.5
   }
 ]
