@@ -2052,5 +2052,15 @@
     "model": "cnn",
     "feature": "timeseries",
     "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.4226267337799072,
+    "mae": 0.16378380358219147,
+    "runtime_s": 20.074538230895996,
+    "task": "severity",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.5
   }
 ]
