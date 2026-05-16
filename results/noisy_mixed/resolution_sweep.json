@@ -2082,5 +2082,25 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.497503399848938,
+    "mae": 0.15296807885169983,
+    "runtime_s": 17.522305727005005,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.509460985660553,
+    "mae": 0.15236206352710724,
+    "runtime_s": 13.716219425201416,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_imag",
+    "ratio": 0.625
   }
 ]
