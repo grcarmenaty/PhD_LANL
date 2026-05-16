@@ -68,80 +68,90 @@ def load_experimental_cfdac():
     return cache
 
 
-def make_loss(exp_cache):
-    counter = {"n": 0}
-    best = {"score": -np.inf, "x": None, "sci": None}
-    t0 = time.time()
-    def loss(x):
-        (e_gpa, I_yy, log_GJ, log_rho_Ip,
-         z_lo, z_mid, z_hi, y_off, f_cut, log_krot) = x
-        params = dict(
-            E_bend=e_gpa * 1e9,
-            I_yy=I_yy,
-            mu=2500.0 * 9.4,                # locked μ (deck mass per metre)
-            GJ=10.0 ** log_GJ,
-            rho_Ip=10.0 ** log_rho_Ip,
-            z_lo=z_lo, z_mid=z_mid, z_hi=z_hi,
-            y_off=y_off, f_cut=f_cut,
-            k_pier_rot=10.0 ** log_krot,
-            k_pier_tors=1e12,               # treat torsion as pinned at piers
-        )
-        sci_list = []
-        f1 = 0.0
-        for sc in ("reference", "field3", "field4"):
-            try:
-                Y, f1_, _, _ = bf2.auto_spectrum_v2(sc, params, FREQ_GRID, BAND)
-            except Exception:
-                return 10.0
-            if sc == "reference":
-                f1 = f1_
-            H_band = Y.astype(np.complex128)
-            sci_list.append(sci(exp_cache[sc]["C"], cfdac(H_band)))
-        mean_sci = float(np.mean(sci_list))
-        f1_dev = ((f1 - F1_EXP) / F1_EXP) ** 2
-        score = mean_sci - W_FREQ * f1_dev
-        counter["n"] += 1
-        if score > best["score"]:
-            best["score"] = score; best["x"] = x.copy(); best["sci"] = sci_list[:]
-            print(f"  [eval {counter['n']:4d} t={time.time()-t0:6.1f}s] "
-                  f"SCI={mean_sci:.4f} (R={sci_list[0]:.3f} "
-                  f"F3={sci_list[1]:.3f} F4={sci_list[2]:.3f}) "
-                  f"f1={f1:.3f} | "
-                  f"E={e_gpa:.1f} I={I_yy:.2f} GJ=1e{log_GJ:.1f} "
-                  f"ρIp=1e{log_rho_Ip:.1f} z=[{z_lo:.3f},{z_mid:.3f},{z_hi:.3f}] "
-                  f"y={y_off:.2f} fc={f_cut:.1f} krot=1e{log_krot:.1f}")
-        return -score
-    return loss, best
+# Module-level cache populated in main() so worker subprocesses can pickle
+# the loss function and inherit the cache via fork.
+_EXP_CACHE: dict | None = None
+
+
+def loss(x):
+    """Module-level loss function (picklable for workers=-1 parallel DE)."""
+    (e_gpa, I_yy, log_GJ, log_rho_Ip,
+     z_lo, z_mid, z_hi, y_off, f_cut, log_krot) = x
+    params = dict(
+        E_bend=e_gpa * 1e9,
+        I_yy=I_yy,
+        mu=2500.0 * 9.4,
+        GJ=10.0 ** log_GJ,
+        rho_Ip=10.0 ** log_rho_Ip,
+        z_lo=z_lo, z_mid=z_mid, z_hi=z_hi,
+        y_off=y_off, f_cut=f_cut,
+        k_pier_rot=10.0 ** log_krot,
+        k_pier_tors=1e12,
+    )
+    sci_list = []
+    f1 = 0.0
+    for sc in ("reference", "field3", "field4"):
+        try:
+            Y, f1_, _, _ = bf2.auto_spectrum_v2(sc, params, FREQ_GRID, BAND)
+        except Exception:
+            return 10.0
+        if sc == "reference":
+            f1 = f1_
+        H_band = Y.astype(np.complex128)
+        sci_list.append(sci(_EXP_CACHE[sc]["C"], cfdac(H_band)))
+    mean_sci = float(np.mean(sci_list))
+    f1_dev = ((f1 - F1_EXP) / F1_EXP) ** 2
+    score = mean_sci - W_FREQ * f1_dev
+    return -score
+
+
+def loss_verbose(x, log_state):
+    """Wrapper that logs improvements but isn't called by parallel DE."""
+    val = loss(x)
+    log_state["n"] += 1
+    if -val > log_state["best"]:
+        log_state["best"] = -val
+        print(f"  [{log_state['n']:4d} t={time.time()-log_state['t0']:6.1f}s] "
+              f"score={-val:.4f}  x={np.array2string(x, precision=3)}")
+    return val
 
 
 def main():
+    global _EXP_CACHE
     print("Loading experimental CFDAC cache…")
-    exp_cache = load_experimental_cfdac()
-    loss, best = make_loss(exp_cache)
+    _EXP_CACHE = load_experimental_cfdac()
     bounds = [
-        (5.0,  45.0),       # E_bend [GPa]
-        (3.0,  40.0),       # I_yy   [m^4]
-        (8.0,  12.5),       # log10(GJ) — 1e8 .. 3e12 N·m²
-        (3.0,   6.5),       # log10(rho·Ip) — 1e3 .. 3e6 kg·m
-        (0.005, 0.20),      # z_lo  (0-3 Hz)
-        (0.005, 0.25),      # z_mid (3-10 Hz)
-        (0.010, 0.30),      # z_hi  (10-25 Hz)
-        (-15.0, 15.0),      # y_off [m²]
-        ( 1.0,  30.0),      # f_cut
-        ( 0.0,  11.0),      # log10(k_pier_rot)
+        (5.0,  45.0),
+        (3.0,  40.0),
+        (8.0,  12.5),
+        (3.0,   6.5),
+        (0.005, 0.20),
+        (0.005, 0.25),
+        (0.010, 0.30),
+        (-15.0, 15.0),
+        ( 1.0,  30.0),
+        ( 0.0,  11.0),
     ]
+    log_state = {"n": 0, "best": -np.inf, "t0": time.time()}
     print("Starting DE…")
+
+    # Custom callback to report per-generation best
+    def cb(xk, convergence):
+        v = loss(xk)
+        log_state["n"] += 1
+        if -v > log_state["best"]:
+            log_state["best"] = -v
+            print(f"  [gen-best t={time.time()-log_state['t0']:6.1f}s] "
+                  f"score={-v:.4f} conv={convergence:.3g} "
+                  f"x={np.array2string(xk, precision=3)}")
+
     res = differential_evolution(
         loss, bounds, seed=20260516, maxiter=80, popsize=20,
-        tol=1e-4, workers=-1, polish=True, disp=False, updating='deferred')
-    print(f"\nDone. Best score = {-res.fun:.4f}")
-    print("Best params:", dict(zip(
-        ["E_GPa", "I_yy", "logGJ", "logrhoIp",
-         "z_lo", "z_mid", "z_hi", "y_off", "f_cut", "logkrot"],
-        [float(v) for v in res.x])))
+        tol=1e-4, workers=-1, polish=True, disp=False,
+        updating='deferred', callback=cb)
+    print(f"\nDone. Best score = {-res.fun:.4f}, n_evals={res.nfev}")
     summary = {
         "best_score": float(-res.fun),
-        "best_sci": best["sci"],
         "best_params": {
             "E_GPa": float(res.x[0]), "I_yy": float(res.x[1]),
             "log_GJ": float(res.x[2]), "log_rho_Ip": float(res.x[3]),
