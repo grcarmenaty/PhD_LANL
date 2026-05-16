@@ -2362,5 +2362,55 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.4774095416069031,
+    "mae": 0.15380513668060303,
+    "runtime_s": 1.6582562923431396,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "R2",
+    "value": 0.4501579999923706,
+    "mae": 0.15916968882083893,
+    "runtime_s": 1.5433032512664795,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.4495689868927002,
+    "mae": 0.15974025428295135,
+    "runtime_s": 1.3575658798217773,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.4341229796409607,
+    "mae": 0.1635764241218567,
+    "runtime_s": 1.1309552192687988,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "R2",
+    "value": 0.43057942390441895,
+    "mae": 0.1642303168773651,
+    "runtime_s": 0.9428060054779053,
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
