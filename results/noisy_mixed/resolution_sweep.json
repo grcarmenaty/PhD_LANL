@@ -2232,5 +2232,25 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "ratio": 0.875
+  },
+  {
+    "metric": "R2",
+    "value": 0.2618480324745178,
+    "mae": 0.1985625922679901,
+    "runtime_s": 23.68744659423828,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.260425865650177,
+    "mae": 0.1995735466480255,
+    "runtime_s": 19.044195413589478,
+    "task": "severity",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.625
   }
 ]
