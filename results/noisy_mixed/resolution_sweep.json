@@ -1006,5 +1006,14 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.44351851851851853,
+    "runtime_s": 24.329174757003784,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.875
   }
 ]
