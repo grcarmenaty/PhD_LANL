@@ -259,5 +259,14 @@
     "model": "cnn",
     "feature": "timeseries",
     "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8565555555555555,
+    "runtime_s": 30.032156229019165,
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.5
   }
 ]
