@@ -1411,5 +1411,41 @@
     "model": "cnn",
     "feature": "timeseries",
     "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9527777777777777,
+    "runtime_s": 5.550906181335449,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9838888888888889,
+    "runtime_s": 5.304624795913696,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9533333333333334,
+    "runtime_s": 5.119004964828491,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9777777777777777,
+    "runtime_s": 4.994681358337402,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 0.5
   }
 ]
