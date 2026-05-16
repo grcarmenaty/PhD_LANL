@@ -1842,5 +1842,15 @@
     "model": "cnn2d",
     "feature": "cfdac_mag",
     "ratio": 0.75
+  },
+  {
+    "metric": "R2",
+    "value": 0.0760718584060669,
+    "mae": 0.2340913563966751,
+    "runtime_s": 39.83033776283264,
+    "task": "severity",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "ratio": 0.625
   }
 ]
