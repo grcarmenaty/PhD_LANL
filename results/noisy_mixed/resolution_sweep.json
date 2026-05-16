@@ -1357,5 +1357,59 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9833333333333333,
+    "runtime_s": 5.097492218017578,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9916666666666667,
+    "runtime_s": 4.872339963912964,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9922222222222222,
+    "runtime_s": 4.786475896835327,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9688888888888889,
+    "runtime_s": 4.682862997055054,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9627777777777777,
+    "runtime_s": 4.670641899108887,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9855555555555555,
+    "runtime_s": 5.548293590545654,
+    "task": "mass_location",
+    "model": "cnn",
+    "feature": "timeseries",
+    "ratio": 1.0
   }
 ]
