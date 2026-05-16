@@ -1762,5 +1762,15 @@
     "model": "xgb",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "R2",
+    "value": 0.5694478750228882,
+    "mae": 0.13738210499286652,
+    "runtime_s": 81.84117197990417,
+    "task": "severity",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
   }
 ]
