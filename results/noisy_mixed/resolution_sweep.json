@@ -2412,5 +2412,14 @@
     "model": "xgb",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.855,
+    "runtime_s": 104.929523229599,
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "ratio": 1.0
   }
 ]
