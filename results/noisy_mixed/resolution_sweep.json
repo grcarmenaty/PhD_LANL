@@ -1024,5 +1024,50 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4762962962962963,
+    "runtime_s": 23.386442184448242,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.4646296296296296,
+    "runtime_s": 9.224348783493042,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.37148148148148147,
+    "runtime_s": 4.879588842391968,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.3446296296296296,
+    "runtime_s": 4.914370775222778,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.3990740740740741,
+    "runtime_s": 4.838433265686035,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "ratio": 0.75
   }
 ]
