@@ -1,0 +1,24 @@
+{
+  "task": "binary",
+  "model": "transformer",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.957,
+  "best_metric_test": 0.9557777777777777,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.957,
+      "metric_test": 0.9557777777777777,
+      "extras": {},
+      "runtime_s": 378.72603607177734
+    }
+  ]
+}

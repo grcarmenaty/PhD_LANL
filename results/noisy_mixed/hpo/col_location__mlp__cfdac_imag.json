@@ -1,0 +1,32 @@
+{
+  "task": "col_location",
+  "model": "mlp",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.5242592592592593,
+  "best_metric_test": 0.5192592592592593,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.5242592592592593,
+      "metric_test": 0.5192592592592593,
+      "extras": {},
+      "runtime_s": 232.7454171180725
+    }
+  ]
+}

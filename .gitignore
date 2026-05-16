@@ -23,3 +23,37 @@ test_write.tmp
 # Allow chunked splits
 !experimental_frfs_chunks/
 !experimental_frfs_chunks/**
+
+# Derived ML-pipeline artefacts (regenerate with the scripts)
+dataset/features.h5
+dataset/experimental_features.h5
+dataset/features_balanced.h5
+dataset/experimental_features_balanced.h5
+experimental_frfs.h5
+results/train.log
+results/hpo.log
+
+# Large RF / XGB pickles regenerate with train.py; keep small Torch .pt only.
+results/models/*.pkl
+results/models_indicators/*.pkl
+
+# Per-case eval blobs — regenerate with evaluate_full_experimental.py
+results/experimental_full_per_case.json
+results/balanced/experimental_full_per_case.json
+
+
+# Noisy synth pipeline outputs (regeneratable)
+dataset/noisy_*dB/
+dataset/features_noisy_*dB.h5
+results/noisy_*dB/balanced/experimental_full_per_case.json
+results/noisy_*dB/models/*.pkl
+results/noisy_*dB/models_indicators/*.pkl
+results/noisy_mixed/balanced/experimental_full_per_case.json
+results/noisy_mixed/models/*.pkl
+results/noisy_mixed/models_indicators/*.pkl
+
+# Sweep launcher logs (kept locally only)
+logs/
+
+# Mixed-training VDS pointer file (regenerate via build_mixed_features.py)
+dataset/features_mixed.h5

@@ -1,0 +1,85 @@
+{
+  "task": "severity",
+  "model": "cnn2d",
+  "feature": "cfdac",
+  "best_hyperparams": {
+    "widths": [
+      16,
+      32,
+      64
+    ],
+    "kernel_size": 5
+  },
+  "best_metric_val": 0.606291651725769,
+  "best_metric_test": 0.5869715213775635,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "R2",
+      "metric_val": 0.46550917625427246,
+      "metric_test": 0.46044594049453735,
+      "extras": {
+        "mae_test": 0.15762288868427277
+      },
+      "runtime_s": 341.9713764190674
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "R2",
+      "metric_val": 0.5793660879135132,
+      "metric_test": 0.56931471824646,
+      "extras": {
+        "mae_test": 0.13607318699359894
+      },
+      "runtime_s": 350.4899990558624
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "R2",
+      "metric_val": 0.5443301200866699,
+      "metric_test": 0.5369444489479065,
+      "extras": {
+        "mae_test": 0.14393632113933563
+      },
+      "runtime_s": 374.8989760875702
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "R2",
+      "metric_val": 0.606291651725769,
+      "metric_test": 0.5869715213775635,
+      "extras": {
+        "mae_test": 0.13308043777942657
+      },
+      "runtime_s": 395.4735677242279
+    }
+  ]
+}

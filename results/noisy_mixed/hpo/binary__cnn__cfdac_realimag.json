@@ -1,0 +1,32 @@
+{
+  "task": "binary",
+  "model": "cnn",
+  "feature": "cfdac_realimag",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.9366666666666666,
+  "best_metric_test": 0.941,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9366666666666666,
+      "metric_test": 0.941,
+      "extras": {},
+      "runtime_s": 1144.5442173480988
+    }
+  ]
+}

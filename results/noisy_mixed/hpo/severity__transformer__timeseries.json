@@ -1,0 +1,91 @@
+{
+  "task": "severity",
+  "model": "transformer",
+  "feature": "timeseries",
+  "best_hyperparams": {
+    "d_model": 64,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.44491761922836304,
+  "best_metric_test": 0.4305493235588074,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 32,
+        "n_layers": 1
+      },
+      "metric_name": "R2",
+      "metric_val": 0.1456294059753418,
+      "metric_test": 0.14340752363204956,
+      "extras": {
+        "mae_test": 0.223014697432518
+      },
+      "runtime_s": 81.33086252212524
+    },
+    {
+      "hyperparams": {
+        "d_model": 32,
+        "n_layers": 2
+      },
+      "metric_name": "R2",
+      "metric_val": 0.41784489154815674,
+      "metric_test": 0.4102596044540405,
+      "extras": {
+        "mae_test": 0.1743730902671814
+      },
+      "runtime_s": 151.79832363128662
+    },
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 1
+      },
+      "metric_name": "R2",
+      "metric_val": 0.1701970100402832,
+      "metric_test": 0.16916388273239136,
+      "extras": {
+        "mae_test": 0.21881137788295746
+      },
+      "runtime_s": 98.75718808174133
+    },
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "R2",
+      "metric_val": 0.4206783175468445,
+      "metric_test": 0.3950904607772827,
+      "extras": {
+        "mae_test": 0.17735905945301056
+      },
+      "runtime_s": 193.0296893119812
+    },
+    {
+      "hyperparams": {
+        "d_model": 64,
+        "n_layers": 1
+      },
+      "metric_name": "R2",
+      "metric_val": 0.17499083280563354,
+      "metric_test": 0.17675191164016724,
+      "extras": {
+        "mae_test": 0.2166443169116974
+      },
+      "runtime_s": 119.5786337852478
+    },
+    {
+      "hyperparams": {
+        "d_model": 64,
+        "n_layers": 2
+      },
+      "metric_name": "R2",
+      "metric_val": 0.44491761922836304,
+      "metric_test": 0.4305493235588074,
+      "extras": {
+        "mae_test": 0.16958610713481903
+      },
+      "runtime_s": 281.11927366256714
+    }
+  ]
+}

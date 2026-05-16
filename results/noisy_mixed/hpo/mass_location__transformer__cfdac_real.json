@@ -1,0 +1,24 @@
+{
+  "task": "mass_location",
+  "model": "transformer",
+  "feature": "cfdac_real",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.8439755691282621,
+  "best_metric_test": 0.8461111111111111,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8439755691282621,
+      "metric_test": 0.8461111111111111,
+      "extras": {},
+      "runtime_s": 71.3049066066742
+    }
+  ]
+}

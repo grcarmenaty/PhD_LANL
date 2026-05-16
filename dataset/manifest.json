@@ -1,0 +1,37 @@
+{
+  "n_samples": 10000,
+  "per_type": 2000,
+  "fs_hz": 256.0,
+  "n_t": 1024,
+  "n_channels": 9,
+  "n_inputs": 1,
+  "chirp_f_lo_hz": 2.0,
+  "chirp_f_hi_hz": 100.0,
+  "rng_seed": 20260511,
+  "type_codes": {
+    "0": "Pristine",
+    "1": "Bolt",
+    "2": "Crack",
+    "3": "Hole",
+    "4": "Mass"
+  },
+  "severity_units": {
+    "0": "",
+    "1": "percent",
+    "2": "mm",
+    "3": "mm",
+    "4": "kg"
+  },
+  "schema": {
+    "signals": "(n, n_t, n_channels) float32  acceleration m/s^2",
+    "time": "(n_t,)  float32  seconds",
+    "excitation": "(n_t,)  float32  newton (shared chirp)",
+    "freqs": "(n_t//2+1,) float32  Hz, rfft bins",
+    "labels/sample_id": "(n,) int32",
+    "labels/type_code": "(n,) int8  0=Pristine, 1=Bolt, 2=Crack, 3=Hole, 4=Mass",
+    "labels/storey": "(n,) int8  -1=N/A else 0..2",
+    "labels/end": "(n,) int8  -1=N/A | 0=BD,1=AD (bolt/crack/hole) | 0..3 plate (mass)",
+    "labels/severity": "(n,) float32  units depend on type",
+    "params/*": "per-sample physical jitter factors"
+  }
+}

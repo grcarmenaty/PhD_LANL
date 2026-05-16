@@ -1,0 +1,32 @@
+{
+  "task": "binary",
+  "model": "mlp",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.8807777777777778,
+  "best_metric_test": 0.8832222222222222,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8807777777777778,
+      "metric_test": 0.8832222222222222,
+      "extras": {},
+      "runtime_s": 569.274046421051
+    }
+  ]
+}

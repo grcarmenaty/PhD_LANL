@@ -1,0 +1,84 @@
+{
+  "indicator": "FRFRMS",
+  "model": "mlp",
+  "feature": "modal",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.003
+  },
+  "best_metric_val": 0.5656604766845703,
+  "best_metric_test": 0.5927834510803223,
+  "best_mae_test": 0.08293750137090683,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "R2",
+      "metric_val": 0.562415361404419,
+      "metric_test": 0.5917249917984009,
+      "extras": {
+        "mae_test": 0.08414571732282639
+      },
+      "runtime_s": 3.257455587387085
+    },
+    {
+      "hyperparams": {
+        "hidden": [
+          128,
+          64
+        ],
+        "lr": 0.003
+      },
+      "metric_name": "R2",
+      "metric_val": 0.5623742341995239,
+      "metric_test": 0.5920397043228149,
+      "extras": {
+        "mae_test": 0.08464205265045166
+      },
+      "runtime_s": 3.2327375411987305
+    },
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "R2",
+      "metric_val": 0.5636817812919617,
+      "metric_test": 0.5920904278755188,
+      "extras": {
+        "mae_test": 0.08311621844768524
+      },
+      "runtime_s": 4.850077152252197
+    },
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.003
+      },
+      "metric_name": "R2",
+      "metric_val": 0.5656604766845703,
+      "metric_test": 0.5927834510803223,
+      "extras": {
+        "mae_test": 0.08293750137090683
+      },
+      "runtime_s": 4.681548833847046
+    }
+  ]
+}

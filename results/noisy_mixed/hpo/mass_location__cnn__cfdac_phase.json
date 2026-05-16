@@ -1,0 +1,32 @@
+{
+  "task": "mass_location",
+  "model": "cnn",
+  "feature": "cfdac_phase",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.9883398112159911,
+  "best_metric_test": 0.9844444444444445,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9883398112159911,
+      "metric_test": 0.9844444444444445,
+      "extras": {},
+      "runtime_s": 62.546852827072144
+    }
+  ]
+}
