@@ -196,5 +196,14 @@
     "model": "cnn",
     "feature": "frf_mag",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.9273333333333333,
+    "runtime_s": 30.36577844619751,
+    "task": "binary",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "ratio": 0.75
   }
 ]
