@@ -1105,5 +1105,32 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7048148148148148,
+    "runtime_s": 17.81715965270996,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7155555555555555,
+    "runtime_s": 17.539307355880737,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.7205555555555555,
+    "runtime_s": 14.956327438354492,
+    "task": "col_location",
+    "model": "rf",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
