@@ -907,5 +907,23 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.47962962962962963,
+    "runtime_s": 62.10917830467224,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.462037037037037,
+    "runtime_s": 24.68416142463684,
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "cfdac_mag",
+    "ratio": 0.875
   }
 ]
