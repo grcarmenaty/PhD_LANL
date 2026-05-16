@@ -547,5 +547,50 @@
     "model": "rf",
     "feature": "modal",
     "ratio": 0.5
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8882222222222222,
+    "runtime_s": 1.7769849300384521,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 1.0
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8615555555555555,
+    "runtime_s": 1.504715919494629,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.875
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8602222222222222,
+    "runtime_s": 1.3666903972625732,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.75
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.8561111111111112,
+    "runtime_s": 1.1202127933502197,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.625
+  },
+  {
+    "metric": "accuracy",
+    "value": 0.849,
+    "runtime_s": 0.911712646484375,
+    "task": "binary",
+    "model": "xgb",
+    "feature": "modal",
+    "ratio": 0.5
   }
 ]
