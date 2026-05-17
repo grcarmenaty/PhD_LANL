@@ -1,0 +1,23 @@
+{
+  "E_factor": 0.37,
+  "A_arch_scale": 3.13,
+  "A_chord_scale": 3.56,
+  "I_arch_scale": 0.56,
+  "zeta_scale": 19.3,
+  "deck_mass_factor": 0.32,
+  "smooth_SCI_chnorm": 0.7832099199295044,
+  "raw_SCI_chnorm": 0.5070395532872114,
+  "smooth_SCI_globgain": 0.5198425650596619,
+  "raw_SCI_globgain": 0.4353303722253954,
+  "gain": 3384.717442171337,
+  "first_5_modes_Hz": [
+    2.0041219269352286,
+    2.5599164449518836,
+    3.1964171995106265,
+    3.8329791006472655,
+    4.91243360891887
+  ],
+  "n_joints": 63,
+  "n_members": 158,
+  "metric_note": "DE optimised on per-channel-normalised CFDAC; smooth_SCI_chnorm is the primary metric."
+}

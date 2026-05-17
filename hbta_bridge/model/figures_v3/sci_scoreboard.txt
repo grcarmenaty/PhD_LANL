@@ -1,0 +1,11 @@
+DE round-3 (channel-normalised loss):
+  chan-norm   raw_SCI = 0.5070   smooth_SCI = 0.7832
+  global-gain raw_SCI = 0.4353   smooth_SCI = 0.5198
+  gain                = 3.385e+03
+  E_factor           = 0.37
+  A_arch_scale       = 3.13
+  A_chord_scale      = 3.56
+  I_arch_scale       = 0.56
+  zeta_scale         = 19.3
+  deck_mass_factor   = 0.32
+  first_5_modes_Hz    = 2.004, 2.560, 3.196, 3.833, 4.912
