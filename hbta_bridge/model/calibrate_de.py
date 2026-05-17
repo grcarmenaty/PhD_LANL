@@ -30,6 +30,12 @@ import run_initial_comparison as R           # noqa: E402
 
 ROOT = Path(__file__).resolve().parent
 
+def chan_norm(X):
+    """Normalise each FRF channel to its peak magnitude (in-band)."""
+    p = np.max(np.abs(X), axis=0, keepdims=True)
+    return X / np.maximum(p, 1e-30)
+
+
 # Load experimental UDS Y data once (slow part)
 print("Loading experimental UDS Y-sweep data…")
 H_exp_med, _ = R.load_uds_y(ROOT.parent / "output" / "chunks")
@@ -38,8 +44,11 @@ N_T = 1024
 freq_grid = np.fft.rfftfreq(N_T, d=1/fs)
 band = (freq_grid >= 2.5) & (freq_grid <= 30.0)
 ch_keep = np.arange(10)
-C_exp_sm = R.smoothed_log_cfdac(H_exp_med[band], sigma=4.0)
-C_exp_rw = R.cfdac(H_exp_med[band])
+# Channel-normalised CFDAC: decouples shape matching from absolute
+# amplitude (the model's AL cross-axis amplitude is ~10× too large)
+H_exp_n = chan_norm(H_exp_med[band])
+C_exp_sm = R.smoothed_log_cfdac(H_exp_n, sigma=4.0)
+C_exp_rw = R.cfdac(H_exp_n)
 
 # Cached geometry
 _joints, _members, _bc_nodes, _ = R.build_geometry()
@@ -77,12 +86,10 @@ def evaluate(params):
     in_dof = R.shaker_dof(_joints, "P1", "y")
     zeta = R.piecewise_zeta(freqs_modes, scale=zeta_scale)
     H = R.modal_frf(eigvecs, freqs_modes, zeta, sens, in_dof, freq_grid, free)
-    # Fit gain
-    num = np.sum(np.abs(H_exp_med[np.ix_(band, ch_keep)]))
-    den = np.sum(np.abs(H        [np.ix_(band, ch_keep)])) + 1e-30
-    H_s = H * float(num / den)
-    C_mod_sm = R.smoothed_log_cfdac(H_s[band], sigma=4.0)
-    C_mod_rw = R.cfdac(H_s[band])
+    # Channel-normalised: per-channel peak = 1 (no global gain needed)
+    H_n = chan_norm(H[band])
+    C_mod_sm = R.smoothed_log_cfdac(H_n, sigma=4.0)
+    C_mod_rw = R.cfdac(H_n)
     s_sm = R.sci(C_exp_sm, C_mod_sm)
     s_rw = R.sci(C_exp_rw, C_mod_rw)
     # Composite loss: weight smooth + raw equally
@@ -137,8 +144,6 @@ for n, v in zip(names, res.x):
     print(f"  {n:12s} = {v:.3f}")
 
 # Final eval to get the actual SCI values
-final = evaluate(res.x)
-# Re-evaluate to capture both metrics
 e_factor, a_arch, a_chord, i_arch, zeta_scale, deck_m = res.x
 R.E_STEEL = 210.0e9 * e_factor
 R.G_STEEL = R.E_STEEL / (2.0 * (1.0 + R.NU_STEEL))
@@ -160,13 +165,20 @@ sens = R.sensor_dofs(_joints, "y")
 in_dof = R.shaker_dof(_joints, "P1", "y")
 zeta = R.piecewise_zeta(freqs_modes, scale=zeta_scale)
 H = R.modal_frf(eigvecs, freqs_modes, zeta, sens, in_dof, freq_grid, free)
+H_n = chan_norm(H[band])
+s_sm = R.sci(C_exp_sm, R.smoothed_log_cfdac(H_n, sigma=4.0))
+s_rw = R.sci(C_exp_rw, R.cfdac(H_n))
+# Also report the global-gain metric for back-compat with v2
 num = np.sum(np.abs(H_exp_med[np.ix_(band, ch_keep)]))
 den = np.sum(np.abs(H        [np.ix_(band, ch_keep)])) + 1e-30
 gain = float(num / den)
 H_s = H * gain
-s_sm = R.sci(C_exp_sm, R.smoothed_log_cfdac(H_s[band], sigma=4.0))
-s_rw = R.sci(C_exp_rw, R.cfdac(H_s[band]))
-print(f"\nFinal: smooth-SCI = {s_sm:.4f}   raw-SCI = {s_rw:.4f}")
+H_exp_glob_sm = R.smoothed_log_cfdac(H_exp_med[band], sigma=4.0)
+H_exp_glob_rw = R.cfdac(H_exp_med[band])
+s_sm_glob = R.sci(H_exp_glob_sm, R.smoothed_log_cfdac(H_s[band], sigma=4.0))
+s_rw_glob = R.sci(H_exp_glob_rw, R.cfdac(H_s[band]))
+print(f"\nFinal (chan-norm): smooth-SCI = {s_sm:.4f}   raw-SCI = {s_rw:.4f}")
+print(f"Final (global gain): smooth-SCI = {s_sm_glob:.4f}   raw-SCI = {s_rw_glob:.4f}")
 print(f"first 5 modes: {freqs_modes[:5]}")
 
 (ROOT / "best_params_de.json").write_text(json.dumps({
@@ -176,8 +188,10 @@ print(f"first 5 modes: {freqs_modes[:5]}")
     "I_arch_scale": float(res.x[3]),
     "zeta_scale": float(res.x[4]),
     "deck_mass_factor": float(res.x[5]),
-    "smooth_SCI": float(s_sm),
-    "raw_SCI": float(s_rw),
+    "smooth_SCI_chnorm": float(s_sm),
+    "raw_SCI_chnorm": float(s_rw),
+    "smooth_SCI_globgain": float(s_sm_glob),
+    "raw_SCI_globgain": float(s_rw_glob),
     "gain": gain,
     "n_evals": int(res.nfev),
     "first_5_modes_Hz": [float(f) for f in freqs_modes[:5]],
