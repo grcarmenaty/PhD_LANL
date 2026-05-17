@@ -90,12 +90,12 @@ def evaluate(params):
     return loss
 
 
-bounds = [(0.3, 2.0),   # E_factor
-          (0.5, 3.0),   # A_arch
-          (0.5, 3.0),   # A_chord
-          (0.3, 3.0),   # I_arch
-          (1.0, 30.0),  # zeta_scale
-          (0.3, 3.0)]   # deck_m
+bounds = [(0.2, 2.5),    # E_factor
+          (0.3, 6.0),    # A_arch
+          (0.3, 6.0),    # A_chord
+          (0.2, 6.0),    # I_arch
+          (1.0, 40.0),   # zeta_scale
+          (0.3, 8.0)]    # deck_m
 
 
 _call = {"n": 0, "best": 0.0, "best_x": None}
@@ -121,11 +121,12 @@ print("Starting differential_evolution…")
 t0 = time.time()
 res = so.differential_evolution(
     loss_track, bounds=bounds,
-    maxiter=80, popsize=15, tol=1e-3,
-    mutation=(0.4, 1.4), recombination=0.7,
+    maxiter=120, popsize=20, tol=1e-4,
+    mutation=(0.3, 1.7), recombination=0.8,
     seed=42, polish=True, workers=1,
     init="sobol", callback=cb,
-    updating="deferred",
+    strategy="best1bin",
+    updating="immediate",
 )
 elapsed = time.time() - t0
 print(f"\nDE done in {elapsed:.1f}s, evals={res.nfev}")

@@ -114,10 +114,15 @@ def build_geometry():
                 j_idx[(chord, side, i)] = len(joints)
                 joints.append(Joint(name, float(x), float(y), float(z_fun(i))))
 
-    # Cross-girder midpoint nodes at y=0 (one per panel point)
+    # Cross-girder midpoint nodes at y=0 + stringer-line nodes at
+    # y=±0.55 m (matches AL10/AL26 lateral position) per panel point
     for i, x in enumerate(PANEL_X):
         j_idx[("mid", i)] = len(joints)
         joints.append(Joint(f"mid_{i}", float(x), 0.0, DECK_Z))
+        j_idx[("strN", i)] = len(joints)
+        joints.append(Joint(f"strN_{i}", float(x), +0.55, DECK_Z))
+        j_idx[("strS", i)] = len(joints)
+        joints.append(Joint(f"strS_{i}", float(x), -0.55, DECK_Z))
 
     members = []
 
@@ -152,20 +157,30 @@ def build_geometry():
                                     j_idx[("bot", side, i + 1)],
                                     "DIAGONAL"))
 
-    # Cross-girders: split into north-half and south-half at midpoint
+    # Cross-girders: 4 segments per panel point connecting
+    # bot_N - strN - mid - strS - bot_S at deck level
     for i in range(len(PANEL_X)):
         members.append(Member(j_idx[("bot", "N", i)],
+                                j_idx[("strN", i)],
+                                "CROSS_GIRDER"))
+        members.append(Member(j_idx[("strN", i)],
                                 j_idx[("mid", i)],
                                 "CROSS_GIRDER"))
         members.append(Member(j_idx[("mid", i)],
+                                j_idx[("strS", i)],
+                                "CROSS_GIRDER"))
+        members.append(Member(j_idx[("strS", i)],
                                 j_idx[("bot", "S", i)],
                                 "CROSS_GIRDER"))
 
-    # Longitudinal "spine" beams at midline deck level (connect mid nodes)
+    # Longitudinal stringer beams: 3 lines (mid + north-stringer + south-stringer)
     for i in range(N_PANELS):
-        members.append(Member(j_idx[("mid", i)],
-                                j_idx[("mid", i + 1)],
-                                "STRINGER"))
+        members.append(Member(j_idx[("mid",  i)],
+                                j_idx[("mid",  i + 1)], "STRINGER"))
+        members.append(Member(j_idx[("strN", i)],
+                                j_idx[("strN", i + 1)], "STRINGER"))
+        members.append(Member(j_idx[("strS", i)],
+                                j_idx[("strS", i + 1)], "STRINGER"))
 
     # Lateral X-bracing under the deck (in horizontal X-Y plane at z=0.6):
     # one X-pair per panel, between bot_N_i, bot_S_i+1 and bot_S_i, bot_N_i+1
