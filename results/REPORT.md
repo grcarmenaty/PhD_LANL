@@ -993,6 +993,8 @@ small Bolt damage on synth.
 
 ### 7.1.19 Cross-model comparison (binary)
 
+_Cross-domain transfer (synth test -> exp, acc): across 17 cells the median drop is Δ+0.015; best-transferring cell is `transformer/frf_mag` (Δ-0.141); worst-transferring is `cnn/timeseries` (Δ+0.549).  14/17 cells transfer within |Δ| ≤ 0.10._
+
 | model | feature | val acc | test acc | exp acc |
 |---|---|---|---|---|
 | xgb         | `cfdac_real` | 0.999 | 0.995 | — |
@@ -1019,51 +1021,112 @@ small Bolt damage on synth.
 | cnn2d       | `cfdac_mag` | 0.801 | 0.799 | 0.934 |
 
 ![HPO — binary/xgb/cfdac_real](figures/hpo/binary__xgb__cfdac_real.png)
-![confusion — binary/xgb/cfdac_real](figures/confusion/binary_xgb_cfdac_real.png)
+![synth confusion — binary/xgb/cfdac_real](figures/confusion/binary_xgb_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — binary/rf/cfdac_real](figures/hpo/binary__rf__cfdac_real.png)
-![confusion — binary/rf/cfdac_real](figures/confusion/binary_rf_cfdac_real.png)
+![synth confusion — binary/rf/cfdac_real](figures/confusion/binary_rf_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — binary/mlp/modal](figures/hpo/binary__mlp__modal.png)
-![confusion — binary/mlp/modal](figures/confusion/binary_mlp_modal.png)
+![synth confusion — binary/mlp/modal](figures/confusion/binary_mlp_modal.png)
+![exp confusion — binary/mlp/modal](figures_exp/confusion/binary_mlp_modal.png)
+*Cross-domain: synth test acc 0.989 → exp acc 0.941 (Δ+0.047).*
+
 ![HPO — binary/mlp/cfdac_real](figures/hpo/binary__mlp__cfdac_real.png)
-![confusion — binary/mlp/cfdac_real](figures/confusion/binary_mlp_cfdac_real.png)
+![synth confusion — binary/mlp/cfdac_real](figures/confusion/binary_mlp_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — binary/xgb/modal](figures/hpo/binary__xgb__modal.png)
-![confusion — binary/xgb/modal](figures/confusion/binary_xgb_modal.png)
+![synth confusion — binary/xgb/modal](figures/confusion/binary_xgb_modal.png)
+*Cross-domain: synth test acc 0.965 → exp acc 0.941 (Δ+0.023).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — binary/cnn3d/cfdac3d_magphase](figures/hpo/binary__cnn3d__cfdac3d_magphase.png)
-![confusion — binary/cnn3d/cfdac3d_magphase](figures/confusion/binary_cnn3d_cfdac3d_magphase.png)
+![synth confusion — binary/cnn3d/cfdac3d_magphase](figures/confusion/binary_cnn3d_cfdac3d_magphase.png)
+![exp confusion — binary/cnn3d/cfdac3d_magphase](figures_exp/confusion/binary_cnn3d_cfdac3d_magphase.png)
+*Cross-domain: synth test acc 0.959 → exp acc 0.941 (Δ+0.018).*
+
 ![HPO — binary/cnn2d/cfdac_real](figures/hpo/binary__cnn2d__cfdac_real.png)
-![confusion — binary/cnn2d/cfdac_real](figures/confusion/binary_cnn2d_cfdac_real.png)
+![synth confusion — binary/cnn2d/cfdac_real](figures/confusion/binary_cnn2d_cfdac_real.png)
+![exp confusion — binary/cnn2d/cfdac_real](figures_exp/confusion/binary_cnn2d_cfdac_real.png)
+*Cross-domain: synth test acc 0.957 → exp acc 0.904 (Δ+0.053).*
+
 ![HPO — binary/cnn2d/cfdac_phase](figures/hpo/binary__cnn2d__cfdac_phase.png)
-![confusion — binary/cnn2d/cfdac_phase](figures/confusion/binary_cnn2d_cfdac_phase.png)
+![synth confusion — binary/cnn2d/cfdac_phase](figures/confusion/binary_cnn2d_cfdac_phase.png)
+![exp confusion — binary/cnn2d/cfdac_phase](figures_exp/confusion/binary_cnn2d_cfdac_phase.png)
+*Cross-domain: synth test acc 0.953 → exp acc 0.941 (Δ+0.012).*
+
 ![HPO — binary/rf/modal](figures/hpo/binary__rf__modal.png)
-![confusion — binary/rf/modal](figures/confusion/binary_rf_modal.png)
+![synth confusion — binary/rf/modal](figures/confusion/binary_rf_modal.png)
+*Cross-domain: synth test acc 0.949 → exp acc 0.941 (Δ+0.008).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — binary/cnn2d/cfdac_imag](figures/hpo/binary__cnn2d__cfdac_imag.png)
-![confusion — binary/cnn2d/cfdac_imag](figures/confusion/binary_cnn2d_cfdac_imag.png)
+![synth confusion — binary/cnn2d/cfdac_imag](figures/confusion/binary_cnn2d_cfdac_imag.png)
+![exp confusion — binary/cnn2d/cfdac_imag](figures_exp/confusion/binary_cnn2d_cfdac_imag.png)
+*Cross-domain: synth test acc 0.946 → exp acc 0.928 (Δ+0.018).*
+
 ![HPO — binary/cnn2d/cfdac](figures/hpo/binary__cnn2d__cfdac.png)
-![confusion — binary/cnn2d/cfdac](figures/confusion/binary_cnn2d_cfdac.png)
+![synth confusion — binary/cnn2d/cfdac](figures/confusion/binary_cnn2d_cfdac.png)
+![exp confusion — binary/cnn2d/cfdac](figures_exp/confusion/binary_cnn2d_cfdac.png)
+*Cross-domain: synth test acc 0.944 → exp acc 0.929 (Δ+0.015).*
+
 ![HPO — binary/cnn3d/cfdac3d_realimag](figures/hpo/binary__cnn3d__cfdac3d_realimag.png)
-![confusion — binary/cnn3d/cfdac3d_realimag](figures/confusion/binary_cnn3d_cfdac3d_realimag.png)
+![synth confusion — binary/cnn3d/cfdac3d_realimag](figures/confusion/binary_cnn3d_cfdac3d_realimag.png)
+![exp confusion — binary/cnn3d/cfdac3d_realimag](figures_exp/confusion/binary_cnn3d_cfdac3d_realimag.png)
+*Cross-domain: synth test acc 0.939 → exp acc 0.878 (Δ+0.061).*
+
 ![HPO — binary/cnn2d/cfdac_magphase](figures/hpo/binary__cnn2d__cfdac_magphase.png)
-![confusion — binary/cnn2d/cfdac_magphase](figures/confusion/binary_cnn2d_cfdac_magphase.png)
+![synth confusion — binary/cnn2d/cfdac_magphase](figures/confusion/binary_cnn2d_cfdac_magphase.png)
+![exp confusion — binary/cnn2d/cfdac_magphase](figures_exp/confusion/binary_cnn2d_cfdac_magphase.png)
+*Cross-domain: synth test acc 0.935 → exp acc 0.941 (Δ-0.007).*
+
 ![HPO — binary/cnn3d/cfdac3d_all](figures/hpo/binary__cnn3d__cfdac3d_all.png)
-![confusion — binary/cnn3d/cfdac3d_all](figures/confusion/binary_cnn3d_cfdac3d_all.png)
+![synth confusion — binary/cnn3d/cfdac3d_all](figures/confusion/binary_cnn3d_cfdac3d_all.png)
+![exp confusion — binary/cnn3d/cfdac3d_all](figures_exp/confusion/binary_cnn3d_cfdac3d_all.png)
+*Cross-domain: synth test acc 0.935 → exp acc 0.941 (Δ-0.007).*
+
 ![HPO — binary/cnn2d/cfdac_all](figures/hpo/binary__cnn2d__cfdac_all.png)
-![confusion — binary/cnn2d/cfdac_all](figures/confusion/binary_cnn2d_cfdac_all.png)
+![synth confusion — binary/cnn2d/cfdac_all](figures/confusion/binary_cnn2d_cfdac_all.png)
+![exp confusion — binary/cnn2d/cfdac_all](figures_exp/confusion/binary_cnn2d_cfdac_all.png)
+*Cross-domain: synth test acc 0.920 → exp acc 0.941 (Δ-0.021).*
+
 ![HPO — binary/transformer/timeseries](figures/hpo/binary__transformer__timeseries.png)
-![confusion — binary/transformer/timeseries](figures/confusion/binary_transformer_timeseries.png)
+![synth confusion — binary/transformer/timeseries](figures/confusion/binary_transformer_timeseries.png)
+![exp confusion — binary/transformer/timeseries](figures_exp/confusion/binary_transformer_timeseries.png)
+*Cross-domain: synth test acc 0.876 → exp acc 0.837 (Δ+0.039).*
+
 ![HPO — binary/cnn/frf_mag](figures/hpo/binary__cnn__frf_mag.png)
-![confusion — binary/cnn/frf_mag](figures/confusion/binary_cnn_frf_mag.png)
+![synth confusion — binary/cnn/frf_mag](figures/confusion/binary_cnn_frf_mag.png)
+![exp confusion — binary/cnn/frf_mag](figures_exp/confusion/binary_cnn_frf_mag.png)
+*Cross-domain: synth test acc 0.853 → exp acc 0.941 (Δ-0.089).*
+
 ![HPO — binary/cnn/timeseries](figures/hpo/binary__cnn__timeseries.png)
-![confusion — binary/cnn/timeseries](figures/confusion/binary_cnn_timeseries.png)
+![synth confusion — binary/cnn/timeseries](figures/confusion/binary_cnn_timeseries.png)
+![exp confusion — binary/cnn/timeseries](figures_exp/confusion/binary_cnn_timeseries.png)
+*Cross-domain: synth test acc 0.842 → exp acc 0.293 (Δ+0.549).*
+
 ![HPO — binary/cnn/cfdac_real](figures/hpo/binary__cnn__cfdac_real.png)
-![confusion — binary/cnn/cfdac_real](figures/confusion/binary_cnn_cfdac_real.png)
+![synth confusion — binary/cnn/cfdac_real](figures/confusion/binary_cnn_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — binary/transformer/cfdac_real](figures/hpo/binary__transformer__cfdac_real.png)
-![confusion — binary/transformer/cfdac_real](figures/confusion/binary_transformer_cfdac_real.png)
+![synth confusion — binary/transformer/cfdac_real](figures/confusion/binary_transformer_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — binary/transformer/frf_mag](figures/hpo/binary__transformer__frf_mag.png)
-![confusion — binary/transformer/frf_mag](figures/confusion/binary_transformer_frf_mag.png)
+![synth confusion — binary/transformer/frf_mag](figures/confusion/binary_transformer_frf_mag.png)
+![exp confusion — binary/transformer/frf_mag](figures_exp/confusion/binary_transformer_frf_mag.png)
+*Cross-domain: synth test acc 0.800 → exp acc 0.941 (Δ-0.141).*
+
 ![HPO — binary/cnn2d/cfdac_mag](figures/hpo/binary__cnn2d__cfdac_mag.png)
-![confusion — binary/cnn2d/cfdac_mag](figures/confusion/binary_cnn2d_cfdac_mag.png)
-![binary ROC overlay](figures/roc/binary_roc.png)
-![binary PR overlay](figures/roc/binary_pr.png)
+![synth confusion — binary/cnn2d/cfdac_mag](figures/confusion/binary_cnn2d_cfdac_mag.png)
+![exp confusion — binary/cnn2d/cfdac_mag](figures_exp/confusion/binary_cnn2d_cfdac_mag.png)
+*Cross-domain: synth test acc 0.799 → exp acc 0.934 (Δ-0.135).*
+
+![synth binary ROC overlay](figures/roc/binary_roc.png)
+![exp binary ROC overlay](figures_exp/roc/binary_roc.png)
+![synth binary PR overlay](figures/roc/binary_pr.png)
+![exp binary PR overlay](figures_exp/roc/binary_pr.png)
 
 ### 7.1.20 Recommendation for binary
 
@@ -1291,6 +1354,8 @@ synth precision for cross-domain robustness.
 
 ### 7.2.19 Cross-model comparison (type)
 
+_Cross-domain transfer (synth test -> exp, acc): across 16 cells the median drop is Δ+0.495; best-transferring cell is `transformer/frf_mag` (Δ+0.149); worst-transferring is `mlp/modal` (Δ+0.625).  0/16 cells transfer within |Δ| ≤ 0.10._
+
 | model | feature | val acc | test acc | exp acc |
 |---|---|---|---|---|
 | mlp         | `modal` | 0.869 | 0.877 | 0.251 |
@@ -1311,37 +1376,83 @@ synth precision for cross-domain robustness.
 | transformer | `frf_mag` | 0.476 | 0.501 | 0.351 |
 
 ![HPO — type/mlp/modal](figures/hpo/type__mlp__modal.png)
-![confusion — type/mlp/modal](figures/confusion/type_mlp_modal.png)
+![synth confusion — type/mlp/modal](figures/confusion/type_mlp_modal.png)
+![exp confusion — type/mlp/modal](figures_exp/confusion/type_mlp_modal.png)
+*Cross-domain: synth test acc 0.877 → exp acc 0.251 (Δ+0.625).*
+
 ![HPO — type/xgb/modal](figures/hpo/type__xgb__modal.png)
-![confusion — type/xgb/modal](figures/confusion/type_xgb_modal.png)
+![synth confusion — type/xgb/modal](figures/confusion/type_xgb_modal.png)
+*Cross-domain: synth test acc 0.822 → exp acc 0.216 (Δ+0.606).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — type/cnn3d/cfdac3d_realimag](figures/hpo/type__cnn3d__cfdac3d_realimag.png)
-![confusion — type/cnn3d/cfdac3d_realimag](figures/confusion/type_cnn3d_cfdac3d_realimag.png)
+![synth confusion — type/cnn3d/cfdac3d_realimag](figures/confusion/type_cnn3d_cfdac3d_realimag.png)
+![exp confusion — type/cnn3d/cfdac3d_realimag](figures_exp/confusion/type_cnn3d_cfdac3d_realimag.png)
+*Cross-domain: synth test acc 0.812 → exp acc 0.338 (Δ+0.474).*
+
 ![HPO — type/rf/modal](figures/hpo/type__rf__modal.png)
-![confusion — type/rf/modal](figures/confusion/type_rf_modal.png)
+![synth confusion — type/rf/modal](figures/confusion/type_rf_modal.png)
+*Cross-domain: synth test acc 0.811 → exp acc 0.271 (Δ+0.541).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — type/cnn2d/cfdac](figures/hpo/type__cnn2d__cfdac.png)
-![confusion — type/cnn2d/cfdac](figures/confusion/type_cnn2d_cfdac.png)
+![synth confusion — type/cnn2d/cfdac](figures/confusion/type_cnn2d_cfdac.png)
+![exp confusion — type/cnn2d/cfdac](figures_exp/confusion/type_cnn2d_cfdac.png)
+*Cross-domain: synth test acc 0.803 → exp acc 0.299 (Δ+0.505).*
+
 ![HPO — type/cnn2d/cfdac_imag](figures/hpo/type__cnn2d__cfdac_imag.png)
-![confusion — type/cnn2d/cfdac_imag](figures/confusion/type_cnn2d_cfdac_imag.png)
+![synth confusion — type/cnn2d/cfdac_imag](figures/confusion/type_cnn2d_cfdac_imag.png)
+![exp confusion — type/cnn2d/cfdac_imag](figures_exp/confusion/type_cnn2d_cfdac_imag.png)
+*Cross-domain: synth test acc 0.802 → exp acc 0.316 (Δ+0.486).*
+
 ![HPO — type/cnn3d/cfdac3d_all](figures/hpo/type__cnn3d__cfdac3d_all.png)
-![confusion — type/cnn3d/cfdac3d_all](figures/confusion/type_cnn3d_cfdac3d_all.png)
+![synth confusion — type/cnn3d/cfdac3d_all](figures/confusion/type_cnn3d_cfdac3d_all.png)
+![exp confusion — type/cnn3d/cfdac3d_all](figures_exp/confusion/type_cnn3d_cfdac3d_all.png)
+*Cross-domain: synth test acc 0.782 → exp acc 0.257 (Δ+0.525).*
+
 ![HPO — type/cnn2d/cfdac_real](figures/hpo/type__cnn2d__cfdac_real.png)
-![confusion — type/cnn2d/cfdac_real](figures/confusion/type_cnn2d_cfdac_real.png)
+![synth confusion — type/cnn2d/cfdac_real](figures/confusion/type_cnn2d_cfdac_real.png)
+![exp confusion — type/cnn2d/cfdac_real](figures_exp/confusion/type_cnn2d_cfdac_real.png)
+*Cross-domain: synth test acc 0.778 → exp acc 0.357 (Δ+0.421).*
+
 ![HPO — type/cnn3d/cfdac3d_magphase](figures/hpo/type__cnn3d__cfdac3d_magphase.png)
-![confusion — type/cnn3d/cfdac3d_magphase](figures/confusion/type_cnn3d_cfdac3d_magphase.png)
+![synth confusion — type/cnn3d/cfdac3d_magphase](figures/confusion/type_cnn3d_cfdac3d_magphase.png)
+![exp confusion — type/cnn3d/cfdac3d_magphase](figures_exp/confusion/type_cnn3d_cfdac3d_magphase.png)
+*Cross-domain: synth test acc 0.778 → exp acc 0.244 (Δ+0.534).*
+
 ![HPO — type/cnn2d/cfdac_phase](figures/hpo/type__cnn2d__cfdac_phase.png)
-![confusion — type/cnn2d/cfdac_phase](figures/confusion/type_cnn2d_cfdac_phase.png)
+![synth confusion — type/cnn2d/cfdac_phase](figures/confusion/type_cnn2d_cfdac_phase.png)
+![exp confusion — type/cnn2d/cfdac_phase](figures_exp/confusion/type_cnn2d_cfdac_phase.png)
+*Cross-domain: synth test acc 0.769 → exp acc 0.238 (Δ+0.530).*
+
 ![HPO — type/cnn2d/cfdac_magphase](figures/hpo/type__cnn2d__cfdac_magphase.png)
-![confusion — type/cnn2d/cfdac_magphase](figures/confusion/type_cnn2d_cfdac_magphase.png)
+![synth confusion — type/cnn2d/cfdac_magphase](figures/confusion/type_cnn2d_cfdac_magphase.png)
+![exp confusion — type/cnn2d/cfdac_magphase](figures_exp/confusion/type_cnn2d_cfdac_magphase.png)
+*Cross-domain: synth test acc 0.767 → exp acc 0.216 (Δ+0.551).*
+
 ![HPO — type/cnn/frf_mag](figures/hpo/type__cnn__frf_mag.png)
-![confusion — type/cnn/frf_mag](figures/confusion/type_cnn_frf_mag.png)
+![synth confusion — type/cnn/frf_mag](figures/confusion/type_cnn_frf_mag.png)
+![exp confusion — type/cnn/frf_mag](figures_exp/confusion/type_cnn_frf_mag.png)
+*Cross-domain: synth test acc 0.689 → exp acc 0.390 (Δ+0.300).*
+
 ![HPO — type/cnn/timeseries](figures/hpo/type__cnn__timeseries.png)
-![confusion — type/cnn/timeseries](figures/confusion/type_cnn_timeseries.png)
+![synth confusion — type/cnn/timeseries](figures/confusion/type_cnn_timeseries.png)
+![exp confusion — type/cnn/timeseries](figures_exp/confusion/type_cnn_timeseries.png)
+*Cross-domain: synth test acc 0.657 → exp acc 0.201 (Δ+0.455).*
+
 ![HPO — type/cnn2d/cfdac_mag](figures/hpo/type__cnn2d__cfdac_mag.png)
-![confusion — type/cnn2d/cfdac_mag](figures/confusion/type_cnn2d_cfdac_mag.png)
+![synth confusion — type/cnn2d/cfdac_mag](figures/confusion/type_cnn2d_cfdac_mag.png)
+![exp confusion — type/cnn2d/cfdac_mag](figures_exp/confusion/type_cnn2d_cfdac_mag.png)
+*Cross-domain: synth test acc 0.630 → exp acc 0.403 (Δ+0.227).*
+
 ![HPO — type/transformer/timeseries](figures/hpo/type__transformer__timeseries.png)
-![confusion — type/transformer/timeseries](figures/confusion/type_transformer_timeseries.png)
+![synth confusion — type/transformer/timeseries](figures/confusion/type_transformer_timeseries.png)
+![exp confusion — type/transformer/timeseries](figures_exp/confusion/type_transformer_timeseries.png)
+*Cross-domain: synth test acc 0.576 → exp acc 0.246 (Δ+0.330).*
+
 ![HPO — type/transformer/frf_mag](figures/hpo/type__transformer__frf_mag.png)
-![confusion — type/transformer/frf_mag](figures/confusion/type_transformer_frf_mag.png)
+![synth confusion — type/transformer/frf_mag](figures/confusion/type_transformer_frf_mag.png)
+![exp confusion — type/transformer/frf_mag](figures_exp/confusion/type_transformer_frf_mag.png)
+*Cross-domain: synth test acc 0.501 → exp acc 0.351 (Δ+0.149).*
+
 
 ### 7.2.20 Recommendation for type
 
@@ -1506,6 +1617,8 @@ regression is broken cross-domain regardless of representation
 
 ### 7.3.19 Cross-model comparison (severity)
 
+_Cross-domain transfer (synth test -> exp, R²): across 17 cells the median drop is Δ+0.735; best-transferring cell is `transformer/frf_mag` (Δ+0.146); worst-transferring is `mlp/modal` (Δ+53.127).  0/17 cells transfer within |Δ| ≤ 0.10._
+
 | model | feature | val R² | test R² | exp R² |
 |---|---|---|---|---|
 | rf          | `modal` | 0.593 | 0.573 | -0.039 |
@@ -1529,43 +1642,96 @@ regression is broken cross-domain regardless of representation
 | transformer | `frf_mag` | 0.028 | 0.013 | -0.133 |
 
 ![HPO — severity/rf/modal](figures/hpo/severity__rf__modal.png)
-![scatter — severity/rf/modal](figures/scatter/severity_rf_modal.png)
+![synth scatter — severity/rf/modal](figures/scatter/severity_rf_modal.png)
+*Cross-domain: synth test R² 0.573 → exp R² -0.039 (Δ+0.612).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — severity/mlp/modal](figures/hpo/severity__mlp__modal.png)
-![scatter — severity/mlp/modal](figures/scatter/severity_mlp_modal.png)
+![synth scatter — severity/mlp/modal](figures/scatter/severity_mlp_modal.png)
+![exp scatter — severity/mlp/modal](figures_exp/scatter/severity_mlp_modal.png)
+*Cross-domain: synth test R² 0.542 → exp R² -52.585 (Δ+53.127).*
+
 ![HPO — severity/xgb/modal](figures/hpo/severity__xgb__modal.png)
-![scatter — severity/xgb/modal](figures/scatter/severity_xgb_modal.png)
+![synth scatter — severity/xgb/modal](figures/scatter/severity_xgb_modal.png)
+*Cross-domain: synth test R² 0.532 → exp R² 0.022 (Δ+0.509).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — severity/cnn2d/cfdac_all](figures/hpo/severity__cnn2d__cfdac_all.png)
-![scatter — severity/cnn2d/cfdac_all](figures/scatter/severity_cnn2d_cfdac_all.png)
+![synth scatter — severity/cnn2d/cfdac_all](figures/scatter/severity_cnn2d_cfdac_all.png)
+![exp scatter — severity/cnn2d/cfdac_all](figures_exp/scatter/severity_cnn2d_cfdac_all.png)
+*Cross-domain: synth test R² 0.508 → exp R² -0.388 (Δ+0.896).*
+
 ![HPO — severity/cnn2d/cfdac_magphase](figures/hpo/severity__cnn2d__cfdac_magphase.png)
-![scatter — severity/cnn2d/cfdac_magphase](figures/scatter/severity_cnn2d_cfdac_magphase.png)
+![synth scatter — severity/cnn2d/cfdac_magphase](figures/scatter/severity_cnn2d_cfdac_magphase.png)
+![exp scatter — severity/cnn2d/cfdac_magphase](figures_exp/scatter/severity_cnn2d_cfdac_magphase.png)
+*Cross-domain: synth test R² 0.506 → exp R² -0.053 (Δ+0.558).*
+
 ![HPO — severity/cnn3d/cfdac3d_all](figures/hpo/severity__cnn3d__cfdac3d_all.png)
-![scatter — severity/cnn3d/cfdac3d_all](figures/scatter/severity_cnn3d_cfdac3d_all.png)
+![synth scatter — severity/cnn3d/cfdac3d_all](figures/scatter/severity_cnn3d_cfdac3d_all.png)
+![exp scatter — severity/cnn3d/cfdac3d_all](figures_exp/scatter/severity_cnn3d_cfdac3d_all.png)
+*Cross-domain: synth test R² 0.480 → exp R² -0.255 (Δ+0.735).*
+
 ![HPO — severity/cnn3d/cfdac3d_magphase](figures/hpo/severity__cnn3d__cfdac3d_magphase.png)
-![scatter — severity/cnn3d/cfdac3d_magphase](figures/scatter/severity_cnn3d_cfdac3d_magphase.png)
+![synth scatter — severity/cnn3d/cfdac3d_magphase](figures/scatter/severity_cnn3d_cfdac3d_magphase.png)
+![exp scatter — severity/cnn3d/cfdac3d_magphase](figures_exp/scatter/severity_cnn3d_cfdac3d_magphase.png)
+*Cross-domain: synth test R² 0.472 → exp R² -0.173 (Δ+0.644).*
+
 ![HPO — severity/cnn2d/cfdac_phase](figures/hpo/severity__cnn2d__cfdac_phase.png)
-![scatter — severity/cnn2d/cfdac_phase](figures/scatter/severity_cnn2d_cfdac_phase.png)
+![synth scatter — severity/cnn2d/cfdac_phase](figures/scatter/severity_cnn2d_cfdac_phase.png)
+![exp scatter — severity/cnn2d/cfdac_phase](figures_exp/scatter/severity_cnn2d_cfdac_phase.png)
+*Cross-domain: synth test R² 0.470 → exp R² -0.020 (Δ+0.489).*
+
 ![HPO — severity/cnn2d/cfdac_imag](figures/hpo/severity__cnn2d__cfdac_imag.png)
-![scatter — severity/cnn2d/cfdac_imag](figures/scatter/severity_cnn2d_cfdac_imag.png)
+![synth scatter — severity/cnn2d/cfdac_imag](figures/scatter/severity_cnn2d_cfdac_imag.png)
+![exp scatter — severity/cnn2d/cfdac_imag](figures_exp/scatter/severity_cnn2d_cfdac_imag.png)
+*Cross-domain: synth test R² 0.420 → exp R² -0.617 (Δ+1.038).*
+
 ![HPO — severity/cnn2d/cfdac](figures/hpo/severity__cnn2d__cfdac.png)
-![scatter — severity/cnn2d/cfdac](figures/scatter/severity_cnn2d_cfdac.png)
+![synth scatter — severity/cnn2d/cfdac](figures/scatter/severity_cnn2d_cfdac.png)
+![exp scatter — severity/cnn2d/cfdac](figures_exp/scatter/severity_cnn2d_cfdac.png)
+*Cross-domain: synth test R² 0.420 → exp R² -0.429 (Δ+0.849).*
+
 ![HPO — severity/cnn2d/cfdac_real](figures/hpo/severity__cnn2d__cfdac_real.png)
-![scatter — severity/cnn2d/cfdac_real](figures/scatter/severity_cnn2d_cfdac_real.png)
+![synth scatter — severity/cnn2d/cfdac_real](figures/scatter/severity_cnn2d_cfdac_real.png)
+![exp scatter — severity/cnn2d/cfdac_real](figures_exp/scatter/severity_cnn2d_cfdac_real.png)
+*Cross-domain: synth test R² 0.400 → exp R² -0.189 (Δ+0.590).*
+
 ![HPO — severity/cnn3d/cfdac3d_realimag](figures/hpo/severity__cnn3d__cfdac3d_realimag.png)
-![scatter — severity/cnn3d/cfdac3d_realimag](figures/scatter/severity_cnn3d_cfdac3d_realimag.png)
+![synth scatter — severity/cnn3d/cfdac3d_realimag](figures/scatter/severity_cnn3d_cfdac3d_realimag.png)
+![exp scatter — severity/cnn3d/cfdac3d_realimag](figures_exp/scatter/severity_cnn3d_cfdac3d_realimag.png)
+*Cross-domain: synth test R² 0.353 → exp R² -0.546 (Δ+0.900).*
+
 ![HPO — severity/cnn/timeseries](figures/hpo/severity__cnn__timeseries.png)
-![scatter — severity/cnn/timeseries](figures/scatter/severity_cnn_timeseries.png)
+![synth scatter — severity/cnn/timeseries](figures/scatter/severity_cnn_timeseries.png)
+![exp scatter — severity/cnn/timeseries](figures_exp/scatter/severity_cnn_timeseries.png)
+*Cross-domain: synth test R² 0.227 → exp R² -34.774 (Δ+35.001).*
+
 ![HPO — severity/cnn2d/cfdac_mag](figures/hpo/severity__cnn2d__cfdac_mag.png)
-![scatter — severity/cnn2d/cfdac_mag](figures/scatter/severity_cnn2d_cfdac_mag.png)
+![synth scatter — severity/cnn2d/cfdac_mag](figures/scatter/severity_cnn2d_cfdac_mag.png)
+![exp scatter — severity/cnn2d/cfdac_mag](figures_exp/scatter/severity_cnn2d_cfdac_mag.png)
+*Cross-domain: synth test R² 0.222 → exp R² -0.877 (Δ+1.099).*
+
 ![HPO — severity/cnn/cfdac_real](figures/hpo/severity__cnn__cfdac_real.png)
-![scatter — severity/cnn/cfdac_real](figures/scatter/severity_cnn_cfdac_real.png)
+![synth scatter — severity/cnn/cfdac_real](figures/scatter/severity_cnn_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — severity/cnn/frf_mag](figures/hpo/severity__cnn__frf_mag.png)
-![scatter — severity/cnn/frf_mag](figures/scatter/severity_cnn_frf_mag.png)
+![synth scatter — severity/cnn/frf_mag](figures/scatter/severity_cnn_frf_mag.png)
+![exp scatter — severity/cnn/frf_mag](figures_exp/scatter/severity_cnn_frf_mag.png)
+*Cross-domain: synth test R² 0.213 → exp R² -5.114 (Δ+5.327).*
+
 ![HPO — severity/mlp/cfdac_real](figures/hpo/severity__mlp__cfdac_real.png)
-![scatter — severity/mlp/cfdac_real](figures/scatter/severity_mlp_cfdac_real.png)
+![synth scatter — severity/mlp/cfdac_real](figures/scatter/severity_mlp_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — severity/transformer/timeseries](figures/hpo/severity__transformer__timeseries.png)
-![scatter — severity/transformer/timeseries](figures/scatter/severity_transformer_timeseries.png)
+![synth scatter — severity/transformer/timeseries](figures/scatter/severity_transformer_timeseries.png)
+![exp scatter — severity/transformer/timeseries](figures_exp/scatter/severity_transformer_timeseries.png)
+*Cross-domain: synth test R² 0.168 → exp R² -0.253 (Δ+0.421).*
+
 ![HPO — severity/transformer/frf_mag](figures/hpo/severity__transformer__frf_mag.png)
-![scatter — severity/transformer/frf_mag](figures/scatter/severity_transformer_frf_mag.png)
+![synth scatter — severity/transformer/frf_mag](figures/scatter/severity_transformer_frf_mag.png)
+![exp scatter — severity/transformer/frf_mag](figures_exp/scatter/severity_transformer_frf_mag.png)
+*Cross-domain: synth test R² 0.013 → exp R² -0.133 (Δ+0.146).*
+
 
 ### 7.3.20 Recommendation for severity
 
@@ -1752,6 +1918,8 @@ experimental score to 0.24+, behind only `cfdac_mag`.
 
 ### 7.4.20 Cross-model comparison (col_location)
 
+_Cross-domain transfer (synth test -> exp, acc): across 17 cells the median drop is Δ+0.270; best-transferring cell is `transformer/frf_mag` (Δ+0.143); worst-transferring is `rf/modal` (Δ+0.409).  0/17 cells transfer within |Δ| ≤ 0.10._
+
 | model | feature | val acc | test acc | exp acc |
 |---|---|---|---|---|
 | cnn2d       | `cfdac_all` | 0.505 | 0.504 | 0.227 |
@@ -1777,47 +1945,104 @@ experimental score to 0.24+, behind only `cfdac_mag`.
 | transformer | `cfdac_real` | 0.236 | 0.230 | — |
 
 ![HPO — col_location/cnn2d/cfdac_all](figures/hpo/col_location__cnn2d__cfdac_all.png)
-![confusion — col_location/cnn2d/cfdac_all](figures/confusion/col_location_cnn2d_cfdac_all.png)
+![synth confusion — col_location/cnn2d/cfdac_all](figures/confusion/col_location_cnn2d_cfdac_all.png)
+![exp confusion — col_location/cnn2d/cfdac_all](figures_exp/confusion/col_location_cnn2d_cfdac_all.png)
+*Cross-domain: synth test acc 0.504 → exp acc 0.227 (Δ+0.277).*
+
 ![HPO — col_location/cnn2d/cfdac_imag](figures/hpo/col_location__cnn2d__cfdac_imag.png)
-![confusion — col_location/cnn2d/cfdac_imag](figures/confusion/col_location_cnn2d_cfdac_imag.png)
+![synth confusion — col_location/cnn2d/cfdac_imag](figures/confusion/col_location_cnn2d_cfdac_imag.png)
+![exp confusion — col_location/cnn2d/cfdac_imag](figures_exp/confusion/col_location_cnn2d_cfdac_imag.png)
+*Cross-domain: synth test acc 0.500 → exp acc 0.171 (Δ+0.329).*
+
 ![HPO — col_location/rf/cfdac_real](figures/hpo/col_location__rf__cfdac_real.png)
-![confusion — col_location/rf/cfdac_real](figures/confusion/col_location_rf_cfdac_real.png)
+![synth confusion — col_location/rf/cfdac_real](figures/confusion/col_location_rf_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — col_location/cnn2d/cfdac](figures/hpo/col_location__cnn2d__cfdac.png)
-![confusion — col_location/cnn2d/cfdac](figures/confusion/col_location_cnn2d_cfdac.png)
+![synth confusion — col_location/cnn2d/cfdac](figures/confusion/col_location_cnn2d_cfdac.png)
+![exp confusion — col_location/cnn2d/cfdac](figures_exp/confusion/col_location_cnn2d_cfdac.png)
+*Cross-domain: synth test acc 0.494 → exp acc 0.250 (Δ+0.244).*
+
 ![HPO — col_location/mlp/modal](figures/hpo/col_location__mlp__modal.png)
-![confusion — col_location/mlp/modal](figures/confusion/col_location_mlp_modal.png)
+![synth confusion — col_location/mlp/modal](figures/confusion/col_location_mlp_modal.png)
+![exp confusion — col_location/mlp/modal](figures_exp/confusion/col_location_mlp_modal.png)
+*Cross-domain: synth test acc 0.494 → exp acc 0.285 (Δ+0.209).*
+
 ![HPO — col_location/rf/modal](figures/hpo/col_location__rf__modal.png)
-![confusion — col_location/rf/modal](figures/confusion/col_location_rf_modal.png)
+![synth confusion — col_location/rf/modal](figures/confusion/col_location_rf_modal.png)
+*Cross-domain: synth test acc 0.492 → exp acc 0.083 (Δ+0.409).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — col_location/mlp/cfdac_real](figures/hpo/col_location__mlp__cfdac_real.png)
-![confusion — col_location/mlp/cfdac_real](figures/confusion/col_location_mlp_cfdac_real.png)
+![synth confusion — col_location/mlp/cfdac_real](figures/confusion/col_location_mlp_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — col_location/xgb/modal](figures/hpo/col_location__xgb__modal.png)
-![confusion — col_location/xgb/modal](figures/confusion/col_location_xgb_modal.png)
+![synth confusion — col_location/xgb/modal](figures/confusion/col_location_xgb_modal.png)
+*Cross-domain: synth test acc 0.488 → exp acc 0.102 (Δ+0.386).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — col_location/cnn2d/cfdac_phase](figures/hpo/col_location__cnn2d__cfdac_phase.png)
-![confusion — col_location/cnn2d/cfdac_phase](figures/confusion/col_location_cnn2d_cfdac_phase.png)
+![synth confusion — col_location/cnn2d/cfdac_phase](figures/confusion/col_location_cnn2d_cfdac_phase.png)
+![exp confusion — col_location/cnn2d/cfdac_phase](figures_exp/confusion/col_location_cnn2d_cfdac_phase.png)
+*Cross-domain: synth test acc 0.487 → exp acc 0.206 (Δ+0.280).*
+
 ![HPO — col_location/cnn3d/cfdac3d_all](figures/hpo/col_location__cnn3d__cfdac3d_all.png)
-![confusion — col_location/cnn3d/cfdac3d_all](figures/confusion/col_location_cnn3d_cfdac3d_all.png)
+![synth confusion — col_location/cnn3d/cfdac3d_all](figures/confusion/col_location_cnn3d_cfdac3d_all.png)
+![exp confusion — col_location/cnn3d/cfdac3d_all](figures_exp/confusion/col_location_cnn3d_cfdac3d_all.png)
+*Cross-domain: synth test acc 0.484 → exp acc 0.215 (Δ+0.270).*
+
 ![HPO — col_location/cnn3d/cfdac3d_magphase](figures/hpo/col_location__cnn3d__cfdac3d_magphase.png)
-![confusion — col_location/cnn3d/cfdac3d_magphase](figures/confusion/col_location_cnn3d_cfdac3d_magphase.png)
+![synth confusion — col_location/cnn3d/cfdac3d_magphase](figures/confusion/col_location_cnn3d_cfdac3d_magphase.png)
+![exp confusion — col_location/cnn3d/cfdac3d_magphase](figures_exp/confusion/col_location_cnn3d_cfdac3d_magphase.png)
+*Cross-domain: synth test acc 0.479 → exp acc 0.250 (Δ+0.229).*
+
 ![HPO — col_location/cnn2d/cfdac_real](figures/hpo/col_location__cnn2d__cfdac_real.png)
-![confusion — col_location/cnn2d/cfdac_real](figures/confusion/col_location_cnn2d_cfdac_real.png)
+![synth confusion — col_location/cnn2d/cfdac_real](figures/confusion/col_location_cnn2d_cfdac_real.png)
+![exp confusion — col_location/cnn2d/cfdac_real](figures_exp/confusion/col_location_cnn2d_cfdac_real.png)
+*Cross-domain: synth test acc 0.478 → exp acc 0.179 (Δ+0.299).*
+
 ![HPO — col_location/cnn2d/cfdac_magphase](figures/hpo/col_location__cnn2d__cfdac_magphase.png)
-![confusion — col_location/cnn2d/cfdac_magphase](figures/confusion/col_location_cnn2d_cfdac_magphase.png)
+![synth confusion — col_location/cnn2d/cfdac_magphase](figures/confusion/col_location_cnn2d_cfdac_magphase.png)
+![exp confusion — col_location/cnn2d/cfdac_magphase](figures_exp/confusion/col_location_cnn2d_cfdac_magphase.png)
+*Cross-domain: synth test acc 0.474 → exp acc 0.108 (Δ+0.366).*
+
 ![HPO — col_location/cnn/timeseries](figures/hpo/col_location__cnn__timeseries.png)
-![confusion — col_location/cnn/timeseries](figures/confusion/col_location_cnn_timeseries.png)
+![synth confusion — col_location/cnn/timeseries](figures/confusion/col_location_cnn_timeseries.png)
+![exp confusion — col_location/cnn/timeseries](figures_exp/confusion/col_location_cnn_timeseries.png)
+*Cross-domain: synth test acc 0.473 → exp acc 0.194 (Δ+0.280).*
+
 ![HPO — col_location/cnn/frf_mag](figures/hpo/col_location__cnn__frf_mag.png)
-![confusion — col_location/cnn/frf_mag](figures/confusion/col_location_cnn_frf_mag.png)
+![synth confusion — col_location/cnn/frf_mag](figures/confusion/col_location_cnn_frf_mag.png)
+![exp confusion — col_location/cnn/frf_mag](figures_exp/confusion/col_location_cnn_frf_mag.png)
+*Cross-domain: synth test acc 0.469 → exp acc 0.287 (Δ+0.181).*
+
 ![HPO — col_location/cnn2d/cfdac_mag](figures/hpo/col_location__cnn2d__cfdac_mag.png)
-![confusion — col_location/cnn2d/cfdac_mag](figures/confusion/col_location_cnn2d_cfdac_mag.png)
+![synth confusion — col_location/cnn2d/cfdac_mag](figures/confusion/col_location_cnn2d_cfdac_mag.png)
+![exp confusion — col_location/cnn2d/cfdac_mag](figures_exp/confusion/col_location_cnn2d_cfdac_mag.png)
+*Cross-domain: synth test acc 0.463 → exp acc 0.263 (Δ+0.201).*
+
 ![HPO — col_location/cnn3d/cfdac3d_realimag](figures/hpo/col_location__cnn3d__cfdac3d_realimag.png)
-![confusion — col_location/cnn3d/cfdac3d_realimag](figures/confusion/col_location_cnn3d_cfdac3d_realimag.png)
+![synth confusion — col_location/cnn3d/cfdac3d_realimag](figures/confusion/col_location_cnn3d_cfdac3d_realimag.png)
+![exp confusion — col_location/cnn3d/cfdac3d_realimag](figures_exp/confusion/col_location_cnn3d_cfdac3d_realimag.png)
+*Cross-domain: synth test acc 0.457 → exp acc 0.231 (Δ+0.225).*
+
 ![HPO — col_location/cnn/cfdac_real](figures/hpo/col_location__cnn__cfdac_real.png)
-![confusion — col_location/cnn/cfdac_real](figures/confusion/col_location_cnn_cfdac_real.png)
+![synth confusion — col_location/cnn/cfdac_real](figures/confusion/col_location_cnn_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — col_location/transformer/timeseries](figures/hpo/col_location__transformer__timeseries.png)
-![confusion — col_location/transformer/timeseries](figures/confusion/col_location_transformer_timeseries.png)
+![synth confusion — col_location/transformer/timeseries](figures/confusion/col_location_transformer_timeseries.png)
+![exp confusion — col_location/transformer/timeseries](figures_exp/confusion/col_location_transformer_timeseries.png)
+*Cross-domain: synth test acc 0.368 → exp acc 0.210 (Δ+0.157).*
+
 ![HPO — col_location/transformer/frf_mag](figures/hpo/col_location__transformer__frf_mag.png)
-![confusion — col_location/transformer/frf_mag](figures/confusion/col_location_transformer_frf_mag.png)
+![synth confusion — col_location/transformer/frf_mag](figures/confusion/col_location_transformer_frf_mag.png)
+![exp confusion — col_location/transformer/frf_mag](figures_exp/confusion/col_location_transformer_frf_mag.png)
+*Cross-domain: synth test acc 0.251 → exp acc 0.108 (Δ+0.143).*
+
 ![HPO — col_location/transformer/cfdac_real](figures/hpo/col_location__transformer__cfdac_real.png)
-![confusion — col_location/transformer/cfdac_real](figures/confusion/col_location_transformer_cfdac_real.png)
+![synth confusion — col_location/transformer/cfdac_real](figures/confusion/col_location_transformer_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 
 ### 7.4.21 Recommendation for col_location
 
@@ -1979,6 +2204,8 @@ from Conv3d at D = 2 / 4.
 
 ### 7.5.19 Cross-model comparison (mass_location)
 
+_Cross-domain transfer (synth test -> exp, acc): across 17 cells the median drop is Δ+0.703; best-transferring cell is `cnn/frf_mag` (Δ+0.163); worst-transferring is `rf/modal` (Δ+0.740).  0/17 cells transfer within |Δ| ≤ 0.10._
+
 | model | feature | val acc | test acc | exp acc |
 |---|---|---|---|---|
 | mlp         | `cfdac_real` | 1.000 | 0.997 | — |
@@ -2004,47 +2231,104 @@ from Conv3d at D = 2 / 4.
 | cnn         | `frf_mag` | 0.427 | 0.413 | 0.250 |
 
 ![HPO — mass_location/mlp/cfdac_real](figures/hpo/mass_location__mlp__cfdac_real.png)
-![confusion — mass_location/mlp/cfdac_real](figures/confusion/mass_location_mlp_cfdac_real.png)
+![synth confusion — mass_location/mlp/cfdac_real](figures/confusion/mass_location_mlp_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — mass_location/rf/cfdac_real](figures/hpo/mass_location__rf__cfdac_real.png)
-![confusion — mass_location/rf/cfdac_real](figures/confusion/mass_location_rf_cfdac_real.png)
+![synth confusion — mass_location/rf/cfdac_real](figures/confusion/mass_location_rf_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — mass_location/rf/modal](figures/hpo/mass_location__rf__modal.png)
-![confusion — mass_location/rf/modal](figures/confusion/mass_location_rf_modal.png)
+![synth confusion — mass_location/rf/modal](figures/confusion/mass_location_rf_modal.png)
+*Cross-domain: synth test acc 0.990 → exp acc 0.250 (Δ+0.740).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — mass_location/cnn2d/cfdac_magphase](figures/hpo/mass_location__cnn2d__cfdac_magphase.png)
-![confusion — mass_location/cnn2d/cfdac_magphase](figures/confusion/mass_location_cnn2d_cfdac_magphase.png)
+![synth confusion — mass_location/cnn2d/cfdac_magphase](figures/confusion/mass_location_cnn2d_cfdac_magphase.png)
+![exp confusion — mass_location/cnn2d/cfdac_magphase](figures_exp/confusion/mass_location_cnn2d_cfdac_magphase.png)
+*Cross-domain: synth test acc 0.987 → exp acc 0.250 (Δ+0.737).*
+
 ![HPO — mass_location/mlp/modal](figures/hpo/mass_location__mlp__modal.png)
-![confusion — mass_location/mlp/modal](figures/confusion/mass_location_mlp_modal.png)
+![synth confusion — mass_location/mlp/modal](figures/confusion/mass_location_mlp_modal.png)
+![exp confusion — mass_location/mlp/modal](figures_exp/confusion/mass_location_mlp_modal.png)
+*Cross-domain: synth test acc 0.987 → exp acc 0.250 (Δ+0.737).*
+
 ![HPO — mass_location/xgb/modal](figures/hpo/mass_location__xgb__modal.png)
-![confusion — mass_location/xgb/modal](figures/confusion/mass_location_xgb_modal.png)
+![synth confusion — mass_location/xgb/modal](figures/confusion/mass_location_xgb_modal.png)
+*Cross-domain: synth test acc 0.987 → exp acc 0.250 (Δ+0.737).  (No exp twin figure: model artifact missing on disk.)*
+
 ![HPO — mass_location/cnn2d/cfdac_phase](figures/hpo/mass_location__cnn2d__cfdac_phase.png)
-![confusion — mass_location/cnn2d/cfdac_phase](figures/confusion/mass_location_cnn2d_cfdac_phase.png)
+![synth confusion — mass_location/cnn2d/cfdac_phase](figures/confusion/mass_location_cnn2d_cfdac_phase.png)
+![exp confusion — mass_location/cnn2d/cfdac_phase](figures_exp/confusion/mass_location_cnn2d_cfdac_phase.png)
+*Cross-domain: synth test acc 0.973 → exp acc 0.250 (Δ+0.723).*
+
 ![HPO — mass_location/cnn2d/cfdac_all](figures/hpo/mass_location__cnn2d__cfdac_all.png)
-![confusion — mass_location/cnn2d/cfdac_all](figures/confusion/mass_location_cnn2d_cfdac_all.png)
+![synth confusion — mass_location/cnn2d/cfdac_all](figures/confusion/mass_location_cnn2d_cfdac_all.png)
+![exp confusion — mass_location/cnn2d/cfdac_all](figures_exp/confusion/mass_location_cnn2d_cfdac_all.png)
+*Cross-domain: synth test acc 0.970 → exp acc 0.338 (Δ+0.632).*
+
 ![HPO — mass_location/cnn2d/cfdac_imag](figures/hpo/mass_location__cnn2d__cfdac_imag.png)
-![confusion — mass_location/cnn2d/cfdac_imag](figures/confusion/mass_location_cnn2d_cfdac_imag.png)
+![synth confusion — mass_location/cnn2d/cfdac_imag](figures/confusion/mass_location_cnn2d_cfdac_imag.png)
+![exp confusion — mass_location/cnn2d/cfdac_imag](figures_exp/confusion/mass_location_cnn2d_cfdac_imag.png)
+*Cross-domain: synth test acc 0.970 → exp acc 0.250 (Δ+0.720).*
+
 ![HPO — mass_location/cnn3d/cfdac3d_all](figures/hpo/mass_location__cnn3d__cfdac3d_all.png)
-![confusion — mass_location/cnn3d/cfdac3d_all](figures/confusion/mass_location_cnn3d_cfdac3d_all.png)
+![synth confusion — mass_location/cnn3d/cfdac3d_all](figures/confusion/mass_location_cnn3d_cfdac3d_all.png)
+![exp confusion — mass_location/cnn3d/cfdac3d_all](figures_exp/confusion/mass_location_cnn3d_cfdac3d_all.png)
+*Cross-domain: synth test acc 0.970 → exp acc 0.250 (Δ+0.720).*
+
 ![HPO — mass_location/cnn3d/cfdac3d_magphase](figures/hpo/mass_location__cnn3d__cfdac3d_magphase.png)
-![confusion — mass_location/cnn3d/cfdac3d_magphase](figures/confusion/mass_location_cnn3d_cfdac3d_magphase.png)
+![synth confusion — mass_location/cnn3d/cfdac3d_magphase](figures/confusion/mass_location_cnn3d_cfdac3d_magphase.png)
+![exp confusion — mass_location/cnn3d/cfdac3d_magphase](figures_exp/confusion/mass_location_cnn3d_cfdac3d_magphase.png)
+*Cross-domain: synth test acc 0.970 → exp acc 0.250 (Δ+0.720).*
+
 ![HPO — mass_location/cnn/cfdac_real](figures/hpo/mass_location__cnn__cfdac_real.png)
-![confusion — mass_location/cnn/cfdac_real](figures/confusion/mass_location_cnn_cfdac_real.png)
+![synth confusion — mass_location/cnn/cfdac_real](figures/confusion/mass_location_cnn_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — mass_location/cnn2d/cfdac](figures/hpo/mass_location__cnn2d__cfdac.png)
-![confusion — mass_location/cnn2d/cfdac](figures/confusion/mass_location_cnn2d_cfdac.png)
+![synth confusion — mass_location/cnn2d/cfdac](figures/confusion/mass_location_cnn2d_cfdac.png)
+![exp confusion — mass_location/cnn2d/cfdac](figures_exp/confusion/mass_location_cnn2d_cfdac.png)
+*Cross-domain: synth test acc 0.953 → exp acc 0.250 (Δ+0.703).*
+
 ![HPO — mass_location/cnn3d/cfdac3d_realimag](figures/hpo/mass_location__cnn3d__cfdac3d_realimag.png)
-![confusion — mass_location/cnn3d/cfdac3d_realimag](figures/confusion/mass_location_cnn3d_cfdac3d_realimag.png)
+![synth confusion — mass_location/cnn3d/cfdac3d_realimag](figures/confusion/mass_location_cnn3d_cfdac3d_realimag.png)
+![exp confusion — mass_location/cnn3d/cfdac3d_realimag](figures_exp/confusion/mass_location_cnn3d_cfdac3d_realimag.png)
+*Cross-domain: synth test acc 0.937 → exp acc 0.250 (Δ+0.687).*
+
 ![HPO — mass_location/cnn2d/cfdac_mag](figures/hpo/mass_location__cnn2d__cfdac_mag.png)
-![confusion — mass_location/cnn2d/cfdac_mag](figures/confusion/mass_location_cnn2d_cfdac_mag.png)
+![synth confusion — mass_location/cnn2d/cfdac_mag](figures/confusion/mass_location_cnn2d_cfdac_mag.png)
+![exp confusion — mass_location/cnn2d/cfdac_mag](figures_exp/confusion/mass_location_cnn2d_cfdac_mag.png)
+*Cross-domain: synth test acc 0.927 → exp acc 0.250 (Δ+0.677).*
+
 ![HPO — mass_location/cnn2d/cfdac_real](figures/hpo/mass_location__cnn2d__cfdac_real.png)
-![confusion — mass_location/cnn2d/cfdac_real](figures/confusion/mass_location_cnn2d_cfdac_real.png)
+![synth confusion — mass_location/cnn2d/cfdac_real](figures/confusion/mass_location_cnn2d_cfdac_real.png)
+![exp confusion — mass_location/cnn2d/cfdac_real](figures_exp/confusion/mass_location_cnn2d_cfdac_real.png)
+*Cross-domain: synth test acc 0.863 → exp acc 0.163 (Δ+0.701).*
+
 ![HPO — mass_location/transformer/timeseries](figures/hpo/mass_location__transformer__timeseries.png)
-![confusion — mass_location/transformer/timeseries](figures/confusion/mass_location_transformer_timeseries.png)
+![synth confusion — mass_location/transformer/timeseries](figures/confusion/mass_location_transformer_timeseries.png)
+![exp confusion — mass_location/transformer/timeseries](figures_exp/confusion/mass_location_transformer_timeseries.png)
+*Cross-domain: synth test acc 0.637 → exp acc 0.075 (Δ+0.562).*
+
 ![HPO — mass_location/transformer/cfdac_real](figures/hpo/mass_location__transformer__cfdac_real.png)
-![confusion — mass_location/transformer/cfdac_real](figures/confusion/mass_location_transformer_cfdac_real.png)
+![synth confusion — mass_location/transformer/cfdac_real](figures/confusion/mass_location_transformer_cfdac_real.png)
+*Cross-domain: this cell has no balanced-experimental evaluation (feature not present in `experimental_features_balanced.h5` or model never scored on exp), so no exp twin is shown.*
+
 ![HPO — mass_location/transformer/frf_mag](figures/hpo/mass_location__transformer__frf_mag.png)
-![confusion — mass_location/transformer/frf_mag](figures/confusion/mass_location_transformer_frf_mag.png)
+![synth confusion — mass_location/transformer/frf_mag](figures/confusion/mass_location_transformer_frf_mag.png)
+![exp confusion — mass_location/transformer/frf_mag](figures_exp/confusion/mass_location_transformer_frf_mag.png)
+*Cross-domain: synth test acc 0.480 → exp acc 0.250 (Δ+0.230).*
+
 ![HPO — mass_location/cnn/timeseries](figures/hpo/mass_location__cnn__timeseries.png)
-![confusion — mass_location/cnn/timeseries](figures/confusion/mass_location_cnn_timeseries.png)
+![synth confusion — mass_location/cnn/timeseries](figures/confusion/mass_location_cnn_timeseries.png)
+![exp confusion — mass_location/cnn/timeseries](figures_exp/confusion/mass_location_cnn_timeseries.png)
+*Cross-domain: synth test acc 0.473 → exp acc 0.250 (Δ+0.223).*
+
 ![HPO — mass_location/cnn/frf_mag](figures/hpo/mass_location__cnn__frf_mag.png)
-![confusion — mass_location/cnn/frf_mag](figures/confusion/mass_location_cnn_frf_mag.png)
+![synth confusion — mass_location/cnn/frf_mag](figures/confusion/mass_location_cnn_frf_mag.png)
+![exp confusion — mass_location/cnn/frf_mag](figures_exp/confusion/mass_location_cnn_frf_mag.png)
+*Cross-domain: synth test acc 0.413 → exp acc 0.250 (Δ+0.163).*
+
 
 ### 7.5.20 Recommendation for mass_location
 
