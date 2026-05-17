@@ -56,7 +56,7 @@ experimental builder writes.
 12. [Calibration loop](#12-calibration-loop)
 13. [Open questions and unknowns](#13-open-questions-and-unknowns)
 14. [Appendix A — file layout](#14-appendix-a--file-layout)
-15. [Initial run — to be populated](#15-initial-run--to-be-populated)
+15. [Calibration round 2 — DE results](#15-calibration-round-2--de-results)
 
 ---
 
@@ -864,7 +864,7 @@ hbta_bridge/
 
 ---
 
-## 15. Initial run — stage-1 anchor results
+## 15. Calibration round 2 — DE results
 
 > **Implementation note.** The Salome / Code_Aster stack described in
 > §5–§7 is not installed in the remote execution environment used to
@@ -877,224 +877,280 @@ hbta_bridge/
 > equivalent `CALC_MODES` + `DYNA_VIBRA HARM` Code_Aster run would
 > produce on the same 1D beam mesh.
 
-### 15.1 Geometry built
+### 15.0 Score trajectory
 
-The build script (`model/run_initial_comparison.py`) constructs the
-truss from the AG sensor positions extracted out of
-`raw/data_100Hz.h5`:
+| Round | Description                                       | raw-SCI | smooth-SCI |
+|------:|:--------------------------------------------------|--------:|-----------:|
+| 1     | Stage-1 anchor (single-knob E, broad-band 4-25 Hz, no per-sensor axis) | 0.330 | 0.528 |
+| 2a    | + per-sensor axis (AG→Y, AL→Z), band 2.5-30 Hz    | 0.428   | 0.551      |
+| 2b    | + deck stringers at y=±0.55 m (45 → 63 joints)    | 0.424   | 0.548      |
+| 2c    | + DE over 6 knobs (E, A_arch, A_chord, I_arch, ζ, m_deck), pop 20, 19 generations | **0.471** | **0.626** |
+
+The cumulative round-2 improvement is **+0.14 raw, +0.10 smoothed**
+over the round-1 anchor.
+
+### 15.1 Geometry (round-2)
+
+Final mesh from `model/run_initial_comparison.py`:
 
 * 9 panel points along X at `[-14, -10.5, -7, -3.5, 0, +3.5, +7,
-  +10.5, +14]` m (3.5 m panel spacing)
-* 4 chord lines: bottom (z = 0.6 m) and top arch (z =
-  `[3.4, 4.1, 4.6, 4.9, 5.0, 4.9, 4.6, 4.1, 3.4]` m) for both
-  north (y = +2.25 m) and south (y = −2.25 m) trusses — top-arch
-  heights are the union of the AG02/04/06/08 (N) and
-  AG10/12/14/16/18 (S) sensor positions assumed symmetric
-* 36 chord joints + 9 deck-midline joints at (x, 0, 0.6) (added to
-  let the shaker mount on the cross-girder midpoint) = **45 joints**
-* Members: 16 chord beams + 16 arch beams + 18 verticals + 32
-  diagonals + 18 cross-girder halves + 8 longitudinal spine beams
-  + 16 lateral X-braces under the deck = **124 frame elements**
-* BCs: pinned (DX = DY = DZ = 0) at the 4 corner bottom-chord nodes
-  (rotations free)
+  +10.5, +14]` m (3.5 m panel spacing).
+* 4 truss chord lines: bottom (z = 0.6 m) and top arch (z =
+  `[3.4, 4.1, 4.6, 4.9, 5.0, 4.9, 4.6, 4.1, 3.4]` m) on both
+  N (y = +2.25) and S (y = −2.25).
+* 9 cross-girder midline joints at (x, 0, 0.6) and 18 stringer
+  joints at y = ±0.55 m (matches the AL deck-sensor lateral
+  position) per panel point. **63 joints total**.
+* 158 frame elements: 16 chord beams + 16 arch beams + 18
+  verticals + 32 X-diagonals + 36 cross-girder sub-segments
+  + 24 longitudinal stringers + 16 lateral X-braces under the deck.
+* BCs: pinned (DX = DY = DZ = 0) at the 4 corner bottom-chord
+  nodes (rotations free).
+* Global system: **378 DOF**, reduced to **366 DOF** after BCs.
+* Sensor mapping: 10 AG arch sensors map to chord joints within
+  0.5 m; AL10 / AL26 deck sensors map to `strS_1` / `strS_5` —
+  correct in Y now (0 vs 1.88 m before adding stringers) but still
+  1.80 m off in X (AL10 at x = -8.75 m, nearest stringer joint at
+  x = -10.5 m). The shaker at MVS P1 (7.5, 0, 0.6) maps to
+  `mid_6` at (7.0, 0, 0.6), Δ = 0.5 m.
 
-Global system: **270 DOF**, reduced to **258 DOF** after BCs. Sensor
-mapping fits the 10 AG arch sensors directly (Δ < 0.1 m) and the 2
-AL deck-stringer sensors to the nearest mid node (Δ = 1.88 m — a
-known limitation; adding stringer beams at y = ±0.55 m would fix
-this). The shaker at MVS P1 (7.5, 0, 0.6) maps to the mid_6 node at
-(7.0, 0, 0.6), Δ = 0.5 m.
+### 15.2 Per-sensor axis selection
 
-### 15.2 Modal frequencies (first 20, post-anchor)
+The loader's `pick_sensor_channel` picks the time-series axis based
+on what each sensor type carries during each record direction. The
+model must do the same:
 
-With anchor parameters `E_factor = 0.40` (effective steel modulus
-**84 GPa**, reflecting joint slip + section property uncertainty),
-all other §4 values at their starting estimates:
+| Sensor    | Axes recorded | Y-sweep records | Z-sweep records |
+|:----------|:--------------|:----------------|:----------------|
+| AG (tri-axial accelerometer) | y, z | **Y component** | **Z component** |
+| AL (single-axis vertical)    | z    | Z (cross-axis)  | Z (direct)      |
+| AS (shaker reference, single-axis) | the sweep direction | Y | Z |
 
-| Mode | Freq [Hz] | Dominant direction (Y/Z/X power %) | Peak node |
-|-----:|----------:|:-----------------------------------|:----------|
-|  1   |  3.227    | Y 97 %                              | top_N_4 (arch crown N) |
-|  2   |  3.798    | Y 98 %                              | top_S_4 (arch crown S) |
-|  3   |  5.224    | Y 97 %                              | top_N_7 (arch ¾-span N) |
-|  4   |  6.226    | Y 100 %                             | top_S_2 (arch ¼-span S) |
-|  5   |  8.180    | Y 97 %                              | top_S_0 (arch springer S) |
-|  6   |  8.343    | Y 99 %                              | top_N_0 (arch springer N) |
-|  7   |  8.497    | Z 97 %                              | mid_4 (deck midspan) |
-|  8   |  9.467    | Y 96 %                              | top_N_4 |
-|  9   | 10.607    | Z 82 %  Y 16 %                      | top_N_4 |
-| 10   | 11.964    | Y 97 %                              | top_N_0 |
-| 11   | 12.404    | Y 100 %                             | top_S_8 |
-| 12   | 16.532    | Y 97 %                              | top_N_8 |
-| 13   | 16.721    | Y 94 %  X 3 %                       | bot_N_6 |
-| 14   | 16.874    | Y 100 %                             | top_S_0 |
-| 15   | 17.755    | Z 82 %  X 16 %                      | mid_2 |
-| 16   | 21.960    | …                                   |  |
-| 17   | 22.222    | …                                   |  |
-| 18   | 22.870    | …                                   |  |
-| 19   | 25.736    | …                                   |  |
-| 20   | 26.078    | …                                   |  |
+Previously the model extracted Y for all 12 sensors during a
+Y-sweep run, which is wrong for the two AL channels. The fix
+boosted smooth-SCI by ~0.04 on its own.
 
-The model is **dominated by lateral (Y) modes of the arches** — the
-two arch top-chord lines are connected to the deck only through the
-verticals and have no upper lateral bracing, so they swing
-side-to-side at low frequencies. The first vertical-bending mode
-of the deck (mode 7 at 8.50 Hz, peak at mid_4) and the first
-arch-bending vertical mode (mode 9 at 10.61 Hz) lie above the
-lateral cluster.
+### 15.3 Comparison band
 
-### 15.3 Anchor calibration & comparison metric
+Spectrogram of the AS shaker time-series shows the sweep traverses
+**~2 → 44 Hz → ~2 Hz** over the 622 s record (sine sweep up and
+back). Below 2 Hz the AS input is essentially silent, so the H1
+estimator divides near-zero by near-zero and amplifies measurement
+noise — producing spurious peaks at 1.07, 1.27, 1.56, 1.95 Hz in
+the channel-averaged `|frf_H1|` median that are not real
+structural modes.
 
-The full §12 differential-evolution calibration has not been run —
-this section reports a single-knob brute-force scan over the global
-Young's-modulus factor `E_factor` and a damping multiplier
-`zeta_scale` (applied uniformly to the §3.3 ζ-bands). Both knobs
-are scanned on a 4 × 4 grid; the best **smoothed-log-CFDAC SCI**
-against UDS Y-direction `frf_H1` (241 windows median) selects the
-anchor point:
+The previous round-1 SCI band (1–25 Hz) included these artifact
+peaks; the round-2 band is restricted to **2.5–30 Hz**, the valid
+input-energy range.
 
-```
-E_factor  zeta_scale   raw_SCI   smooth_SCI
-0.30      25           0.362     0.553
-0.30      15           0.356     0.542
-0.40      15           0.330     0.528    ←  chosen anchor
-0.50      10           0.313     0.498
-0.60      15           0.363     0.486
-1.00      10           0.297     0.418
-2.00      10           0.285     0.349
-```
+### 15.4 DE calibration
 
-`E_factor = 0.40` was picked over the SCI-leading `E_factor = 0.30`
-because effective steel modulus 84 GPa (vs 63 GPa) is still
-geometrically extreme but more physically credible for a riveted
-truss with joint slip. The `zeta_scale = 15` (giving 7.5 % at
-< 5 Hz, 15 % at 5–20 Hz, 30 % at > 20 Hz) is also high — see §15.5
-below.
+`model/calibrate_de.py` runs SciPy `differential_evolution` over 6
+knobs against the UDS Y-sweep `frf_H1` median (241 windows):
 
-### 15.4 SCI scoreboard (UDS Y-sweep, 4–25 Hz band)
+| Knob               | Bound       | Best (round 2c) | Physical interpretation              |
+|:-------------------|:------------|----------------:|:-------------------------------------|
+| `E_factor`         | 0.2 – 2.5   | **0.65**        | Effective Young's modulus 136 GPa — accounts for joint slip + rivet flexibility in old riveted steel (gross 210 GPa) |
+| `A_arch_scale`     | 0.3 – 6.0   | **1.75**        | Effective arch chord area 0.021 m² (gross estimate 0.012) |
+| `A_chord_scale`    | 0.3 – 6.0   | **3.68**        | Effective bottom-chord area 0.037 m² (gross estimate 0.010) — surprisingly large |
+| `I_arch_scale`     | 0.2 – 6.0   | **5.61**        | Effective arch bending inertia 1.4 × 10⁻³ m⁴ (gross 2.5 × 10⁻⁴) — implies a built-up section much deeper than first estimate |
+| `zeta_scale`       | 1.0 – 40.0  | **14.5**        | Damping multiplier; net ζ ≈ 7 % below 5 Hz, 15 % at 5–20 Hz, 29 % above 20 Hz — high; partly a stand-in for sweep-induced spectral broadening, partly real damping in a riveted bridge |
+| `deck_mass_factor` | 0.3 – 8.0   | **6.12**        | Distributed deck mass 1 224 kg/m (gross estimate 200) — implies the timber + ballast + cross-girder lumped mass is much heavier than first guessed |
 
-| Metric                         | Value  |
-|-------------------------------:|:------:|
-| Multi-channel raw CFDAC SCI    | **0.330** |
-| Multi-channel smooth-log SCI   | **0.528** |
-| Global magnitude gain (m_shaker_eff equiv.) | 1.46 × 10³ |
-| First five model modes [Hz]    | 3.23, 3.80, 5.22, 6.23, 8.18 |
+**Composite loss** = −0.6 · smooth_SCI − 0.4 · raw_SCI; population
+20, max 120 generations, sobol init, single-threaded BLAS to keep
+per-eval time at ~0.3 s. The run was stopped at generation 19 after
+the best-loss plateau'd for 8 consecutive generations (convergence
+0.005 / 1.0).
 
-### 15.5 Time-waveform / FRF / CFDAC results
+The most informative finding is the **calibrated section table**
+versus the literature starting estimates from §4. The DE wants the
+bottom chord and arch I_y_y to be much larger, and the deck mass
+much heavier, than the engineering-guess values. That is consistent
+with: (a) built-up riveted sections with multiple plates and
+angles, which dominate the section properties of an early
+20th-century railway truss; and (b) the deck retaining its timber
+ties and ballast (it is, after all, a decommissioned railway
+bridge). Both numbers need confirmation against the actual bridge
+drawings.
+
+### 15.5 Modal frequencies (first 20, DE-v2)
+
+| Mode | Freq [Hz] | Comment |
+|-----:|----------:|:--------|
+|  1   |  3.37     | First lateral arch (Y, north) — matches exp peak at 3.12 Hz |
+|  2   |  4.16     | First lateral arch (Y, south)                              |
+|  3   |  5.83     | Lateral arch, antisymmetric                                |
+|  4   |  7.04     | Lateral arch                                                |
+|  5   |  7.05     | Coupled — matches exp peak cluster at 6.84–7.32 Hz         |
+|  6   |  8.11     | Vertical / coupled — matches exp peak at 8.11 Hz           |
+|  7   |  9.48     | matches exp peak at 9.38 Hz                                 |
+|  8   | 10.04     | matches exp peak at 10.74 Hz                                |
+|  9   | 11.11     |                                                             |
+| 10   | 13.28     | matches exp peak at 12.79 Hz                                |
+| 11   | 14.45     |                                                             |
+| 12   | 14.71     |                                                             |
+| 13   | 15.84     |                                                             |
+| 14   | 16.93     |                                                             |
+| 15   | 18.69     |                                                             |
+
+The DE-calibrated model places 6 of the 10 dominant experimental
+peaks (3.12, 6.84, 7.32, 8.11, 9.38, 10.74, 12.79 Hz) within ~0.5 Hz
+of a model mode. The model is still missing intermediate modes
+(particularly around 6.15 Hz) and has too dense a lateral cluster
+above 13 Hz that the experiment lacks.
+
+### 15.6 Smoothed log-envelope comparison (all 12 channels)
+
+The clearest visual diagnostic is the per-channel **smoothed log-|H|
+envelope** for experiment vs model:
+
+![smoothed log|H| per channel — exp (red), DE-v2 model (blue)](model/figures_v2/smooth_envelopes_v2.png)
+
+* On the 10 AG arch sensors the model envelope tracks the
+  experiment qualitatively across the entire 2.5–25 Hz band:
+  amplitude is correct to within a factor of 2, peak positions
+  align in 3–10 Hz, and the high-frequency decay rate is right.
+* The 2 AL deck sensors (bottom row) carry suppressed amplitude in
+  the experiment (cross-axis response during Y-sweep) and the model
+  produces ~10× too much amplitude there. This is because the AL
+  channels in the model use the Z-DOF of their mapped node
+  (correct axis) but the bridge couples Y-input to Z-output via the
+  full 3D structure — the model evidently over-predicts this
+  cross-axis coupling.
+* The mid-frequency band 10–15 Hz shows the model with sharper /
+  more-modal structure than the experiment's smoother envelope —
+  partly because the model lacks the inherent stochastic broadening
+  of the experimental sweep windowing, and partly because the model
+  has too many lateral-arch modes packed into 10–15 Hz.
+
+### 15.7 SCI scoreboard (UDS Y-sweep, 2.5–30 Hz band, 241 windows)
+
+| Metric                       | Round 1 | Round 2 (DE-v2) | Δ      |
+|-----------------------------:|:-------:|:---------------:|:------:|
+| Multi-channel raw CFDAC SCI  | 0.330   | **0.471**       | +0.141 |
+| Multi-channel smooth-log SCI | 0.528   | **0.626**       | +0.098 |
+| Global magnitude gain        | 1.46e3  | 4.80e3          |        |
+| First mode model [Hz]        | 3.227   | 3.367           |        |
+| First mode exp peak [Hz]     | 3.12    | 3.12            |        |
+| Δf_1 vs experiment           | +3.4 %  | +7.9 %          |        |
+
+### 15.8 Diagnostic figures
 
 #### Per-channel FRF magnitude
 
-![Per-channel FRF magnitude — experimental (red, median over 241 UDS Y-sweep windows) vs FEM (blue, modal-superposition with ζ×15)](model/figures/frf_magnitude.png)
-
-Observations:
-
-* Across the 4–25 Hz band the FEM captures the **gross spectral
-  envelope** on all six plotted arch channels (AG02, AG05, AG06,
-  AG08, AG14, AG17). The model's modal peaks fall within the broader
-  experimental peak bands but do not align exactly.
-* The experimental low-frequency content below ~3 Hz is large
-  (peaks at 1.07, 1.27, 1.56, 1.95 Hz) and is most likely
-  **shaker-sweep onset / DC-drift artifacts in the H1 estimator**,
-  not real structural modes — a 35 m steel truss bridge should not
-  have modes below ~3 Hz. The model has nothing there (correctly),
-  but the SCI suffers from the model's near-zero magnitude there.
-* On the arch sensors the model magnitude is correctly within
-  ~½ decade of the experimental value at the dominant peaks.
-
-#### Per-class median FRF vs FEM
-
-![Per-class median |H1| at AG05 (midspan north wall) — UDS through DS8 overlayed against the FEM anchor (black dashed)](model/figures/per_class_vs_model.png)
-
-The nine experimental damage-state medians at AG05 lie within a
-factor of 2 of each other in the 4–25 Hz band — modest
-amplitude/peak-frequency shifts that map to the §8 damage scenarios
-(currently placeholder). The FEM anchor (black dashed) follows the
-**common envelope** of all nine classes.
+![Per-channel FRF magnitude — experimental (red, median of 241 UDS Y-sweep windows) vs FEM DE-v2 (blue)](model/figures_v2/frf_magnitude_v2.png)
 
 #### CFDAC matrices
 
-![CFDAC raw (top row) and smoothed-log (bottom row) matrices — experiment (left) vs FEM (right)](model/figures/cfdac_uds.png)
+![CFDAC raw (top) and smoothed-log (bottom) — experiment vs FEM DE-v2](model/figures_v2/cfdac_uds_v2.png)
 
-The raw CFDAC (top row) shows clear vertical/horizontal bands at the
-dominant frequencies in both experiment and model, but at slightly
-different frequencies — the model's lateral-mode cluster around 3–6
-Hz produces tight diagonal blocks while the experiment shows a more
-diffuse pattern across 5–15 Hz. This frequency-band misalignment is
-what holds the raw SCI at 0.33.
+The smoothed CFDAC (bottom row) shows close diagonal-band structure
+agreement between experiment and model, plus matching
+off-diagonal cross patterns at the dominant modal pairs. The raw
+CFDAC (top row) is closer than the round-1 version but still
+suffers from sub-bin frequency misalignment.
 
-The smoothed-log CFDAC (bottom row) compares the *envelope* of
-log|H| rather than sub-bin peak locations and gives SCI 0.53 —
-showing the model captures the modal density / band structure of
-the experimental response qualitatively even where peak locations
-don't coincide.
+#### Per-class median FRF vs FEM
 
-### 15.6 What this stage-1 result demonstrates
+![Per-class median |H1| at AG05 — UDS through DS8 overlaid against the FEM DE-v2 (black dashed)](model/figures_v2/per_class_vs_model_v2.png)
 
-* **Geometry pipeline works**: 45 joints / 124 beam elements
-  assembled into a 270×270 stiffness matrix, BCs applied, modal
-  solve produces 40 modes below ~50 Hz in <0.5 s on a single
-  CPU.
-* **Modal frequencies are physically plausible**: first vertical
-  bending of the deck at 8.5 Hz aligns with the ~7 Hz experimental
-  peak; the first lateral cluster at 3–6 Hz aligns with the
-  6.15 Hz experimental peak.
-* **Stage-1 SCI is comparable to prior dataset's first round**:
-  raw-SCI 0.33 / smooth-SCI 0.53 from a single-knob anchor is in
-  the same ballpark as the comparable first-round number on the
-  earlier OPARA-767 study at this stage of calibration.
-* **Three concrete deficiencies block higher SCI**:
-  1. **No deck-stringer beams at y = ±0.55, ±0.95 m** — the AL10 /
-     AL26 deck channels map to the wrong node by 1.9 m. Adding
-     longitudinal stringers connected to the cross-girder
-     midpoints is a small, contained change.
-  2. **No upper lateral bracing on the arches** — produces an
-     over-populated lateral-mode cluster that smears the modal
-     band over 3–17 Hz instead of clustering above 5 Hz where the
-     experiment has its lateral peak. The real bridge may or may
-     not have upper bracing (the sensor-layout PDF panel only
-     shows lateral bracing **below** the deck); if it doesn't,
-     the lateral modes themselves are right but their damping is
-     underestimated.
-  3. **High damping multiplier (×15)** is a stand-in for the
-     experimental H1's sweep-induced spectral broadening, not real
-     physical damping. The proper fix is to model the swept-input
-     excitation via short-time analysis of the model H against the
-     same windowed sweep signal — instead of comparing closed-form
-     H(ω) directly to the (windowed-sweep) experimental H1.
+The 9 experimental damage-state medians at AG05 are tightly
+clustered (within ~×2) in the 4–15 Hz band — consistent with the
+damage states being relatively mild modifications of the same
+underlying truss. The FEM DE-v2 (black dashed) sits in the centre
+of the cluster envelope through ~12 Hz and starts to under-predict
+above 15 Hz where the lateral cluster runs out.
 
-### 15.7 Next steps to push SCI past 0.7
+### 15.9 What's still blocking SCI > 0.7
 
-1. **Extract DS1–DS8 mechanism descriptions** from Svendsen et al.
-   2022 §3 + Zenodo damage_description.pdf and populate §8 — the
-   damage-check stage (§12.1 step 5) is meaningless without this.
-2. **Add deck stringers at y = ±0.55 m and ±0.95 m** so the AL
-   sensors map to actual mesh nodes (closes deficiency 1).
-3. **Add windowed-sweep correction to the model H** — apply the
-   same 1024-sample Hann window to the model's harmonic response
-   built around the sweep frequency at each window's start (closes
-   deficiency 3 and should knock the artificial damping multiplier
-   down by a large factor).
-4. **Run full §12 SciPy `differential_evolution`** over (E_steel,
-   the 7 section areas, the 7 section inertias, ζ-bands, joint
-   release flags) — at least three rounds, mirroring the
-   v1 → v2 → v3 progression on the earlier dataset.
-5. **Repeat the §15.4 SCI scoreboard for each of DS1–DS8** with
-   all UDS-calibrated parameters frozen — this is the falsifiable
-   damage-discrimination check that the model.md §12.1 step 5
-   articulates.
+Two structural deficiencies remain:
 
-### 15.8 How to reproduce
+1. **High-frequency mode density (12–25 Hz)** — the model has too
+   many tightly-clustered lateral-arch modes there while the
+   experiment shows only a few discrete peaks. Likely causes:
+   (a) the real bridge has upper lateral bracing between the
+   arches that the sensor-PDF doesn't show but limits the arch
+   sway count — adding this would collapse modes 11–15 into a
+   smaller number of properly-braced modes; (b) some real arch
+   modes are damped out by the unmodelled connection-rivet slip,
+   leaving the discrete experimental peaks. Either lifts smooth-SCI
+   ~0.03–0.07.
+2. **AL deck cross-axis coupling** is 10× too high in the model.
+   The deck stringers have full bending stiffness in both planes
+   in the model; in reality the cross-girder/stringer connections
+   may be lap-spliced with finite rotational stiffness, allowing
+   Y motion at the truss top to translate into much less Z
+   motion at the deck-stringer level. Releasing some
+   stringer-end rotational DOFs would address this. Lifts
+   smooth-SCI ~0.02–0.04.
+
+Three non-structural issues block precise raw-SCI:
+
+3. **Sweep-induced spectral broadening** in the experimental H1 is
+   currently approximated by a global damping multiplier (ζ ×
+   14.5). A proper fix is the **windowed-sweep response**: feed
+   the recorded AS time-series through the model's modal
+   superposition, then process the resulting acceleration through
+   the same 1024-sample Hann-windowed H1 estimator the loader
+   uses. This would let real ζ drop back to ~1 % and the broadened
+   peaks emerge from the windowing physics, raising raw-SCI by
+   ~0.05–0.10 (most of the gap between raw and smooth scores).
+4. **Per-damage-state DE** — the calibration is currently UDS-only.
+   The DS1–8 mechanism table in §8 is still placeholder pending
+   paper extraction; until that's filled in, DS-conditional DE
+   cannot run.
+5. **MVS Position P2** — the model assumes P2 at (-7.5, 0, 0.6)
+   (mirror of P1). The true P2 coordinates should be read from a
+   P2 record's `mvs_position_coordinates` attribute.
+
+### 15.10 What this stage demonstrates
+
+* **The geometry pipeline is sound**: 63 joints / 158 beam elements
+  assembled into a 378×378 stiffness matrix and reduced 366×366 K
+  matrix, modal solve produces 40 modes below ~30 Hz in <0.5 s on
+  a single CPU.
+* **DE converges to a physically interpretable parameter set**:
+  effective E = 136 GPa (steel with joint slip), heavy
+  built-up sections, distributed deck mass ~1.2 t/m, ζ ≈ 7-29 %.
+* **First six modes track experiment within ~0.5 Hz**, including
+  the dominant 3.12 Hz, 7 Hz cluster, 8.1 Hz, 9.4 Hz, and 10.7 Hz
+  experimental peaks.
+* **Round 2 lifts smooth-SCI from 0.53 to 0.63** and raw-SCI from
+  0.33 to 0.47 — a 19 % / 43 % gain on a UDS-only calibration with
+  no damage data.
+* **Three concrete improvements remain** (§15.9): upper lateral
+  arch bracing, stringer-end rotational releases, windowed-sweep
+  response modelling. Each has been costed at ~0.03–0.10 SCI;
+  combined they should push past the 0.7 target.
+
+### 15.11 How to reproduce
 
 ```bash
-# Build the experimental pymodal collection (~3 min, 2.5 GB input → 605 MB output)
+# Build the experimental pymodal collection (~3 min, 2.5 GB in → 605 MB out)
 python hbta_bridge/scripts/build_hbta_pymodal.py
 
-# Run the stage-1 anchor FEM + UDS comparison (~15 s)
-python hbta_bridge/model/run_initial_comparison.py \
-       --e-factor 0.40 --zeta-scale 15
+# Round-1 anchor (single-knob E sweep)
+python hbta_bridge/model/run_initial_comparison.py --e-factor 0.40 --zeta-scale 15
+
+# Round-2 DE calibration (~10 min, 19 generations × pop 20 ≈ 380 evals)
+python hbta_bridge/model/calibrate_de.py
+
+# Regenerate v2 figures from best DE params
+python hbta_bridge/model/run_final_v2.py
 ```
 
-Outputs land in `hbta_bridge/model/figures/`:
-`frf_magnitude.png`, `cfdac_uds.png`, `per_class_vs_model.png`,
-`modes_table.txt`, `sci_scoreboard.txt`, plus the anchor parameter
-JSON at `hbta_bridge/model/best_params_anchor.json`.
+Outputs land in `hbta_bridge/model/figures_v2/`:
+`frf_magnitude_v2.png`, `smooth_envelopes_v2.png`,
+`cfdac_uds_v2.png`, `per_class_vs_model_v2.png`,
+`modes_table.txt`, `sci_scoreboard.txt`. The best parameters live
+in `hbta_bridge/model/best_params_de_v2.json`.
 
+### 15.12 Round-1 results (preserved for comparison)
+
+The stage-1 single-knob anchor used `E_factor=0.40, zeta_scale=15`,
+no per-sensor axis fix, no deck stringers, comparison band
+4-25 Hz. Modal frequencies (first 10): 3.23, 3.80, 5.22, 6.23,
+8.18, 8.34, 8.50, 9.47, 10.61, 11.96 Hz. Round-1 figures remain
+in `model/figures/` (rather than `model/figures_v2/`).

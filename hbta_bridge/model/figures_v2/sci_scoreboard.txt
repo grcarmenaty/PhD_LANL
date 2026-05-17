@@ -1,0 +1,10 @@
+raw  CFDAC SCI  = 0.4710
+smooth log-SCI  = 0.6264
+gain            = 4.804e+03
+E_factor        = 0.65
+A_arch_scale    = 1.75
+A_chord_scale   = 3.68
+I_arch_scale    = 5.61
+zeta_scale      = 14.5
+deck_mass_factor= 6.12
+first 5 modes   = 3.368, 4.164, 5.829, 7.037, 7.054
