@@ -13,7 +13,7 @@
 #   5. evaluate_full_experimental.py   → results/noisy_mixed/full_experimental/*
 #   6. transfer_learn.py               → results/noisy_mixed/transfer/*
 #   7. resolution_sweep.py             → results/noisy_mixed/resolution_sweep/*
-#   8. build_report_noise.py           → results/REPORT_noisy_mixed.md
+#   8. build_report_noisy_mixed.py    → results/REPORT_noisy_mixed.md
 set -u
 
 REPO="${REPO:-/home/user/PhD_LANL}"
@@ -59,7 +59,7 @@ step transfer  python -m ml_pipeline.transfer_learn \
   --syn "$FEATS" --exp "$EXP" --results "$OUT"                          || exit 1
 step resolution_sweep  python -m ml_pipeline.resolution_sweep \
   --features "$FEATS" --out "$OUT"                                      || exit 1
-step report  python -m ml_pipeline.build_report_noise \
+step report  python -m ml_pipeline.build_report_noisy_mixed \
   --results "$OUT" --out "$REPO/results/REPORT_noisy_mixed.md"          || exit 1
 
 echo "[orchestrator] ALL DONE"
