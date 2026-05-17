@@ -1,5 +1,5 @@
-raw  CFDAC SCI  = 0.3300
-smooth log-SCI  = 0.5283
-gain            = 1.464e+03
+raw  CFDAC SCI  = 0.4329
+smooth log-SCI  = 0.5593
+gain            = 1.917e+03
 E_factor        = 0.4
 first 5 modes   = 3.227, 3.798, 5.224, 6.226, 8.180

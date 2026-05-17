@@ -2,3 +2,4 @@ raw/*.h5
 output/*.h5
 output/chunks/
 logs/
+model/de_run*.log

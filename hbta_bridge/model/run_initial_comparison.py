@@ -395,13 +395,22 @@ def map_pos_to_joint(joints, p):
     return int(np.argmin(d)), float(d.min())
 
 
-def sensor_dofs(joints, direction):
-    """Map each sensor to (joint, dof_offset).  direction in {'y','z'}.
+def sensor_dofs(joints, sweep_direction):
+    """Map each sensor to its global DOF index.  Mirrors the loader's
+    axis-selection logic in `pick_sensor_channel` for build_hbta_pymodal.py:
+
+      AG sensors are tri-axial → use the sweep direction (y or z)
+      AL sensors are single-axis vertical → always use z
+
     Returns ndarray of length 12 with the global DOF index per sensor."""
-    dof_off = {"x": 0, "y": 1, "z": 2}[direction]
     out = []
+    sweep_off = {"y": 1, "z": 2}[sweep_direction]
     for name in SENSOR_NAMES:
         idx, dist = map_pos_to_joint(joints, SENSOR_POS[name])
+        if name.startswith("AL"):
+            dof_off = 2     # AL channels are always Z
+        else:
+            dof_off = sweep_off
         out.append(6*idx + dof_off)
         if dist > 0.5:
             log.warning(f"sensor {name} → joint {joints[idx].name} "
@@ -583,15 +592,17 @@ def main(e_factor=1.0, zeta_scale=1.0):
     log.info(f"experimental H_med shape {H_exp_med.shape}")
 
     # ---------- Magnitude scale fit (one global gain, in-band fit) ----
-    # Use 4-25 Hz to avoid the low-freq sweep-onset artifact peaks in H1
-    # (the H1 estimator amplifies noise where input spectrum is small).
-    band = (freq_grid >= 4.0) & (freq_grid <= 25.0)
+    # Restrict to the actual sweep frequency range (2.5-40 Hz from the
+    # AS-signal spectrogram). Below 2 Hz the H1 estimator is dominated
+    # by noise (no input energy there); above 40 Hz the anti-alias
+    # filter rolls off.
+    band = (freq_grid >= 2.5) & (freq_grid <= 30.0)
     ch_keep = np.arange(10)        # arch sensors only (skip AL deck channels)
     num = np.sum(np.abs(H_exp_med[np.ix_(band, ch_keep)]))
     den = np.sum(np.abs(H_model [np.ix_(band, ch_keep)])) + 1e-30
     gain = float(num / den)
     H_model_scaled = H_model * gain
-    log.info(f"global gain fit (band 4-25 Hz, arch ch) = {gain:.3e}")
+    log.info(f"global gain fit (band 2.5-30 Hz, arch ch) = {gain:.3e}")
 
     # ---------- Scores ----------
     C_exp = cfdac(H_exp_med[band])
