@@ -73,7 +73,10 @@ fi
 # ---------- 4.  remind Claude to re-arm the 10-min heartbeat --------------
 # The Monitor process dies on every VM reboot.  Only Claude can call Monitor,
 # so we emit a system-reminder telling it to re-arm if no ping script is alive.
-if ! pgrep -f "$REPO/.claude/hpo_ping.sh" >/dev/null; then
+# Skip when .claude/PAUSE_PINGS is present (manual mute).
+PAUSE_PINGS_FLAG="$REPO/.claude/PAUSE_PINGS"
+if [ ! -f "$PAUSE_PINGS_FLAG" ] && \
+     ! pgrep -f "$REPO/.claude/hpo_ping.sh" >/dev/null; then
   cat <<EOF
 <system-reminder>
 The 10-minute hpo.py status pings are NOT running.  Re-arm them by calling
