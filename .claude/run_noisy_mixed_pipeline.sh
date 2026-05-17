@@ -14,6 +14,7 @@
 #   6. transfer_learn.py               → results/noisy_mixed/transfer/*
 #   7. resolution_sweep.py             → results/noisy_mixed/resolution_sweep/*
 #   7.5 plots_experimental.py        → results/noisy_mixed/figures_exp/*
+#   7.6 plot_exp_dataset.py          → results/figures/dataset_exp/* (shared)
 #   8. build_report_noisy_mixed.py    → results/REPORT_noisy_mixed.md
 set -u
 

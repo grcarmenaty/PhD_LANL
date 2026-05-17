@@ -146,6 +146,32 @@ def plot_perclass_f1_exp(exp_path: Path, results_dir: Path,
         by_task.setdefault(task_name, []).append(
             (f"{model_name}/{feature}", f1))
 
+    # Per-task summary JSON for downstream report commentary.
+    summary: Dict[str, dict] = {}
+    for task_name, rows in by_task.items():
+        labels = _class_labels(task_name)
+        rows_data = [
+            {"cell": name, "f1_per_class": [float(x) for x in f1]}
+            for (name, f1) in rows
+        ]
+        # Pick the best cell by mean F1 and report its worst class.
+        best_cell = max(rows, key=lambda r: float(np.mean(r[1])))
+        worst_idx = int(np.argmin(best_cell[1]))
+        best_idx = int(np.argmax(best_cell[1]))
+        summary[task_name] = {
+            "labels": labels,
+            "best_cell": best_cell[0],
+            "best_cell_mean_f1": float(np.mean(best_cell[1])),
+            "best_class": labels[best_idx],
+            "best_class_f1": float(best_cell[1][best_idx]),
+            "worst_class": labels[worst_idx],
+            "worst_class_f1": float(best_cell[1][worst_idx]),
+            "rows": rows_data,
+        }
+    import json
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "perclass_summary.json").write_text(json.dumps(summary, indent=2))
+
     for task_name, rows in by_task.items():
         labels = _class_labels(task_name)
         rows = sorted(rows, key=lambda r: -np.mean(r[1]))
