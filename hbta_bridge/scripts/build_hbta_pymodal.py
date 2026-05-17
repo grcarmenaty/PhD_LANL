@@ -1,21 +1,22 @@
 """Build pymodal-compatible spectra from the HBTA experimental HDF5.
 
-Mirrors `flossgraben_bridge/scripts/build_flossgraben_pymodal.py`:
-windows the 100 Hz acceleration into 1024-sample chunks, computes per-
-window rfft, writes a pymodal frf collection + chunk-format HDF5 with
-labels and metadata.
+Windows the 100 Hz acceleration data into 1024-sample chunks; for each
+window computes the rfft output spectrum and the H1 input-output FRF
+(using the on-shaker AS reference sensor); writes a pymodal frf
+collection plus chunk-format HDF5 files with damage-state labels.
 
-Differences vs Flossgraben:
-  - HBTA has measured shaker acceleration (AS sensor) -> true input-
-    output FRF computable; we store the H1 FRF estimator alongside
-    the raw output spectrum.
-  - 9 damage classes (UDS + DS1-DS8) instead of 3.
-  - 50 records, each ~622 s; window count per record ≈ 60.
-  - Sample rate already 100 Hz, no resampling.
+Source HDF5 schema:
+  50 top-level records named MVS_<P1|P2>_<UDS|DS1..8>_<SM|NM>_<Y|Z>_NN.
+  Each record holds a Group `acceleration/<sensor>/<axis>` of float64
+  time-series at 100 Hz, ~622 s long (62 147 samples). Sensors: 18
+  arch (AG01-18), 40 deck (AL01-40), 1 shaker reference (AS), plus
+  strain gauges (SB/SC).
+
+Damage classes encoded as integers: 0 = UDS (undamaged), 1..8 = DS1..DS8.
 
 Usage:
-  python build_hbta_pymodal.py             # full build
-  python build_hbta_pymodal.py --smoke 4   # 4 records, smoke test
+  python build_hbta_pymodal.py             # full build (~3 min)
+  python build_hbta_pymodal.py --smoke 6   # 6 records, smoke test
 """
 from __future__ import annotations
 
@@ -52,13 +53,13 @@ STRAIN_BOTTOM = [f"SB{i:02d}" for i in range(1, 9)]
 STRAIN_CROSS  = [f"SC{i:02d}" for i in range(1, 8)]
 SHAKER_SENSOR = "AS"
 
-# Channel selection (kept compact, like Flossgraben's 9). 12 arch
-# accelerometers (every other arch sensor on each side) → mirrors the
-# Flossgraben-style "one per span" + extras philosophy.
+# Channel selection: 10 arch accelerometers (5 north + 5 south, picking
+# alternating joints along the span) + 2 representative deck stringers.
+# Edit this list to expand to more sensors if needed.
 SENSOR_SELECTION = [
     "AG02", "AG04", "AG05", "AG06", "AG08",  # north arch (top girder joints)
     "AG11", "AG13", "AG14", "AG15", "AG17",  # south arch (top girder joints)
-    "AL10", "AL26",                            # deck stringers, two representative
+    "AL10", "AL26",                          # deck stringers, two representative
 ]
 N_CH = len(SENSOR_SELECTION)
 
@@ -78,12 +79,12 @@ N_F        = N_T // 2 + 1  # 513 rfft bins
 DF         = FS / N_T      # 0.09766 Hz frequency resolution
 F_MAX      = FS / 2.0      # 50 Hz Nyquist (paper notes 100 Hz is resampled from 400 Hz)
 
-# Window targets — balanced across classes; pick comparable to Flossgraben's 10 k
+# Window targets — balanced across the 9 damage classes
 TARGETS_TOTAL = 9000        # total windows
 TARGETS_PER_CLASS = TARGETS_TOTAL // 9     # 9 classes, 1000 each
 
 
-# ── Logging setup (matches Flossgraben builder) ──────────────────────
+# ── Logging setup ────────────────────────────────────────────────────
 def setup_logging(name: str, log_dir: Path) -> logging.Logger:
     log_dir.mkdir(parents=True, exist_ok=True)
     log = logging.getLogger(name)

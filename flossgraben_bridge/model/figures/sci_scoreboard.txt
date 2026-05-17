@@ -1,6 +1,0 @@
-SCI band: 0.5-25.0 Hz
---------------------------------
- reference : SCI = 0.0393
-    field3 : SCI = 0.0527
-    field4 : SCI = 0.0393
-      mean : SCI = 0.0438
