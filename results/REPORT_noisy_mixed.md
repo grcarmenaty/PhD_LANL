@@ -1,6 +1,6 @@
 # Comprehensive report — LANL 3SBB synthetic damage dataset & ML pipeline
 
-> **NOTE — noisy-mixed variant.**  This report has the same structure as [`REPORT.md`](REPORT.md), but every table and per-task narrative below was rebuilt from the **noisy_mixed** pipeline outputs in `results/noisy_mixed/` (mixed-SNR additive Gaussian noise on the time series).  All hand-written sections (§§ 2-6 dataset / models / features / plot key) are inherited verbatim; only §§ 1, 7-9 cross-model tables and figure references reflect the noisy run.
+> **NOTE - noisy-mixed variant.**  This report has the same structure as [`REPORT.md`](REPORT.md), but every cross-model table and per-indicator section below was rebuilt from the **noisy_mixed** pipeline outputs in `results/noisy_mixed/` (mixed-SNR additive Gaussian noise on the time series).  All hand-written sections (dataset, models, features, plot key) are inherited verbatim from `REPORT.md`; only the auto-generated results tables reflect the noisy run.
 
 A single document containing everything: the train / val / test
 protocol, how to read every plot, the per-task narrative with
