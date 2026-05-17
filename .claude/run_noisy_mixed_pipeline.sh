@@ -13,6 +13,7 @@
 #   5. evaluate_full_experimental.py   → results/noisy_mixed/full_experimental/*
 #   6. transfer_learn.py               → results/noisy_mixed/transfer/*
 #   7. resolution_sweep.py             → results/noisy_mixed/resolution_sweep/*
+#   7.5 plots_experimental.py        → results/noisy_mixed/figures_exp/*
 #   8. build_report_noisy_mixed.py    → results/REPORT_noisy_mixed.md
 set -u
 
@@ -59,6 +60,9 @@ step transfer  python -m ml_pipeline.transfer_learn \
   --syn "$FEATS" --exp "$EXP" --results "$OUT"                          || exit 1
 step resolution_sweep  python -m ml_pipeline.resolution_sweep \
   --features "$FEATS" --out "$OUT"                                      || exit 1
+step exp_plots  python -m ml_pipeline.plots_experimental \
+  --syn-features "$FEATS" --exp "$EXP" \
+  --results "$OUT" --out "$OUT/figures_exp"                             || exit 1
 step report  python -m ml_pipeline.build_report_noisy_mixed \
   --results "$OUT" --out "$REPO/results/REPORT_noisy_mixed.md"          || exit 1
 

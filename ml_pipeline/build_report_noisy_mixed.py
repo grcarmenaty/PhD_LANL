@@ -146,6 +146,11 @@ def main() -> None:
     tmp_subs = _REPO / "results" / ".noisy_mixed_indicator_subs.md"
     _build_indicator_subs(args.results, tmp_subs)
 
+    # The noisy-mixed exp figures live under results/noisy_mixed/figures_exp/
+    # but the report itself lives in results/ - the relative path from the
+    # report has to walk into the results/noisy_mixed/ subdirectory.
+    exp_fig_rel = str(args.results.relative_to(args.out.parent) / "figures_exp")
+
     cmd = [
         sys.executable, "-m", "ml_pipeline.integrate_report",
         "--report", str(args.out),
@@ -153,6 +158,7 @@ def main() -> None:
         "--exp", str(args.results / "experimental_full_evaluation.json"),
         "--ind-subs", str(tmp_subs),
         "--ind-vs-dmg", str(_REPO / "results" / "indicator_vs_damage_table.md"),
+        "--exp-figures-dir", exp_fig_rel,
     ]
     subprocess.check_call(cmd, cwd=_REPO)
 
