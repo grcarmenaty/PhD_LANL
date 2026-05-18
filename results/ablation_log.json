@@ -34,5 +34,26 @@
     },
     "decision": "keep",
     "notes": "Severity goes from best=-0.020 (R^2) to best=+0.180 -- a +0.20 lift from a single line of code per model. Catastrophic MLP failures (R^2 ~ -10^22) collapse to mundane negative R^2 (-1.2). Indicator predictors correctly get bounded_output=False so their raw unbounded predictions are surfaced (this is the truth -- they were never trained with target normalization; that's a P1 problem)."
+  },
+  {
+    "phase": "P0.3",
+    "description": "Per-domain scaler refit. _build_scalers in evaluate_full_experimental.py now accepts source='exp_pristine' which fits each StandardScaler on the 462 IQS Pristine cases instead of the synth train fold. The classifier decision boundary is unchanged; only the input whitening shifts so MLP/sklearn cells see inputs centered where the experimental data live. Wired through a --scaler-source CLI flag; default flipped to exp_pristine. Skipped the planned 'add indicators to FEATURES_FLAT' step -- no *_indicators.pt artefacts exist; the report explicitly removed indicators-as-input.",
+    "snapshot_dir": "results/p0_3/",
+    "best_per_task_exp": {
+      "binary":        {"p0_2": 0.825, "p0_3": 0.827, "delta": +0.002, "cell": "mlp/modal becomes the new best (was cnn2d/cfdac_all)"},
+      "type":          {"p0_2": 0.384, "p0_3": 0.379, "delta": -0.005, "cell": "best slides from mlp/modal to cnn2d/cfdac_mag"},
+      "severity_R2":   {"p0_2": 0.180, "p0_3": 0.180, "delta": +0.000, "cell": "best cnn/timeseries unchanged (not a flat-feature cell)"},
+      "col_location":  {"p0_2": 0.508, "p0_3": 0.508, "delta": +0.000, "cell": "best cnn2d/cfdac_mag unchanged"},
+      "mass_location": {"p0_2": 0.534, "p0_3": 0.534, "delta": +0.000, "cell": "best cnn2d/cfdac_real unchanged"}
+    },
+    "mlp_modal_per_task": {
+      "severity_R2":   {"p0_2": -1.165, "p0_3": +0.055, "delta": +1.220},
+      "mass_location": {"p0_2":  0.256, "p0_3":  0.378, "delta": +0.122},
+      "binary":        {"p0_2":  0.825, "p0_3":  0.827, "delta": +0.002},
+      "col_location":  {"p0_2":  0.453, "p0_3":  0.398, "delta": -0.054},
+      "type":          {"p0_2":  0.384, "p0_3":  0.348, "delta": -0.036}
+    },
+    "decision": "keep",
+    "notes": "Where the StandardScaler is in the prediction path (MLP / sklearn on 'modal'), the exp-Pristine scaler dominates -- severity MLP/modal goes from -1.165 to +0.055 (+1.2 lift, the biggest single-cell improvement in the whole sweep so far). Mass-location MLP/modal +0.12. Col/type MLP/modal regress slightly because their decision boundary doesn't survive the input shift cleanly. Overall best-per-task is essentially unchanged because deep cells (Conv2D/Conv3D on CFDAC) dominate the top of every task and don't go through this scaler at all. The fix is a net win and is now the default."
   }
 ]

@@ -121,7 +121,7 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.8248673237300985,
+    "value": 0.8271417740712661,
     "mae": null,
     "n_cases": 2638
   },
@@ -265,7 +265,7 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.45252837977296184,
+    "value": 0.39834881320949433,
     "mae": null,
     "n_cases": 1938
   },
@@ -409,7 +409,7 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.25630252100840334,
+    "value": 0.37815126050420167,
     "mae": null,
     "n_cases": 238
   },
@@ -553,8 +553,8 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "R2",
-    "value": -1.1646995544433594,
-    "mae": 0.3635827302932739,
+    "value": 0.05461496114730835,
+    "mae": 0.255683958530426,
     "n_cases": 2176
   },
   {
@@ -679,7 +679,7 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.3840030326004549,
+    "value": 0.3479909021986353,
     "mae": null,
     "n_cases": 2638
   },

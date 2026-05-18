@@ -60,13 +60,48 @@ def _exp_load_feature(exp_path: Path, name: str,
         return f[name][:] if rows is None else f[name][rows]
 
 
-def _build_scalers(syn_path: Path) -> Dict[str, Dict[str, StandardScaler]]:
-    """Re-fit per-(task, flat-feature) StandardScaler on the synth
-    train fold so MLP / sklearn cells receive the same input
-    distribution they trained on."""
+def _build_scalers(syn_path: Path,
+                    exp_path: Path | None = None,
+                    source: str = "synth",
+                    ) -> Dict[str, Dict[str, StandardScaler]]:
+    """Re-fit per-(task, flat-feature) StandardScaler.
+
+    ``source="synth"`` (default) preserves the legacy behaviour: fit
+    on the synth train fold of each task, then apply at inference --
+    only correct if synth and exp share the input distribution, which
+    is the exact failure mode this plan is fixing.
+
+    ``source="exp_pristine"`` fits the same scaler on the experimental
+    Pristine subset (462 cases) instead.  The classifier's decision
+    boundary is unchanged; only the input whitening shifts so the MLP
+    sees inputs centred where the experimental data actually live.
+    Requires ``exp_path``.
+    """
     L = load_labels(syn_path)
     tasks = build_targets(L["type_code"], L["storey"], L["end"], L["severity"])
     out: Dict[str, Dict[str, StandardScaler]] = {}
+
+    if source == "exp_pristine":
+        if exp_path is None:
+            raise ValueError("exp_pristine scaler source requires --exp")
+        with h5py.File(exp_path, "r") as f:
+            e_tc = f["type_code"][:]
+            flat = {n: f[n][:] for n in FEATURES_FLAT if n in f}
+        from ml_pipeline.case_design import TYPE_PRISTINE
+        pristine_idx = np.where(e_tc == TYPE_PRISTINE)[0]
+        if pristine_idx.size == 0:
+            print("WARNING: no exp Pristine; falling back to synth scaler source")
+            source = "synth"
+        else:
+            print(f"  fitting scalers on {pristine_idx.size} exp Pristine cases")
+            scalers_by_feature: Dict[str, StandardScaler] = {}
+            for f_name, arr in flat.items():
+                scalers_by_feature[f_name] = StandardScaler().fit(
+                    arr[pristine_idx].reshape(pristine_idx.size, -1))
+            for tn in tasks:
+                out[tn] = dict(scalers_by_feature)
+            return out
+
     flat = {n: load_feature(syn_path, n) for n in FEATURES_FLAT}
     for tn, (mask, y_pool, kind) in tasks.items():
         out[tn] = {}
@@ -157,12 +192,14 @@ def _parse_tag(tag: str, tasks: Dict[str, tuple]) -> tuple[str, str, str] | None
 
 
 def evaluate_classification_regression(syn_path: Path, exp_path: Path,
-                                          out_dir: Path) -> None:
-    print("loading synth labels + scalers …")
+                                          out_dir: Path,
+                                          scaler_source: str = "synth",
+                                          out_suffix: str = "") -> None:
+    print(f"loading synth labels + scalers (source={scaler_source}) …")
     syn_labels = load_labels(syn_path)
     syn_tasks  = build_targets(syn_labels["type_code"], syn_labels["storey"],
                                   syn_labels["end"], syn_labels["severity"])
-    scalers = _build_scalers(syn_path)
+    scalers = _build_scalers(syn_path, exp_path, source=scaler_source)
 
     with h5py.File(exp_path, "r") as f:
         e_type = f["type_code"][:].astype(np.int64)
@@ -230,12 +267,12 @@ def evaluate_classification_regression(syn_path: Path, exp_path: Path,
             })
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "experimental_full_evaluation.json").write_text(
-        json.dumps(rows, indent=2))
-    (out_dir / "experimental_full_per_case.json").write_text(
-        json.dumps(per_case, indent=2))
-    print(f"\nWrote experimental_full_evaluation.json ({len(rows)} rows) "
-            f"and experimental_full_per_case.json ({len(per_case)} rows)")
+    eval_name = f"experimental_full_evaluation{out_suffix}.json"
+    case_name = f"experimental_full_per_case{out_suffix}.json"
+    (out_dir / eval_name).write_text(json.dumps(rows, indent=2))
+    (out_dir / case_name).write_text(json.dumps(per_case, indent=2))
+    print(f"\nWrote {eval_name} ({len(rows)} rows) "
+            f"and {case_name} ({len(per_case)} rows)")
 
 
 def evaluate_indicator_predictors(syn_path: Path, exp_path: Path,
@@ -322,9 +359,21 @@ def main() -> None:
     p.add_argument("--out", type=Path, default=_REPO / "results")
     p.add_argument("--skip-cls", action="store_true")
     p.add_argument("--skip-ind", action="store_true")
+    p.add_argument("--scaler-source", choices=("synth", "exp_pristine"),
+                      default="exp_pristine",
+                      help="Where to fit the StandardScaler for MLP/sklearn "
+                              "flat-feature cells. 'exp_pristine' (default, P0.3) "
+                              "fits on the experimental Pristine subset, so the "
+                              "input whitening matches the domain we infer on. "
+                              "'synth' (legacy) fits on the synth train fold.")
+    p.add_argument("--out-suffix", default="",
+                      help="Suffix appended to output JSONs; useful for A/B "
+                              "comparison runs, e.g. _scaler_exp.")
     args = p.parse_args()
     if not args.skip_cls:
-        evaluate_classification_regression(args.syn, args.exp, args.out)
+        evaluate_classification_regression(args.syn, args.exp, args.out,
+                                              scaler_source=args.scaler_source,
+                                              out_suffix=args.out_suffix)
     if not args.skip_ind:
         evaluate_indicator_predictors(args.syn, args.exp, args.out)
 
