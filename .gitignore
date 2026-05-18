@@ -68,6 +68,10 @@ results/transfer_learn.log
 results/hpo.log
 results/vision_train.log
 
+# Vision-backbone artefacts: large (16-330 MB each); regenerate via
+# ml_pipeline.train_vision.  Keep only results/vision_eval.json tracked.
+results/models_vision/*.pt
+
 # Mid-sweep ablation output directories (regenerate via the matching
 # hpo / train command in the ablation log).  Large .pt files; the
 # canonical artefacts live in results/models/.
