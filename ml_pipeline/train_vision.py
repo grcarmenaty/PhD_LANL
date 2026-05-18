@@ -173,8 +173,12 @@ def _train_one_cell(backbone_name: str, feature: str, task_name: str,
 
 
 def _exp_eval(backbone_name: str, mdl: nn.Module, feature: str, task: str,
-                exp_path: Path) -> Dict:
-    """Zero-shot evaluation on the full 2638-case experimental set."""
+                exp_path: Path, batch: int = 32) -> Dict:
+    """Zero-shot evaluation on the full 2638-case experimental set.
+
+    Batches inference so the 224x224 upsample doesn't materialise the
+    whole feature tensor at once (2638 * 4 * 224 * 224 * float32 ≈ 2 GB).
+    """
     from ml_pipeline.evaluate_full_experimental import _exp_load_feature
     X = _exp_load_feature(exp_path, feature, normalize=True)
     if X.ndim == 5:
@@ -188,16 +192,20 @@ def _exp_eval(backbone_name: str, mdl: nn.Module, feature: str, task: str,
     e_tasks = build_targets(tc, sto, end, sev)
     e_mask, e_y, e_kind = e_tasks[task]
     idx = np.where(e_mask)[0]
-    Xe = torch.as_tensor(X[idx]).float()
+    Xe = X[idx]
     mdl.eval()
+    outs = []
     with torch.no_grad():
-        out = mdl(Xe).cpu()
+        for i in range(0, len(Xe), batch):
+            xb = torch.as_tensor(Xe[i:i + batch]).float()
+            outs.append(mdl(xb).cpu().numpy())
+    out = np.concatenate(outs, axis=0)
     if e_kind == "cls":
-        pred = out.argmax(1).numpy()
+        pred = out.argmax(1)
         metric = accuracy_score(e_y, pred)
         return {"metric_name": "accuracy", "value": float(metric),
                   "mae": None, "n": int(len(idx))}
-    pred = out.squeeze(1).numpy()
+    pred = out.squeeze(1) if out.ndim == 2 else out
     return {"metric_name": "R2",
             "value": float(r2_score(e_y, pred)),
             "mae": float(mean_absolute_error(e_y, pred)),
