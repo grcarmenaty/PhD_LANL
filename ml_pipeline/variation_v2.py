@@ -283,14 +283,19 @@ def geometry_from_params(p: SampleParamsV2) -> BuildingGeometry:
         g.joint_stiffness_per_end[p.storey, :, end_idx] *= r
     elif p.type_code == TYPE_CRACK:
         r = crack_ratio(p.severity)
-        # NOTE: P2.2 will replace this with the per-corner asymmetric
-        # variant (BD -> corners 0,1; AD -> corners 2,3) that lifts
-        # the ROM ceiling on col_location.  Keeping symmetric for now
-        # so P1.2 is purely about jitter widening.
-        g.column_factor[p.storey, _columns_all()] *= r ** 0.25
+        # P2.2: per-corner asymmetric damage.  The 4 columns at each
+        # storey form a rectangle; BD ("Bottom Damaged") and AD ("Above
+        # Damaged" / top) ends sit on opposite faces.  Mapping the
+        # `end` field to the corner pair {0,1} (BD) or {2,3} (AD) and
+        # applying a stronger exponent to fewer columns breaks the
+        # information-theoretic degeneracy that caps col_location at
+        # ~0.67 in the symmetric version.
+        corners = (0, 1) if p.end != END_AD else (2, 3)
+        g.column_factor[p.storey, list(corners)] *= r ** 0.5
     elif p.type_code == TYPE_HOLE:
         r = hole_ratio(p.severity)
-        g.column_factor[p.storey, _columns_all()] *= r ** 0.25
+        corners = (0, 1) if p.end != END_AD else (2, 3)
+        g.column_factor[p.storey, list(corners)] *= r ** 0.5
     elif p.type_code == TYPE_MASS:
         plate = int(p.end)
         if 0 <= plate <= 3:

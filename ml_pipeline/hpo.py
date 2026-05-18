@@ -393,6 +393,10 @@ def run_hpo(features_path: Path, out_dir: Path, epochs: int = 4) -> None:
                     "n_out": n_out,
                     "in_shape": in_shape,
                     "hyperparams": best_trial.hyperparams,
+                    # P1.1: load_feature() applies per-sample normalisation
+                    # by default; flag the artefact so eval feeds the
+                    # matching input distribution.
+                    "input_normalized": True,
                 }, models_dir / f"{tag}.pt")
 
     print("\nHPO complete.")

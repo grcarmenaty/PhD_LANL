@@ -231,8 +231,12 @@ def evaluate_classification_regression(syn_path: Path, exp_path: Path,
     artefacts = sorted(models_dir.iterdir())
     print(f"artefacts: {len(artefacts)}")
 
-    # Cache loaded features (only what we actually need, lazily).
-    feat_cache: Dict[str, np.ndarray] = {}
+    # P1.1: each artefact carries a `input_normalized` flag; we keep
+    # two parallel feature caches so artefacts trained on raw inputs
+    # and artefacts trained on per-sample-normalised inputs both see
+    # the distribution they expect.
+    feat_cache_norm: Dict[str, np.ndarray] = {}
+    feat_cache_raw:  Dict[str, np.ndarray] = {}
 
     for art in artefacts:
         tag = art.stem
@@ -244,11 +248,20 @@ def evaluate_classification_regression(syn_path: Path, exp_path: Path,
         mask, y_all, kind = exp_tasks[task_name]
         if not mask.any():
             continue
+        # Peek the artefact flag (lazy load of the blob's metadata).
+        try:
+            blob = torch.load(art, map_location="cpu", weights_only=False)
+            normalized = bool(blob.get("input_normalized", False))
+        except Exception:
+            normalized = False
         idx = np.where(mask)[0]
-        if feature not in feat_cache:
-            print(f"  loading exp feature: {feature}")
-            feat_cache[feature] = _exp_load_feature(exp_path, feature)
-        X = feat_cache[feature][idx]
+        cache = feat_cache_norm if normalized else feat_cache_raw
+        if feature not in cache:
+            print(f"  loading exp feature: {feature}  "
+                      f"(normalize={normalized})")
+            cache[feature] = _exp_load_feature(exp_path, feature,
+                                                     normalize=normalized)
+        X = cache[feature][idx]
         y = y_all
         scaler = scalers.get(task_name, {}).get(feature)
         try:

@@ -288,7 +288,9 @@ def _to_tensor(x: np.ndarray, seq: bool) -> torch.Tensor:
 def train_torch(model_name: str, kind: str, n_out: int,
                  X_tr, y_tr, X_va, y_va, X_te, y_te,
                  epochs: int = 12, batch: int = 64,
-                 lr: float = 1e-3) -> Dict:
+                 lr: float = 1e-3,
+                 init_from: Path | None = None,
+                 feature: str | None = None) -> Dict:
     t0 = time.time()
     seq = X_tr.ndim == 3
     is_mat = X_tr.ndim == 4
@@ -330,6 +332,23 @@ def train_torch(model_name: str, kind: str, n_out: int,
     else:
         raise ValueError(model_name)
 
+    # P2.3: optionally warm-start the backbone from an SSL-pretrained
+    # checkpoint produced by pretrain_ssl.py.  We only load the
+    # `backbone_state_dict` parameters whose names also exist on this
+    # task model; unmatched keys (the SSL projection head) are dropped.
+    if init_from is not None and feature is not None:
+        ssl_path = Path(init_from) / f"{model_name}_{feature}_ssl.pt"
+        if ssl_path.exists():
+            ssl_blob = torch.load(ssl_path, map_location="cpu",
+                                       weights_only=False)
+            ssl_state = ssl_blob.get("backbone_state_dict", {})
+            own_state = model.state_dict()
+            matched = {k: v for k, v in ssl_state.items()
+                          if k in own_state and v.shape == own_state[k].shape}
+            own_state.update(matched)
+            model.load_state_dict(own_state)
+            print(f"    SSL warm-start: {len(matched)}/{len(ssl_state)} "
+                      f"keys from {ssl_path.name}", flush=True)
     model = model.to(DEVICE)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
@@ -390,7 +409,8 @@ def train_torch(model_name: str, kind: str, n_out: int,
 
 # ── orchestrator ────────────────────────────────────────────────────────────
 def run(features_path: Path, out_dir: Path,
-        epochs: int = 12) -> List[Result]:
+        epochs: int = 12,
+        init_from: Path | None = None) -> List[Result]:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "models").mkdir(parents=True, exist_ok=True)
 
@@ -463,12 +483,19 @@ def run(features_path: Path, out_dir: Path,
                 else:
                     out = train_torch(model_name, kind, n_out,
                                        flat_X[0], y_tr, flat_X[1], y_va,
-                                       flat_X[2], y_te, epochs=epochs)
+                                       flat_X[2], y_te, epochs=epochs,
+                                       init_from=init_from,
+                                       feature=feat_name)
                     art_path = out_dir / "models" / f"{tag}.pt"
                     torch.save({"state_dict": out["model"].state_dict(),
                                  "model_name": model_name,
                                  "n_out": n_out,
-                                 "in_shape": list(X_tr.shape[1:])}, art_path)
+                                 "in_shape": list(X_tr.shape[1:]),
+                                 # P1.1: artefacts produced after the
+                                 # per-sample-normalisation roll-in
+                                 # carry this flag so eval routines
+                                 # know to feed normalised inputs.
+                                 "input_normalized": True}, art_path)
                 print(f"  val={out['metric_val']:.4f}  test={out['metric_test']:.4f}  "
                       f"({out['runtime_s']:.1f}s)")
                 extra = {k: out[k] for k in out
@@ -492,8 +519,14 @@ def main() -> None:
                           default=_REPO / "dataset" / "features.h5")
     parser.add_argument("--out", type=Path, default=_REPO / "results")
     parser.add_argument("--epochs", type=int, default=12)
+    parser.add_argument("--init-from", type=Path, default=None,
+                          help="P2.3: directory of SSL-pretrained "
+                                  "backbones from pretrain_ssl.py to warm-"
+                                  "start training (expects files named "
+                                  "<model>_<feature>_ssl.pt).")
     args = parser.parse_args()
-    results = run(args.features, args.out, epochs=args.epochs)
+    results = run(args.features, args.out, epochs=args.epochs,
+                      init_from=args.init_from)
 
     # Summary table.
     print("\n========= SUMMARY =========")
