@@ -69,19 +69,36 @@ SYNTH_EXP_RATIO = 5
 torch.set_num_threads(4)
 
 
-def _exp_load_feature(exp_path: Path, name: str) -> np.ndarray:
+def _exp_load_feature(exp_path: Path, name: str,
+                        normalize: bool = False) -> np.ndarray:
     """Re-create the model's expected input view from the experimental
-    file.  Mirrors `evaluate_full_experimental._exp_load_feature`."""
+    file.  Mirrors `evaluate_full_experimental._exp_load_feature`.
+
+    P1.1: ``normalize`` -- if True, apply the same per-sample
+    normalisation as load_feature() so artefacts trained on
+    normalised inputs see the matching distribution at fine-tune
+    time.  Defaults to False so existing un-normalised artefacts
+    behave as before.
+    """
+    from ml_pipeline.train import _per_sample_normalize
     if name in _CFDAC_VARIANTS:
         parts, mode = _CFDAC_VARIANTS[name]
         with h5py.File(exp_path, "r") as f:
-            layers = [f[p][:] for p in parts]
+            layers = []
+            for p in parts:
+                arr = f[p][:]
+                if normalize:
+                    arr = _per_sample_normalize(p, arr)
+                layers.append(arr)
         x = np.stack(layers, axis=1)
         if mode == "stack3d":
             x = x[:, np.newaxis, ...]
         return x
     with h5py.File(exp_path, "r") as f:
-        return f[name][:]
+        data = f[name][:]
+    if normalize:
+        data = _per_sample_normalize(name, data)
+    return data
 
 
 def _build_model(model_name: str, n_out: int, in_shape: list, hp: dict,
@@ -265,9 +282,12 @@ def _fine_tune(mdl: nn.Module, kind: str,
 def _process_main(args, tasks, syn_scalers, exp_path: Path,
                     syn_labels) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
-    feat_cache: Dict[str, np.ndarray] = {}
+    # P1.1: per-artefact normalisation flag drives a dual cache.
+    feat_cache_norm: Dict[str, np.ndarray] = {}
+    feat_cache_raw:  Dict[str, np.ndarray] = {}
     # P1.4: synth-side feature cache for joint training in unfreeze='all'.
-    syn_feat_cache: Dict[str, np.ndarray] = {}
+    syn_feat_cache_norm: Dict[str, np.ndarray] = {}
+    syn_feat_cache_raw:  Dict[str, np.ndarray] = {}
     for art in sorted((args.results / "models").iterdir()):
         if art.suffix != ".pt":
             continue
@@ -278,15 +298,18 @@ def _process_main(args, tasks, syn_scalers, exp_path: Path,
         blob = torch.load(art, map_location="cpu", weights_only=False)
         in_shape = blob["in_shape"]; n_out = blob.get("n_out", 1)
         hp = blob.get("hyperparams") or {}
+        normalized = bool(blob.get("input_normalized", False))
         mask, y_pool, kind = tasks[task]
         # Load the experimental feature for this cell.
-        if feature not in feat_cache:
+        cache = feat_cache_norm if normalized else feat_cache_raw
+        if feature not in cache:
             try:
-                feat_cache[feature] = _exp_load_feature(exp_path, feature)
+                cache[feature] = _exp_load_feature(exp_path, feature,
+                                                          normalize=normalized)
             except Exception as e:
                 print(f"  skip {tag}: feature {feature}: {e}", flush=True)
                 continue
-        X_all = feat_cache[feature]
+        X_all = cache[feature]
         # MLP needs flat + scaler.
         scaler = syn_scalers.get(task, {}).get(feature)
         # Reconstruct the experimental labels matching the task.
@@ -342,13 +365,20 @@ def _process_main(args, tasks, syn_scalers, exp_path: Path,
                     # anchor regulariser.
                     X_synth_use = None; y_synth_use = None
                     if unfreeze == "all":
-                        if feature not in syn_feat_cache:
+                        # P1.1: route the synth-side feature through the
+                        # same normalize/raw switch as exp so the
+                        # backbone sees a consistent input distribution
+                        # in both halves of the joint loop.
+                        syn_cache = (syn_feat_cache_norm if normalized
+                                          else syn_feat_cache_raw)
+                        if feature not in syn_cache:
                             try:
-                                syn_feat_cache[feature] = load_feature(
-                                    args.syn, feature)
+                                syn_cache[feature] = load_feature(
+                                    args.syn, feature,
+                                    normalize=normalized)
                             except Exception:
-                                syn_feat_cache[feature] = None
-                        Xsyn = syn_feat_cache[feature]
+                                syn_cache[feature] = None
+                        Xsyn = syn_cache[feature]
                         if Xsyn is not None:
                             syn_mask, syn_y, _ = tasks[task]
                             syn_idx = np.where(syn_mask)[0]
