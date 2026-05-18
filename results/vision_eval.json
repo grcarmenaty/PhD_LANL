@@ -1,0 +1,67 @@
+[
+  {
+    "task": "type",
+    "backbone": "resnet50",
+    "feature": "cfdac_all",
+    "n_channels": 4,
+    "synth_val": 0.6592920353982301,
+    "synth_test": 0.6933333333333334,
+    "exp_metric_name": "accuracy",
+    "exp_value": 0.5181956027293404,
+    "exp_mae": null,
+    "exp_n": 2638,
+    "runtime_s": 613.9550676345825
+  },
+  {
+    "task": "type",
+    "backbone": "efficientnet_b0",
+    "feature": "cfdac_all",
+    "n_channels": 4,
+    "synth_val": 0.6371681415929203,
+    "synth_test": 0.6888888888888889,
+    "exp_metric_name": "accuracy",
+    "exp_value": 0.09021986353297953,
+    "exp_mae": null,
+    "exp_n": 2638,
+    "runtime_s": 411.89891839027405
+  },
+  {
+    "task": "type",
+    "backbone": "convnext_tiny",
+    "feature": "cfdac_all",
+    "n_channels": 4,
+    "synth_val": 0.3008849557522124,
+    "synth_test": 0.31555555555555553,
+    "exp_metric_name": "accuracy",
+    "exp_value": 0.33131159969673996,
+    "exp_mae": null,
+    "exp_n": 2638,
+    "runtime_s": 704.3871574401855
+  },
+  {
+    "task": "type",
+    "backbone": "swin_t",
+    "feature": "cfdac_all",
+    "n_channels": 4,
+    "synth_val": 0.25663716814159293,
+    "synth_test": 0.27555555555555555,
+    "exp_metric_name": "accuracy",
+    "exp_value": 0.1626231993934799,
+    "exp_mae": null,
+    "exp_n": 2638,
+    "runtime_s": 750.6082677841187
+  },
+  {
+    "task": "type",
+    "backbone": "vit_b_16",
+    "feature": "cfdac_all",
+    "n_channels": 4,
+    "synth_val": 0.23893805309734514,
+    "synth_test": 0.26222222222222225,
+    "exp_metric_name": "accuracy",
+    "exp_value": 0.08794541319181198,
+    "exp_mae": null,
+    "exp_n": 2638,
+    "runtime_s": 1531.379430770874
+  }
+]
