@@ -66,6 +66,7 @@ dataset/features_mixed_aug.h5
 # Run logs (regenerate via the matching script)
 results/transfer_learn.log
 results/hpo.log
+results/vision_train.log
 
 # Mid-sweep ablation output directories (regenerate via the matching
 # hpo / train command in the ablation log).  Large .pt files; the
