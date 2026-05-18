@@ -429,6 +429,10 @@ def _process_main(args, tasks, syn_scalers, exp_path: Path,
                 print(f"  {tag_full:<55s} {row['metric']:<8s} "
                           f"{row['value']:+.3f}  ({row['runtime_s']:.1f}s)",
                           flush=True)
+                # P1.4: incremental save after every cell so an
+                # interrupted run still leaves a usable JSON snapshot.
+                _out = args.results / "transfer_learning.json"
+                _out.write_text(json.dumps(rows, indent=2))
     return rows
 
 
