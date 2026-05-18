@@ -320,7 +320,10 @@ def evaluate_indicator_predictors(syn_path: Path, exp_path: Path,
                                   syn_labels["end"], syn_labels["severity"])
     scalers = _build_scalers(syn_path)
 
-    feat_cache: Dict[str, np.ndarray] = {}
+    # P1.1: dual caches keyed by whether the artefact was trained with
+    # per-sample normalisation.  Existing artefacts default to False.
+    feat_cache_norm: Dict[str, np.ndarray] = {}
+    feat_cache_raw:  Dict[str, np.ndarray] = {}
     rows: List[Dict] = []
     for art in sorted(models_dir.iterdir()):
         # tag = "<indicator>_<model>_<feature>" — but indicator names can
@@ -343,10 +346,20 @@ def evaluate_indicator_predictors(syn_path: Path, exp_path: Path,
         if ind_name not in INDICATOR_NAMES:
             continue
         ind_idx = INDICATOR_NAMES.index(ind_name)
-        if feat not in feat_cache:
-            print(f"  loading exp feature: {feat}")
-            feat_cache[feat] = _exp_load_feature(exp_path, feat)
-        X = feat_cache[feat][dmg_idx]
+        # Peek the artefact's normalisation flag.
+        normalized = False
+        if art.suffix == ".pt":
+            try:
+                blob = torch.load(art, map_location="cpu", weights_only=False)
+                normalized = bool(blob.get("input_normalized", False))
+            except Exception:
+                normalized = False
+        cache = feat_cache_norm if normalized else feat_cache_raw
+        if feat not in cache:
+            print(f"  loading exp feature: {feat}  (normalize={normalized})")
+            cache[feat] = _exp_load_feature(exp_path, feat,
+                                                  normalize=normalized)
+        X = cache[feat][dmg_idx]
         y = ind_true[dmg_idx, ind_idx]
         # scaler from severity task fold (same train fold as indicator
         # predictors — they were trained on damage samples).

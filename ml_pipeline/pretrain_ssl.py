@@ -309,7 +309,7 @@ def pretrain_one(model_name: str, feature: str, exp_path: Path,
             z1 = mdl(v1); z2 = mdl(v2)
             loss = nt_xent_loss(z1, z2, temperature=0.1)
             loss.backward(); opt.step()
-            epoch_loss += float(loss); n_batches += 1
+            epoch_loss += float(loss.detach()); n_batches += 1
         sched.step()
         if (ep + 1) % max(1, epochs // 10) == 0 or ep == epochs - 1:
             print(f"    epoch {ep + 1}/{epochs}  "

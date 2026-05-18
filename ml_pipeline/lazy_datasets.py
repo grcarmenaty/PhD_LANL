@@ -85,12 +85,17 @@ class LazyCFDACDataset(Dataset):
                   rows: np.ndarray | None = None,
                   labels: np.ndarray | None = None,
                   kind: str = "cls",
-                  reshape: str = "conv2d"):
+                  reshape: str = "conv2d",
+                  normalize: bool = True):
         """``reshape`` controls how each sample is presented:
             "conv2d" → (C, H, W) — default, suits Conv2DStack
             "conv3d" → (1, D, H, W) where D = C — for Conv3DStack
             "seq"    → (C*W, H) — for Conv1DStack / SmallTransformer
             "flat"   → (C*H*W,) — for MLP / RF / XGB
+
+        P1.1: ``normalize`` (default True) applies the same per-part
+        per-sample normalisation as ``train.load_feature`` so streaming
+        and bulk-read paths produce identically-distributed inputs.
         """
         if variant not in _CFDAC_PARTS:
             raise ValueError(f"unknown variant {variant!r}")
@@ -106,6 +111,7 @@ class LazyCFDACDataset(Dataset):
         if reshape not in ("conv2d", "conv3d", "seq", "flat"):
             raise ValueError(f"unknown reshape {reshape!r}")
         self.reshape = reshape
+        self.normalize = normalize
 
     def __len__(self):
         return len(self.rows)
@@ -127,6 +133,12 @@ class LazyCFDACDataset(Dataset):
         row = int(self.rows[i])
         with h5py.File(self.h5_path, "r") as f:
             layers = [f[p][row] for p in self.parts]
+        if self.normalize:
+            from ml_pipeline.train import _per_sample_normalize
+            # Apply per-part normalisation; each layer is (H, W) here
+            # but _per_sample_normalize expects a leading sample axis.
+            layers = [_per_sample_normalize(p, arr[None, ...])[0]
+                          for p, arr in zip(self.parts, layers)]
         x = np.stack(layers, axis=0).astype(np.float32)        # (C, H, W)
         if self.mode == "stack3d" and self.reshape == "conv2d":
             x = x[np.newaxis, ...]                              # legacy default
@@ -152,6 +164,9 @@ class LazyCFDACDataset(Dataset):
             for p in self.parts:
                 tmp = f[p][rows[order]]
                 arr = np.empty_like(tmp); arr[order] = tmp
+                if self.normalize:
+                    from ml_pipeline.train import _per_sample_normalize
+                    arr = _per_sample_normalize(p, arr)
                 layers.append(arr)
         x = np.stack(layers, axis=1).astype(np.float32)        # (n, C, H, W)
         if self.mode == "stack3d":
