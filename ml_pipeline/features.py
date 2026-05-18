@@ -64,7 +64,12 @@ def compute_frfs(signals: np.ndarray, excitation: np.ndarray,
     Y = np.fft.rfft(signals.astype(np.float64), axis=1)        # (n, N_F, 9)
     X = np.fft.rfft(excitation.astype(np.float64))             # (N_F,)
     # H1 = Sxy / Sxx ; with a deterministic input this reduces to Y / X.
-    H = Y / X[None, :, None]
+    # P0.5: guard against near-zero excitation bins (DC and below the
+    # chirp's lowest frequency).  Without this, lowering CHIRP_F_LO below
+    # ~1 Hz introduces NaNs/Infs that propagate silently through every
+    # downstream feature.
+    X_safe = np.where(np.abs(X) > 1e-12, X, 1e-12)
+    H = Y / X_safe[None, :, None]
     return H[:, freq_mask, :].astype(np.complex64)
 
 

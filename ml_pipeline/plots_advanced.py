@@ -47,9 +47,11 @@ from ml_pipeline.tasks import (   # noqa: E402
     build_targets, TASK_DESCRIPTION, TASK_N_CLASSES,
 )
 from ml_pipeline.train import (   # noqa: E402
-    FEATURES_FLAT, FEATURES_SEQ, FEATURES_MAT, _CFDAC_VARIANTS,
+    FEATURES_FLAT, FEATURES_SEQ_ALL, FEATURES_MAT, _CFDAC_VARIANTS,
     load_labels, load_feature, make_split, SEED,
 )
+# Parser of existing artefact tags must include legacy `timeseries`.
+FEATURES_SEQ = FEATURES_SEQ_ALL
 from ml_pipeline.models import (   # noqa: E402
     MLP, Conv1DStack, SmallTransformer, Conv2DStack, Conv3DStack,
 )

@@ -55,5 +55,12 @@
     },
     "decision": "keep",
     "notes": "Where the StandardScaler is in the prediction path (MLP / sklearn on 'modal'), the exp-Pristine scaler dominates -- severity MLP/modal goes from -1.165 to +0.055 (+1.2 lift, the biggest single-cell improvement in the whole sweep so far). Mass-location MLP/modal +0.12. Col/type MLP/modal regress slightly because their decision boundary doesn't survive the input shift cleanly. Overall best-per-task is essentially unchanged because deep cells (Conv2D/Conv3D on CFDAC) dominate the top of every task and don't go through this scaler at all. The fix is a net win and is now the default."
+  },
+  {
+    "phase": "P0.4 + P0.5",
+    "description": "P0.4: split FEATURES_SEQ in train.py into FEATURES_SEQ (training: frf_mag only) and FEATURES_SEQ_ALL (legacy: frf_mag + timeseries). Future training stops producing *_timeseries.pt cells since on experimental data timeseries is fabricated from H(f)*F(f)->IFFT and carries no info beyond frf_mag. The report builder build_report_sections.py now flags every experimental `timeseries` row with '(exp value is synthesised from FRF; not an independent feature)'.  P0.5: features.compute_frfs now guards X with np.where(|X|>1e-12, X, 1e-12) so a future change to CHIRP_F_LO below 1 Hz cannot inject NaN/Inf into every downstream feature silently.",
+    "snapshot_dir": "results/p0_4_5/",
+    "decision": "keep",
+    "notes": "P0.4 has no immediate ablation impact -- existing artefacts are still evaluated; the change takes effect when synth backbones retrain (P1). The report flag is documentation. P0.5 is a fragility guard with zero numerical effect today (synth chirp starts at 2 Hz, exp bins start at 0; |X| at 0 Hz is the chirp's DC component which is non-zero, ~1e-3). Both are merged together as a small infrastructure commit; the next ablation row will be P1.1 (per-sample normalisation + retraining)."
   }
 ]

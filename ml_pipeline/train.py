@@ -51,8 +51,16 @@ from ml_pipeline.tasks import (   # noqa: E402
 
 
 FEATURES_FLAT  = ("modal",)
-FEATURES_SEQ   = ("frf_mag", "timeseries")
-FEATURES_MAT   = ("cfdac",)        # 2-D matricial features
+# P0.4: `timeseries` on experimental data is synthesised from FRF via
+# H(f)*F(f) -> IFFT (see evaluate.py:synthesize_timeseries), so it
+# carries no independent information beyond `frf_mag` on the exp side.
+# Training a separate timeseries cell is therefore double-counting on
+# any cross-domain test.  Keep FEATURES_SEQ_ALL = legacy enumeration
+# for back-compat with existing artefacts; FEATURES_SEQ (the active
+# training list) drops `timeseries`.
+FEATURES_SEQ_ALL = ("frf_mag", "timeseries")
+FEATURES_SEQ     = ("frf_mag",)
+FEATURES_MAT     = ("cfdac",)        # 2-D matricial features
 SK_MODELS      = ("rf", "xgb")
 TORCH_FLAT     = ("mlp",)
 TORCH_SEQ      = ("cnn", "transformer")

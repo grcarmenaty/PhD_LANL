@@ -114,10 +114,18 @@ def cross_model_tables(hpo_cells, exp_cells, out_dir: Path) -> None:
         )
         pieces.append("|---|---|---|---|---|")
         for r in rows:
+            # P0.4: experimental `timeseries` is synthesised from FRF via
+            # H(f)*F(f) -> IFFT (see evaluate.py:synthesize_timeseries),
+            # so it carries no independent information beyond `frf_mag`
+            # on the experimental side -- the exp column for these cells
+            # is double-counted.
+            note = (" *(exp value is synthesised from FRF; not an "
+                       "independent feature on experimental)*"
+                       if r['feature'] == "timeseries" else "")
             pieces.append(
                 f"| {r['model']:<11} | `{r['feature']}` | "
                 f"{_fmt(r['val'])} | {_fmt(r['test'])} | "
-                f"{_fmt(r['exp'])} |"
+                f"{_fmt(r['exp'])}{note} |"
             )
         pieces.append("")
     out = out_dir / "cross_model_tables.md"
