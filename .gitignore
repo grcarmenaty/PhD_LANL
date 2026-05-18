@@ -57,3 +57,17 @@ logs/
 
 # Mixed-training VDS pointer file (regenerate via build_mixed_features.py)
 dataset/features_mixed.h5
+
+# Augmented chunks (P1.3 - regenerate via build_augmented_chunks.py)
+dataset/aug_chunk/
+dataset/features_aug.h5
+dataset/features_mixed_aug.h5
+
+# Mid-sweep ablation output directories (regenerate via the matching
+# hpo / train command in the ablation log).  Large .pt files; the
+# canonical artefacts live in results/models/.
+results_p1_1/
+results_p2_1/
+results_p2_3/
+results/models_ssl/
+results/models_ssl_smoke/
