@@ -91,30 +91,16 @@
     "notes": "type best lifts +0.128 to 0.507 via cnn/frf_mag -- 1D CNN finally benefits from log+z-score of FRF magnitude, which was the original prediction.  col_location and mass_location bests are unchanged because their best cells live in the un-retrained CFDAC variants. severity has mixed cell-level results: cnn/timeseries (the current best) wasn't retrained so it stays at +0.180; cnn/frf_mag and transformer/frf_mag regress badly when their *inputs* lose absolute-amplitude information via per-sample normalisation -- a real cost of P1.1 in cases where the source distribution was clean enough that absolute scale carried signal. The combination of P1.1 + augmented chunks (P1.3) should recover those cells because the augmentation will give the model amplitude variation that the normalisation removes from the source side. CFDAC variants still need retraining via hpo_cfdac_*.py to fully benefit from P1.1; deferred to a follow-up sweep."
   },
   {
-    "phase": "P1.4 (severity + type)",
-    "description": "Joint synth+exp fine-tuning with backbone unfrozen (unfreeze='all'); 3:1 synth:exp mini-batches plus L2 anchor (lambda=1e-4) against the synth-trained weights.  Sweep run in two focused passes via --tasks; col_location and mass_location 'all' rows are pending in a follow-up.",
-    "snapshot_dir": "results/transfer_learning.json",
-    "severity_per_unfreeze_k50": {
-      "head":      {"value": 0.121, "cell": "cnn2d/cfdac_mag"},
-      "head_proj": {"value": 0.172, "cell": "cnn2d/cfdac"},
-      "all":       {"value": 0.873, "cell": "cnn2d/cfdac_magphase"}
+    "phase": "P1.4 (all four non-binary tasks)",
+    "description": "Joint synth+exp fine-tuning with backbone unfrozen (unfreeze='all'); 3:1 synth:exp mini-batches plus L2 anchor (lambda=1e-4) against the synth-trained weights.  Sweep run in four focused passes via --tasks because the unbounded sweep exceeded the harness timeout; the four resulting JSONs were merged into results/transfer_learning_merged.json (740 rows) and promoted to transfer_learning.json. binary not re-run (already at the class-prior floor of 0.825 / 0.941 balanced; head-only fine-tune doesn't help and 'all' would be wasted compute).",
+    "snapshot_dir": "results/transfer_learning_merged.json",
+    "best_per_task_unfreeze_k50": {
+      "severity":      {"head": 0.121, "head_proj": 0.172, "all": 0.873, "all_cell": "cnn2d/cfdac_magphase"},
+      "type":          {"head": 0.565, "head_proj": 0.553, "all": 0.774, "all_cell": "cnn2d/cfdac_real"},
+      "col_location":  {"head": 0.300, "head_proj": 0.350, "all": 0.796, "all_cell": "cnn2d/cfdac_magphase"},
+      "mass_location": {"head": 0.637, "head_proj": 0.700, "all": 1.000, "all_cell": "cnn2d/cfdac_all"}
     },
-    "severity_per_unfreeze_k_curve_all": {
-      "k=0.10": 0.292,
-      "k=0.30": 0.804,
-      "k=0.50": 0.873
-    },
-    "type_per_unfreeze_k50": {
-      "head":      {"value": 0.565, "cell": "transformer/timeseries"},
-      "head_proj": {"value": 0.553, "cell": "transformer/timeseries"},
-      "all":       {"value": 0.774, "cell": "cnn2d/cfdac_real"}
-    },
-    "type_per_unfreeze_k_curve_all": {
-      "k=0.10": 0.639,
-      "k=0.30": 0.714,
-      "k=0.50": 0.774
-    },
-    "decision": "KEEP -- biggest results of the entire sweep",
-    "notes": "Joint synth+exp fine-tuning with the backbone unfrozen produces dramatic lifts on the two hardest tasks: severity goes 0.172 -> 0.873 (+0.7 R^2) and type goes 0.553 -> 0.774 (+0.22 accuracy) at k=50%.  Both scale cleanly with fraction.  The L2 anchor against the synth-trained weights prevents catastrophic forgetting; the 3:1 synth:exp batch ratio gives the backbone enough exp signal to shift toward the experimental distribution that head-only fine-tuning could not reach.  col_location and mass_location 'all' rows are pending; they're added to the follow-up todo list."
+    "decision": "KEEP -- single biggest fix in the entire plan",
+    "notes": "Joint synth+exp fine-tuning with the backbone unfrozen produces dramatic, consistent lifts on every non-binary task:\n  severity      0.172 -> 0.873 (+0.70 R^2)\n  type          0.553 -> 0.774 (+0.22 acc)\n  col_location  0.350 -> 0.796 (+0.45 acc)\n  mass_location 0.700 -> 1.000 (+0.30 acc, perfect on held-out 80 cases)\n\nThe L2 anchor against the synth-trained weights prevents catastrophic forgetting; the 3:1 synth:exp batch ratio gives the backbone enough exp signal to shift toward the experimental distribution that head-only fine-tuning could not reach.  cnn2d on a CFDAC variant is the consistent winner across all four tasks -- the 2D-conv inductive bias on CFDAC is the right structural prior for sim-to-real transfer once the backbone is allowed to adapt."
   }
 ]
