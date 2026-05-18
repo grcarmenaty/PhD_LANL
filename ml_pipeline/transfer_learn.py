@@ -295,6 +295,10 @@ def _process_main(args, tasks, syn_scalers, exp_path: Path,
         task, model_name, feature = _parse_tag(tag, tasks)
         if task is None:
             continue
+        # P1.4: optional task / unfreeze filters to make focused
+        # ablation runs that fit inside the harness timeout window.
+        if args.tasks and task not in args.tasks:
+            continue
         blob = torch.load(art, map_location="cpu", weights_only=False)
         in_shape = blob["in_shape"]; n_out = blob.get("n_out", 1)
         hp = blob.get("hyperparams") or {}
@@ -327,7 +331,9 @@ def _process_main(args, tasks, syn_scalers, exp_path: Path,
         if n_pool < 50:
             print(f"  skip {tag}: only {n_pool} experimental cases", flush=True)
             continue
-        for unfreeze in UNFREEZE_DEPTHS:
+        unfreeze_depths = (args.unfreezes if args.unfreezes
+                              else UNFREEZE_DEPTHS)
+        for unfreeze in unfreeze_depths:
             for k in FRACTIONS:
                 tag_full = f"{tag}__{unfreeze}__k{int(k*100):02d}"
                 t0 = time.time()
@@ -445,6 +451,15 @@ def main() -> None:
                               / "experimental_features_balanced.h5")
     p.add_argument("--results", type=Path, default=_REPO / "results")
     p.add_argument("--epochs", type=int, default=8)
+    # P1.4: focus filters for runs that have to fit inside a single
+    # harness timeout window.
+    p.add_argument("--tasks", nargs="*", default=None,
+                      choices=("binary", "type", "severity",
+                                  "col_location", "mass_location"),
+                      help="Restrict to a subset of tasks.")
+    p.add_argument("--unfreezes", nargs="*", default=None,
+                      choices=("head", "head_proj", "all"),
+                      help="Restrict to a subset of unfreeze depths.")
     args = p.parse_args()
 
     syn_labels = load_labels(args.syn)
