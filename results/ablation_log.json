@@ -62,5 +62,32 @@
     "snapshot_dir": "results/p0_4_5/",
     "decision": "keep",
     "notes": "P0.4 has no immediate ablation impact -- existing artefacts are still evaluated; the change takes effect when synth backbones retrain (P1). The report flag is documentation. P0.5 is a fragility guard with zero numerical effect today (synth chirp starts at 2 Hz, exp bins start at 0; |X| at 0 Hz is the chirp's DC component which is non-zero, ~1e-3). Both are merged together as a small infrastructure commit; the next ablation row will be P1.1 (per-sample normalisation + retraining)."
+  },
+  {
+    "phase": "P1.1",
+    "description": "Per-sample feature normalisation applied uniformly in load_feature (synth) and _exp_load_feature (exp). Synth backbones retrained via hpo.py on dataset/features.h5 with normalisation in effect.  Each new .pt is stamped input_normalized: True so eval routes through the matching cache; existing un-normalised artefacts (most CFDAC variants) default to False and continue using raw inputs. Retrained 30 cells: (5 tasks) x (modal, frf_mag, cfdac legacy 2-channel) x (rf/xgb/mlp/cnn/transformer/cnn2d as applicable). Did NOT retrain the CFDAC variant cells produced by hpo_cfdac_*.py -- those are a separate sweep and stay on the un-normalised baseline.",
+    "snapshot_dir": "results/p1_1/",
+    "best_per_task_exp": {
+      "binary":        {"p0_3": 0.827, "p1_1": 0.825, "delta": -0.002, "cell": "best back to cnn2d/cfdac_all (CFDAC variants not retrained)"},
+      "type":          {"p0_3": 0.379, "p1_1": 0.507, "delta": +0.128, "cell": "cnn/frf_mag becomes new best after retraining on log-z-scored frf_mag"},
+      "severity_R2":   {"p0_3": 0.180, "p1_1": 0.180, "delta": +0.000, "cell": "cnn/timeseries unchanged (not retrained -- timeseries dropped from FEATURES_SEQ at P0.4)"},
+      "col_location":  {"p0_3": 0.508, "p1_1": 0.508, "delta": +0.000, "cell": "cnn2d/cfdac_mag (CFDAC variant; not retrained)"},
+      "mass_location": {"p0_3": 0.534, "p1_1": 0.534, "delta": +0.000, "cell": "cnn2d/cfdac_real (CFDAC variant; not retrained)"}
+    },
+    "biggest_cell_lifts_p0_3_to_p1_1": {
+      "type/cnn/frf_mag":           {"p0_3": 0.333, "p1_1": 0.507, "delta": +0.174},
+      "col_location/cnn/frf_mag":   {"p0_3": 0.239, "p1_1": 0.377, "delta": +0.138},
+      "mass_location/cnn2d/cfdac":  {"p0_3": 0.366, "p1_1": 0.424, "delta": +0.059},
+      "col_location/cnn2d/cfdac":   {"p0_3": 0.135, "p1_1": 0.169, "delta": +0.034}
+    },
+    "biggest_cell_regressions_p0_3_to_p1_1": {
+      "severity/cnn/frf_mag":       {"p0_3": 0.157, "p1_1": -0.322, "delta": -0.479},
+      "severity/transformer/frf_mag": {"p0_3": -0.032, "p1_1": -0.306, "delta": -0.273},
+      "col_location/mlp/modal":     {"p0_3": 0.398, "p1_1": 0.187, "delta": -0.211},
+      "severity/cnn2d/cfdac":       {"p0_3": -0.050, "p1_1": -0.219, "delta": -0.168},
+      "type/transformer/frf_mag":   {"p0_3": 0.347, "p1_1": 0.233, "delta": -0.114}
+    },
+    "decision": "keep",
+    "notes": "type best lifts +0.128 to 0.507 via cnn/frf_mag -- 1D CNN finally benefits from log+z-score of FRF magnitude, which was the original prediction.  col_location and mass_location bests are unchanged because their best cells live in the un-retrained CFDAC variants. severity has mixed cell-level results: cnn/timeseries (the current best) wasn't retrained so it stays at +0.180; cnn/frf_mag and transformer/frf_mag regress badly when their *inputs* lose absolute-amplitude information via per-sample normalisation -- a real cost of P1.1 in cases where the source distribution was clean enough that absolute scale carried signal. The combination of P1.1 + augmented chunks (P1.3) should recover those cells because the augmentation will give the model amplitude variation that the normalisation removes from the source side. CFDAC variants still need retraining via hpo_cfdac_*.py to fully benefit from P1.1; deferred to a follow-up sweep."
   }
 ]
