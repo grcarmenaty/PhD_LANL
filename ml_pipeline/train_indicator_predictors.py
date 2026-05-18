@@ -106,7 +106,7 @@ def _train_torch(model_name: str, params, X_tr, y_tr, X_va, y_va,
             Xtr = Xtr.flatten(1); Xva = Xva.flatten(1); Xte = Xte.flatten(1)
         model = MLP(in_dim=in_dim, n_out=1,
                      hidden=tuple(params["hidden"]), dropout=0.2,
-                     regression=True)
+                     regression=True, bounded_output=False)
         opt = torch.optim.AdamW(model.parameters(),
                                  lr=float(params["lr"]),
                                  weight_decay=1e-4)
@@ -114,7 +114,7 @@ def _train_torch(model_name: str, params, X_tr, y_tr, X_va, y_va,
         model = Conv2DStack(n_channels=Xtr.shape[1], n_out=1,
                               widths=tuple(params["widths"]),
                               kernel_size=int(params["kernel_size"]),
-                              regression=True)
+                              regression=True, bounded_output=False)
         opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
     else:
         raise ValueError(model_name)

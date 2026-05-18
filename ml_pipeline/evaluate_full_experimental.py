@@ -80,7 +80,8 @@ def _build_scalers(syn_path: Path) -> Dict[str, Dict[str, StandardScaler]]:
 
 
 def _predict(art: Path, X: np.ndarray, kind: str, n_out: int,
-              scaler: StandardScaler | None = None) -> np.ndarray:
+              scaler: StandardScaler | None = None,
+              bounded_output: bool = True) -> np.ndarray:
     if art.suffix == ".pkl":
         with open(art, "rb") as f:
             blob = pickle.load(f)
@@ -100,35 +101,36 @@ def _predict(art: Path, X: np.ndarray, kind: str, n_out: int,
     seq = (t.ndim == 3); mat = (t.ndim == 4); vol = (t.ndim == 5)
     if seq and t.shape[1] != in_shape[-1]:
         t = t.permute(0, 2, 1)
+    reg = (kind == "reg")
     if name == "mlp":
         in_dim = t.shape[-1] if t.ndim == 2 else int(np.prod(in_shape))
         if t.ndim != 2: t = t.flatten(1)
         mdl = MLP(in_dim=in_dim, n_out=n_out,
                      hidden=tuple(hp.get("hidden", (256, 128, 64))),
-                     regression=(kind == "reg"))
+                     regression=reg, bounded_output=bounded_output)
     elif name == "cnn":
         ch = in_shape[1] if len(in_shape) == 2 else in_shape[-1]
         mdl = Conv1DStack(n_channels=ch, n_out=n_out,
                              widths=tuple(hp.get("widths", (32, 64, 128))),
                              kernel_size=int(hp.get("kernel_size", 7)),
-                             regression=(kind == "reg"))
+                             regression=reg, bounded_output=bounded_output)
     elif name == "transformer":
         ch = in_shape[1] if len(in_shape) == 2 else in_shape[-1]
         mdl = SmallTransformer(n_channels=ch, n_out=n_out,
                                   d_model=int(hp.get("d_model", 48)),
                                   n_layers=int(hp.get("n_layers", 2)),
-                                  regression=(kind == "reg"))
+                                  regression=reg, bounded_output=bounded_output)
     elif name == "cnn2d":
         mdl = Conv2DStack(n_channels=in_shape[0], n_out=n_out,
                               widths=tuple(hp.get("widths", (16, 32, 64))),
                               kernel_size=int(hp.get("kernel_size", 5)),
-                              regression=(kind == "reg"))
+                              regression=reg, bounded_output=bounded_output)
     elif name == "cnn3d":
         depth = in_shape[1]
         mdl = Conv3DStack(depth=depth, n_out=n_out,
                               widths=tuple(hp.get("widths", (8, 16, 32))),
                               kernel_size=int(hp.get("kernel_size", 3)),
-                              regression=(kind == "reg"))
+                              regression=reg, bounded_output=bounded_output)
     else:
         raise ValueError(name)
     mdl.load_state_dict(blob["state_dict"]); mdl.eval()
@@ -290,7 +292,11 @@ def evaluate_indicator_predictors(syn_path: Path, exp_path: Path,
         if feat in ("modal", "indicators"):
             scaler = scalers.get("severity", {}).get(feat)
         try:
-            pred = _predict(art, X, "reg", 1, scaler=scaler)
+            # Indicator predictors target raw, unbounded indicator values
+            # (e.g. ODS_diff up to ~1e3, r2_imag huge). Disable the sigmoid
+            # squash so predictions can span the natural target range.
+            pred = _predict(art, X, "reg", 1, scaler=scaler,
+                              bounded_output=False)
         except Exception as e:
             print(f"  FAIL {tag}: {e}")
             continue

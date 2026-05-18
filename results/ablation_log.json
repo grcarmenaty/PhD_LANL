@@ -13,5 +13,26 @@
     },
     "decision": "keep",
     "notes": "3/5 tasks improve; mass_location +0.25 is the largest single lift. Type regresses because synth-trained CFDAC backbones partly exploited the synth-vs-synth ref bias as a cross-domain shortcut; this drops to be recovered after backbones retrain on aligned features (P1). Modal/frf_mag/timeseries unchanged confirms the fix is surgical and only touches reference-dependent features."
+  },
+  {
+    "phase": "P0.2",
+    "description": "Add sigmoid squash to all 5 torch regression heads (MLP, Conv1D, Transformer, Conv2D, Conv3D) gated on (regression AND bounded_output). Severity targets are normalized [0,1] per type (tasks.py:60), so the squash is correct; indicator predictors target raw unbounded values, so bounded_output=False is forwarded from train_indicator_predictors.py and the eval routine. State dicts unchanged -- existing .pt artefacts load and run with the new sigmoid post-hoc.",
+    "snapshot_dir": "results/p0_2/",
+    "best_per_task_exp": {
+      "binary":        {"p0_1": 0.825, "p0_2": 0.825, "delta": +0.000, "cell": "classification unaffected"},
+      "type":          {"p0_1": 0.384, "p0_2": 0.384, "delta": +0.000, "cell": "classification unaffected"},
+      "severity_R2":   {"p0_1": -0.006, "p0_2": +0.180, "delta": +0.186, "cell": "cnn/timeseries"},
+      "col_location":  {"p0_1": 0.508, "p0_2": 0.508, "delta": +0.000, "cell": "classification unaffected"},
+      "mass_location": {"p0_1": 0.534, "p0_2": 0.534, "delta": +0.000, "cell": "classification unaffected"}
+    },
+    "severity_detail": {
+      "best_cell_baseline": "transformer/frf_mag = -0.020",
+      "best_cell_p0_2":     "cnn/timeseries     = +0.180",
+      "MLP_modal_baseline": -2.4e22,
+      "MLP_modal_p0_2":    -1.165,
+      "cells_finite":      "17/17 vs 13/17 in baseline (some were overflow large negatives)"
+    },
+    "decision": "keep",
+    "notes": "Severity goes from best=-0.020 (R^2) to best=+0.180 -- a +0.20 lift from a single line of code per model. Catastrophic MLP failures (R^2 ~ -10^22) collapse to mundane negative R^2 (-1.2). Indicator predictors correctly get bounded_output=False so their raw unbounded predictions are surfaced (this is the truth -- they were never trained with target normalization; that's a P1 problem)."
   }
 ]

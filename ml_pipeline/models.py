@@ -17,7 +17,8 @@ from torch import nn
 class MLP(nn.Module):
     def __init__(self, in_dim: int, n_out: int,
                   hidden: tuple[int, ...] = (256, 128, 64),
-                  dropout: float = 0.2, regression: bool = False):
+                  dropout: float = 0.2, regression: bool = False,
+                  bounded_output: bool = True):
         super().__init__()
         layers: list[nn.Module] = []
         d = in_dim
@@ -27,11 +28,13 @@ class MLP(nn.Module):
         layers.append(nn.Linear(d, n_out))
         self.net = nn.Sequential(*layers)
         self.regression = regression
+        self.bounded_output = bounded_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:   # x: (B, F)
         if x.ndim == 3:
             x = x.flatten(1)
-        return self.net(x)
+        out = self.net(x)
+        return torch.sigmoid(out) if (self.regression and self.bounded_output) else out
 
 
 # ── 1-D CNN ─────────────────────────────────────────────────────────────────
@@ -40,7 +43,8 @@ class Conv1DStack(nn.Module):
 
     def __init__(self, n_channels: int, n_out: int,
                   widths: tuple[int, ...] = (32, 64, 128),
-                  kernel_size: int = 7, regression: bool = False):
+                  kernel_size: int = 7, regression: bool = False,
+                  bounded_output: bool = True):
         super().__init__()
         layers: list[nn.Module] = []
         c = n_channels
@@ -62,11 +66,13 @@ class Conv1DStack(nn.Module):
             nn.Linear(128, n_out),
         )
         self.regression = regression
+        self.bounded_output = bounded_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, C, L)
         x = self.features(x)
-        return self.head(x)
+        out = self.head(x)
+        return torch.sigmoid(out) if (self.regression and self.bounded_output) else out
 
 
 # ── small Transformer ───────────────────────────────────────────────────────
@@ -82,7 +88,8 @@ class SmallTransformer(nn.Module):
     def __init__(self, n_channels: int, n_out: int,
                   d_model: int = 48, n_heads: int = 4,
                   n_layers: int = 2, downsample: int = 16,
-                  regression: bool = False):
+                  regression: bool = False,
+                  bounded_output: bool = True):
         super().__init__()
         self.downsample = downsample
         self.proj = nn.Conv1d(n_channels, d_model, kernel_size=downsample,
@@ -97,6 +104,7 @@ class SmallTransformer(nn.Module):
             nn.LayerNorm(d_model), nn.Linear(d_model, n_out),
         )
         self.regression = regression
+        self.bounded_output = bounded_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, C, L)
@@ -104,7 +112,8 @@ class SmallTransformer(nn.Module):
         cls = self.cls.expand(z.size(0), -1, -1)
         z = torch.cat([cls, z], dim=1)
         z = self.encoder(z)
-        return self.head(z[:, 0])
+        out = self.head(z[:, 0])
+        return torch.sigmoid(out) if (self.regression and self.bounded_output) else out
 
 
 class Conv2DStack(nn.Module):
@@ -123,7 +132,8 @@ class Conv2DStack(nn.Module):
     def __init__(self, n_channels: int, n_out: int,
                   widths: tuple[int, ...] = (16, 32, 64),
                   kernel_size: int = 5,
-                  regression: bool = False):
+                  regression: bool = False,
+                  bounded_output: bool = True):
         super().__init__()
         c = n_channels
         stem_out = widths[0]
@@ -152,13 +162,15 @@ class Conv2DStack(nn.Module):
             nn.Linear(64, n_out),
         )
         self.regression = regression
+        self.bounded_output = bounded_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x: (B, C, H, W).  Input is roughly in [-1, 1] for CFDAC, so
-        # no further normalisation is needed.
+        # x: (B, C, H, W).  Real/imag CFDAC sit in [-1, 1]; mag in [0, 1];
+        # phase in [-pi, pi].  Per-sample normalisation lands in P1.1.
         x = self.stem(x)
         x = self.features(x)
-        return self.head(x)
+        out = self.head(x)
+        return torch.sigmoid(out) if (self.regression and self.bounded_output) else out
 
 
 class Conv3DStack(nn.Module):
@@ -174,7 +186,8 @@ class Conv3DStack(nn.Module):
 
     def __init__(self, depth: int, n_out: int,
                   widths: tuple[int, ...] = (8, 16, 32),
-                  kernel_size: int = 3, regression: bool = False):
+                  kernel_size: int = 3, regression: bool = False,
+                  bounded_output: bool = True):
         super().__init__()
         self.depth = depth
         stem_out = widths[0]
@@ -205,12 +218,14 @@ class Conv3DStack(nn.Module):
             nn.Linear(64, n_out),
         )
         self.regression = regression
+        self.bounded_output = bounded_output
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, 1, D, H, W)
         x = self.stem(x)
         x = self.features(x)
-        return self.head(x)
+        out = self.head(x)
+        return torch.sigmoid(out) if (self.regression and self.bounded_output) else out
 
 
 def build_torch_model(name: str, in_channels: Optional[int],
