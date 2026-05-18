@@ -1,0 +1,1644 @@
+{
+  "meta": {
+    "task": "severity",
+    "kind": "reg",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "fraction": 0.5,
+    "unfreeze": "all",
+    "metric_name": "R2",
+    "metric_value": 0.8901466727256775,
+    "mae": 0.07126977294683456,
+    "n_train": 320,
+    "n_test": 320,
+    "n_classes": 1,
+    "input_normalized": false,
+    "split_seed": 20260561,
+    "best_torch_seed": 45,
+    "n_seeds_swept": 5,
+    "all_seed_metrics": [
+      {
+        "seed": 42,
+        "value": 0.2729412913322449
+      },
+      {
+        "seed": 43,
+        "value": 0.8801396489143372
+      },
+      {
+        "seed": 44,
+        "value": 0.4727988839149475
+      },
+      {
+        "seed": 45,
+        "value": 0.8901466727256775
+      },
+      {
+        "seed": 46,
+        "value": 0.7836790084838867
+      }
+    ]
+  },
+  "rows": [
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9076050519943237
+    },
+    {
+      "case": "b'D(85%) 2BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8266057968139648
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9383220076560974
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.47165432572364807
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3614158630371094
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9460782408714294
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5041524171829224
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9342585802078247
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9154282212257385
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9636521935462952
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8415349721908569
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.5051057934761047
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4084470272064209
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.5836528539657593
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5181702971458435
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.4682161808013916
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9074808955192566
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.959679901599884
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.18646031618118286
+    },
+    {
+      "case": "b'D(50%) 1BD + Mass Base'",
+      "y_true": 0.5,
+      "y_pred": 0.35710805654525757
+    },
+    {
+      "case": "b'D(85%) 2BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8596732020378113
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37611907720565796
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3898875415325165
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.965853214263916
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9002082943916321
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5074060559272766
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9254141449928284
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9038929343223572
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9492192268371582
+    },
+    {
+      "case": "b'Damage (85%) 1BD + Mass 1F'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.87245112657547
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9361117482185364
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8844813108444214
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9364253878593445
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8543086051940918
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.90385502576828
+    },
+    {
+      "case": "b'D(11%) 1BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.17604245245456696
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9333898425102234
+    },
+    {
+      "case": "b'Damage (85%) 1BD + Mass 1F'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.855127215385437
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4981403648853302
+    },
+    {
+      "case": "b'D (11%) 2BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.15691013634204865
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9623745679855347
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9594706892967224
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4190772771835327
+    },
+    {
+      "case": "b'D (20% 1BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.589522659778595
+    },
+    {
+      "case": "b'D(50%) 2BD + Mass First Floor'",
+      "y_true": 0.5,
+      "y_pred": 0.4846687614917755
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.48114603757858276
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.12357936799526215
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.11445164680480957
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4044533967971802
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.504083514213562
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5677009224891663
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 5mm 2BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5413923263549805
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4237595796585083
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.38627055287361145
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.6182126402854919
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9409860968589783
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5164020657539368
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9290180802345276
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9029121398925781
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8592274785041809
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9499189853668213
+    },
+    {
+      "case": "b'Damage (85%) 1BD + Mass 1F'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8076256513595581
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9661139249801636
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4729960262775421
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.40682220458984375
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5083423256874084
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9590196013450623
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.48776841163635254
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.3747105598449707
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.10432274639606476
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.941748321056366
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9291673302650452
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.40223369002342224
+    },
+    {
+      "case": "b'D(85%) 2BD + D(85%) 2AD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9049506187438965
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.6075068712234497
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4044610261917114
+    },
+    {
+      "case": "b'D (11%) 1BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.15717178583145142
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.5578176975250244
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5102564692497253
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9233203530311584
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5531089901924133
+    },
+    {
+      "case": "b'D (11%) 2BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.12944364547729492
+    },
+    {
+      "case": "b'D (11%) 3BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.1740030199289322
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37613973021507263
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3468710482120514
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4199014902114868
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9619911313056946
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5142360329627991
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8939546942710876
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9528011679649353
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.08980152010917664
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.869545578956604
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.34669017791748047
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.36097416281700134
+    },
+    {
+      "case": "b'Crack 2BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5973703861236572
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9465845823287964
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4654153883457184
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5372288227081299
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.6462350487709045
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.44448697566986084
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.46566206216812134
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5625011324882507
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37772276997566223
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.48165497183799744
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5006285309791565
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.45193326473236084
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4221322238445282
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4695402979850769
+    },
+    {
+      "case": "b'D(11%) 1BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.18609969317913055
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8831998109817505
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8611980676651001
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9194261431694031
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3964860737323761
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4020276963710785
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9339836835861206
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4208366274833679
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4058820605278015
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9255404472351074
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.50355064868927
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.40612441301345825
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.49646228551864624
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8514267802238464
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9165394306182861
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.47200533747673035
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5256571173667908
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.179367795586586
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4116726815700531
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.38266387581825256
+    },
+    {
+      "case": "b'D(11%) 1BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.2928779423236847
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37496042251586914
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.929645836353302
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4707438349723816
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 5mm 2BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.4956356883049011
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9182678461074829
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.914595901966095
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3679365813732147
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9253711700439453
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3747693598270416
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.13173530995845795
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 5mm 2BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5071675777435303
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8319798111915588
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9519810080528259
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4236433506011963
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.39745134115219116
+    },
+    {
+      "case": "b'D(85%) 1BD + D(85%) 2BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8333305716514587
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.6194779276847839
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5688782930374146
+    },
+    {
+      "case": "b'D (11%) 2BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.2988489866256714
+    },
+    {
+      "case": "b'D(85%) 2BD + D(85%) 2AD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8961148262023926
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3719046413898468
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5112724900245667
+    },
+    {
+      "case": "b'D (11%) 1BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.13833816349506378
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5731087923049927
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8988080620765686
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.6259815692901611
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8671829700469971
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4913633465766907
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37404510378837585
+    },
+    {
+      "case": "b'D(85%) 1BD + D(85%) 2BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9021139740943909
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.18066446483135223
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.422031044960022
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 5mm 2BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.46808820962905884
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.10361377894878387
+    },
+    {
+      "case": "b'D(50%) 2BD + Mass First Floor'",
+      "y_true": 0.5,
+      "y_pred": 0.4607544541358948
+    },
+    {
+      "case": "b'D(85%) 1BD + D(85%) 2BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9074283838272095
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.36788949370384216
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 5mm 2BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5224937200546265
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.6205451488494873
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8810548782348633
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.33409157395362854
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4215167760848999
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5462176203727722
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9453274607658386
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.43430832028388977
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.10614962875843048
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4001571834087372
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5285730361938477
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.40567848086357117
+    },
+    {
+      "case": "b'D(85%) 2BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8960841298103333
+    },
+    {
+      "case": "b'D (20% 2BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.555518388748169
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9549027681350708
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9275221824645996
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.5774385929107666
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5144523978233337
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5207898616790771
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8913707137107849
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.42882004380226135
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.38743624091148376
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8747960329055786
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9109746217727661
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4816069006919861
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9238097071647644
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8847532868385315
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.43573740124702454
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3667583465576172
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8443666696548462
+    },
+    {
+      "case": "b'D(50%) 2BD'",
+      "y_true": 0.5,
+      "y_pred": 0.46853524446487427
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.35826361179351807
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4072365164756775
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3802538216114044
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.09943890571594238
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4098246395587921
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.35825634002685547
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3875933885574341
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8748173713684082
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3777534067630768
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.43281039595603943
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5869800448417664
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.7125129103660583
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.39805325865745544
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3779893219470978
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.910948634147644
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5398465991020203
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.1746455579996109
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.43772992491722107
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9633103013038635
+    },
+    {
+      "case": "b'D(85%) 2BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9068326950073242
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.4396914839744568
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4905361831188202
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3771549165248871
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9569206833839417
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.9055627584457397
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5448705554008484
+    },
+    {
+      "case": "b'D (20% 2BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.1827121526002884
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4098692834377289
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.49086833000183105
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5003842115402222
+    },
+    {
+      "case": "b'D (11%) 1BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.15967434644699097
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.960197389125824
+    },
+    {
+      "case": "b'D (11%) 3BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.18077494204044342
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.40153729915618896
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.30875667929649353
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3738696277141571
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5248374938964844
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.7905587553977966
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9628761410713196
+    },
+    {
+      "case": "b'D(11%) 1BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.31766533851623535
+    },
+    {
+      "case": "b'Hole 6mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.936987578868866
+    },
+    {
+      "case": "b'D(50%) 2BD + Mass First Floor'",
+      "y_true": 0.5,
+      "y_pred": 0.41823530197143555
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.39950963854789734
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5662419199943542
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9566155672073364
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9620797634124756
+    },
+    {
+      "case": "b'Damage (85%) 1BD + Mass 1F'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8417980074882507
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9449741244316101
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.41993069648742676
+    },
+    {
+      "case": "b'D (11%) 3BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.17591677606105804
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.11222483217716217
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.17027515172958374
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3853176236152649
+    },
+    {
+      "case": "b'Crack 2BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.49492454528808594
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5236263275146484
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3997153341770172
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9178641438484192
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.35123276710510254
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5093602538108826
+    },
+    {
+      "case": "b'D(50%) 2BD + Mass Base'",
+      "y_true": 0.5,
+      "y_pred": 0.5865551829338074
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5208116769790649
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9269217252731323
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5125297904014587
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.49359315633773804
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.45104485750198364
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5020515322685242
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD + Mass First Floor'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.834672749042511
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5036941766738892
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5470280051231384
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.4016954004764557
+    },
+    {
+      "case": "b'Crack 2BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.47424936294555664
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37038594484329224
+    },
+    {
+      "case": "b'D (11%) 2BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.17159761488437653
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.40721064805984497
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass Base'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.10894002765417099
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4816277027130127
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5857638716697693
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9198384881019592
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4641945958137512
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9071609377861023
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8683111071586609
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.5072757005691528
+    },
+    {
+      "case": "b'D (11%) 3BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.09865808486938477
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.39198487997055054
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8984236121177673
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9573567509651184
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3709646463394165
+    },
+    {
+      "case": "b'Hole 4mm 1BD + Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.4667833149433136
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.40853413939476013
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.32418060302734375
+    },
+    {
+      "case": "b'Hole 6mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.8603922724723816
+    },
+    {
+      "case": "b'D (20% 3BD)'",
+      "y_true": 0.1666666716337204,
+      "y_pred": 0.15624001622200012
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.519915759563446
+    },
+    {
+      "case": "b'D (11%) 3BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.18824411928653717
+    },
+    {
+      "case": "b'D(85%) 2BD + Mass Base'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8830488324165344
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.534206211566925
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.37161803245544434
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.34581995010375977
+    },
+    {
+      "case": "b'Hole 4mm 3AD (3 cargols)'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4997731149196625
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3784550130367279
+    },
+    {
+      "case": "b'Hole 4mm 1BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.6145570874214172
+    },
+    {
+      "case": "b'D(50%) 2BD + Mass Base'",
+      "y_true": 0.5,
+      "y_pred": 0.45455145835876465
+    },
+    {
+      "case": "b'D(85%) 1AD + D(85%) 1BD'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.906303882598877
+    },
+    {
+      "case": "b'Hole 4mm 1BD + D(50%) 2AD'",
+      "y_true": 0.5,
+      "y_pred": 0.45211634039878845
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5450220108032227
+    },
+    {
+      "case": "b'Crack 5mm 1BD'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.505125880241394
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.763275682926178
+    },
+    {
+      "case": "b'Hole 6mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9595235586166382
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.405673086643219
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3370665907859802
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5858054757118225
+    },
+    {
+      "case": "b'Damage (85%) 1BD + Mass 1F'",
+      "y_true": 0.8888888955116272,
+      "y_pred": 0.8678721189498901
+    },
+    {
+      "case": "b'Crack 8mm 1BD'",
+      "y_true": 1.0,
+      "y_pred": 0.7812445163726807
+    },
+    {
+      "case": "b'Crack 8mm 2BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9635656476020813
+    },
+    {
+      "case": "b'Crack 3BD 5mm'",
+      "y_true": 0.5714285969734192,
+      "y_pred": 0.5079234838485718
+    },
+    {
+      "case": "b'Crack 8mm 3BD'",
+      "y_true": 1.0,
+      "y_pred": 0.9575402736663818
+    },
+    {
+      "case": "b'Hole 4mm 2BD'",
+      "y_true": 0.6000000238418579,
+      "y_pred": 0.4722377359867096
+    },
+    {
+      "case": "b'D(50%) 2BD'",
+      "y_true": 0.5,
+      "y_pred": 0.5953150987625122
+    },
+    {
+      "case": "b'D (11%) 2BD + Mass First Floor'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.29823586344718933
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3482195734977722
+    },
+    {
+      "case": "b'D (11%) 3BD'",
+      "y_true": 0.06666667014360428,
+      "y_pred": 0.1843380481004715
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.3738773465156555
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 0.4583333134651184,
+      "y_pred": 0.4319298565387726
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+[
+  {
+    "task": "type",
+    "kind": "cls",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "fraction": 0.5,
+    "unfreeze": "all",
+    "metric_name": "accuracy",
+    "metric_value": 0.6911764705882353,
+    "mae": null,
+    "n_train": 340,
+    "n_test": 340,
+    "n_classes": 5,
+    "input_normalized": false,
+    "split_seed": 20260561,
+    "best_torch_seed": 43,
+    "n_seeds_swept": 5,
+    "all_seed_metrics": [
+      {
+        "seed": 42,
+        "value": 0.3911764705882353
+      },
+      {
+        "seed": 43,
+        "value": 0.6911764705882353
+      },
+      {
+        "seed": 44,
+        "value": 0.5852941176470589
+      },
+      {
+        "seed": 45,
+        "value": 0.3029411764705882
+      },
+      {
+        "seed": 46,
+        "value": 0.48823529411764705
+      }
+    ]
+  },
+  {
+    "task": "severity",
+    "kind": "reg",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "fraction": 0.5,
+    "unfreeze": "all",
+    "metric_name": "R2",
+    "metric_value": 0.8901466727256775,
+    "mae": 0.07126977294683456,
+    "n_train": 320,
+    "n_test": 320,
+    "n_classes": 1,
+    "input_normalized": false,
+    "split_seed": 20260561,
+    "best_torch_seed": 45,
+    "n_seeds_swept": 5,
+    "all_seed_metrics": [
+      {
+        "seed": 42,
+        "value": 0.2729412913322449
+      },
+      {
+        "seed": 43,
+        "value": 0.8801396489143372
+      },
+      {
+        "seed": 44,
+        "value": 0.4727988839149475
+      },
+      {
+        "seed": 45,
+        "value": 0.8901466727256775
+      },
+      {
+        "seed": 46,
+        "value": 0.7836790084838867
+      }
+    ]
+  },
+  {
+    "task": "col_location",
+    "kind": "cls",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "fraction": 0.5,
+    "unfreeze": "all",
+    "metric_name": "accuracy",
+    "metric_value": 0.85,
+    "mae": null,
+    "n_train": 240,
+    "n_test": 240,
+    "n_classes": 6,
+    "input_normalized": false,
+    "split_seed": 20260561,
+    "best_torch_seed": 42,
+    "n_seeds_swept": 5,
+    "all_seed_metrics": [
+      {
+        "seed": 42,
+        "value": 0.85
+      },
+      {
+        "seed": 43,
+        "value": 0.7875
+      },
+      {
+        "seed": 44,
+        "value": 0.8
+      },
+      {
+        "seed": 45,
+        "value": 0.8416666666666667
+      },
+      {
+        "seed": 46,
+        "value": 0.65
+      }
+    ]
+  },
+  {
+    "task": "mass_location",
+    "kind": "cls",
+    "model": "cnn2d",
+    "feature": "cfdac_all",
+    "fraction": 0.5,
+    "unfreeze": "all",
+    "metric_name": "accuracy",
+    "metric_value": 1.0,
+    "mae": null,
+    "n_train": 80,
+    "n_test": 80,
+    "n_classes": 4,
+    "input_normalized": false,
+    "split_seed": 20260561,
+    "best_torch_seed": 42,
+    "n_seeds_swept": 5,
+    "all_seed_metrics": [
+      {
+        "seed": 42,
+        "value": 1.0
+      },
+      {
+        "seed": 43,
+        "value": 1.0
+      },
+      {
+        "seed": 44,
+        "value": 1.0
+      },
+      {
+        "seed": 45,
+        "value": 1.0
+      },
+      {
+        "seed": 46,
+        "value": 1.0
+      }
+    ]
+  }
+]
