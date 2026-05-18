@@ -154,7 +154,7 @@ def build_experimental_features(median_path: Path, features_path: Path
     bins  = fft_freqs(N_T, FS)
     with h5py.File(features_path, "r") as f:
         f_band = f["freqs"][:]
-        H_ref  = f["reference/frf_complex"][:]   # (N_F, 9) pristine mean
+        H_ref_synth = f["reference/frf_complex"][:]   # (N_F, 9) synth pristine mean
         f_lo, f_hi = float(f.attrs["f_lo_hz"]), float(f.attrs["f_hi_hz"])
         has_cfdac = "cfdac_real" in f
         cfdac_n   = int(f.attrs["cfdac_n"]) if has_cfdac else None
@@ -170,6 +170,20 @@ def build_experimental_features(median_path: Path, features_path: Path
         H_full = resample_frf(H_exp[i], f_src, bins)
         H_band[i] = H_full[band_mask]
         timeseries[i] = synthesize_timeseries(H_full, chirp)
+
+    # P0.1: build the experimental pristine reference from Pristine
+    # cases in this median dataset; fall back to the synth ref if none
+    # are present (the legacy 61-case median set may not have one).
+    type_codes_pre = np.array(
+        [primary_op(name)["type_code"] for name in names], dtype=np.int8
+    )
+    pristine_idx = np.where(type_codes_pre == TYPE_PRISTINE)[0]
+    if pristine_idx.size > 0:
+        H_ref = H_band[pristine_idx].mean(axis=0).astype(np.complex64)
+        print(f"  using experimental pristine reference ({pristine_idx.size} cases)")
+    else:
+        H_ref = H_ref_synth
+        print("  no Pristine experimental cases; using synth reference")
 
     frf_mag  = np.abs(H_band).astype(np.float32)
     frf_real = H_band.real.astype(np.float32)

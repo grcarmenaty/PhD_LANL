@@ -56,6 +56,7 @@ from ml_pipeline.generate_dataset import (                            # noqa: E4
     make_chirp, N_T, FS, fft_freqs,
 )
 from ml_pipeline.cfdac import _decimate                                # noqa: E402
+from ml_pipeline.case_design import TYPE_PRISTINE                       # noqa: E402
 
 
 def build(exp_frfs_path: Path, syn_features_path: Path,
@@ -74,11 +75,32 @@ def build(exp_frfs_path: Path, syn_features_path: Path,
     bins = fft_freqs(N_T, FS)
     with h5py.File(syn_features_path, "r") as f:
         f_band = f["freqs"][:]
-        H_ref  = f["reference/frf_complex"][:]
+        H_ref_synth = f["reference/frf_complex"][:]
         f_lo   = float(f.attrs["f_lo_hz"]); f_hi = float(f.attrs["f_hi_hz"])
         cfdac_n = int(f.attrs["cfdac_n"])
     band_mask = (bins >= f_lo) & (bins <= f_hi)
     n_freq    = int(band_mask.sum())
+
+    # P0.1: build an EXPERIMENTAL pristine reference by averaging the
+    # complex band-FRFs of every case labelled Pristine in the IQS data.
+    # Using the synth pristine mean for CFDAC/indicators on exp data
+    # injects the full synth-vs-exp domain shift into the features
+    # themselves; the experimental ref removes that bias.
+    pristine_codes = np.array(
+        [primary_op(name)["type_code"] for name in case_names], dtype=np.int8
+    )
+    pristine_idx = np.where(pristine_codes == TYPE_PRISTINE)[0]
+    if pristine_idx.size == 0:
+        print("WARNING: no Pristine experimental cases; falling back to synth ref")
+        H_ref = H_ref_synth
+    else:
+        print(f"computing experimental pristine reference from "
+              f"{pristine_idx.size} cases")
+        H_ref = np.zeros((n_freq, n_ch), dtype=np.complex64)
+        for j in pristine_idx:
+            H_full_j = resample_frf(H_exp_full[j], f_src, bins)
+            H_ref += H_full_j[band_mask]
+        H_ref = (H_ref / float(pristine_idx.size)).astype(np.complex64)
 
     H_ref_d = _decimate(H_ref, cfdac_n)            # (cfdac_n, 9) complex64
     t_axis, chirp = make_chirp()
@@ -158,6 +180,15 @@ def build(exp_frfs_path: Path, syn_features_path: Path,
             cph[i]  = np.arctan2(cf.imag, cf.real).astype(np.float32)
             if (i + 1) % 100 == 0 or i == n_cases - 1:
                 print(f"   .. {i + 1}/{n_cases}")
+
+        # P0.1: persist BOTH references so downstream consumers can
+        # choose, and so the file documents which ref the indicators /
+        # CFDAC inside it were computed against.
+        ref_grp = out.create_group("reference")
+        ref_grp.create_dataset("frf_complex",       data=H_ref)
+        ref_grp.create_dataset("frf_complex_synth", data=H_ref_synth)
+        ref_grp.attrs["used_for_features"] = "frf_complex"  # = experimental pristine mean
+        ref_grp.attrs["n_pristine_cases"]  = int(pristine_idx.size)
 
         out.attrs["n_channels"] = n_ch
         out.attrs["f_lo_hz"]    = f_lo

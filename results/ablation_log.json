@@ -1,0 +1,17 @@
+[
+  {
+    "phase": "P0.1",
+    "description": "Compute experimental pristine reference (mean of 462 IQS pristine cases) and use it for CFDAC + indicators on experimental data, instead of the synth pristine mean. Modal / frf_mag / timeseries unaffected.",
+    "snapshot_dir": "results/p0_1/",
+    "best_type_synth": null,
+    "best_per_task_exp": {
+      "binary":        {"baseline": 0.825, "p0_1": 0.825, "delta": +0.000, "cell": "cnn2d/cfdac_all unchanged"},
+      "type":          {"baseline": 0.470, "p0_1": 0.384, "delta": -0.086, "cell": "best shifted from cnn2d/cfdac_mag to mlp/modal; per-cell mixed (cnn2d/cfdac_phase +0.115, cnn2d/cfdac_imag -0.132)"},
+      "severity_R2":   {"baseline": -0.020, "p0_1": -0.006, "delta": +0.014, "cell": "cnn2d/cfdac_real"},
+      "col_location":  {"baseline": 0.453, "p0_1": 0.508, "delta": +0.055, "cell": "cnn2d/cfdac_mag"},
+      "mass_location": {"baseline": 0.282, "p0_1": 0.534, "delta": +0.252, "cell": "cnn2d/cfdac_real"}
+    },
+    "decision": "keep",
+    "notes": "3/5 tasks improve; mass_location +0.25 is the largest single lift. Type regresses because synth-trained CFDAC backbones partly exploited the synth-vs-synth ref bias as a cross-domain shortcut; this drops to be recovered after backbones retrain on aligned features (P1). Modal/frf_mag/timeseries unchanged confirms the fix is surgical and only touches reference-dependent features."
+  }
+]
