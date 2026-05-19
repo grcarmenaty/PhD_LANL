@@ -1,15 +1,15 @@
 [
   {
-    "task": "is_crack",
+    "task": "is_mass",
     "backbone": "convnext_tiny",
     "feature": "cfdac_all",
     "n_channels": 4,
-    "synth_val": 0.6040511675906592,
-    "synth_test": 0.6533333333333333,
+    "synth_val": 0.7271798681400317,
+    "synth_test": 0.8266666666666667,
     "exp_metric_name": "accuracy",
-    "exp_value": 0.12130401819560273,
+    "exp_value": 0.10197119029567854,
     "exp_mae": null,
     "exp_n": 2638,
-    "runtime_s": 640.9491367340088
+    "runtime_s": 654.3441276550293
   }
 ]
