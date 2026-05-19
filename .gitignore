@@ -67,6 +67,8 @@ dataset/features_mixed_aug.h5
 results/transfer_learn.log
 results/hpo.log
 results/vision_train.log
+results/trenchcoat_train.log
+results/vision_train.log
 
 # Vision-backbone artefacts: large (16-330 MB each); regenerate via
 # ml_pipeline.train_vision.  Keep only results/vision_eval.json tracked.
