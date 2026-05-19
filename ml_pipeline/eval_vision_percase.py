@@ -59,11 +59,13 @@ def main():
         blob = torch.load(art, map_location="cpu", weights_only=False)
         n_out = blob["n_out"]; n_channels = blob["n_channels"]
         kind = e_tasks[task][2]
+        adapter = blob.get("channel_adapter", "first_conv_replace")
 
         mdl = VisionBackbone(backbone, n_channels=n_channels, n_out=n_out,
                                   regression=(kind == "reg"),
                                   bounded_output=True,
-                                  pretrained=False)
+                                  pretrained=False,
+                                  channel_adapter=adapter)
         mdl.load_state_dict(blob["state_dict"])
         mdl.eval()
 

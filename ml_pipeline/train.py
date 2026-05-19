@@ -118,6 +118,9 @@ _CFDAC_VARIANTS = {
     "cfdac_magphase": (("cfdac_mag", "cfdac_phase"),             "stack2d"),
     "cfdac_all":      (("cfdac_real", "cfdac_imag",
                           "cfdac_mag",  "cfdac_phase"),            "stack2d"),
+    # 3-channel "RGB-like" composition for ImageNet-pretrained
+    # vision backbones with a passthrough first-conv stem.
+    "cfdac_rgb":      (("cfdac_real", "cfdac_imag", "cfdac_mag"),  "stack2d"),
     # 3-D inputs (n, 1, D, H, W) for Conv3d
     "cfdac3d_realimag": (("cfdac_real", "cfdac_imag"),                  "stack3d"),
     "cfdac3d_magphase": (("cfdac_mag",  "cfdac_phase"),                 "stack3d"),

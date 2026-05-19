@@ -27,7 +27,7 @@ import h5py
 import numpy as np
 import torch
 from sklearn.metrics import (
-    accuracy_score, mean_absolute_error, r2_score,
+    accuracy_score, f1_score, mean_absolute_error, r2_score,
 )
 from sklearn.preprocessing import StandardScaler
 from torch import nn
@@ -97,10 +97,22 @@ def _train_one_cell(backbone_name: str, feature: str, task_name: str,
     mdl = VisionBackbone(backbone_name, n_channels=n_channels, n_out=n_out,
                               regression=(kind == "reg"),
                               bounded_output=True, pretrained=True,
-                              target_size=args.target_size).to(DEVICE)
+                              target_size=args.target_size,
+                              channel_adapter=args.channel_adapter
+                              ).to(DEVICE)
 
     if kind == "cls":
-        loss_fn = nn.CrossEntropyLoss()
+        # Tier-1 A1: class-weighted CE defends minorities against the
+        # majority-class collapse pattern that produced misleading
+        # accuracies in the first vision sweep.
+        cls_weight = None
+        if args.class_weights == "inverse-freq":
+            cls_counts = np.bincount(y_tr, minlength=n_out).astype(np.float32)
+            inv = (cls_counts.sum() / np.clip(cls_counts * n_out, 1e-6, None))
+            cls_weight = torch.as_tensor(inv).float().to(DEVICE)
+            print(f"    class_weights inverse-freq: {cls_weight.tolist()}",
+                      flush=True)
+        loss_fn = nn.CrossEntropyLoss(weight=cls_weight)
         ytr = torch.as_tensor(y_tr).long()
         yva = torch.as_tensor(y_va).long()
         yte = torch.as_tensor(y_te).long()
@@ -115,31 +127,76 @@ def _train_one_cell(backbone_name: str, feature: str, task_name: str,
     Xte_t = torch.as_tensor(X_te).float()
     dl = DataLoader(TensorDataset(Xtr_t, ytr),
                        batch_size=args.batch, shuffle=True)
-    opt = torch.optim.AdamW(mdl.parameters(), lr=args.lr,
-                                weight_decay=1e-4)
-    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=args.epochs)
+
+    # Tier-1 A2: linear-probe → fine-tune.  First `probe_epochs`
+    # freeze the backbone (train only the head + channel projector if
+    # any).  Remaining epochs unfreeze everything and use a smaller
+    # backbone lr (`args.lr * args.backbone_lr_mult`) so the
+    # pretrained features aren't blown up by the head's gradient.
+    def _set_backbone_trainable(flag: bool):
+        for p in mdl.backbone.parameters():
+            p.requires_grad = flag
+        # head + projector stay trainable always
+    _set_backbone_trainable(False)
+
+    head_params = [p for n, p in mdl.named_parameters()
+                       if not n.startswith("backbone.")]
+    probe_opt = torch.optim.AdamW(head_params, lr=args.lr,
+                                          weight_decay=1e-4)
+    probe_epochs = min(int(args.probe_epochs), args.epochs)
 
     t0 = time.time()
     best_val = -np.inf
     best_state = None
+    opt = probe_opt
+    sched = None
     for ep in range(args.epochs):
+        if ep == probe_epochs:
+            _set_backbone_trainable(True)
+            # Differential lr: backbone lower, head full
+            backbone_params = list(mdl.backbone.parameters())
+            opt = torch.optim.AdamW(
+                [{"params": backbone_params,
+                    "lr": args.lr * float(args.backbone_lr_mult)},
+                 {"params": head_params, "lr": args.lr}],
+                weight_decay=1e-4)
+            sched = torch.optim.lr_scheduler.CosineAnnealingLR(
+                opt, T_max=max(1, args.epochs - probe_epochs))
+            print(f"    epoch {ep + 1}: unfreezing backbone "
+                      f"(backbone_lr={args.lr * float(args.backbone_lr_mult):.1e}, "
+                      f"head_lr={args.lr:.1e})", flush=True)
         mdl.train()
         for xb, yb in dl:
             opt.zero_grad()
             out = mdl(xb)
             loss_fn(out, yb).backward()
             opt.step()
-        sched.step()
+        if sched is not None:
+            sched.step()
         mdl.eval()
         with torch.no_grad():
             out_va = mdl(Xva_t).cpu()
             if kind == "cls":
-                metric = accuracy_score(y_va, out_va.argmax(1).numpy())
+                pred_va = out_va.argmax(1).numpy()
+                # Tier-1 A4: select checkpoint by macro-F1 -- on a
+                # balanced val fold this matches accuracy, but it
+                # makes the right inductive choice if anything pulls
+                # the val distribution off-balance.
+                acc = accuracy_score(y_va, pred_va)
+                f1m = f1_score(y_va, pred_va,
+                                  labels=list(range(n_out)),
+                                  average="macro", zero_division=0)
+                metric = f1m if args.select_by == "macro_f1" else acc
             else:
                 metric = r2_score(y_va, out_va.squeeze(1).numpy())
-        print(f"      epoch {ep+1}/{args.epochs}  val={metric:+.4f} "
-                  f"({time.time()-t0:.0f}s elapsed)",
-                  flush=True)
+                acc = float("nan"); f1m = float("nan")
+        if kind == "cls":
+            print(f"      epoch {ep+1}/{args.epochs}  "
+                      f"acc={acc:+.4f} macro-F1={f1m:+.4f}  "
+                      f"({time.time()-t0:.0f}s elapsed)", flush=True)
+        else:
+            print(f"      epoch {ep+1}/{args.epochs}  R2={metric:+.4f} "
+                      f"({time.time()-t0:.0f}s elapsed)", flush=True)
         if metric > best_val:
             best_val = metric
             best_state = {k: v.detach().clone()
@@ -238,6 +295,28 @@ def main():
                               "3000 to keep runs fast).")
     p.add_argument("--force", action="store_true",
                       help="Retrain even if the .pt artefact exists.")
+    # ── Tier-1 vision-sweep fixes ───────────────────────────────────────
+    p.add_argument("--class-weights",
+                      choices=("none", "inverse-freq"),
+                      default="inverse-freq",
+                      help="Weight the CE loss to defend minorities.")
+    p.add_argument("--probe-epochs", type=int, default=2,
+                      help="Number of linear-probe epochs (backbone "
+                              "frozen) before unfreezing.")
+    p.add_argument("--backbone-lr-mult", type=float, default=0.1,
+                      help="Backbone lr multiplier after unfreezing "
+                              "(differential learning rate).")
+    p.add_argument("--channel-adapter",
+                      choices=("first_conv_replace", "projector",
+                                  "passthrough"),
+                      default="projector",
+                      help="How to bridge ImageNet 3-ch stem to "
+                              "CFDAC's n_channels.")
+    p.add_argument("--select-by",
+                      choices=("accuracy", "macro_f1"),
+                      default="macro_f1",
+                      help="Which val metric drives best-epoch "
+                              "checkpoint selection.")
     args = p.parse_args()
 
     print(f"vision sweep: {len(args.backbones)} backbones x "
@@ -265,11 +344,17 @@ def main():
                                           weights_only=False)
                     n_out = blob["n_out"]
                     n_channels = blob["n_channels"]
+                    # Honour the artefact's recorded channel adapter
+                    # so older first_conv_replace artefacts continue
+                    # to load even after the default switches.
+                    adapter = blob.get("channel_adapter",
+                                          "first_conv_replace")
                     mdl = VisionBackbone(backbone, n_channels=n_channels,
                                               n_out=n_out,
                                               regression=(tasks[task][2]=="reg"),
                                               bounded_output=True,
-                                              pretrained=False)
+                                              pretrained=False,
+                                              channel_adapter=adapter)
                     mdl.load_state_dict(blob["state_dict"])
                 else:
                     print(f"== {tag} ==", flush=True)
@@ -290,7 +375,14 @@ def main():
                               "mae": out["mae"],
                               "runtime_s": out["runtime_s"],
                               "epochs": args.epochs,
-                              "target_size": args.target_size}
+                              "target_size": args.target_size,
+                              # Tier-1 settings stamped on the artefact
+                              # so reconstruction at eval time matches.
+                              "channel_adapter": args.channel_adapter,
+                              "class_weights": args.class_weights,
+                              "probe_epochs": int(args.probe_epochs),
+                              "backbone_lr_mult": float(args.backbone_lr_mult),
+                              "select_by": args.select_by}
                     torch.save(blob, art)
                     print(f"    synth val={out['val_metric']:+.3f}  "
                               f"test={out['test_metric']:+.3f}  "

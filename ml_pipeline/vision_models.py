@@ -125,11 +125,27 @@ def _replace_first_conv(model: nn.Module, name: str, n_channels: int) -> None:
 class VisionBackbone(nn.Module):
     """Thin wrapper around a torchvision model that handles input
     upsampling, the bounded-regression flag, and lets the outer code
-    pretend every backbone has the same forward signature."""
+    pretend every backbone has the same forward signature.
+
+    ``channel_adapter`` controls how the first conv accepts CFDAC's
+    arbitrary input-channel count:
+
+      * "first_conv_replace" (default): replace the pretrained first
+        conv with one accepting ``n_channels`` directly, initialised
+        from the channel-mean of the pretrained 3-ch conv tiled across
+        the target channel count.  Discards the colour-edge structure
+        of the pretrained kernels.
+      * "projector": prepend a 1x1 ``Conv2d(n_channels, 3)``, leave
+        the pretrained 3-ch first conv intact.  Preserves the pretrained
+        features but adds 3*n_channels learnable parameters; the
+        projector is initialised to channel-mean so the initial output
+        matches the legacy behaviour.
+    """
 
     def __init__(self, name: str, n_channels: int, n_out: int,
                   regression: bool = False, bounded_output: bool = True,
-                  pretrained: bool = True, target_size: int = 224):
+                  pretrained: bool = True, target_size: int = 224,
+                  channel_adapter: str = "first_conv_replace"):
         super().__init__()
         if not _HAS_TV:
             raise ImportError("torchvision required for vision backbones")
@@ -138,20 +154,43 @@ class VisionBackbone(nn.Module):
         ctor = VISION_BACKBONES[name]
         weights = "IMAGENET1K_V1" if pretrained else None
         backbone = ctor(weights)
-        _replace_first_conv(backbone, name, n_channels)
+        if channel_adapter == "first_conv_replace":
+            _replace_first_conv(backbone, name, n_channels)
+            self.channel_projector = None
+        elif channel_adapter == "projector":
+            # Keep the pretrained 3-channel first conv intact; prepend
+            # a 1x1 projector that maps n_channels -> 3.  Initialise the
+            # projector so that channel-mean input → channel-mean output
+            # (matches the legacy first_conv_replace at init).
+            proj = nn.Conv2d(n_channels, 3, kernel_size=1, bias=True)
+            with torch.no_grad():
+                # Each of the 3 output channels gets a uniform
+                # 1/n_channels weight across all input channels, so the
+                # initial projection is the channel-mean.
+                proj.weight.fill_(1.0 / float(n_channels))
+                proj.bias.zero_()
+            self.channel_projector = proj
+        elif channel_adapter == "passthrough":
+            # No adaptation; use only when n_channels == 3.
+            if n_channels != 3:
+                raise ValueError("passthrough channel_adapter requires n_channels=3")
+            self.channel_projector = None
+        else:
+            raise ValueError(f"unknown channel_adapter {channel_adapter!r}")
         _replace_head(backbone, name, n_out)
         self.backbone = backbone
         self.name = name
         self.regression = regression
         self.bounded_output = bounded_output
         self.target_size = int(target_size)
-        # ViT requires fixed size; the others accept any divisible size
-        # but the pretrained features are aligned at 224 so we keep it.
+        self.channel_adapter = channel_adapter
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (B, C, H, W) — CFDAC is typically 128x128.
         if x.ndim != 4:
             raise ValueError(f"VisionBackbone expects (B, C, H, W), got {x.shape}")
+        if self.channel_projector is not None:
+            x = self.channel_projector(x)
         if x.shape[-1] != self.target_size or x.shape[-2] != self.target_size:
             x = F.interpolate(x, size=self.target_size, mode="bilinear",
                                   align_corners=False)
