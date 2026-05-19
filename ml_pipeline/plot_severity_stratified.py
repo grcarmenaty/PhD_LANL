@@ -113,33 +113,60 @@ def compute_curves():
     # Model list: each entry → (label, per-case rows)
     models = []
 
-    # Baseline cnn2d (pre-fix, original report) — different filename
-    p = _REPO / "results" / "baseline" / "experimental_per_case.json"
-    if p.exists():
-        rs = _load_per_case(p, by_name, model="cnn2d", feature="cfdac_mag")
-        if rs: models.append(("cnn2d/cfdac_mag (baseline)", rs))
+    # Non-vision zero-shot cells from the latest experimental_full_per_case.
+    # Pick the top cell per architecture family by accuracy, plus a few
+    # additional representatives so the per-family story is visible.
+    nv_path = _REPO / "results" / "experimental_full_per_case.json"
+    if nv_path.exists():
+        nv_rows_all = json.loads(nv_path.read_text())
+        # Top accuracy per (model, feature) determines which we plot
+        type_rows = [r for r in nv_rows_all if r.get("task") == "type"]
+        # Filter once for type task; group by (model, feature)
+        by_cell = {}
+        for r in type_rows:
+            by_cell.setdefault((r["model"], r["feature"]), []).append(r)
 
-    # P0.1 snapshot (after the reference-FRF fix)
-    p = _REPO / "results" / "p0_1" / "experimental_full_per_case.json"
-    if p.exists():
-        rs = _load_per_case(p, by_name, model="cnn2d", feature="cfdac_mag")
-        if rs: models.append(("cnn2d/cfdac_mag (P0.1 ref-FRF)", rs))
-
-    # Latest cnn2d (current state of results/)
-    p = _REPO / "results" / "experimental_full_per_case.json"
-    if p.exists():
-        rs = _load_per_case(p, by_name, model="cnn2d", feature="cfdac_mag")
-        if rs: models.append(("cnn2d/cfdac_mag (current)", rs))
+        # The seven curves below cover one cell per architecture / feature
+        # family.  Skip duplicates (e.g. cnn/timeseries — synthesised
+        # from FRF on the exp side, double-counts cnn/frf_mag).
+        non_vision_picks = [
+            ("cnn",         "frf_mag",        "1-D CNN / frf_mag"),
+            ("cnn2d",       "cfdac",          "2-D CNN / cfdac (legacy)"),
+            ("cnn2d",       "cfdac_mag",      "2-D CNN / cfdac_mag"),
+            ("cnn2d",       "cfdac_real",     "2-D CNN / cfdac_real"),
+            ("cnn3d",       "cfdac3d_realimag", "3-D CNN / cfdac3d_realimag"),
+            ("transformer", "frf_mag",        "Transformer / frf_mag"),
+            ("mlp",         "modal",          "MLP / modal"),
+            ("xgb",         "modal",          "XGBoost / modal"),
+            ("rf",          "modal",          "Random Forest / modal"),
+        ]
+        for m, f, label in non_vision_picks:
+            cell_rows = by_cell.get((m, f), [])
+            if not cell_rows:
+                continue
+            rs = []
+            for r in cell_rows:
+                name = r.get("case")
+                if name in by_name:
+                    rs.append((by_name[name], int(r["y_true"]), int(r["y_pred"])))
+            if rs:
+                models.append((label, rs))
 
     # Vision sweep — synth-only
     p = (_REPO / "results" / "per_case_vision"
             / "type_convnext_tiny_cfdac_all.json")
     if p.exists():
         rs = _load_per_case(p, by_name)
-        if rs: models.append(("ConvNeXt-T/cfdac_all (vision v1)", rs))
+        if rs: models.append(("ConvNeXt-T / cfdac_all (vision)", rs))
+
+    p = (_REPO / "results" / "per_case_vision"
+            / "type_resnet50_cfdac_all.json")
+    if p.exists():
+        rs = _load_per_case(p, by_name)
+        if rs: models.append(("ResNet50 / cfdac_all (vision)", rs))
 
     rs = _load_trenchcoat()
-    if rs: models.append(("trenchcoat (dataset_zscore)", rs))
+    if rs: models.append(("trenchcoat (binary aggreg.)", rs))
 
     # Sweep severity thresholds; report:
     #   accuracy on damage subset (severity >= τ AND type_code != Pristine)
@@ -180,16 +207,24 @@ def compute_curves():
 
 def plot_per_model_curves(out):
     thresholds = np.array(out["thresholds"])
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
-    colors = plt.cm.tab10.colors
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True)
+    n_models = len(out["models"])
+    cmap = plt.cm.tab20(np.linspace(0, 1, max(12, n_models)))
     for i, (label, d) in enumerate(out["models"].items()):
         accs = np.array(d["accuracy"])
         f1s = np.array(d["macro_f1"])
         ns  = np.array(d["n_remaining"])
-        axes[0].plot(thresholds, accs, "-o", color=colors[i],
-                          label=label, markersize=5)
-        axes[1].plot(thresholds, f1s, "-o", color=colors[i],
-                          label=label, markersize=5)
+        # vision models get dashed lines so they stand out from the
+        # bespoke baselines.
+        is_vision = ("vision" in label or "trenchcoat" in label)
+        ls = "--" if is_vision else "-"
+        lw = 2.0 if is_vision else 1.2
+        axes[0].plot(thresholds, accs, ls, marker="o",
+                          color=cmap[i % len(cmap)],
+                          label=label, markersize=4, linewidth=lw)
+        axes[1].plot(thresholds, f1s, ls, marker="o",
+                          color=cmap[i % len(cmap)],
+                          label=label, markersize=4, linewidth=lw)
     axes[0].set_ylabel("accuracy (damage cases only, severity ≥ τ)")
     axes[1].set_ylabel("macro-F1 (4 damage classes, severity ≥ τ)")
     for ax, ttl in zip(axes, ["accuracy vs severity threshold",
@@ -197,9 +232,9 @@ def plot_per_model_curves(out):
         ax.set_xlabel("severity threshold τ (normalised per type)")
         ax.set_title(ttl)
         ax.grid(linestyle=":", alpha=0.4)
-        ax.legend(fontsize=8, loc="upper left")
+        ax.legend(fontsize=7, loc="upper left", ncol=2)
         ax.set_ylim(0, 1.05)
-        ax.axhline(0.25, color="gray", linestyle="--", linewidth=0.8,
+        ax.axhline(0.25, color="gray", linestyle=":", linewidth=0.8,
                       label=None)  # random for 4-class
     # Secondary axis for sample count
     # Reference: chance for 4-class restricted-to-damage = 0.25
@@ -234,28 +269,45 @@ def plot_n_remaining(out):
 
 
 def plot_per_type_breakdown(by_name, sev_norm, tc_all):
-    """For the trenchcoat aggregator and the cnn2d baseline, plot
-    per-true-type accuracy vs severity threshold."""
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5), sharey=True)
-    for ax, src, title in zip(axes,
-                                          ["baseline_cnn2d", "trenchcoat"],
-                                          ["cnn2d/cfdac_mag baseline",
-                                            "trenchcoat (dataset_zscore)"]):
-        if src == "baseline_cnn2d":
-            p = _REPO / "results" / "experimental_full_per_case.json"
-            rs = _load_per_case(p, by_name, model="cnn2d",
-                                    feature="cfdac_mag")
-        else:
-            rs = _load_trenchcoat()
-        if not rs:
-            ax.set_title(f"{title}: no data"); continue
+    """Per-true-type accuracy vs severity threshold for a fan of models.
+
+    Cells chosen to span tabular (RF/MLP/XGB on modal), 1-D CNN, 2-D CNN
+    on the two most-improving CFDAC variants, plus the trenchcoat
+    aggregator.  Six panels in two rows so the per-class lines stay
+    legible."""
+    nv_path = _REPO / "results" / "experimental_full_per_case.json"
+    if not nv_path.exists():
+        return
+    nv_rows_all = json.loads(nv_path.read_text())
+    type_rows = [r for r in nv_rows_all if r.get("task") == "type"]
+    by_cell = {}
+    for r in type_rows:
+        by_cell.setdefault((r["model"], r["feature"]), []).append(r)
+
+    picks = [
+        ("cnn2d",       "cfdac_mag",      "2-D CNN / cfdac_mag"),
+        ("cnn2d",       "cfdac_real",     "2-D CNN / cfdac_real"),
+        ("cnn",         "frf_mag",        "1-D CNN / frf_mag"),
+        ("mlp",         "modal",          "MLP / modal"),
+        ("rf",          "modal",          "Random Forest / modal"),
+        ("xgb",         "modal",          "XGBoost / modal"),
+    ]
+
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8), sharey=True,
+                                  sharex=True)
+    axes = axes.flatten()
+    thresholds = np.linspace(0.0, 0.9, 10)
+    for ax, (m, f, label) in zip(axes, picks):
+        cell_rows = by_cell.get((m, f), [])
+        if not cell_rows:
+            ax.set_title(f"{label}: no data"); continue
+        rs = [(by_name[r["case"]], int(r["y_true"]), int(r["y_pred"]))
+                for r in cell_rows if r["case"] in by_name]
         ys = np.array([r[1] for r in rs])
         yhats = np.array([r[2] for r in rs])
         idxs = np.array([r[0] for r in rs])
         sev_for_rs = sev_norm[idxs]
         tc_for_rs = tc_all[idxs]
-
-        thresholds = np.linspace(0.0, 0.9, 10)
         for k, name in enumerate(TYPE_NAMES):
             if k == 0: continue   # skip Pristine
             cls_acc = []
@@ -264,16 +316,19 @@ def plot_per_type_breakdown(by_name, sev_norm, tc_all):
                 if mask.sum() < 5:
                     cls_acc.append(float("nan")); continue
                 cls_acc.append(accuracy_score(ys[mask], yhats[mask]))
-            ax.plot(thresholds, cls_acc, "-o", label=name, markersize=5)
-        ax.set_title(title)
-        ax.set_xlabel("severity threshold τ")
+            ax.plot(thresholds, cls_acc, "-o", label=name, markersize=4)
+        ax.set_title(label, fontsize=10)
         ax.grid(linestyle=":", alpha=0.4)
         ax.set_ylim(0, 1.05)
-        ax.legend(fontsize=8, loc="lower right")
-    axes[0].set_ylabel("per-class accuracy")
-    fig.suptitle("Per-true-type accuracy as a function of severity threshold",
+        ax.legend(fontsize=7, loc="lower right")
+    for ax in axes[-3:]:
+        ax.set_xlabel("severity threshold τ")
+    for r in (0, 1):
+        axes[r * 3].set_ylabel("per-class accuracy")
+    fig.suptitle("Per-true-type accuracy as a function of severity threshold "
+                  "— is the lift class-distribution shift or per-class gain?",
                   fontsize=11)
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
     out_path = OUT_DIR / "per_type_breakdown.png"
     fig.savefig(out_path, dpi=140)
     plt.close(fig)
