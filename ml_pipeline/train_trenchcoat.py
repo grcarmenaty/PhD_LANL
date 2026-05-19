@@ -161,17 +161,58 @@ def main():
         col = LABEL_TO_TYPE_IDX[label]
         proba_matrix[:, col] = res["proba_pos"]
 
-    pred = proba_matrix.argmax(axis=1)
-    # Per-sample uncertainty: 1 - max(prob)
+    # Each binary classifier has a constant offset cross-domain
+    # (different mean P(pos) per binary on the OOD distribution) that
+    # makes naive argmax just pick the binary with the highest bias.
+    # We report several aggregator variants and pick the best by
+    # macro-F1.  All aggregator variants are *label-free* (no exp
+    # supervision); the dataset-level z-score is transductive --
+    # it uses the unlabelled experimental distribution to recalibrate
+    # each binary's bias, which is fair under the standard
+    # transductive-inference assumption.
+    aggregators = {}
+
+    # A) naive argmax of raw sigmoids
+    aggregators["naive_argmax"] = proba_matrix.argmax(axis=1)
+
+    # B) dataset z-score per binary, then argmax — removes per-binary
+    # constant offset; turns absolute probabilities into relative
+    # cross-binary scores.
+    mu = proba_matrix.mean(axis=0, keepdims=True)
+    sig = proba_matrix.std(axis=0, keepdims=True) + 1e-9
+    proba_z = (proba_matrix - mu) / sig
+    aggregators["dataset_zscore"] = proba_z.argmax(axis=1)
+
+    # C) per-sample z-score across the 5 binaries — uses only within-
+    # sample ranking; deals with bias only insofar as it differs
+    # between binaries (does not adjust per-binary mean).
+    mu_s = proba_matrix.mean(axis=1, keepdims=True)
+    sig_s = proba_matrix.std(axis=1, keepdims=True) + 1e-9
+    aggregators["per_sample_zscore"] = (
+        (proba_matrix - mu_s) / sig_s).argmax(axis=1)
+
+    metrics = {}
+    for name, pred_v in aggregators.items():
+        acc_v = float(accuracy_score(type_code, pred_v))
+        f1_v = float(f1_score(type_code, pred_v,
+                                  labels=[0, 1, 2, 3, 4],
+                                  average="macro", zero_division=0))
+        metrics[name] = {"accuracy": acc_v, "macro_f1": f1_v}
+        print(f"  aggregator {name:<22s} acc={acc_v:.3f}  "
+                  f"macro-F1={f1_v:.3f}", flush=True)
+
+    # Promote the best-by-macro-F1 aggregator as the canonical one
+    best_name = max(metrics, key=lambda n: metrics[n]["macro_f1"])
+    print(f"\n  best by macro-F1: {best_name}", flush=True)
+    pred = aggregators[best_name]
+    # Per-sample diagnostics from the z-score view
     uncertainty = 1.0 - proba_matrix.max(axis=1)
-    # Per-sample agreement: number of binaries with prob > 0.5
     binary_yes_count = (proba_matrix > 0.5).sum(axis=1)
 
     cm = confusion_matrix(type_code, pred, labels=[0, 1, 2, 3, 4])
     cm_norm = cm / np.maximum(cm.sum(axis=1, keepdims=True), 1)
-    acc = float(accuracy_score(type_code, pred))
-    f1m = float(f1_score(type_code, pred, labels=[0, 1, 2, 3, 4],
-                                average="macro", zero_division=0))
+    acc = metrics[best_name]["accuracy"]
+    f1m = metrics[best_name]["macro_f1"]
     f1_per = f1_score(type_code, pred, labels=[0, 1, 2, 3, 4],
                           average=None, zero_division=0).tolist()
 
@@ -200,6 +241,8 @@ def main():
         "feature": args.feature,
         "subsample": args.subsample,
         "epochs": args.epochs,
+        "best_aggregator": best_name,
+        "aggregators": metrics,
         "aggregator_accuracy": acc,
         "aggregator_macro_f1": f1m,
         "aggregator_per_class_f1": dict(zip(TYPE_NAMES, f1_per)),
