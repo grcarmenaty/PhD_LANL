@@ -79,7 +79,7 @@ def plot_headline_bars():
             p14_best[t] = (v, r["model"], r["feature"])
 
     # Build per-task series
-    fig, axes = plt.subplots(1, len(TASKS), figsize=(4.2 * len(TASKS), 4.0),
+    fig, axes = plt.subplots(1, len(TASKS), figsize=(2.6 * len(TASKS), 4.0),
                                   sharey=False)
     for ax, task in zip(axes, TASKS):
         names = []; vals = []; cells = []
@@ -163,7 +163,7 @@ def plot_transfer_k_curves():
     rows = json.loads((_REPO / "results" / "transfer_learning.json").read_text())
     tasks_present = sorted({r["task"] for r in rows})
     fig, axes = plt.subplots(1, len(tasks_present),
-                                  figsize=(4 * len(tasks_present), 4), sharey=False)
+                                  figsize=(2.6 * len(tasks_present), 4), sharey=False)
     if len(tasks_present) == 1:
         axes = [axes]
     for ax, task in zip(axes, tasks_present):

@@ -26,7 +26,7 @@ def _bar_plot(rows, out_path: Path, title: str) -> None:
     feats = sorted({r["feature"] for r in rows})
     models = sorted({r["model"] for r in rows})
 
-    fig, axes = plt.subplots(1, len(tasks), figsize=(4 * len(tasks), 4), sharey=False)
+    fig, axes = plt.subplots(1, len(tasks), figsize=(3.6 * len(tasks), 4), sharey=False)
     if len(tasks) == 1:
         axes = [axes]
     for ax, task in zip(axes, tasks):
@@ -56,7 +56,7 @@ def _bar_plot(rows, out_path: Path, title: str) -> None:
     axes[-1].legend(loc="lower right", fontsize=8)
     fig.suptitle(title)
     fig.tight_layout()
-    fig.savefig(out_path, dpi=110)
+    fig.savefig(out_path, dpi=100)
     plt.close(fig)
 
 

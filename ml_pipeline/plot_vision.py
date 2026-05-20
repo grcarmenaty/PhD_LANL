@@ -94,7 +94,7 @@ def plot_vision_vs_cnn2d_bar():
         key = (r["task"], r["feature"])
         by_cell.setdefault(key, []).append(r)
     n_cells = len(by_cell)
-    fig, axes = plt.subplots(1, n_cells, figsize=(5 * n_cells, 5),
+    fig, axes = plt.subplots(1, n_cells, figsize=(3.3 * n_cells, 5),
                                   sharey=True)
     if n_cells == 1:
         axes = [axes]
@@ -331,7 +331,7 @@ def plot_per_class_f1_topcells(top_k: int = 5):
     rows = _load_vision()
     rows.sort(key=lambda r: -r["exp_value"])
     top = rows[:top_k]
-    fig, axes = plt.subplots(1, len(top), figsize=(3.5 * len(top), 4),
+    fig, axes = plt.subplots(1, len(top), figsize=(2.6 * len(top), 4),
                                   sharey=True)
     for ax, r in zip(axes, top):
         tag = f"type_{r['backbone']}_{r['feature']}"

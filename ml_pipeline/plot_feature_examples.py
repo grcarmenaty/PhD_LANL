@@ -135,7 +135,7 @@ def plot_cfdac(features_path, exp, out_path):
     real = {k: _pick_real(exp["labels"], k) for k in CLASSES}
     real_cfdac = exp.get("cfdac")
 
-    fig, axes = plt.subplots(5, 2, figsize=(10, 22))
+    fig, axes = plt.subplots(5, 2, figsize=(10, 17))
     with h5py.File(features_path, "r") as f:
         syn_re = f["cfdac_real"]; syn_im = f["cfdac_imag"]
         for row, k in enumerate(CLASSES):

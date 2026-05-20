@@ -151,7 +151,7 @@ def plot_proba_distribution():
     proba = np.array([r["proba"] for r in per_case])
     tc = np.array([r["type_code"] for r in per_case])
 
-    fig, axes = plt.subplots(1, 5, figsize=(16, 4), sharey=True)
+    fig, axes = plt.subplots(1, 5, figsize=(13, 4), sharey=True)
     for k_bin, (ax, name) in enumerate(zip(axes, TYPE_NAMES)):
         ax.hist(proba[tc != k_bin, k_bin], bins=40, range=(0, 1),
                   alpha=0.55, color="#888888",
