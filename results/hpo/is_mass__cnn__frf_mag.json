@@ -1,0 +1,77 @@
+{
+  "task": "is_mass",
+  "model": "cnn",
+  "feature": "frf_mag",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.922,
+  "best_metric_test": 0.9243333333333333,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9053333333333333,
+      "metric_test": 0.8893333333333333,
+      "extras": {},
+      "runtime_s": 14.295583486557007
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9183333333333333,
+      "metric_test": 0.9176666666666666,
+      "extras": {},
+      "runtime_s": 14.972106695175171
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.911,
+      "metric_test": 0.906,
+      "extras": {},
+      "runtime_s": 27.078966856002808
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.922,
+      "metric_test": 0.9243333333333333,
+      "extras": {},
+      "runtime_s": 29.61882448196411
+    }
+  ]
+}

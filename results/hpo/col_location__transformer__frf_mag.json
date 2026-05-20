@@ -1,0 +1,79 @@
+{
+  "task": "col_location",
+  "model": "transformer",
+  "feature": "frf_mag",
+  "best_hyperparams": {
+    "d_model": 64,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.45641310383120487,
+  "best_metric_test": 0.4633333333333333,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 32,
+        "n_layers": 1
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.38478622987229316,
+      "metric_test": 0.38166666666666665,
+      "extras": {},
+      "runtime_s": 5.455765247344971
+    },
+    {
+      "hyperparams": {
+        "d_model": 32,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.4142143253747918,
+      "metric_test": 0.39944444444444444,
+      "extras": {},
+      "runtime_s": 10.001649379730225
+    },
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 1
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.3886729594669628,
+      "metric_test": 0.3838888888888889,
+      "extras": {},
+      "runtime_s": 6.820091962814331
+    },
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.44031093836757357,
+      "metric_test": 0.42777777777777776,
+      "extras": {},
+      "runtime_s": 12.222625732421875
+    },
+    {
+      "hyperparams": {
+        "d_model": 64,
+        "n_layers": 1
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.38145474736257634,
+      "metric_test": 0.395,
+      "extras": {},
+      "runtime_s": 8.055244207382202
+    },
+    {
+      "hyperparams": {
+        "d_model": 64,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.45641310383120487,
+      "metric_test": 0.4633333333333333,
+      "extras": {},
+      "runtime_s": 15.155807495117188
+    }
+  ]
+}
