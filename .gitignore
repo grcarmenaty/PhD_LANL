@@ -82,3 +82,6 @@ results_p2_1/
 results_p2_3/
 results/models_ssl/
 results/models_ssl_smoke/
+
+# Scratch A/B baseline snapshot (baseline is recoverable from git history)
+results/_baseline/
