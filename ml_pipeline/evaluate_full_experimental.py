@@ -24,6 +24,7 @@ import numpy as np
 import torch
 from sklearn.metrics import (
     accuracy_score, mean_absolute_error, r2_score,
+    f1_score, balanced_accuracy_score,
 )
 from sklearn.preprocessing import StandardScaler
 
@@ -270,18 +271,26 @@ def evaluate_classification_regression(syn_path: Path, exp_path: Path,
         except Exception as e:
             print(f"  FAIL {tag}: {e}")
             continue
+        macro_f1 = None; bal_acc = None
         if kind == "cls":
             metric = float(accuracy_score(y, pred))
             mae = None; mname = "accuracy"
+            # On the strongly class-imbalanced experimental set raw accuracy
+            # rewards class-prior collapse (predict-majority); macro-F1 and
+            # balanced accuracy are the honest discrimination metrics.
+            macro_f1 = float(f1_score(y, pred, average="macro"))
+            bal_acc = float(balanced_accuracy_score(y, pred))
         else:
             metric = float(r2_score(y, pred))
             mae = float(mean_absolute_error(y, pred))
             mname = "R2"
         print(f"  {tag:<55s} {mname}={metric:.3f}  n={len(X)}"
+                + (f"  macroF1={macro_f1:.3f}" if macro_f1 is not None else "")
                 + (f"  MAE={mae:.3f}" if mae is not None else ""))
         rows.append({
             "task": task_name, "model": model_name, "feature": feature,
             "metric": mname, "value": metric, "mae": mae,
+            "macro_f1": macro_f1, "balanced_acc": bal_acc,
             "n_cases": int(len(X)),
         })
         for nm, yt, yp in zip(np.array(names)[idx].tolist(), y.tolist(),

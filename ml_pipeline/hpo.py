@@ -135,6 +135,13 @@ def _train_torch(model_name: str, kind: str, n_out: int,
                   X_tr, y_tr, X_va, y_va, X_te, y_te,
                   epochs: int) -> Tuple[TrialResult, nn.Module]:
     t0 = time.time()
+    # Deterministic per-trial seeding: torch was previously unseeded, so
+    # every cnn/transformer/cnn2d cell was a single unreproducible draw.
+    # Re-seeding here makes weight init + shuffling reproducible and turns
+    # any A/B (e.g. plain vs augmented features) into a controlled
+    # comparison where the only varying factor is the data.
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
     # X_tr may be either a numpy/tensor array (eager) or a torch Dataset
     # (lazy, streaming from HDF5 row-by-row).  Detect and route.
     from torch.utils.data import Dataset as _TorchDataset
@@ -199,7 +206,8 @@ def _train_torch(model_name: str, kind: str, n_out: int,
     n_workers = 2 if streaming else 0
     dl_tr = DataLoader(ds_tr, batch_size=batch, shuffle=True,
                        num_workers=n_workers,
-                       persistent_workers=bool(n_workers))
+                       persistent_workers=bool(n_workers),
+                       generator=torch.Generator().manual_seed(SEED))
 
     best_metric = -np.inf
     best_state = None
