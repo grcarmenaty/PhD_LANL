@@ -37,7 +37,7 @@ def _active_step() -> str | None:
     except subprocess.CalledProcessError:
         return None
     candidates = [
-        "build_report_noise", "resolution_sweep", "transfer_learn",
+        "resolution_sweep", "transfer_learn",
         "evaluate_full_experimental", "train_indicator_predictors",
         "hpo_cfdac_allmodels", "hpo_cfdac_variants", "hpo",
     ]

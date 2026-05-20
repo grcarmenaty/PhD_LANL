@@ -1,5 +1,0 @@
-   .. 10000/10000
-
-Appended cfdac_mag, cfdac_phase to /home/user/PhD_LANL/dataset/features_noisy_25dB.h5
-
---- $ /usr/local/bin/python ml_pipeline/cfdac_variants.py --features /home/user/PhD_LANL/dataset/features_noisy_25dB.h5

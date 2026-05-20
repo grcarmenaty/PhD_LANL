@@ -8,9 +8,7 @@ comparison tables (§§ 7.1.19, 7.2.19, 7.3.19, 7.4.20, 7.5.19) and the
 22 per-indicator subsections (§ 7.6.7-7.6.28) are regenerated from
 the noisy_mixed HPO and balanced-experimental evaluation artefacts.
 
-This is the step-8 entry point for ``run_noisy_mixed_pipeline.sh``;
-``build_report_noise.py`` is reserved for the separate per-SNR sweep
-launched by ``run_noise_sweep.py``.
+This is the step-8 entry point for ``run_noisy_mixed_pipeline.sh``.
 """
 from __future__ import annotations
 

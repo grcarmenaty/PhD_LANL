@@ -24,7 +24,7 @@ emit_ping() {
   ts=$(TZ=Europe/Madrid date +'%H:%M:%S %Z')
   # Find the active orchestrator step (any python process started by
   # run_noisy_mixed_pipeline.sh).  Falls back to hpo.py for backward compat.
-  proc=$(pgrep -af 'python.*ml_pipeline\.(hpo|hpo_cfdac_variants|hpo_cfdac_allmodels|train_indicator_predictors|evaluate_full_experimental|transfer_learn|resolution_sweep|build_report_noise)' | head -1)
+  proc=$(pgrep -af 'python.*ml_pipeline\.(hpo|hpo_cfdac_variants|hpo_cfdac_allmodels|train_indicator_predictors|evaluate_full_experimental|transfer_learn|resolution_sweep)' | head -1)
   if [ -z "$proc" ]; then
     proc=$(pgrep -af 'hpo\.py.*features_mixed' | grep -v 'hpo_ping' | head -1)
   fi
