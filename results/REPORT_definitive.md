@@ -26,7 +26,7 @@ with the honest metric.** The exhaustive catalogue is in
 > 0.51, ≈ 2× chance). The recommended physics-aware augmentation, when run
 > as a seeded A/B, produced **no classification change distinguishable from
 > run-to-run noise** (mean macro-F1 Δ −0.008 ± 0.054 over 20 paired cells,
-> ≈ 0.6σ from zero; the predicted +0.05–0.10 `type` lift did not
+> ≈ 0.64σ from zero; the predicted +0.05–0.10 `type` lift did not
 > materialise) and a marginal severity-regression gain (R² +0.006 → +0.075,
 > both near zero). That A/B is single-seed and confounded by a 2×
 > training-set-size difference, so it shows the predicted-magnitude benefit
@@ -45,10 +45,10 @@ every meaningful task. Raw accuracy on the experimental set, however, is a
 | task | synth holdout¹ | exp zero-shot (accuracy) | what the accuracy means |
 |---|---|---|---|
 | binary | 0.99 | 0.825 | = "predict damage" class-prior floor |
-| type | 0.88 | 0.25 – 0.51 | range spans only *which* class a collapsed model lands on |
+| type | 0.88 | 0.13 – 0.51 | range spans only *which* class a collapsed model lands on |
 | severity (R²) | 0.57 | ≤ 0 on real features | no transfer |
-| col_location | 0.49 | 0.45 – 0.51 | near the 6-class prior |
-| mass_location | 0.99 | 0.28 – 0.53 | the one task with real signal |
+| col_location | 0.49 | 0.05 – 0.51 | scattered around the class prior |
+| mass_location | 0.99 | 0.00 – 0.53 | the one task with real signal |
 
 ¹ Synth-holdout figures are quoted from the original `REPORT.md`; they are
 not re-derived here. All experimental numbers below *are* re-derived.
@@ -144,7 +144,7 @@ run as a seeded A/B:
 These rows are the *best cell* per task, not means. The honest aggregate is
 the **paired per-cell** delta over the 20 main-task classification cells
 present in both arms: **mean Δ macro-F1 −0.008, sd 0.054, range
-[−0.123, +0.050]** — ≈ 0.6 standard errors from zero, not significant. Per
+[−0.123, +0.050]** — ≈ 0.64 standard errors from zero, not significant. Per
 task the cell-mean Δ is **+0.004** (`type`, 4 of 5 cells positive),
 **−0.021** (`col_location`, driven by two ≈ −0.12 cells), **−0.010**
 (`mass_location`) and **−0.003** (`binary`): a marginal positive `type`
@@ -291,7 +291,7 @@ Status of the previous draft's recommendations after this round of work.
 1. **Run the augmented-chunks retrain — DONE; predicted lift not observed.**
    See § 3.3. The estimated +0.05–0.10 `type` lift did not materialise:
    observed `type` is a marginal +0.004 cell-mean (+0.04 best-cell), and the
-   paired classification Δ macro-F1 is −0.008 ± 0.054 (≈ 0.6σ), inside
+   paired classification Δ macro-F1 is −0.008 ± 0.054 (≈ 0.64σ), inside
    run-to-run noise. The test is single-seed and confounded by a 2×
    training-set-size difference, so it cannot show augmentation is harmful —
    only that the predicted-magnitude benefit is absent. To resolve it
