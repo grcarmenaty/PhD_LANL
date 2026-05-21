@@ -1,0 +1,24 @@
+{
+  "task": "is_bolt",
+  "model": "transformer",
+  "feature": "cfdac_all",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.954,
+  "best_metric_test": 0.9493333333333334,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.954,
+      "metric_test": 0.9493333333333334,
+      "extras": {},
+      "runtime_s": 130.2465856075287
+    }
+  ]
+}

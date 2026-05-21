@@ -1,0 +1,32 @@
+{
+  "task": "is_crack",
+  "model": "cnn",
+  "feature": "cfdac_all",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.8306666666666667,
+  "best_metric_test": 0.846,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8306666666666667,
+      "metric_test": 0.846,
+      "extras": {},
+      "runtime_s": 129.22002005577087
+    }
+  ]
+}
