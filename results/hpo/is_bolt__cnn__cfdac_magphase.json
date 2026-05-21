@@ -1,0 +1,32 @@
+{
+  "task": "is_bolt",
+  "model": "cnn",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.9646666666666667,
+  "best_metric_test": 0.968,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9646666666666667,
+      "metric_test": 0.968,
+      "extras": {},
+      "runtime_s": 83.10233879089355
+    }
+  ]
+}

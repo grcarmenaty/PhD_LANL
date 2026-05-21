@@ -1,0 +1,32 @@
+{
+  "task": "binary",
+  "model": "cnn",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.8666666666666667,
+  "best_metric_test": 0.8633333333333333,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8666666666666667,
+      "metric_test": 0.8633333333333333,
+      "extras": {},
+      "runtime_s": 82.66615223884583
+    }
+  ]
+}
