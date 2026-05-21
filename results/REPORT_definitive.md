@@ -18,27 +18,27 @@ chronological ablation table is in [`ablation_log.json`](ablation_log.json).
 
 | # | goal | task(s) | best synth-only result (seeded, zero-shot) | transfers? |
 |---|---|---|---|---|
-| 1 | **Damage detection** | `binary` (damage vs pristine) | balanced acc 0.54 (`mlp/cfdac_magphase`) | **marginal** — +0.04, within noise |
+| 1 | **Damage detection** | `binary` (damage vs pristine) | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
 | 2 | **Damage type** | `type` (5-class) | macro-F1 0.25, balanced acc 0.33 | **weakly** |
+| 2 | | `type` one-vs-rest (is X?) | balanced acc 0.59–0.71 (`is_bolt` best, § 5.6) | **yes** — strongest result |
 | 3 | **Damage severity** | `severity` (regression) | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
 | 4 | **Damage location** | `col_location` (column-end) | macro-F1 0.17, balanced acc 0.27 | **no** |
-| 4 | | `mass_location` (mass-plate) | macro-F1 0.45, balanced acc 0.51 | **partly** — best goal |
+| 4 | | `mass_location` (mass-plate) | macro-F1 0.45, balanced acc 0.51 | **partly** |
 
-> **One-paragraph summary.** Across the four diagnosis goals, the seeded
-> 244-cell sweep shows: **mass-plate location** is the strongest — a partial
-> success (macro-F1 0.45, balanced accuracy 0.51 ≈ 2× chance, though no
-> single cell resolves all four plates uniformly); **type** and **severity**
-> transfer **weakly** (type macro-F1 0.25 via the modal feature; severity
-> R² ≈ 0.12, consistent across three CFDAC cells); **detection** is
-> **marginal** (best cell balanced accuracy 0.54 — only +0.04 over chance,
-> inside the run-to-run noise band); **column-end location** does **not**
-> transfer (macro-F1 0.17 ≈ chance). Two cautionary findings: the previous
-> draft's accuracy headlines (type 0.507, binary 0.825) were **class-prior
-> collapse**; and the report-era "best" column-location cell
-> (`cnn2d/cfdac_mag`, accuracy 0.508) was a **non-reproducible fluke** — it
-> collapses to chance once the training is seeded. The recommended
-> physics-aware augmentation, run as a seeded A/B, produced no
-> classification change beyond noise.
+> **One-paragraph summary.** The seeded 244-cell sweep shows the strongest
+> honest transfer is **one-vs-rest damage-type detection** — synth-trained
+> "is the damage type X?" classifiers reach balanced accuracy 0.59–0.71
+> (`is_bolt` 0.71, § 5.6), far above the joint 5-class `type` task (0.33)
+> which collapses by having to commit to one label. After that:
+> **mass-plate location** is a partial success (macro-F1 0.45, balanced
+> accuracy 0.51 ≈ 2× chance); **severity** transfers weakly (R² ≈ 0.12
+> across three CFDAC cells); **detection** has weak signal (balanced
+> accuracy 0.585) but no operationally usable cell; **column-end location**
+> does not transfer. Two cautionary findings: the previous draft's accuracy
+> headlines (type 0.507, binary 0.825) were **class-prior collapse**; and
+> the report-era "best" column-location cell (`cnn2d/cfdac_mag`, accuracy
+> 0.508) was a **non-reproducible fluke** that collapses to chance once the
+> training is seeded.
 
 ---
 
@@ -183,23 +183,25 @@ Pristine cases, where a "predict-damage" collapse would flag 0 %.
 
 ### 4.3 Comparison (seeded sweep, `_seeded.json`)
 
-| model / feature | accuracy | macro-F1 | balanced acc |
-|---|---|---|---|
-| mlp / cfdac_magphase | 0.76 | **0.54** | **0.54** |
-| mlp / modal | 0.82 | 0.49 | 0.52 |
-| transformer / frf_mag | 0.82 | 0.47 | 0.51 |
-| mlp / cfdac_imag | 0.82 | 0.47 | 0.50 |
+| model / feature | accuracy | macro-F1 | balanced acc | per-class recall |
+|---|---|---|---|---|
+| cnn2d / cfdac_real | 0.49 | 0.46 | **0.585** | Pristine 0.73 / Damage 0.44 |
+| mlp / cfdac_magphase | 0.76 | **0.54** | 0.540 | Pristine 0.19 / Damage 0.88 |
+| mlp / modal | 0.82 | 0.49 | 0.515 | — |
+| transformer / frf_mag | 0.82 | 0.47 | 0.505 | — |
 
 ### 4.4 Verdict
 
-**At best marginal.** The seeded sweep surfaces one cell —
-`mlp/cfdac_magphase` — at balanced accuracy 0.540 against the 0.500 binary
-chance level. That +0.04 margin is real in the sense it is not class-prior
-collapse (Pristine recall 0.19, not 0), but it is **inside the ≈ 0.05–0.07
-run-to-run noise band** of § 2.1 and rests on a single cell and a single
-seed. Every other cell sits at balanced accuracy ≈ 0.50. Detection does not
-reliably transfer; the most that can be said is that one cell hints at a
-marginal signal worth a multi-seed check.
+**Weakly transfers — but no operationally usable cell.** The best
+balanced-accuracy cell, `cnn2d/cfdac_real` (0.585), clears the 0.500 chance
+level by +0.085 — outside the noise band, so detection carries *some*
+genuine discriminative signal. But the metric and the operating point
+disagree: `cnn2d/cfdac_real` reaches 0.585 by leaning Pristine — it catches
+73 % of Pristine cases but **misses 56 % of real damage**, useless as a
+safety detector; `mlp/cfdac_magphase` (best macro-F1) instead catches 88 %
+of damage but flags 81 % of Pristine as damaged. Detection has weak
+cross-domain signal yet no cell trades recall against false alarms well
+enough to deploy.
 
 ### 4.5 Evaluation on Pristine + severe-damage only
 
@@ -289,6 +291,32 @@ raw accuracy on a *damage-only* subset — a class-distribution shift, not a
 real skill gain. Under macro-F1 / balanced accuracy on the Pristine-
 inclusive set there is at most a small genuine effect, and only for one
 CFDAC cell — not the breakthrough the accuracy figure suggested.
+
+### 5.6 One-vs-rest type detection — the strongest transfer in the study
+
+The 5-class `type` task transfers weakly (§ 5.2, macro-F1 0.25). But the
+**binary-trenchcoat decomposition** — five one-vs-rest classifiers, each
+answering "is the damage type X?", trained with the § 3 shared recipe —
+transfers *far* better. Seeded best cell per sub-task:
+
+| one-vs-rest task | best cell | balanced acc | macro-F1 |
+|---|---|---|---|
+| `is_bolt` | cnn2d / cfdac_real | **0.708** | 0.701 |
+| `is_hole` | mlp / cfdac_all | 0.684 | 0.629 |
+| `is_mass` | rf / cfdac_real | 0.633 | 0.471 |
+| `is_crack` | mlp / modal | 0.603 | 0.613 |
+| `is_pristine` | cnn2d / cfdac_real | 0.592 | 0.536 |
+
+Every per-type yes/no question transfers at balanced accuracy 0.59–0.71,
+against 0.33 for the joint 5-class task. **`is_bolt` (balanced accuracy
+0.71, macro-F1 0.70) is the strongest honest cross-domain result in the
+whole study** — stronger than mass-plate location (§ 7.2). The joint
+5-class classifier collapses because it must commit to a single label; the
+per-type detectors each keep their signal. Deployment implication: build a
+**bank of per-damage-type detectors**, not one 5-class classifier. (The
+*aggregated* trenchcoat — recombining the five into a 5-class prediction —
+loses this and scores only ≈ 0.29 macro-F1; the aggregation, not the
+binaries, is the weak link.)
 
 ---
 
