@@ -1,0 +1,32 @@
+{
+  "task": "is_hole",
+  "model": "cnn",
+  "feature": "cfdac_real",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.8,
+  "best_metric_test": 0.8,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8,
+      "metric_test": 0.8,
+      "extras": {},
+      "runtime_s": 50.7715699672699
+    }
+  ]
+}
