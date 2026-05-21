@@ -90,3 +90,4 @@ results/_arm_aug/
 # Per-case eval blobs for the A/B arms — regeneratable, large
 results/experimental_full_per_case_plain.json
 results/experimental_full_per_case_aug.json
+results/experimental_full_per_case_basescore.json
