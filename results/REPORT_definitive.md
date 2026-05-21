@@ -101,6 +101,53 @@ Evidence artefacts: `experimental_full_evaluation_plain.json` (seeded,
 60 cells), `_aug.json` (seeded augmented arm, 50 cells),
 `_basescore.json` (report-era models re-scored, 78 cells).
 
+### 3.1 The cell grid — which model pairs with which feature
+
+A **cell** is one (task × model × feature) combination — e.g.
+`type / mlp / modal`. The model family is fixed by the feature's tensor
+rank: a flat vector goes to a tree ensemble or an MLP; a frequency×channel
+*sequence* to a 1-D CNN or Transformer; a 128×128 CFDAC *matrix* to a 2-D
+CNN; a stacked 3-D CFDAC tensor to a 3-D CNN.
+
+| feature | tensor shape | model(s) paired with it |
+|---|---|---|
+| `modal` | 81-vector (flat) | `rf`, `xgb`, `mlp` |
+| `frf_mag` | 381×9 sequence | `cnn` (1-D), `transformer` |
+| `timeseries` (legacy) | 1024×9 sequence | `cnn` (1-D), `transformer` |
+| `cfdac` (legacy, real+imag) | 128×128×2 matrix | `cnn2d` |
+| `cfdac_real` | 128×128 matrix | `cnn2d` (also `mlp`, flattened) |
+| `cfdac_imag` / `cfdac_mag` / `cfdac_phase` | 128×128 matrix | `cnn2d` |
+| `cfdac_realimag` / `cfdac_magphase` | 128×128×2 matrix | `cnn2d` |
+| `cfdac_all` | 128×128×4 matrix | `cnn2d` |
+| `cfdac3d_realimag` / `cfdac3d_magphase` / `cfdac3d_all` | 3-D stack | `cnn3d` |
+
+Models: `rf`, `xgb` — sklearn tree ensembles; `mlp` — multilayer
+perceptron; `cnn` — 1-D conv stack; `transformer` — small encoder; `cnn2d`
+/ `cnn3d` — 2-/3-D conv stacks. Across the five tasks this yields the
+78-cell report-era sweep (`_basescore.json`) and the 60-cell seeded sweep
+(`_plain.json`, the `modal` / `frf_mag` / `cfdac`-legacy subset that
+`hpo.py` covers; the CFDAC variants come from `hpo_cfdac_*.py`).
+
+### 3.2 Deployment data assumption — what experimental data is available
+
+"Synth-only" here means a specific, realistic constraint: **before
+deployment the only experimental data available is a reference measurement
+of the *healthy* structure.** The pristine 3SBB can be measured freely, but
+there are *no* measurements of it in any damaged state — diagnosing unseen
+damage is the whole task. Methods are classified by what they need:
+
+| method | experimental data needed | within the assumption? |
+|---|---|---|
+| P0.1 CFDAC reference, P0.3 scaler, P1.1, the whole synth-only pipeline (§§ 4–8) | pristine reference only (462 healthy measurements, averaged to one reference) | **yes** |
+| Recommendation 4 — SSL pretrain on "unlabelled experimental data" | unlabelled measurements of the **damaged** structure | **no** |
+| Joint synth+exp fine-tune (`REPORT_full.md` § 9.2) | **labelled** measurements of the damaged structure | no — post-deployment only |
+
+The SSL proposal pretrains on all 2 638 experimental cases — but 2 176 of
+those are damaged-structure measurements a genuine pre-deployment scenario
+does not have. SSL pretrain is therefore **not a synth-only method** under
+this assumption; § 10 is corrected accordingly. P0.1 / P0.3 use only the
+462 pristine measurements and stay within it.
+
 ---
 
 ## 4. Goal 1 — Damage detection
@@ -147,6 +194,22 @@ is excluded.
 binary chance level. The best genuine-feature cell (`mlp/modal`) reaches
 0.515, marginally above chance and not usable. The synthetic damage
 signature does not separate damaged from pristine on real data.
+
+### 4.5 Evaluation on Pristine + severe-damage only
+
+A deployment-relevant restriction: evaluate only on cases that are either
+Pristine or *clearly* damaged — Pristine ∪ {damage with per-type-normalised
+severity ≥ τ} (`mlp/modal`):
+
+| test set | n | accuracy | macro-F1 | balanced acc |
+|---|---|---|---|---|
+| all cases | 2 638 | 0.825 | 0.482 | 0.513 |
+| Pristine + damage τ ≥ 0.5 | 1 520 | 0.705 | 0.444 | 0.516 |
+| Pristine + damage τ ≥ 0.7 | 1 240 | 0.640 | 0.420 | 0.516 |
+
+Balanced accuracy is flat at ≈ 0.51 at every threshold — restricting to
+severe damage does **not** help detection. Raw accuracy *falls* only
+because Pristine becomes a larger share of a smaller set.
 
 ---
 
@@ -198,6 +261,26 @@ signal — macro-F1 ≈ 0.25–0.30, balanced accuracy ≈ 0.33–0.37 against a
 *accuracy* purely by collapsing onto the majority class; their balanced
 accuracy is at or near chance. Type assessment is above chance but far from
 usable.
+
+### 5.5 Evaluation on Pristine + severe-damage only
+
+The same restriction as § 4.5 — Pristine ∪ {damage with per-type-normalised
+severity ≥ τ} — a scenario where damage, if present, is significant:
+
+| cell | test set | n | accuracy | macro-F1 | balanced acc |
+|---|---|---|---|---|---|
+| mlp / modal | all cases | 2 638 | 0.373 | 0.296 | 0.371 |
+| mlp / modal | Pristine + τ ≥ 0.7 | 1 240 | 0.390 | 0.219 | 0.306 |
+| cnn2d / cfdac_real | all cases | 2 638 | 0.324 | 0.172 | 0.189 |
+| cnn2d / cfdac_real | Pristine + τ ≥ 0.7 | 1 240 | 0.411 | 0.206 | 0.307 |
+
+Restricting to severe damage helps the 2-D CNN / CFDAC cell modestly
+(balanced accuracy 0.19 → 0.31) but *lowers* the modal-MLP cell's macro-F1
+(0.30 → 0.22). A previously-reported "≈ 0.66 accuracy at high severity" was
+raw accuracy on a *damage-only* subset — a class-distribution shift, not a
+real skill gain. Under macro-F1 / balanced accuracy on the Pristine-
+inclusive set there is at most a small genuine effect, and only for one
+CFDAC cell — not the breakthrough the accuracy figure suggested.
 
 ---
 
@@ -404,8 +487,13 @@ In cost / impact order, all synth-only.
    directly targets the two biggest failures — the `is_Crack` AUC-0.36
    anti-correlation (§ 9.3) and the column-end symmetry (§ 7a). Expected:
    `is_Crack` AUC 0.36 → ≥ 0.5 and a non-degenerate `col_location`.
-4. **SSL pretrain on unlabelled experimental data** (P2.3, ≈ 6 h CPU) — not
-   run; compute-bound.
+4. **SSL pretrain on unlabelled experimental data** (P2.3) — **withdrawn as
+   stated.** The proposal pretrains on all 2 638 experimental cases, but
+   2 176 of those are damaged-structure measurements that a genuine
+   pre-deployment scenario does not have (§ 3.2); it is not a synth-only
+   method. An assumption-respecting variant could pretrain only on synthetic
+   data plus the single pristine reference — but that adds little over the
+   existing synthetic training and is not the original recommendation.
 5. **Full-data vision sweep** (≈ 14 h CPU) — not run; compute-bound.
 6. **Nonlinear bolt model** (P2.4, Bouc-Wen, multi-day) — not started.
 
