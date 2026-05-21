@@ -1,0 +1,24 @@
+{
+  "task": "is_bolt",
+  "model": "rf",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": null
+  },
+  "best_metric_val": 0.9673333333333334,
+  "best_metric_test": 0.972,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9673333333333334,
+      "metric_test": 0.972,
+      "extras": {},
+      "runtime_s": 55.6768958568573
+    }
+  ]
+}
