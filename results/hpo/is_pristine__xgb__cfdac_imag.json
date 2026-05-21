@@ -1,0 +1,24 @@
+{
+  "task": "is_pristine",
+  "model": "xgb",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": 6
+  },
+  "best_metric_val": 0.992,
+  "best_metric_test": 0.9913333333333333,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.992,
+      "metric_test": 0.9913333333333333,
+      "extras": {},
+      "runtime_s": 251.2639319896698
+    }
+  ]
+}
