@@ -1,0 +1,32 @@
+{
+  "task": "is_mass",
+  "model": "cnn",
+  "feature": "cfdac_realimag",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.9093333333333333,
+  "best_metric_test": 0.918,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9093333333333333,
+      "metric_test": 0.918,
+      "extras": {},
+      "runtime_s": 93.725417137146
+    }
+  ]
+}
