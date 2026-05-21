@@ -1,0 +1,34 @@
+{
+  "task": "severity",
+  "model": "mlp",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.1633877158164978,
+  "best_metric_test": 0.1215752363204956,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "R2",
+      "metric_val": 0.1633877158164978,
+      "metric_test": 0.1215752363204956,
+      "extras": {
+        "mae_test": 0.2302228808403015
+      },
+      "runtime_s": 44.474270820617676
+    }
+  ]
+}
