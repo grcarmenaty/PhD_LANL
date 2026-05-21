@@ -141,7 +141,7 @@ damage is the whole task. Methods are classified by what they need:
 | method | experimental data needed | within the assumption? |
 |---|---|---|
 | P0.1 CFDAC reference, P0.3 scaler, P1.1, the whole synth-only pipeline (§§ 4–8) | pristine reference only (462 healthy measurements, averaged to one reference) | **yes** |
-| Recommendation 4 — SSL pretrain on "unlabelled experimental data" | unlabelled measurements of the **damaged** structure | **no** |
+| Recommendation 4 (§ 10) — SSL pretrain on "unlabelled experimental data" | unlabelled measurements of the **damaged** structure | **no** |
 | Joint synth+exp fine-tune (`REPORT_full.md` § 9.2) | **labelled** measurements of the damaged structure | no — post-deployment only |
 
 The SSL proposal pretrains on all 2 638 experimental cases — but 2 176 of
@@ -201,7 +201,8 @@ signature does not separate damaged from pristine on real data.
 
 A deployment-relevant restriction: evaluate only on cases that are either
 Pristine or *clearly* damaged — Pristine ∪ {damage with per-type-normalised
-severity ≥ τ} (`mlp/modal`):
+severity ≥ τ} (`mlp/modal`; artefact `results/severity_inclusive_eval.json`,
+regenerate via `python -m ml_pipeline.severity_inclusive_eval`):
 
 | test set | n | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|---|
@@ -267,7 +268,8 @@ usable.
 ### 5.5 Evaluation on Pristine + severe-damage only
 
 The same restriction as § 4.5 — Pristine ∪ {damage with per-type-normalised
-severity ≥ τ} — a scenario where damage, if present, is significant:
+severity ≥ τ} — a scenario where damage, if present, is significant
+(artefact `results/severity_inclusive_eval.json`):
 
 | cell | test set | n | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|---|---|
@@ -305,7 +307,7 @@ target normalised to [0, 1] per damage type, damage samples only.
 | HPO selection | grid d_model ∈ {32,48,64} × n_layers ∈ {1,2}; best by validation R² |
 | seed | 20260511 |
 
-### 6.2 Result (seeded, zero-shot on 2 638 real cases)
+### 6.2 Result (seeded, zero-shot on 2 176 damage cases)
 
 | synth val R² | synth test R² | **exp R²** | exp MAE |
 |---|---|---|---|
@@ -339,9 +341,15 @@ synth-trained model on this rig.
 **column-end** (`col_location`, 6 classes S1AD…S3BD) and which
 **mass-plate** (`mass_location`, 4 classes Base/F1/F2/F3).
 
-### 7a Column-end location (`col_location`)
+> **Note on the location numbers.** The CFDAC-variant cells below come from
+> the report-era models (`_basescore.json`, unseeded). A seeded
+> `hpo_cfdac_*` re-run is in progress; the numbers will be replaced with
+> seeded values when it completes. The training *recipe* (config tables) is
+> already seeded — only the quoted results pre-date it.
 
-#### 7a.1 Recommended training configuration
+### 7.1 Column-end location (`col_location`)
+
+**Recommended training configuration**
 
 | element | value |
 |---|---|
@@ -355,13 +363,13 @@ synth-trained model on this rig.
 | HPO selection | grid widths × kernel (4 configs, `hpo_cfdac_variants.py`); best by validation accuracy |
 | seed | 20260511 (`hpo_cfdac_*` seeded as of commit `f3ceeaf`) |
 
-#### 7a.2 Result (zero-shot on 2 638 real cases)
+**Result** (zero-shot on 2 638 real cases)
 
 | synth val | synth test | exp accuracy | exp macro-F1 | exp balanced acc |
 |---|---|---|---|---|
 | 0.492 | 0.463 | 0.508 | **0.192** | 0.228 |
 
-#### 7a.3 Comparison (`_basescore.json`)
+**Comparison** (`_basescore.json`)
 
 | model / feature | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|
@@ -369,16 +377,14 @@ synth-trained model on this rig.
 | mlp / cfdac_real | 0.35 | 0.18 | 0.30 |
 | cnn / timeseries | 0.30 | 0.16 | 0.16 |
 
-#### 7a.4 Verdict
-
-**Does not transfer.** Best macro-F1 0.19, balanced accuracy 0.23 against a
-0.167 six-class chance level — marginal. The synthetic crack/hole model is
-symmetric per storey, so the BD-vs-AD column ends are nearly
+**Verdict — does not transfer.** Best macro-F1 0.19, balanced accuracy 0.23
+against a 0.167 six-class chance level — marginal. The synthetic crack/hole
+model is symmetric per storey, so the BD-vs-AD column ends are nearly
 indistinguishable; this is a property of the synthetic physics.
 
-### 7b Mass-plate location (`mass_location`)
+### 7.2 Mass-plate location (`mass_location`)
 
-#### 7b.1 Recommended training configuration
+**Recommended training configuration**
 
 | element | value |
 |---|---|
@@ -392,13 +398,13 @@ indistinguishable; this is a property of the synthetic physics.
 | HPO selection | grid widths × kernel (4 configs, `hpo_cfdac_variants.py`); best by validation accuracy |
 | seed | 20260511 |
 
-#### 7b.2 Result (zero-shot on 2 638 real cases)
+**Result** (zero-shot on 2 638 real cases)
 
 | synth val | synth test | exp accuracy | exp macro-F1 | exp balanced acc |
 |---|---|---|---|---|
 | 0.893 | 0.863 | 0.534 | **0.435** | **0.506** |
 
-#### 7b.3 Comparison (`_basescore.json`)
+**Comparison** (`_basescore.json`)
 
 | model / feature | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|
@@ -407,10 +413,9 @@ indistinguishable; this is a property of the synthetic physics.
 | cnn2d / cfdac_imag | 0.39 | 0.42 | 0.49 |
 | mlp / modal | 0.37 | 0.25 | 0.26 |
 
-#### 7b.4 Per-class breakdown — a *partial* success
-
-The macro-F1 0.44 is the best of any goal, but the confusion matrix
-(`cnn2d / cfdac_real`, 238 Mass cases) shows it is not uniform:
+**Per-class breakdown — a partial success.** The macro-F1 0.44 is the best
+of any goal, but the confusion matrix (`cnn2d / cfdac_real`, 238 Mass cases)
+is not uniform:
 
 | true ↓ / pred → | Base | F1 | F2 | F3 | recall |
 |---|---|---|---|---|---|
@@ -425,15 +430,13 @@ all predictions). So the signal is real (Base and F1 recall are above the
 0.25 chance level — this is not class-prior collapse) but **partial**: it
 locates a mass on the lower three plates and cannot separate the top two.
 
-#### 7b.5 Verdict
-
-**The best goal, but a partial success.** Balanced accuracy 0.51 (≈ 2×
-chance) and macro-F1 0.44 — the only goal with genuine synth-only signal —
-yet F3 is unresolved (F2/F3 mass signatures are too similar to survive the
-domain gap). An added mass-plate shifts the floor-mode amplitudes by a
-large, location-specific amount; that amount distinguishes the lower plates
-but not the top two. This is the result to build on — and the F2/F3
-confusion is the specific thing to fix.
+**Verdict — the best goal, but a partial success.** Balanced accuracy 0.51
+(≈ 2× chance) and macro-F1 0.44 — the only goal with genuine synth-only
+signal — yet F3 is unresolved (F2/F3 mass signatures are too similar to
+survive the domain gap). An added mass-plate shifts the floor-mode
+amplitudes by a large, location-specific amount; that amount distinguishes
+the lower plates but not the top two. This is the result to build on — and
+the F2/F3 confusion is the specific thing to fix.
 
 ---
 
@@ -471,7 +474,7 @@ control.
 1. **Three of four goals do not transfer.** Detection, column-end location
    and severity are at chance / R² ≈ 0; type is only weakly above chance.
    Only mass-plate location carries genuine signal — and only partially
-   (the lower three plates; the top plate F3 is unresolved, § 7b.4). This is
+   (the lower three plates; the top plate F3 is unresolved, § 7.2). This is
    the central finding.
 2. **Deep CFDAC models collapse to the class prior** for `type` and
    `binary` — the synth feature manifold projects to a near-constant on the
@@ -502,7 +505,7 @@ In cost / impact order, all synth-only.
    To close it out properly: re-run over ≥ 3 seeds with a size-matched
    (10 000 augmented-only) control.
 2. **Build on mass-plate location** — the one goal with partial real signal
-   (§ 7b). *Done this iteration:* the per-class breakdown (§ 7b.4) shows the
+   (§ 7.2). *Done this iteration:* the per-class breakdown (§ 7.2) shows the
    model resolves the lower three plates via floor-mode amplitude but
    collapses F3→F2. Next: re-run `hpo_cfdac_variants.py` (now seeded) to
    confirm reproducibly, and target the F2/F3 confusion specifically.
@@ -510,7 +513,7 @@ In cost / impact order, all synth-only.
    Promote `variation_v2.py` → `variation.py` and regenerate the chunk set
    (P2.1 + P2.2, ≈ 24 h CPU). Asymmetric per-corner Crack/Hole damage
    directly targets the two biggest failures — the `is_Crack` AUC-0.36
-   anti-correlation (§ 9.3) and the column-end symmetry (§ 7a). Expected:
+   anti-correlation (§ 9.3) and the column-end symmetry (§ 7.1). Expected:
    `is_Crack` AUC 0.36 → ≥ 0.5 and a non-degenerate `col_location`.
 4. **SSL pretrain on unlabelled experimental data** (P2.3) — **withdrawn as
    stated.** The proposal pretrains on all 2 638 experimental cases, but

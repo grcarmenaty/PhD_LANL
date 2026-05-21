@@ -1,0 +1,902 @@
+[
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.4150871872630781,
+    "macro_f1": 0.4020858369237409,
+    "balanced_acc": 0.5525309555640439
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6105263157894737,
+    "macro_f1": 0.6020372240964197,
+    "balanced_acc": 0.6537737624694147
+  },
+  {
+    "task": "binary",
+    "model": "cnn",
+    "feature": "timeseries",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6830645161290323,
+    "macro_f1": 0.6789128949430032,
+    "balanced_acc": 0.6995153518289765
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8203184230477635,
+    "macro_f1": 0.45064556434818825,
+    "balanced_acc": 0.49724264705882354
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6881578947368421,
+    "macro_f1": 0.40763834762275913,
+    "balanced_acc": 0.4943289224952741
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.617741935483871,
+    "macro_f1": 0.3818544366899302,
+    "balanced_acc": 0.4922879177377892
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_all",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_all",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_all",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8097043214556482,
+    "macro_f1": 0.45707880719983207,
+    "balanced_acc": 0.4950711818818437
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6697368421052632,
+    "macro_f1": 0.4104776503164557,
+    "balanced_acc": 0.4841447147685333
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.5951612903225807,
+    "macro_f1": 0.3822249745934959,
+    "balanced_acc": 0.47649094692796495
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8222137983320698,
+    "macro_f1": 0.4512169752444352,
+    "balanced_acc": 0.4983915441176471
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6914473684210526,
+    "macro_f1": 0.4087903539478802,
+    "balanced_acc": 0.4966918714555766
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6217741935483871,
+    "macro_f1": 0.38339134758826454,
+    "balanced_acc": 0.4955012853470437
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8229719484457922,
+    "macro_f1": 0.4514452069037222,
+    "balanced_acc": 0.49885110294117646
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6927631578947369,
+    "macro_f1": 0.40924990283715507,
+    "balanced_acc": 0.4976370510396975
+  },
+  {
+    "task": "binary",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6233870967741936,
+    "macro_f1": 0.3840039741679086,
+    "balanced_acc": 0.4967866323907455
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_all",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_all",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_all",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_magphase",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_magphase",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_magphase",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8237300985595147,
+    "macro_f1": 0.4516732488048223,
+    "balanced_acc": 0.4993106617647059
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.694078947368421,
+    "macro_f1": 0.4097087378640777,
+    "balanced_acc": 0.4985822306238185
+  },
+  {
+    "task": "binary",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.625,
+    "macro_f1": 0.38461538461538464,
+    "balanced_acc": 0.4980719794344473
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8237300985595147,
+    "macro_f1": 0.4516732488048223,
+    "balanced_acc": 0.4993106617647059
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.694078947368421,
+    "macro_f1": 0.4097087378640777,
+    "balanced_acc": 0.4985822306238185
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "cfdac_real",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "modal",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.4822018517007912,
+    "balanced_acc": 0.5127870750572957
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "modal",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.7052631578947368,
+    "macro_f1": 0.4439490591490043,
+    "balanced_acc": 0.5157611764417057
+  },
+  {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "modal",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6395161290322581,
+    "macro_f1": 0.4198639148195945,
+    "balanced_acc": 0.5162337662337663
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.8248673237300985,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6960526315789474,
+    "macro_f1": 0.41039565554693563,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.6274193548387097,
+    "macro_f1": 0.3855302279484638,
+    "balanced_acc": 0.5
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "timeseries",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.7501895375284306,
+    "macro_f1": 0.496237374725254,
+    "balanced_acc": 0.49991445441813087
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "timeseries",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.6243421052631579,
+    "macro_f1": 0.45746556807903227,
+    "balanced_acc": 0.4807997610455077
+  },
+  {
+    "task": "binary",
+    "model": "transformer",
+    "feature": "timeseries",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.5766129032258065,
+    "macro_f1": 0.44202502916297753,
+    "balanced_acc": 0.48280917882460295
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.5072024260803639,
+    "macro_f1": 0.1346076458752515,
+    "balanced_acc": 0.2
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.5381578947368421,
+    "macro_f1": 0.17493584260051326,
+    "balanced_acc": 0.25
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "frf_mag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.4338709677419355,
+    "macro_f1": 0.1512935883014623,
+    "balanced_acc": 0.25
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.2884761182714177,
+    "macro_f1": 0.181291776863167,
+    "balanced_acc": 0.2614144402155481
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.45789473684210524,
+    "macro_f1": 0.22084419697299137,
+    "balanced_acc": 0.29820118756549074
+  },
+  {
+    "task": "type",
+    "model": "cnn",
+    "feature": "timeseries",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.5604838709677419,
+    "macro_f1": 0.2739367756021648,
+    "balanced_acc": 0.35070366436537437
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.2137983320697498,
+    "macro_f1": 0.12583069304515196,
+    "balanced_acc": 0.17188249739357625
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.2118421052631579,
+    "macro_f1": 0.14003300536859475,
+    "balanced_acc": 0.1339649551752241
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.14193548387096774,
+    "macro_f1": 0.12233069571472614,
+    "balanced_acc": 0.11415737298636927
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.19901440485216074,
+    "macro_f1": 0.11815958744912133,
+    "balanced_acc": 0.14215624896513843
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.19210526315789472,
+    "macro_f1": 0.11504493264434812,
+    "balanced_acc": 0.10725465447348087
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_imag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.12983870967741937,
+    "macro_f1": 0.10153064680490598,
+    "balanced_acc": 0.09107706110494214
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.3794541319181198,
+    "macro_f1": 0.11094486007204211,
+    "balanced_acc": 0.14962630792227205
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.31644736842105264,
+    "macro_f1": 0.0976154236428209,
+    "balanced_acc": 0.1470048899755501
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_mag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.18629032258064515,
+    "macro_f1": 0.06412213740458014,
+    "balanced_acc": 0.10734200743494424
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.18688400303260044,
+    "macro_f1": 0.09614741566112657,
+    "balanced_acc": 0.23120799889462512
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.10328947368421053,
+    "macro_f1": 0.054751525719267655,
+    "balanced_acc": 0.04798288508557457
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_magphase",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.035483870967741936,
+    "macro_f1": 0.023342175066312996,
+    "balanced_acc": 0.020446096654275093
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.29909021986353296,
+    "macro_f1": 0.13692845434745188,
+    "balanced_acc": 0.2208752559319692
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.20921052631578949,
+    "macro_f1": 0.09204052098408104,
+    "balanced_acc": 0.09718826405867971
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_phase",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.13306451612903225,
+    "macro_f1": 0.0695468914646997,
+    "balanced_acc": 0.0766728624535316
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.3244882486732373,
+    "macro_f1": 0.17209061819784235,
+    "balanced_acc": 0.18928282523771842
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.40921052631578947,
+    "macro_f1": 0.1915046296296296,
+    "balanced_acc": 0.2665393235533822
+  },
+  {
+    "task": "type",
+    "model": "cnn2d",
+    "feature": "cfdac_real",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.4112903225806452,
+    "macro_f1": 0.20613512098650535,
+    "balanced_acc": 0.30659076827757126
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_all",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.12736921910538287,
+    "macro_f1": 0.06154089561804053,
+    "balanced_acc": 0.21464872944693575
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_all",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.05592105263157895,
+    "macro_f1": 0.03748621830209482,
+    "balanced_acc": 0.02597799511002445
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_all",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.062096774193548386,
+    "macro_f1": 0.04975767366720517,
+    "balanced_acc": 0.03578066914498141
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_magphase",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.23881728582259287,
+    "macro_f1": 0.11941368611139733,
+    "balanced_acc": 0.19205708853047945
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_magphase",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.23421052631578948,
+    "macro_f1": 0.10279175358939747,
+    "balanced_acc": 0.11057966585167074
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_magphase",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.21854838709677418,
+    "macro_f1": 0.10557775557775559,
+    "balanced_acc": 0.1275480173482032
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.3434420015163002,
+    "macro_f1": 0.17085785199069728,
+    "balanced_acc": 0.1994335738779817
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.45,
+    "macro_f1": 0.20975159294487025,
+    "balanced_acc": 0.26060004074979626
+  },
+  {
+    "task": "type",
+    "model": "cnn3d",
+    "feature": "cfdac3d_realimag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.41774193548387095,
+    "macro_f1": 0.21691323470611756,
+    "balanced_acc": 0.28764714993804213
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.37263078089461715,
+    "macro_f1": 0.29586203435830044,
+    "balanced_acc": 0.3707833216857881
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.33881578947368424,
+    "macro_f1": 0.1906608171977781,
+    "balanced_acc": 0.24934310799225223
+  },
+  {
+    "task": "type",
+    "model": "mlp",
+    "feature": "modal",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.3895161290322581,
+    "macro_f1": 0.21905836009339213,
+    "balanced_acc": 0.3063685849466518
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.23313115996967398,
+    "macro_f1": 0.1581322970458785,
+    "balanced_acc": 0.22429469545665798
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.29210526315789476,
+    "macro_f1": 0.17171261703668333,
+    "balanced_acc": 0.23880399348003262
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "frf_mag",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.3258064516129032,
+    "macro_f1": 0.21167258849848664,
+    "balanced_acc": 0.28161400247831475
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "timeseries",
+    "tau": 0.0,
+    "n_cases": 2638,
+    "accuracy": 0.2941622441243366,
+    "macro_f1": 0.24211172844779627,
+    "balanced_acc": 0.2983716253521384
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "timeseries",
+    "tau": 0.5,
+    "n_cases": 1520,
+    "accuracy": 0.3513157894736842,
+    "macro_f1": 0.30576157074374083,
+    "balanced_acc": 0.42890113146836867
+  },
+  {
+    "task": "type",
+    "model": "transformer",
+    "feature": "timeseries",
+    "tau": 0.7,
+    "n_cases": 1240,
+    "accuracy": 0.3629032258064516,
+    "macro_f1": 0.3302610048434177,
+    "balanced_acc": 0.4286784467081865
+  }
+]

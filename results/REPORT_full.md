@@ -53,7 +53,7 @@ decomposition, a severity-stratified analysis, and a noise-robustness sweep.
 | type | `type` | macro-F1 0.25–0.30 | weakly |
 | severity | `severity` | R² ≈ 0 on real features | no |
 | location | `col_location` | macro-F1 0.19 | no |
-| location | `mass_location` | macro-F1 0.44, balanced acc 0.51 | **yes** |
+| location | `mass_location` | macro-F1 0.44, balanced acc 0.51 | **partly** (lower 3 plates) |
 
 Using **experimental labels in training** (joint synth+exp fine-tune, § 9.2)
 reaches deployable accuracy on every task — but that is no longer synth-only

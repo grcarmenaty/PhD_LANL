@@ -1,0 +1,52 @@
+{
+  "task": "binary",
+  "model": "cnn2d",
+  "feature": "cfdac_imag",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9266666666666666,
+      "metric_test": 0.918,
+      "extras": {},
+      "runtime_s": 174.42444157600403
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9493333333333334,
+      "metric_test": 0.9346666666666666,
+      "extras": {},
+      "runtime_s": 51.53570199012756
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9133333333333333,
+      "metric_test": 0.9106666666666666,
+      "extras": {},
+      "runtime_s": 57.95945954322815
+    }
+  ]
+}
