@@ -1,5 +1,5 @@
 {
-  "task": "is_bolt",
+  "task": "is_pristine",
   "model": "cnn2d",
   "feature": "cfdac_phase",
   "trials": [
@@ -13,10 +13,10 @@
         "kernel_size": 3
       },
       "metric_name": "accuracy",
-      "metric_val": 0.96,
-      "metric_test": 0.9553333333333334,
+      "metric_val": 0.906,
+      "metric_test": 0.9166666666666666,
       "extras": {},
-      "runtime_s": 48.0845673084259
+      "runtime_s": 50.13130736351013
     },
     {
       "hyperparams": {
@@ -28,10 +28,10 @@
         "kernel_size": 5
       },
       "metric_name": "accuracy",
-      "metric_val": 0.96,
-      "metric_test": 0.9633333333333334,
+      "metric_val": 0.928,
+      "metric_test": 0.9353333333333333,
       "extras": {},
-      "runtime_s": 48.408674478530884
+      "runtime_s": 50.61411643028259
     },
     {
       "hyperparams": {
@@ -43,10 +43,10 @@
         "kernel_size": 3
       },
       "metric_name": "accuracy",
-      "metric_val": 0.9593333333333334,
-      "metric_test": 0.964,
+      "metric_val": 0.9193333333333333,
+      "metric_test": 0.91,
       "extras": {},
-      "runtime_s": 56.53305792808533
+      "runtime_s": 59.0237512588501
     }
   ]
 }
