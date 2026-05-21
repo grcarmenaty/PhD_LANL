@@ -1,0 +1,26 @@
+{
+  "task": "severity",
+  "model": "xgb",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": 6
+  },
+  "best_metric_val": 0.6607449054718018,
+  "best_metric_test": 0.6413511633872986,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "R2",
+      "metric_val": 0.6607449054718018,
+      "metric_test": 0.6413511633872986,
+      "extras": {
+        "mae_test": 0.11218933016061783
+      },
+      "runtime_s": 256.5986921787262
+    }
+  ]
+}
