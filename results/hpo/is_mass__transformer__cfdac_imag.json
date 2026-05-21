@@ -1,0 +1,24 @@
+{
+  "task": "is_mass",
+  "model": "transformer",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.9646666666666667,
+  "best_metric_test": 0.9613333333333334,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9646666666666667,
+      "metric_test": 0.9613333333333334,
+      "extras": {},
+      "runtime_s": 53.2537567615509
+    }
+  ]
+}

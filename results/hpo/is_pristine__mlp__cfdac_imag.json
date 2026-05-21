@@ -1,0 +1,32 @@
+{
+  "task": "is_pristine",
+  "model": "mlp",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.804,
+  "best_metric_test": 0.796,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.804,
+      "metric_test": 0.796,
+      "extras": {},
+      "runtime_s": 57.25946807861328
+    }
+  ]
+}
