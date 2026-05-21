@@ -1,0 +1,32 @@
+{
+  "task": "is_mass",
+  "model": "mlp",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.8386666666666667,
+  "best_metric_test": 0.8466666666666667,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8386666666666667,
+      "metric_test": 0.8466666666666667,
+      "extras": {},
+      "runtime_s": 60.27912402153015
+    }
+  ]
+}
