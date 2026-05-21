@@ -1,0 +1,37 @@
+{
+  "task": "is_bolt",
+  "model": "cnn2d",
+  "feature": "cfdac_real",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.962,
+      "metric_test": 0.9553333333333334,
+      "extras": {},
+      "runtime_s": 50.175328493118286
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.964,
+      "metric_test": 0.968,
+      "extras": {},
+      "runtime_s": 50.93787741661072
+    }
+  ]
+}
