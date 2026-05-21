@@ -1,0 +1,24 @@
+{
+  "task": "is_bolt",
+  "model": "xgb",
+  "feature": "cfdac_mag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": 6
+  },
+  "best_metric_val": 0.9666666666666667,
+  "best_metric_test": 0.972,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9666666666666667,
+      "metric_test": 0.972,
+      "extras": {},
+      "runtime_s": 266.38437962532043
+    }
+  ]
+}
