@@ -1,0 +1,32 @@
+{
+  "task": "is_pristine",
+  "model": "mlp",
+  "feature": "cfdac_phase",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.822,
+  "best_metric_test": 0.8053333333333333,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.822,
+      "metric_test": 0.8053333333333333,
+      "extras": {},
+      "runtime_s": 58.926533699035645
+    }
+  ]
+}

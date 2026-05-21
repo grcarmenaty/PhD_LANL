@@ -1,0 +1,24 @@
+{
+  "task": "mass_location",
+  "model": "rf",
+  "feature": "cfdac_phase",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": null
+  },
+  "best_metric_val": 1.0,
+  "best_metric_test": 1.0,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 1.0,
+      "metric_test": 1.0,
+      "extras": {},
+      "runtime_s": 2.326117515563965
+    }
+  ]
+}
