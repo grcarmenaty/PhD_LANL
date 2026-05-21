@@ -45,15 +45,16 @@ of the LANL 3-Storey Bookcase Benchmark and evaluates them **zero-shot** on
 plus a synth-only vision-backbone sweep, the binary-trenchcoat
 decomposition, a severity-stratified analysis, and a noise-robustness sweep.
 
-**Headline, by goal** (synth-only, zero-shot, honest metric):
+**Headline, by goal** (synth-only, zero-shot, seeded 244-cell sweep
+`experimental_full_evaluation_seeded.json`, honest metric):
 
 | goal | task | best result | transfers? |
 |---|---|---|---|
-| detection | `binary` | balanced accuracy 0.515 | no |
-| type | `type` | macro-F1 0.25–0.30 | weakly |
-| severity | `severity` | R² ≈ 0 on real features | no |
-| location | `col_location` | macro-F1 0.19 | no |
-| location | `mass_location` | macro-F1 0.44, balanced acc 0.51 | **partly** (lower 3 plates) |
+| detection | `binary` | balanced acc 0.54 (`mlp/cfdac_magphase`) | **marginal** — within noise |
+| type | `type` | macro-F1 0.25 (`mlp/modal`) | weakly |
+| severity | `severity` | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
+| location | `col_location` | macro-F1 0.17 (`mlp/modal`) | no |
+| location | `mass_location` | macro-F1 0.45 (`mlp/cfdac_imag`), balanced acc 0.51 | **partly** (best goal) |
 
 Using **experimental labels in training** (joint synth+exp fine-tune, § 9.2)
 reaches deployable accuracy on every task — but that is no longer synth-only
@@ -176,44 +177,48 @@ only the 462 pristine measurements and stay within the assumption.
 
 | element | value |
 |---|---|
-| feature | `modal` (81-dim) |
-| model | `MLP`, hidden (256, 128, 64), dropout 0.2 |
-| optimiser | AdamW, lr 3×10⁻³, weight decay 10⁻⁴ |
+| feature | `cfdac_magphase` (128×128×2 CFDAC magnitude+phase stack) |
+| model | `MLP`, hidden (256, 128, 64), dropout 0.2 (flattened CFDAC input) |
+| optimiser | AdamW, lr 1×10⁻³, weight decay 10⁻⁴ |
 | schedule / epochs / batch | CosineAnnealing / 4 / 64 |
 | loss | cross-entropy |
-| preprocessing | P0.3 `StandardScaler` on the experimental-Pristine subset |
-| HPO | grid hidden ∈ {(128,64),(256,128,64),(512,256,128)} × lr ∈ {5e-4,1e-3,3e-3}; best of 9 by val accuracy |
+| preprocessing | P0.1 experimental-Pristine CFDAC reference; P1.1 per-sample normalisation |
+| HPO | grid hidden × lr (9 configs, `hpo_cfdac_allmodels.py`); best by val accuracy |
 
 ## 5.2 Result (seeded, zero-shot)
 
 | synth val | synth test | exp accuracy | exp macro-F1 | exp balanced acc |
 |---|---|---|---|---|
-| 0.993 | 0.982 | 0.824 | 0.488 | **0.515** |
+| 0.80 | 0.80 | 0.764 | 0.542 | **0.540** |
 
-## 5.3 Full comparison (`_basescore.json`, 16 binary cells)
+Per-class recall: Damage 0.88, Pristine 0.19.
+
+## 5.3 Full comparison (seeded sweep, `_seeded.json`, 26 binary cells)
 
 | model / feature | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|
-| mlp / modal | 0.825 | 0.482 | 0.513 |
-| cnn2d / cfdac_imag | 0.810 | 0.457 | 0.495 |
-| cnn2d / cfdac_all | 0.825 | 0.452 | 0.500 |
-| cnn / frf_mag, transformer / frf_mag, … | 0.825 | 0.452 | 0.500 |
+| mlp / cfdac_magphase | 0.764 | 0.542 | 0.540 |
+| mlp / modal | 0.824 | 0.488 | 0.515 |
+| mlp / cfdac_imag | 0.816 | 0.471 | 0.504 |
+| transformer / frf_mag | 0.819 | 0.470 | 0.505 |
 
-Every CFDAC cnn2d cell sits at balanced accuracy exactly 0.500 — they
-predict "damage" for all 2 638 cases. `transformer/timeseries` reaches
-macro-F1 0.496 but on the non-independent `timeseries` feature.
+Most CFDAC cnn2d cells sit at balanced accuracy ≈ 0.500 (predict "damage"
+for nearly all cases); the MLP-on-CFDAC cells are the only ones above it.
 
 ## 5.4 Ablation history
 
-P0/P1 fixes did not move binary: it was at the class-prior floor before and
-after. The synthetic damage signature does not separate damaged from
-pristine on real data at all.
+P0/P1 fixes did not move binary in the report-era sweep. The seeded
+re-run's `hpo_cfdac_allmodels` pass added the MLP-on-CFDAC cells, which is
+where the small `mlp/cfdac_magphase` margin first appears.
 
 ## 5.5 Verdict
 
-**Does not transfer.** Best genuine-feature balanced accuracy 0.515 ≈
-chance. Detection is the goal the synthetic model is *least* able to do —
-ironic, since it is nominally the easiest task.
+**At best marginal.** The seeded best cell `mlp/cfdac_magphase` reaches
+balanced accuracy 0.540 — +0.04 over the 0.500 binary chance level. It is
+not class-prior collapse (Pristine recall 0.19, not 0), but +0.04 sits
+inside the ≈ 0.05–0.07 run-to-run noise band and rests on a single cell and
+seed. Detection does not reliably transfer; one cell hints at a marginal
+signal worth a multi-seed check.
 
 ## 5.6 Evaluation on Pristine + severe-damage only
 
@@ -342,43 +347,46 @@ damage samples only (8 000 synthetic / 2 176 experimental).
 
 | element | value |
 |---|---|
-| feature | `frf_mag` (381×9 log-magnitude FRF) |
-| model | `SmallTransformer`, d_model 32, 2 layers |
+| feature | `cfdac_imag` (128×128 CFDAC imaginary-part matrix) |
+| model | `MLP`, hidden (256, 128, 64), dropout 0.2 (flattened CFDAC input) |
 | optimiser | AdamW, lr 1×10⁻³, weight decay 10⁻⁴ |
 | schedule / epochs / batch | CosineAnnealing / 4 / 64 |
 | loss | MSE; **sigmoid-bounded output head** (P0.2) keeps predictions in [0, 1] |
-| preprocessing | P1.1 per-sample log + z-score of `frf_mag` |
-| HPO | grid d_model ∈ {32,48,64} × n_layers ∈ {1,2}; best by val R² |
+| preprocessing | P0.1 experimental-Pristine CFDAC reference; P1.1 per-sample normalisation |
+| HPO | grid hidden × lr (9 configs, `hpo_cfdac_allmodels.py`); best by val R² |
 
 ## 7.2 Result (seeded, zero-shot)
 
 | synth val R² | synth test R² | exp R² | exp MAE |
 |---|---|---|---|
-| 0.185 | 0.130 | **+0.006** | 0.272 |
+| 0.311 | 0.281 | **+0.131** | 0.224 |
 
-## 7.3 Full comparison (`_basescore.json`, 16 severity cells)
+## 7.3 Full comparison (seeded sweep, `_seeded.json`, 16 severity cells)
 
 | model / feature | exp R² | note |
 |---|---|---|
+| mlp / cfdac_imag | +0.131 | best genuine-feature cell |
+| mlp / cfdac_realimag | +0.128 | |
+| xgb / cfdac_imag | +0.110 | |
+| transformer / frf_mag | +0.006 | |
 | cnn / timeseries | +0.180 | **non-independent `timeseries` feature — excluded** |
-| cnn2d / cfdac_mag | −0.012 | best genuine feature |
-| cnn3d / cfdac3d_realimag | −0.013 | |
-| cnn2d / cfdac_real | −0.015 | |
-| mlp / modal | −0.027 | |
 
 ## 7.4 Ablation history
 
 P0.2 (sigmoid-bounded heads) was essential: before it, MLP regression heads
-extrapolated to ±∞ on OOD inputs, giving R² as low as −10²². P0.3
-(experimental-Pristine scaler) lifted the modal MLP cell from R² −1.17 to
-+0.06 *in-cell*. But the best **genuine-feature** cell still lands at R² ≈ 0:
-the fixes made severity *finite and well-posed*, not *transferable*.
+extrapolated to ±∞ on OOD inputs, giving R² as low as −10²². The earlier
+"does not transfer" verdict held only because the report-era sweep never
+evaluated MLP/XGB on the CFDAC variants — the seeded `hpo_cfdac_allmodels`
+pass added them and surfaced the R² ≈ 0.12 cells.
 
 ## 7.5 Verdict
 
-**Does not transfer.** On every genuine feature synth-only severity R² ≈ 0.
-The `timeseries` 0.180 figure is on a feature reconstructed from the FRF
-(P0.4) and is not a genuine-feature result.
+**Weakly transfers.** The seeded sweep surfaces **three independent cells
+clustered at R² 0.11–0.13** (`mlp`/`xgb` on `cfdac_imag`/`cfdac_realimag`) —
+well below a usable severity estimator, but distinctly above the ≈ 0 of
+every earlier genuine-feature cell. Severity carries a weak but consistent
+cross-domain signal in the CFDAC imaginary part. The `timeseries` 0.180
+figure is on a feature reconstructed from the FRF (P0.4) and is excluded.
 
 ---
 
@@ -394,30 +402,34 @@ chance 0.250).
 
 | element | value |
 |---|---|
-| feature | `cfdac_mag` (128×128 CFDAC magnitude) |
-| model | `Conv2DStack` (2-D CNN), widths (16, 32, 64), kernel 3 |
-| optimiser | AdamW, lr 1×10⁻³, weight decay 10⁻⁴ |
+| feature | `modal` (81-dim modal descriptor) |
+| model | `MLP`, hidden (512, 256, 128), dropout 0.2 |
+| optimiser | AdamW, lr 3×10⁻³, weight decay 10⁻⁴ |
 | schedule / epochs / batch | CosineAnnealing / 4 / 64 |
 | loss | cross-entropy |
-| preprocessing | P0.1 experimental-Pristine CFDAC reference; P1.1 per-sample mean-subtract |
-| HPO | `hpo_cfdac_variants.py` grid widths × kernel (4 configs); best by val accuracy |
+| preprocessing | P0.3 `StandardScaler` on the experimental-Pristine subset |
+| HPO | grid hidden × lr (9 configs); best by val accuracy |
 
-### Result & comparison
+### Result & comparison (seeded sweep, `_seeded.json`)
 
 | synth val | synth test | exp accuracy | exp macro-F1 | exp balanced acc |
 |---|---|---|---|---|
-| 0.492 | 0.463 | 0.508 | **0.192** | 0.228 |
+| 0.515 | 0.481 | 0.284 | **0.167** | 0.274 |
 
 | model / feature | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|
-| cnn2d / cfdac_mag | 0.51 | 0.19 | 0.23 |
-| mlp / cfdac_real | 0.35 | 0.18 | 0.30 |
-| cnn / timeseries | 0.30 | 0.16 | 0.16 |
+| mlp / modal | 0.28 | 0.17 | 0.27 |
+| cnn / frf_mag | 0.36 | 0.16 | 0.21 |
+| mlp / cfdac_magphase | 0.41 | 0.15 | 0.18 |
+| cnn2d / cfdac_mag | 0.02 | 0.01 | 0.17 |
 
-**Verdict — does not transfer.** Best macro-F1 0.19, balanced accuracy 0.23
-vs 0.167 chance. The synthetic crack/hole damage is symmetric per storey, so
-the BD-vs-AD column ends are nearly information-theoretically
-indistinguishable — a property of the synthetic physics, not the model.
+**Verdict — does not transfer.** Best seeded macro-F1 0.17, balanced
+accuracy 0.27 vs 0.167 chance. The report-era headline cell `cnn2d/cfdac_mag`
+(`_basescore`: accuracy 0.508 / macro-F1 0.19) **did not survive seeding** —
+re-run it collapses to macro-F1 0.007, balanced accuracy 0.167 (chance): a
+non-reproducible fluke. The synthetic crack/hole damage is symmetric per
+storey, so the BD-vs-AD column ends are nearly indistinguishable — a
+property of the synthetic physics.
 
 ## 8.2 Mass-plate location (`mass_location`)
 
@@ -425,51 +437,51 @@ indistinguishable — a property of the synthetic physics, not the model.
 
 | element | value |
 |---|---|
-| feature | `cfdac_real` (128×128 CFDAC real part) |
-| model | `Conv2DStack` (2-D CNN), widths (16, 32, 64), kernel 5 |
+| feature | `cfdac_imag` (128×128 CFDAC imaginary-part matrix) |
+| model | `MLP`, hidden (256, 128, 64), dropout 0.2 (flattened CFDAC input) |
 | optimiser | AdamW, lr 1×10⁻³, weight decay 10⁻⁴ |
 | schedule / epochs / batch | CosineAnnealing / 4 / 64 |
 | loss | cross-entropy |
-| preprocessing | P0.1 experimental-Pristine CFDAC reference; P1.1 per-sample mean-subtract |
-| HPO | `hpo_cfdac_variants.py` grid widths × kernel (4 configs); best by val accuracy |
+| preprocessing | P0.1 experimental-Pristine CFDAC reference; P1.1 per-sample normalisation |
+| HPO | grid hidden × lr (9 configs, `hpo_cfdac_allmodels.py`); best by val accuracy |
 
-### Result & comparison
+### Result & comparison (seeded sweep, `_seeded.json`)
 
 | synth val | synth test | exp accuracy | exp macro-F1 | exp balanced acc |
 |---|---|---|---|---|
-| 0.893 | 0.863 | 0.534 | **0.435** | **0.506** |
+| 0.97 | 0.973 | 0.441 | **0.452** | **0.512** |
 
 | model / feature | accuracy | macro-F1 | balanced acc |
 |---|---|---|---|
-| cnn2d / cfdac_real | 0.53 | **0.44** | 0.51 |
-| cnn2d / cfdac (real+imag) | 0.42 | 0.43 | 0.49 |
-| cnn2d / cfdac_imag | 0.39 | 0.42 | 0.49 |
-| mlp / modal | 0.37 | 0.25 | 0.26 |
+| mlp / cfdac_imag | 0.44 | **0.45** | 0.51 |
+| cnn2d / cfdac_real | 0.53 | 0.37 | 0.45 |
+| mlp / cfdac_mag | 0.45 | 0.27 | 0.31 |
+| mlp / modal | 0.39 | 0.25 | 0.27 |
 
-**Per-class breakdown — a partial success.** The macro-F1 0.44 is the best
-of any goal, but the `cnn2d / cfdac_real` confusion matrix (238 Mass cases)
-is not uniform:
+**Per-class breakdown — a partial success.** Macro-F1 0.45 is the best of
+any goal; the `mlp / cfdac_imag` confusion matrix (238 Mass cases):
 
 | true ↓ / pred → | Base | F1 | F2 | F3 | recall |
 |---|---|---|---|---|---|
-| Base | 66 | 0 | 31 | 0 | 0.68 |
-| F1 | 0 | 21 | 40 | 0 | 0.34 |
-| F2 | 0 | 0 | 40 | 0 | 1.00 |
-| F3 | 0 | 0 | 40 | 0 | **0.00** |
+| Base | 27 | 0 | 32 | 38 | 0.28 |
+| F1 | 22 | 21 | 0 | 18 | 0.34 |
+| F2 | 0 | 0 | 26 | 14 | 0.65 |
+| F3 | 0 | 0 | 9 | 31 | 0.78 |
 
-The model resolves **Base** well and **F1** weakly but **never identifies
-F3** (all top-plate cases → F2), and F2 is a dump class (63 % of all
-predictions). Base and F1 recall are above the 0.25 chance level, so this is
-real signal — not class-prior collapse — but it is **partial**: it locates a
-mass on the lower three plates and cannot separate the top two.
+Every plate has recall ≥ 0.28 — none collapses to zero, so the signal is
+genuine — but it is **partial and uneven**: the cell resolves the upper
+plates (F2 0.65, F3 0.78) and the lower ones (Base 0.28, F1 0.34) poorly.
+The report-era `cnn2d/cfdac_real` cell had the *opposite* weakness (strong
+Base, zero F3) and a lower seeded balanced accuracy 0.45.
 
 **Verdict — the best goal, but a partial success.** Balanced accuracy 0.51
-(≈ 2× chance), macro-F1 0.44; three `cnn2d` CFDAC cells agree at
-macro-F1 ≈ 0.42–0.44. An added mass-plate shifts the floor-mode amplitudes
-by a large, location-specific amount that survives the domain gap — but the
-F2 and F3 plates produce signatures too similar to separate cross-domain.
-P0.1 (experimental-Pristine reference) drove the gain: mass_location
-accuracy 0.282 → 0.534. The F2/F3 confusion is the specific thing to fix.
+(≈ 2× the 0.25 four-class chance), macro-F1 0.45 — the strongest synth-only
+signal of any goal. An added mass-plate shifts the floor-mode amplitudes by
+a large, location-specific amount that partly survives the domain gap; no
+single cell resolves all four plates uniformly. P0.1 (experimental-Pristine
+reference) drove the gain. A cell that resolves all four plates — combining
+the complementary strengths of `mlp/cfdac_imag` and `cnn2d/cfdac_real` — is
+the specific next experiment.
 
 ---
 
@@ -533,11 +545,12 @@ and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 
 # 10. Limitations
 
-1. **Three of four goals do not transfer** synth-only — detection,
-   column-end location and severity are at chance / R² ≈ 0; type only
-   weakly above chance. Only mass-plate location carries genuine signal,
-   and only partially — the lower three plates resolve, the top plate F3
-   does not (§ 8.2).
+1. **No goal transfers well enough to deploy** synth-only. The seeded
+   244-cell sweep ranks them: mass-plate location strongest (macro-F1 0.45,
+   partial — no cell resolves all four plates); type and severity weak
+   (macro-F1 0.25; R² ≈ 0.12); detection marginal (+0.04 over chance, within
+   noise); column-end location does not transfer (≈ chance). The report-era
+   "best" column-location cell was a non-reproducible fluke (§ 8.1).
 2. **Deep CFDAC and vision models collapse to the class prior** on `type`
    and `binary`; raw accuracy hides this, balanced accuracy reveals it.
 3. **Synthetic Crack is anti-correlated with real Crack** (`is_Crack`
@@ -558,11 +571,11 @@ and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 
 1. **Augmented retrain — done; predicted lift not observed** (§ 9.1).
    Re-run over ≥ 3 seeds with a size-matched control to close it out.
-2. **Build on mass-plate location** (§ 8.2) — the one goal with partial
-   real signal. *Done this iteration:* the per-class breakdown shows the
-   lower three plates resolve via floor-mode amplitude while F3 collapses
-   into F2. Next: re-run the now-seeded `hpo_cfdac_variants.py` to confirm
-   reproducibly and target the F2/F3 confusion.
+2. **Build on mass-plate location** (§ 8.2) — the strongest goal. *Done:*
+   the seeded `hpo_cfdac_*` re-run is complete; best seeded cell
+   `mlp/cfdac_imag` (macro-F1 0.45) resolves the upper plates while the
+   report-era `cnn2d/cfdac_real` resolved the lower ones — complementary.
+   Next: a cell that resolves all four plates (ensemble, or `cfdac_all`).
 3. **Fix the synthetic damage physics — recommended next investment.**
    Promote `variation_v2.py` → `variation.py`, regenerate the chunk set
    (P2.1 + P2.2, ≈ 24 h CPU). Asymmetric per-corner Crack/Hole damage
