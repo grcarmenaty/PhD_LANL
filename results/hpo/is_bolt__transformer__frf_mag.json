@@ -3,11 +3,11 @@
   "model": "transformer",
   "feature": "frf_mag",
   "best_hyperparams": {
-    "d_model": 48,
+    "d_model": 32,
     "n_layers": 2
   },
-  "best_metric_val": 0.951,
-  "best_metric_test": 0.9456666666666667,
+  "best_metric_val": 0.9146666666666666,
+  "best_metric_test": 0.9113333333333333,
   "trials": [
     {
       "hyperparams": {
@@ -15,10 +15,10 @@
         "n_layers": 1
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8733333333333333,
-      "metric_test": 0.8773333333333333,
+      "metric_val": 0.87,
+      "metric_test": 0.8553333333333333,
       "extras": {},
-      "runtime_s": 8.943429708480835
+      "runtime_s": 4.630162000656128
     },
     {
       "hyperparams": {
@@ -26,10 +26,10 @@
         "n_layers": 2
       },
       "metric_name": "accuracy",
-      "metric_val": 0.9313333333333333,
-      "metric_test": 0.9333333333333333,
+      "metric_val": 0.9146666666666666,
+      "metric_test": 0.9113333333333333,
       "extras": {},
-      "runtime_s": 16.559110641479492
+      "runtime_s": 7.959054470062256
     },
     {
       "hyperparams": {
@@ -37,10 +37,10 @@
         "n_layers": 1
       },
       "metric_name": "accuracy",
-      "metric_val": 0.9056666666666666,
-      "metric_test": 0.9056666666666666,
+      "metric_val": 0.8806666666666667,
+      "metric_test": 0.8653333333333333,
       "extras": {},
-      "runtime_s": 11.648359298706055
+      "runtime_s": 5.667621374130249
     },
     {
       "hyperparams": {
@@ -48,10 +48,10 @@
         "n_layers": 2
       },
       "metric_name": "accuracy",
-      "metric_val": 0.951,
-      "metric_test": 0.9456666666666667,
+      "metric_val": 0.9093333333333333,
+      "metric_test": 0.9013333333333333,
       "extras": {},
-      "runtime_s": 20.505290508270264
+      "runtime_s": 10.514046430587769
     },
     {
       "hyperparams": {
@@ -59,10 +59,10 @@
         "n_layers": 1
       },
       "metric_name": "accuracy",
-      "metric_val": 0.9063333333333333,
-      "metric_test": 0.899,
+      "metric_val": 0.8666666666666667,
+      "metric_test": 0.8586666666666667,
       "extras": {},
-      "runtime_s": 13.538286924362183
+      "runtime_s": 6.956075429916382
     },
     {
       "hyperparams": {
@@ -70,10 +70,10 @@
         "n_layers": 2
       },
       "metric_name": "accuracy",
-      "metric_val": 0.9336666666666666,
-      "metric_test": 0.9353333333333333,
+      "metric_val": 0.9,
+      "metric_test": 0.8853333333333333,
       "extras": {},
-      "runtime_s": 24.5297749042511
+      "runtime_s": 12.938875436782837
     }
   ]
 }

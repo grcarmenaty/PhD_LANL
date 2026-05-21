@@ -3,11 +3,11 @@
   "model": "rf",
   "feature": "modal",
   "best_hyperparams": {
-    "n_estimators": 200,
+    "n_estimators": 100,
     "max_depth": null
   },
-  "best_metric_val": 0.815,
-  "best_metric_test": 0.8066666666666666,
+  "best_metric_val": 0.822,
+  "best_metric_test": 0.8213333333333334,
   "trials": [
     {
       "hyperparams": {
@@ -15,10 +15,10 @@
         "max_depth": 6
       },
       "metric_name": "accuracy",
-      "metric_val": 0.55,
-      "metric_test": 0.5496666666666666,
+      "metric_val": 0.63,
+      "metric_test": 0.6246666666666667,
       "extras": {},
-      "runtime_s": 1.1255199909210205
+      "runtime_s": 0.6154272556304932
     },
     {
       "hyperparams": {
@@ -26,10 +26,10 @@
         "max_depth": 12
       },
       "metric_name": "accuracy",
-      "metric_val": 0.647,
-      "metric_test": 0.6556666666666666,
+      "metric_val": 0.6633333333333333,
+      "metric_test": 0.6573333333333333,
       "extras": {},
-      "runtime_s": 1.6494262218475342
+      "runtime_s": 0.8482871055603027
     },
     {
       "hyperparams": {
@@ -37,10 +37,10 @@
         "max_depth": null
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8126666666666666,
-      "metric_test": 0.806,
+      "metric_val": 0.822,
+      "metric_test": 0.8213333333333334,
       "extras": {},
-      "runtime_s": 2.4294848442077637
+      "runtime_s": 1.2438075542449951
     },
     {
       "hyperparams": {
@@ -48,10 +48,10 @@
         "max_depth": 6
       },
       "metric_name": "accuracy",
-      "metric_val": 0.55,
-      "metric_test": 0.5496666666666666,
+      "metric_val": 0.63,
+      "metric_test": 0.626,
       "extras": {},
-      "runtime_s": 2.10127592086792
+      "runtime_s": 1.1304981708526611
     },
     {
       "hyperparams": {
@@ -59,43 +59,43 @@
         "max_depth": 12
       },
       "metric_name": "accuracy",
-      "metric_val": 0.6473333333333333,
-      "metric_test": 0.6593333333333333,
-      "extras": {},
-      "runtime_s": 3.2572264671325684
-    },
-    {
-      "hyperparams": {
-        "n_estimators": 200,
-        "max_depth": null
-      },
-      "metric_name": "accuracy",
-      "metric_val": 0.815,
-      "metric_test": 0.8066666666666666,
-      "extras": {},
-      "runtime_s": 4.912386417388916
-    },
-    {
-      "hyperparams": {
-        "n_estimators": 300,
-        "max_depth": 6
-      },
-      "metric_name": "accuracy",
-      "metric_val": 0.549,
-      "metric_test": 0.552,
-      "extras": {},
-      "runtime_s": 3.1217191219329834
-    },
-    {
-      "hyperparams": {
-        "n_estimators": 300,
-        "max_depth": 12
-      },
-      "metric_name": "accuracy",
-      "metric_val": 0.6453333333333333,
+      "metric_val": 0.6606666666666666,
       "metric_test": 0.656,
       "extras": {},
-      "runtime_s": 4.89651894569397
+      "runtime_s": 1.635667085647583
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": null
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.818,
+      "metric_test": 0.822,
+      "extras": {},
+      "runtime_s": 2.4425175189971924
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.6313333333333333,
+      "metric_test": 0.6253333333333333,
+      "extras": {},
+      "runtime_s": 1.6883952617645264
+    },
+    {
+      "hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 12
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.662,
+      "metric_test": 0.656,
+      "extras": {},
+      "runtime_s": 2.3838772773742676
     },
     {
       "hyperparams": {
@@ -103,10 +103,10 @@
         "max_depth": null
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8146666666666667,
-      "metric_test": 0.8066666666666666,
+      "metric_val": 0.8173333333333334,
+      "metric_test": 0.8266666666666667,
       "extras": {},
-      "runtime_s": 7.2906670570373535
+      "runtime_s": 3.6294748783111572
     }
   ]
 }

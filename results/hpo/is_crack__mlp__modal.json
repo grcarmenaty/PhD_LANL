@@ -8,10 +8,10 @@
       256,
       128
     ],
-    "lr": 0.003
+    "lr": 0.001
   },
-  "best_metric_val": 0.8463333333333334,
-  "best_metric_test": 0.8473333333333334,
+  "best_metric_val": 0.8913333333333333,
+  "best_metric_test": 0.896,
   "trials": [
     {
       "hyperparams": {
@@ -25,7 +25,7 @@
       "metric_val": 0.8,
       "metric_test": 0.8,
       "extras": {},
-      "runtime_s": 1.7031736373901367
+      "runtime_s": 0.8550055027008057
     },
     {
       "hyperparams": {
@@ -36,10 +36,10 @@
         "lr": 0.001
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8,
-      "metric_test": 0.8,
+      "metric_val": 0.8006666666666666,
+      "metric_test": 0.7986666666666666,
       "extras": {},
-      "runtime_s": 1.6728298664093018
+      "runtime_s": 0.8362734317779541
     },
     {
       "hyperparams": {
@@ -50,10 +50,10 @@
         "lr": 0.003
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8236666666666667,
-      "metric_test": 0.823,
+      "metric_val": 0.89,
+      "metric_test": 0.8953333333333333,
       "extras": {},
-      "runtime_s": 1.691741943359375
+      "runtime_s": 0.8303167819976807
     },
     {
       "hyperparams": {
@@ -61,59 +61,59 @@
           256,
           128,
           64
-        ],
-        "lr": 0.0005
-      },
-      "metric_name": "accuracy",
-      "metric_val": 0.8,
-      "metric_test": 0.8,
-      "extras": {},
-      "runtime_s": 2.2922303676605225
-    },
-    {
-      "hyperparams": {
-        "hidden": [
-          256,
-          128,
-          64
-        ],
-        "lr": 0.001
-      },
-      "metric_name": "accuracy",
-      "metric_val": 0.8,
-      "metric_test": 0.8,
-      "extras": {},
-      "runtime_s": 2.26387357711792
-    },
-    {
-      "hyperparams": {
-        "hidden": [
-          256,
-          128,
-          64
-        ],
-        "lr": 0.003
-      },
-      "metric_name": "accuracy",
-      "metric_val": 0.844,
-      "metric_test": 0.8426666666666667,
-      "extras": {},
-      "runtime_s": 2.2937121391296387
-    },
-    {
-      "hyperparams": {
-        "hidden": [
-          512,
-          256,
-          128
         ],
         "lr": 0.0005
       },
       "metric_name": "accuracy",
       "metric_val": 0.8013333333333333,
-      "metric_test": 0.8003333333333333,
+      "metric_test": 0.8013333333333333,
       "extras": {},
-      "runtime_s": 3.0269246101379395
+      "runtime_s": 1.198103904724121
+    },
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.814,
+      "metric_test": 0.814,
+      "extras": {},
+      "runtime_s": 1.2408602237701416
+    },
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.003
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8906666666666667,
+      "metric_test": 0.898,
+      "extras": {},
+      "runtime_s": 1.2484300136566162
+    },
+    {
+      "hyperparams": {
+        "hidden": [
+          512,
+          256,
+          128
+        ],
+        "lr": 0.0005
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8006666666666666,
+      "metric_test": 0.8006666666666666,
+      "extras": {},
+      "runtime_s": 1.562194585800171
     },
     {
       "hyperparams": {
@@ -125,10 +125,10 @@
         "lr": 0.001
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8253333333333334,
-      "metric_test": 0.824,
+      "metric_val": 0.8913333333333333,
+      "metric_test": 0.896,
       "extras": {},
-      "runtime_s": 2.986359119415283
+      "runtime_s": 1.6084351539611816
     },
     {
       "hyperparams": {
@@ -140,10 +140,10 @@
         "lr": 0.003
       },
       "metric_name": "accuracy",
-      "metric_val": 0.8463333333333334,
-      "metric_test": 0.8473333333333334,
+      "metric_val": 0.8853333333333333,
+      "metric_test": 0.8906666666666667,
       "extras": {},
-      "runtime_s": 3.0160491466522217
+      "runtime_s": 1.64581298828125
     }
   ]
 }

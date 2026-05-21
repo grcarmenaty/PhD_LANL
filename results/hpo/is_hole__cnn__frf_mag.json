@@ -26,7 +26,7 @@
       "metric_val": 0.8,
       "metric_test": 0.8,
       "extras": {},
-      "runtime_s": 13.772536516189575
+      "runtime_s": 6.800982475280762
     },
     {
       "hyperparams": {
@@ -41,7 +41,7 @@
       "metric_val": 0.8,
       "metric_test": 0.8,
       "extras": {},
-      "runtime_s": 14.507646083831787
+      "runtime_s": 7.421031951904297
     },
     {
       "hyperparams": {
@@ -56,7 +56,7 @@
       "metric_val": 0.8,
       "metric_test": 0.8,
       "extras": {},
-      "runtime_s": 26.744520902633667
+      "runtime_s": 17.604798316955566
     },
     {
       "hyperparams": {
@@ -71,7 +71,7 @@
       "metric_val": 0.8,
       "metric_test": 0.8,
       "extras": {},
-      "runtime_s": 29.71360492706299
+      "runtime_s": 18.58890128135681
     }
   ]
 }
