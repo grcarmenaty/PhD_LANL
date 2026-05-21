@@ -50,8 +50,9 @@ decomposition, a severity-stratified analysis, and a noise-robustness sweep.
 
 | goal | task | best result | transfers? |
 |---|---|---|---|
-| detection | `binary` | balanced acc 0.54 (`mlp/cfdac_magphase`) | **marginal** — within noise |
-| type | `type` | macro-F1 0.25 (`mlp/modal`) | weakly |
+| detection | `binary` | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
+| type | `type` (5-class) | macro-F1 0.25 (`mlp/modal`) | weakly |
+| type | `type` one-vs-rest | balanced acc 0.59–0.71 (`is_bolt` best, § 6.6) | **yes** — strongest result |
 | severity | `severity` | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
 | location | `col_location` | macro-F1 0.17 (`mlp/modal`) | no |
 | location | `mass_location` | macro-F1 0.45 (`mlp/cfdac_imag`), balanced acc 0.51 | **partly** (best goal) |
@@ -195,15 +196,17 @@ Per-class recall: Damage 0.88, Pristine 0.19.
 
 ## 5.3 Full comparison (seeded sweep, `_seeded.json`, 26 binary cells)
 
-| model / feature | accuracy | macro-F1 | balanced acc |
-|---|---|---|---|
-| mlp / cfdac_magphase | 0.764 | 0.542 | 0.540 |
-| mlp / modal | 0.824 | 0.488 | 0.515 |
-| mlp / cfdac_imag | 0.816 | 0.471 | 0.504 |
-| transformer / frf_mag | 0.819 | 0.470 | 0.505 |
+| model / feature | accuracy | macro-F1 | balanced acc | per-class recall |
+|---|---|---|---|---|
+| cnn2d / cfdac_real | 0.494 | 0.463 | **0.585** | Pristine 0.73 / Damage 0.44 |
+| mlp / cfdac_magphase | 0.764 | 0.542 | 0.540 | Pristine 0.19 / Damage 0.88 |
+| mlp / modal | 0.824 | 0.488 | 0.515 | — |
+| transformer / frf_mag | 0.819 | 0.470 | 0.505 | — |
 
-Most CFDAC cnn2d cells sit at balanced accuracy ≈ 0.500 (predict "damage"
-for nearly all cases); the MLP-on-CFDAC cells are the only ones above it.
+Most cells sit at balanced accuracy ≈ 0.50 (predict "damage" for nearly all
+cases). The two cells above it trade off oppositely: `cnn2d/cfdac_real`
+leans Pristine (high balanced acc, low accuracy), `mlp/cfdac_magphase` leans
+Damage (best macro-F1).
 
 ## 5.4 Ablation history
 
@@ -213,12 +216,15 @@ where the small `mlp/cfdac_magphase` margin first appears.
 
 ## 5.5 Verdict
 
-**At best marginal.** The seeded best cell `mlp/cfdac_magphase` reaches
-balanced accuracy 0.540 — +0.04 over the 0.500 binary chance level. It is
-not class-prior collapse (Pristine recall 0.19, not 0), but +0.04 sits
-inside the ≈ 0.05–0.07 run-to-run noise band and rests on a single cell and
-seed. Detection does not reliably transfer; one cell hints at a marginal
-signal worth a multi-seed check.
+**Weakly transfers — but no operationally usable cell.** The best
+balanced-accuracy cell `cnn2d/cfdac_real` (0.585) clears the 0.500 chance
+level by +0.085 — outside the noise band, so detection carries genuine weak
+discriminative signal. But no cell has a usable operating point:
+`cnn2d/cfdac_real` reaches 0.585 by leaning Pristine — it **misses 56 % of
+real damage**, useless as a safety detector — while `mlp/cfdac_magphase`
+(best macro-F1) catches 88 % of damage but flags 81 % of Pristine cases as
+damaged. Detection has weak cross-domain signal that no single cell
+converts into an acceptable recall / false-alarm trade-off.
 
 ## 5.6 Evaluation on Pristine + severe-damage only
 
@@ -298,15 +304,35 @@ exposes it.* Detail in [`REPORT_vision.md`](REPORT_vision.md) /
 [`REPORT_vision_v2.md`](REPORT_vision_v2.md). These sub-studies pre-date the
 § 3 corrections and were not re-scored.
 
-## 6.6 Binary-trenchcoat decomposition
+## 6.6 One-vs-rest type detection — the strongest transfer in the study
 
-Five one-vs-rest binaries (`is_pristine/bolt/crack/hole/mass`) aggregated
-into a 5-class prediction via a transductive `dataset_zscore` aggregator.
-Best aggregator: macro-F1 ≈ 0.29, above the multi-class baseline. The key
-diagnostic: the **`is_Crack` binary has cross-domain AUC 0.36 — below
-chance** — synthetic Crack damage is *anti-correlated* with real Crack
-(symmetric 4-corner synth model vs per-corner-asymmetric reality). Detail in
-[`REPORT_vision_v2.md` § trenchcoat](REPORT_vision_v2.md).
+Five one-vs-rest classifiers — each answering "is the damage type X?",
+trained with the § 4 shared recipe — are evaluated in the seeded sweep as
+the `is_*` tasks. **They transfer far better than the joint 5-class
+`type`.** Seeded best cell per sub-task (`_seeded.json`):
+
+| one-vs-rest task | best cell | accuracy | macro-F1 | balanced acc |
+|---|---|---|---|---|
+| `is_bolt` | cnn2d / cfdac_real | 0.706 | **0.701** | **0.708** |
+| `is_hole` | mlp / cfdac_all | 0.811 | 0.629 | 0.684 |
+| `is_mass` | rf / cfdac_real | 0.581 | 0.471 | 0.633 |
+| `is_crack` | mlp / modal | 0.851 | 0.613 | 0.603 |
+| `is_pristine` | cnn2d / cfdac_real | 0.623 | 0.536 | 0.592 |
+
+Every per-type yes/no question transfers at balanced accuracy 0.59–0.71,
+against 0.33 for the joint 5-class task — `is_bolt` (0.71) is the strongest
+honest cross-domain result in the whole study. The joint classifier
+collapses because it must commit to one of five labels; the per-type
+detectors each keep their signal. **Deployment implication: a bank of
+per-damage-type detectors, not one 5-class classifier.**
+
+The *aggregated* trenchcoat (recombining the five binaries into a 5-class
+prediction via a transductive `dataset_zscore` aggregator) scores only
+macro-F1 ≈ 0.29 — the lossy aggregation, not the binaries, is the weak
+link. A separate diagnostic from the pre-correction `vision_v2` study found
+the `is_Crack` binary's cross-domain ROC-AUC at 0.36 (below chance), which
+motivated the asymmetric-damage fix (P2.2); that AUC figure is from
+[`REPORT_vision_v2.md`](REPORT_vision_v2.md), not the seeded sweep.
 
 ## 6.7 Severity-stratified behaviour
 
