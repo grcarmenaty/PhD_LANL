@@ -425,11 +425,17 @@ fraction (`ablation_log.json`, P1.4 row):
 | col_location (accuracy) | 0.30 | **0.80** | cnn2d / cfdac_magphase |
 | mass_location (accuracy) | 0.64 | **1.00** | cnn2d / cfdac_all |
 
+Joint fine-tune recipe: start from the synth-HPO backbone, unfreeze the
+whole network, mix 3 synth : 1 experimental samples per mini-batch, and add
+an L2 anchor (λ = 10⁻⁴) to the synth-trained weights to prevent forgetting;
+sweep the experimental fine-tune fraction k ∈ {10…50 %}. Per-case results
+use 5 seeds (42–46), best-by-metric kept (`results/per_case_final/`).
+
 These numbers are accuracy / R² (not re-scored with macro-F1) and were
 produced before the § 3 seeding fix; treat them as indicative. The point
 stands: experimental labels in training close the gap that synth-only
-cannot. Detail in [`REPORT_simtoreal.md`](REPORT_simtoreal.md) /
-[`REPORT_final.md`](REPORT_final.md).
+cannot. (The former standalone `REPORT_simtoreal.md` and `REPORT_final.md`
+are superseded by this report and retired.)
 
 ## 9.3 Noise robustness
 
@@ -525,10 +531,14 @@ results/ablation_log.json                      chronological per-fix ablation ta
 results/experimental_full_evaluation_plain.json     seeded synth-only sweep (60 cells)
 results/experimental_full_evaluation_aug.json       seeded augmented sweep   (50 cells)
 results/experimental_full_evaluation_basescore.json report-era models, macro-F1 re-score (78 cells)
-results/REPORT_simtoreal.md / REPORT_final.md       joint synth+exp fine-tune (uses exp labels)
-results/REPORT_vision.md / REPORT_vision_v2.md      vision-backbone sweep + trenchcoat
-results/REPORT_severity_stratified.md               severity-threshold analysis
-results/REPORT_noise.md / REPORT_noisy_mixed.md      noise-robustness sweeps
+results/REPORT_vision.md / REPORT_vision_v2.md      vision-backbone sweep + trenchcoat (method study)
+results/REPORT_severity_stratified.md               severity-threshold analysis (method study)
+results/REPORT_noise.md / REPORT_noisy_mixed.md      noise-robustness sweeps (method study)
+results/per_case_final/                             joint synth+exp fine-tune per-case predictions
+
+(REPORT.md and REPORT_noisy_mixed.md are auto-generated and pre-date the
+methodology corrections; REPORT_simtoreal.md and REPORT_final.md are
+retired — their content lives in this report.)
 ```
 
 Modules: `features.py`, `cfdac.py`, `cfdac_variants.py`,

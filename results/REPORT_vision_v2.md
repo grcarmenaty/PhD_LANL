@@ -1,3 +1,12 @@
+> **Method study — bears on the *damage type* goal.** Follow-on to
+> [`REPORT_vision.md`](REPORT_vision.md); both are focused studies of the
+> 5-class **`type`** task, not canonical reports. The methodology-corrected,
+> goal-structured results are in [`REPORT_definitive.md`](REPORT_definitive.md)
+> and [`REPORT_full.md`](REPORT_full.md) — vision backbones in § 6.5, the
+> binary-trenchcoat decomposition in § 6.6 (key finding: synthetic Crack is
+> anti-correlated with real Crack, `is_Crack` cross-domain AUC 0.36).
+> Numbers below pre-date the seeding / macro-F1 corrections.
+
 # Vision-model sweep — v2 (Tier-1 fixes + binary-trenchcoat)
 
 A direct follow-on to [`REPORT_vision.md`](REPORT_vision.md).  Same constraint (synth-only training, zero-shot cross-domain), with three changes:

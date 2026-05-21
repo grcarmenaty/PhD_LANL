@@ -1,3 +1,12 @@
+> **Method study — bears on the *damage type* and *detection* goals.** A
+> focused study, not a canonical report; the methodology-corrected,
+> goal-structured results are in [`REPORT_definitive.md`](REPORT_definitive.md)
+> and [`REPORT_full.md`](REPORT_full.md). It asks how cross-domain accuracy
+> behaves when the evaluation is restricted to high-severity damage; the
+> finding (see `REPORT_full.md` § 6.7) is that the apparent high-severity
+> lift is partly a class-distribution shift, not uniform per-class gain.
+> Numbers below pre-date the seeding / macro-F1 corrections.
+
 # Does accuracy improve when restricted to extreme cases?
 
 This is **v2** — the first version had only one non-vision model and produced a misleading conclusion. The wider sweep here covers six bespoke non-vision cells (1-D CNN, 2-D CNN with three CFDAC variants, 3-D CNN, Transformer, MLP, RF, XGBoost) plus two vision cells and the trenchcoat aggregator. **The picture is more nuanced than "no, severity doesn't help"** — most bespoke models *do* improve on high-severity cases, sometimes substantially. Whether the improvement is real per-class gain or class-distribution shift depends on the model.

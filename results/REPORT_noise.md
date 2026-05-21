@@ -1,3 +1,12 @@
+> **Method study — bears on all four diagnosis goals.** A focused study of
+> noise robustness, not a canonical report; the methodology-corrected,
+> goal-structured results are in [`REPORT_definitive.md`](REPORT_definitive.md)
+> and [`REPORT_full.md`](REPORT_full.md) (noise context: `REPORT_full.md`
+> § 9.3). It re-runs the pipeline on synthetic data corrupted with additive
+> Gaussian time-series noise at controlled SNR, across detection, type,
+> severity and location. Numbers below pre-date the seeding / macro-F1
+> corrections and are indicative.
+
 # Noisy-synth study — companion to `REPORT.md`
 
 Every experiment in [`REPORT.md`](REPORT.md) is repeated on synthetic data corrupted by additive Gaussian noise on the **time-series** field (1024 × 9 acceleration samples per signal).  The noise is applied **per sample, per channel, at a controlled signal-to-noise ratio**; every downstream feature (FRF, modal-peak vector, CFDAC variants, pymodal indicators) is then re-extracted from the noisy time series so the entire pipeline trains and tests on a self-consistent noisy dataset.

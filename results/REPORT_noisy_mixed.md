@@ -1,3 +1,13 @@
+> **⚠ Superseded — auto-generated, pre-corrections.** This report is built
+> by `ml_pipeline/build_report_noisy_mixed.py` (the noisy-mixed pipeline
+> variant) and pre-dates the methodology corrections (deterministic torch
+> seeding; macro-F1 / balanced accuracy instead of raw accuracy). Its
+> accuracy-based numbers overstate cross-domain performance. The current,
+> methodology-corrected reports are organised **by diagnosis goal** — see
+> [`REPORT_definitive.md`](REPORT_definitive.md) and
+> [`REPORT_full.md`](REPORT_full.md). Noise-robustness context is in
+> `REPORT_full.md` § 9.3.
+
 # Comprehensive report — LANL 3SBB synthetic damage dataset & ML pipeline
 
 > **NOTE - noisy-mixed variant.**  This report has the same structure as [`REPORT.md`](REPORT.md), but every cross-model table and per-indicator section below was rebuilt from the **noisy_mixed** pipeline outputs in `results/noisy_mixed/` (mixed-SNR additive Gaussian noise on the time series).  All hand-written sections (dataset, models, features, plot key) are inherited verbatim from `REPORT.md`; only the auto-generated results tables reflect the noisy run.

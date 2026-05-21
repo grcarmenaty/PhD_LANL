@@ -1,3 +1,13 @@
+> **Method study — bears on the *damage type* goal.** This is a focused
+> study, not a canonical report; the methodology-corrected results are
+> organised by diagnosis goal in [`REPORT_definitive.md`](REPORT_definitive.md)
+> and [`REPORT_full.md`](REPORT_full.md). It asks whether ImageNet-pretrained
+> vision backbones beat the bespoke `cnn2d` on the 5-class **`type`** task.
+> Verdict (see `REPORT_full.md` § 6.5): **no** — no backbone beats the
+> bespoke model on macro-F1; cells that win on raw accuracy do so by
+> class-prior collapse. Numbers below pre-date the seeding / macro-F1
+> corrections and are indicative.
+
 # Vision-model backbones on CFDAC — synth-only sim-to-real
 
 A focused study: can general-purpose ImageNet-pretrained vision backbones beat the bespoke `cnn2d`-from-scratch on CFDAC features, when trained on **synthetic data only** and evaluated zero-shot on the full 2638-case IQS experimental set?

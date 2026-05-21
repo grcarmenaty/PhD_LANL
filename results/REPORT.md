@@ -1,3 +1,12 @@
+> **⚠ Superseded — auto-generated, pre-corrections.** This report is built
+> by `ml_pipeline/integrate_report.py` and pre-dates the methodology
+> corrections (deterministic torch seeding; macro-F1 / balanced accuracy
+> instead of raw accuracy). Its accuracy-based numbers overstate
+> cross-domain performance on the class-imbalanced experimental set. The
+> current, methodology-corrected reports are organised **by diagnosis goal**
+> — see [`REPORT_definitive.md`](REPORT_definitive.md) and
+> [`REPORT_full.md`](REPORT_full.md).
+
 # Comprehensive report — LANL 3SBB synthetic damage dataset & ML pipeline
 
 A single document containing everything: the train / val / test

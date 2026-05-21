@@ -414,7 +414,7 @@ gap is **structural** — in the physics of the synthetic damage model, not
 the ML pipeline. Post-hoc augmentation (rec 1) did not close it. The route
 to deployable accuracy on the failing goals is either better synthetic
 physics (rec 3) or training that uses experimental data — the joint
-synth+exp fine-tune in [`REPORT_full.md` § 5.4](REPORT_full.md), out of
+synth+exp fine-tune in [`REPORT_full.md` § 9.2](REPORT_full.md), out of
 scope for a synth-only report.
 
 ---
