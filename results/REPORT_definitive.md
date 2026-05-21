@@ -25,12 +25,12 @@ with the honest metric.** The exhaustive catalogue is in
 > synth-only success is `mass_location` (macro-F1 0.44, balanced accuracy
 > 0.51, ≈ 2× chance). The recommended physics-aware augmentation, when run
 > as a seeded A/B, produced **no classification change distinguishable from
-> run-to-run noise** (mean macro-F1 Δ −0.008 ± 0.053 over 20 paired cells;
-> the predicted +0.05–0.10 `type` lift did not appear) and a marginal
-> severity-regression gain (R² +0.006 → +0.075, both near zero). That A/B
-> is single-seed and confounded by a 2× training-set-size difference, so it
-> refutes the *predicted benefit* without proving augmentation harmful —
-> see § 3.3.
+> run-to-run noise** (mean macro-F1 Δ −0.008 ± 0.054 over 20 paired cells,
+> ≈ 0.6σ from zero; the predicted +0.05–0.10 `type` lift did not
+> materialise) and a marginal severity-regression gain (R² +0.006 → +0.075,
+> both near zero). That A/B is single-seed and confounded by a 2×
+> training-set-size difference, so it shows the predicted-magnitude benefit
+> did not materialise without proving augmentation harmful — see § 3.3.
 
 ---
 
@@ -143,11 +143,14 @@ run as a seeded A/B:
 
 These rows are the *best cell* per task, not means. The honest aggregate is
 the **paired per-cell** delta over the 20 main-task classification cells
-present in both arms: **mean Δ macro-F1 −0.008, spread (sd) 0.053, range
-[−0.123, +0.050]**. The mean is an order of magnitude smaller than its own
-spread and sits well inside the ≈ 0.05–0.07 run-to-run band of § 2.1 — i.e.
-**no effect distinguishable from noise.** The per-task best-cell moves above
-(−0.087 … +0.041) are all within that band too.
+present in both arms: **mean Δ macro-F1 −0.008, sd 0.054, range
+[−0.123, +0.050]** — ≈ 0.6 standard errors from zero, not significant. Per
+task the cell-mean Δ is **+0.004** (`type`, 4 of 5 cells positive),
+**−0.021** (`col_location`, driven by two ≈ −0.12 cells), **−0.010**
+(`mass_location`) and **−0.003** (`binary`): a marginal positive `type`
+trend and a marginal negative `col_location` trend, every one inside the
+≈ 0.05–0.07 run-to-run band of § 2.1. **No per-task effect is
+distinguishable from noise.**
 
 Two caveats keep this from being a clean negative result:
 
@@ -159,12 +162,15 @@ Two caveats keep this from being a clean negative result:
    10 000 — augmentation and a 2× data increase vary together. A
    size-matched control (10 000 augmented-only) was not run.
 
-Conclusion: the experiment **refutes the predicted +0.05–0.10 `type` lift**
-— no such lift appears — but does **not** establish that augmentation is
-harmful. Severity regression moves from R² +0.006 to +0.075: directionally
-positive (consistent with augmentation restoring the amplitude variation
-per-sample normalisation strips), but both arms are essentially R² ≈ 0. The
-augmented-features build is fully reproducible (§ 7).
+Conclusion: the **predicted +0.05–0.10 `type` lift did not materialise** —
+the observed `type` effect is a marginal +0.04 best-cell move (cell-mean
++0.004), positive in direction but far below the estimate and inside the
+noise band. The experiment does **not** establish that augmentation is
+harmful either. Severity regression moves from R² +0.006 to +0.075:
+directionally positive (consistent with augmentation restoring the
+amplitude variation per-sample normalisation strips), but both arms are
+essentially R² ≈ 0. The augmented-features build is fully reproducible
+(§ 7).
 
 ### 3.4 Vision-model backbones (synth-only) — unchanged
 
@@ -200,24 +206,28 @@ Re-scored:
 | mass_location | cnn2d / cfdac_real | 0.534 | **0.435** | **0.506** | 0.250 | **real signal** (≈ 2× chance) |
 
 Three of the four accuracy headlines are degenerate classifiers. The
-`type` cnn/frf_mag cell predicts a single class for > 98 % of cases; its
-balanced accuracy of 0.200 is *exactly* the 5-class chance level.
+`type` cnn/frf_mag cell predicts a single class — Bolt — for *every one* of
+the 2 638 cases (2638/2638); its balanced accuracy of 0.200 is *exactly*
+the 5-class chance level.
 
 ### 4.2 Best cell per task by macro-F1 (the honest ranking)
+
+Classification tasks only (severity is regression — see § 4.3):
 
 | task | best honest cell | accuracy | macro-F1 | balanced acc | reading |
 |---|---|---|---|---|---|
 | type | mlp / modal | 0.37 | **0.30** | 0.37 | weak but above chance |
 | col_location | cnn2d / cfdac_mag | 0.51 | **0.19** | 0.23 | barely above chance |
 | mass_location | cnn2d / cfdac_real | 0.53 | **0.44** | 0.51 | the one real success |
-| binary | transformer / timeseries² | 0.75 | **0.50** | 0.50 | ≈ no skill |
-| severity (R²) | cnn / timeseries² | — | — | — | R² 0.18 — see § 4.3 |
+| binary | mlp / modal² | 0.83 | **0.48** | 0.51 | ≈ no skill |
 
-² Both "best" cells here sit on the synthesised `timeseries` feature,
-which § 4.3 / P0.4 establish is not independent on experimental data. On
-real features the best binary cell is `cnn2d/cfdac_all` (macro-F1 0.45,
-balanced acc 0.50 — i.e. still no skill), and the best severity cell is
-`cnn2d/cfdac_mag` (R² −0.012). Neither transfers.
+² The single highest-macro-F1 binary cell is actually `transformer/timeseries`
+(0.50), and the highest-R² severity cell `cnn/timeseries` (R² 0.18) — but
+both sit on the synthesised `timeseries` feature, which § 4.3 / P0.4
+establish is *not* an independent feature on experimental data. They are
+excluded here; the rows above are the best cells on genuine features. (The
+best genuine-feature binary cell, `mlp/modal`, reaches balanced accuracy
+0.513 — marginally above the 0.500 no-skill floor.)
 
 The honest synth-only ceiling is: **`mass_location` transfers** (macro-F1
 0.44); **`type` transfers weakly** (macro-F1 0.30, via the modal feature,
@@ -228,10 +238,12 @@ essentially do **not** transfer beyond the class prior / R² ≈ 0.
 
 The previous draft's "severity R² 0.180" is the `cnn / timeseries` cell —
 but P0.4 itself establishes that experimental `timeseries` is *synthesised*
-from the FRF and is not an independent feature. On every **real** feature,
-synth-only severity R² is ≤ 0 (best real-feature cell: `cnn2d/cfdac_mag`
-R² −0.012; seeded `transformer/frf_mag` R² +0.006). Synth-only severity
-regression does not transfer; the 0.180 figure should not be quoted as a
+from the FRF and is not an independent feature. On **real** features
+synth-only severity R² is at best ≈ 0: the report-era real-feature cells
+cluster at R² −0.01 to −0.02 (`cnn2d/cfdac_mag` −0.012, `cnn3d/cfdac3d_realimag`
+−0.013, `cnn2d/cfdac_real` −0.015), and the best seeded real-feature cell,
+`transformer/frf_mag`, reaches only R² +0.006. Synth-only severity
+regression does not transfer; the 0.180 figure must not be quoted as a
 real-feature result.
 
 ---
@@ -277,12 +289,14 @@ real-feature result.
 Status of the previous draft's recommendations after this round of work.
 
 1. **Run the augmented-chunks retrain — DONE; predicted lift not observed.**
-   See § 3.3. The estimated +0.05–0.10 `type` lift did not appear: the
-   paired classification Δ macro-F1 is −0.008 ± 0.053, inside run-to-run
-   noise. The test is single-seed and confounded by a 2× training-set-size
-   difference, so it cannot show augmentation is harmful — it shows the
-   predicted *benefit* is absent. To resolve it properly: re-run the A/B
-   over ≥ 3 seeds with a size-matched (10 000 augmented-only) control.
+   See § 3.3. The estimated +0.05–0.10 `type` lift did not materialise:
+   observed `type` is a marginal +0.004 cell-mean (+0.04 best-cell), and the
+   paired classification Δ macro-F1 is −0.008 ± 0.054 (≈ 0.6σ), inside
+   run-to-run noise. The test is single-seed and confounded by a 2×
+   training-set-size difference, so it cannot show augmentation is harmful —
+   only that the predicted-magnitude benefit is absent. To resolve it
+   properly: re-run the A/B over ≥ 3 seeds with a size-matched (10 000
+   augmented-only) control.
 2. **Retrain the CFDAC-variant cells with P1.1 — not run.** Compute-bound
    (`hpo_cfdac_*` is multi-hour and the ephemeral container suspends on
    idle). The seeding fix (§ 2.1) is the prerequisite and is now in place,
