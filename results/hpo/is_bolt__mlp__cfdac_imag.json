@@ -1,0 +1,32 @@
+{
+  "task": "is_bolt",
+  "model": "mlp",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "hidden": [
+      256,
+      128,
+      64
+    ],
+    "lr": 0.001
+  },
+  "best_metric_val": 0.96,
+  "best_metric_test": 0.964,
+  "trials": [
+    {
+      "hyperparams": {
+        "hidden": [
+          256,
+          128,
+          64
+        ],
+        "lr": 0.001
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.96,
+      "metric_test": 0.964,
+      "extras": {},
+      "runtime_s": 206.50119280815125
+    }
+  ]
+}
