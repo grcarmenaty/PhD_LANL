@@ -1,0 +1,24 @@
+{
+  "task": "is_crack",
+  "model": "xgb",
+  "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "n_estimators": 200,
+    "max_depth": 6
+  },
+  "best_metric_val": 0.8713333333333333,
+  "best_metric_test": 0.886,
+  "trials": [
+    {
+      "hyperparams": {
+        "n_estimators": 200,
+        "max_depth": 6
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8713333333333333,
+      "metric_test": 0.886,
+      "extras": {},
+      "runtime_s": 257.3071415424347
+    }
+  ]
+}
