@@ -76,6 +76,8 @@ def _train_torch(model_name: str, feat_name: str, kind: str, n_out: int,
                   params, X_tr, y_tr, X_va, y_va, X_te, y_te,
                   epochs: int = 4) -> tuple[dict, nn.Module]:
     t0 = time.time()
+    torch.manual_seed(SEED)            # deterministic weight init + shuffling
+    np.random.seed(SEED)
     Xtr = torch.as_tensor(X_tr).float()
     Xva = torch.as_tensor(X_va).float()
     Xte = torch.as_tensor(X_te).float()
@@ -155,6 +157,8 @@ def _train_torch_streaming(model_name: str, feat_name: str, kind: str,
     DataLoader fed by LazyCFDACDataset. The full (n, C, H, W) tensor
     is never materialised."""
     t0 = time.time()
+    torch.manual_seed(SEED)            # deterministic weight init + shuffling
+    np.random.seed(SEED)
     x0, _ = tr_ds[0]
     if model_name == "cnn2d":
         model = Conv2DStack(n_channels=x0.shape[0], n_out=n_out,

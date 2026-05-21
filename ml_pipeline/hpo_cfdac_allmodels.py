@@ -144,6 +144,8 @@ def _to_seq(X: np.ndarray) -> np.ndarray:
 def _train_sklearn(model_name: str, kind: str, params: dict,
                     X_tr, y_tr, X_va, y_va, X_te, y_te) -> Tuple[dict, object]:
     t0 = time.time()
+    torch.manual_seed(SEED)            # deterministic weight init + shuffling
+    np.random.seed(SEED)
     if model_name == "rf":
         cls = RandomForestClassifier if kind == "cls" else RandomForestRegressor
         mdl = cls(n_jobs=-1, random_state=SEED, **params)
@@ -176,6 +178,8 @@ def _train_torch(model_name: str, kind: str, n_out: int, params: dict,
                   X_tr, y_tr, X_va, y_va, X_te, y_te,
                   epochs: int = 4) -> Tuple[dict, nn.Module]:
     t0 = time.time()
+    torch.manual_seed(SEED)            # deterministic weight init + shuffling
+    np.random.seed(SEED)
     Xtr = torch.as_tensor(X_tr).float()
     Xva = torch.as_tensor(X_va).float()
     Xte = torch.as_tensor(X_te).float()
@@ -267,6 +271,8 @@ def _train_torch_streaming(model_name: str, kind: str, n_out: int, params: dict,
     for mlp).  Labels are read from each dataset via ``ds[i] -> (x, y)``.
     """
     t0 = time.time()
+    torch.manual_seed(SEED)            # deterministic weight init + shuffling
+    np.random.seed(SEED)
     # Probe sample shape from a single read.
     x0, y0 = tr_ds[0]
     sample_shape = tuple(x0.shape)
