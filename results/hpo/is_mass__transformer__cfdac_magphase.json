@@ -1,0 +1,24 @@
+{
+  "task": "is_mass",
+  "model": "transformer",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "d_model": 48,
+    "n_layers": 2
+  },
+  "best_metric_val": 0.948,
+  "best_metric_test": 0.942,
+  "trials": [
+    {
+      "hyperparams": {
+        "d_model": 48,
+        "n_layers": 2
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.948,
+      "metric_test": 0.942,
+      "extras": {},
+      "runtime_s": 76.83969712257385
+    }
+  ]
+}

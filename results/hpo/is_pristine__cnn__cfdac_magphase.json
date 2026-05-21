@@ -1,0 +1,32 @@
+{
+  "task": "is_pristine",
+  "model": "cnn",
+  "feature": "cfdac_magphase",
+  "best_hyperparams": {
+    "widths": [
+      32,
+      64,
+      128
+    ],
+    "kernel_size": 7
+  },
+  "best_metric_val": 0.8113333333333334,
+  "best_metric_test": 0.776,
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          32,
+          64,
+          128
+        ],
+        "kernel_size": 7
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8113333333333334,
+      "metric_test": 0.776,
+      "extras": {},
+      "runtime_s": 77.66903352737427
+    }
+  ]
+}
