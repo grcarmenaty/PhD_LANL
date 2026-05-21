@@ -2,6 +2,16 @@
   "task": "binary",
   "model": "cnn2d",
   "feature": "cfdac_imag",
+  "best_hyperparams": {
+    "widths": [
+      8,
+      16,
+      32
+    ],
+    "kernel_size": 5
+  },
+  "best_metric_val": 0.9493333333333334,
+  "best_metric_test": 0.9346666666666666,
   "trials": [
     {
       "hyperparams": {
@@ -47,6 +57,21 @@
       "metric_test": 0.9106666666666666,
       "extras": {},
       "runtime_s": 57.95945954322815
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          16,
+          32,
+          64
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.9493333333333334,
+      "metric_test": 0.9393333333333334,
+      "extras": {},
+      "runtime_s": 57.66923928260803
     }
   ]
 }
