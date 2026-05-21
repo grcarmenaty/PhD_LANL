@@ -1,0 +1,37 @@
+{
+  "task": "is_crack",
+  "model": "cnn2d",
+  "feature": "cfdac_mag",
+  "trials": [
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 3
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8,
+      "metric_test": 0.8,
+      "extras": {},
+      "runtime_s": 49.82057785987854
+    },
+    {
+      "hyperparams": {
+        "widths": [
+          8,
+          16,
+          32
+        ],
+        "kernel_size": 5
+      },
+      "metric_name": "accuracy",
+      "metric_val": 0.8,
+      "metric_test": 0.8,
+      "extras": {},
+      "runtime_s": 50.61335730552673
+    }
+  ]
+}
