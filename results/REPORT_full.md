@@ -446,12 +446,30 @@ indistinguishable — a property of the synthetic physics, not the model.
 | cnn2d / cfdac_imag | 0.39 | 0.42 | 0.49 |
 | mlp / modal | 0.37 | 0.25 | 0.26 |
 
-**Verdict — transfers; the one clear synth-only success.** Balanced accuracy
-0.51 vs 0.250 chance (≈ 2× chance), and three independent `cnn2d` CFDAC
-cells agree at macro-F1 ≈ 0.42–0.44. An added mass-plate shifts the
-floor-mode amplitudes by a large, location-specific amount that survives the
-sim-to-real gap. P0.1 (experimental-Pristine reference) drove this:
-mass_location accuracy 0.282 → 0.534.
+**Per-class breakdown — a partial success.** The macro-F1 0.44 is the best
+of any goal, but the `cnn2d / cfdac_real` confusion matrix (238 Mass cases)
+is not uniform:
+
+| true ↓ / pred → | Base | F1 | F2 | F3 | recall |
+|---|---|---|---|---|---|
+| Base | 66 | 0 | 31 | 0 | 0.68 |
+| F1 | 0 | 21 | 40 | 0 | 0.34 |
+| F2 | 0 | 0 | 40 | 0 | 1.00 |
+| F3 | 0 | 0 | 40 | 0 | **0.00** |
+
+The model resolves **Base** well and **F1** weakly but **never identifies
+F3** (all top-plate cases → F2), and F2 is a dump class (63 % of all
+predictions). Base and F1 recall are above the 0.25 chance level, so this is
+real signal — not class-prior collapse — but it is **partial**: it locates a
+mass on the lower three plates and cannot separate the top two.
+
+**Verdict — the best goal, but a partial success.** Balanced accuracy 0.51
+(≈ 2× chance), macro-F1 0.44; three `cnn2d` CFDAC cells agree at
+macro-F1 ≈ 0.42–0.44. An added mass-plate shifts the floor-mode amplitudes
+by a large, location-specific amount that survives the domain gap — but the
+F2 and F3 plates produce signatures too similar to separate cross-domain.
+P0.1 (experimental-Pristine reference) drove the gain: mass_location
+accuracy 0.282 → 0.534. The F2/F3 confusion is the specific thing to fix.
 
 ---
 
@@ -517,7 +535,9 @@ and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 
 1. **Three of four goals do not transfer** synth-only — detection,
    column-end location and severity are at chance / R² ≈ 0; type only
-   weakly above chance. Only mass-plate location is usable.
+   weakly above chance. Only mass-plate location carries genuine signal,
+   and only partially — the lower three plates resolve, the top plate F3
+   does not (§ 8.2).
 2. **Deep CFDAC and vision models collapse to the class prior** on `type`
    and `binary`; raw accuracy hides this, balanced accuracy reveals it.
 3. **Synthetic Crack is anti-correlated with real Crack** (`is_Crack`
@@ -538,9 +558,11 @@ and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 
 1. **Augmented retrain — done; predicted lift not observed** (§ 9.1).
    Re-run over ≥ 3 seeds with a size-matched control to close it out.
-2. **Build on mass-plate location** (§ 8.2) — the one transferring goal.
-   Confirm reproducibly with the now-seeded `hpo_cfdac_variants.py` and
-   characterise *why* it transfers (floor-mode amplitude) as a template.
+2. **Build on mass-plate location** (§ 8.2) — the one goal with partial
+   real signal. *Done this iteration:* the per-class breakdown shows the
+   lower three plates resolve via floor-mode amplitude while F3 collapses
+   into F2. Next: re-run the now-seeded `hpo_cfdac_variants.py` to confirm
+   reproducibly and target the F2/F3 confusion.
 3. **Fix the synthetic damage physics — recommended next investment.**
    Promote `variation_v2.py` → `variation.py`, regenerate the chunk set
    (P2.1 + P2.2, ≈ 24 h CPU). Asymmetric per-corner Crack/Hole damage

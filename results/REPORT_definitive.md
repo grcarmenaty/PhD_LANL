@@ -22,12 +22,14 @@ chronological ablation table is in [`ablation_log.json`](ablation_log.json).
 | 2 | **Damage type** | `type` (5-class) | macro-F1 0.25–0.30, balanced acc 0.33–0.37 | **weakly** |
 | 3 | **Damage severity** | `severity` (regression) | R² ≈ 0 on real features | **no** |
 | 4 | **Damage location** | `col_location` (column-end) | macro-F1 0.19, balanced acc 0.23 | **no** |
-| 4 | | `mass_location` (mass-plate) | macro-F1 0.44, balanced acc 0.51 | **yes** (modest) |
+| 4 | | `mass_location` (mass-plate) | macro-F1 0.44, balanced acc 0.51 | **partly** — lower 3 plates only |
 
 > **One-paragraph summary.** Of the four diagnosis goals, synthetic-only
-> training transfers cleanly to **exactly one**: locating an added
+> training partially transfers to **exactly one**: locating an added
 > mass-plate (`mass_location`, macro-F1 0.44, balanced accuracy 0.51 — ≈ 2×
-> chance). Damage **detection** and column-end **location** do not transfer
+> chance) — and even there only the lower three plates are resolved; the top
+> plate (F3) is consistently confused with F2. Damage **detection** and
+> column-end **location** do not transfer
 > (balanced accuracy at chance); **type** transfers only weakly (macro-F1
 > ≈ 0.30 via the modal feature, *not* the deep CFDAC models, which collapse
 > to predicting one class); **severity** regression does not transfer
@@ -405,13 +407,33 @@ indistinguishable; this is a property of the synthetic physics.
 | cnn2d / cfdac_imag | 0.39 | 0.42 | 0.49 |
 | mlp / modal | 0.37 | 0.25 | 0.26 |
 
-#### 7b.4 Verdict
+#### 7b.4 Per-class breakdown — a *partial* success
 
-**Transfers — the one clear synth-only success.** Balanced accuracy 0.51
-against a 0.250 four-class chance level (≈ 2× chance), and three independent
-`cnn2d` CFDAC cells agree at macro-F1 ≈ 0.42–0.44. An added mass-plate
-shifts the floor-mode amplitudes by a large, location-specific amount that
-survives the sim-to-real gap. This is the result to build on.
+The macro-F1 0.44 is the best of any goal, but the confusion matrix
+(`cnn2d / cfdac_real`, 238 Mass cases) shows it is not uniform:
+
+| true ↓ / pred → | Base | F1 | F2 | F3 | recall |
+|---|---|---|---|---|---|
+| Base | 66 | 0 | 31 | 0 | 0.68 |
+| F1 | 0 | 21 | 40 | 0 | 0.34 |
+| F2 | 0 | 0 | 40 | 0 | 1.00 |
+| F3 | 0 | 0 | 40 | 0 | **0.00** |
+
+The model resolves **Base** well and **F1** weakly, but **never identifies
+F3** — every top-plate case is called F2 — and F2 is a dump class (63 % of
+all predictions). So the signal is real (Base and F1 recall are above the
+0.25 chance level — this is not class-prior collapse) but **partial**: it
+locates a mass on the lower three plates and cannot separate the top two.
+
+#### 7b.5 Verdict
+
+**The best goal, but a partial success.** Balanced accuracy 0.51 (≈ 2×
+chance) and macro-F1 0.44 — the only goal with genuine synth-only signal —
+yet F3 is unresolved (F2/F3 mass signatures are too similar to survive the
+domain gap). An added mass-plate shifts the floor-mode amplitudes by a
+large, location-specific amount; that amount distinguishes the lower plates
+but not the top two. This is the result to build on — and the F2/F3
+confusion is the specific thing to fix.
 
 ---
 
@@ -448,7 +470,9 @@ control.
 
 1. **Three of four goals do not transfer.** Detection, column-end location
    and severity are at chance / R² ≈ 0; type is only weakly above chance.
-   Only mass-plate location is usable. This is the central finding.
+   Only mass-plate location carries genuine signal — and only partially
+   (the lower three plates; the top plate F3 is unresolved, § 7b.4). This is
+   the central finding.
 2. **Deep CFDAC models collapse to the class prior** for `type` and
    `binary` — the synth feature manifold projects to a near-constant on the
    experimental distribution, so argmax returns one class. Raw accuracy
@@ -477,10 +501,11 @@ In cost / impact order, all synth-only.
    The estimated type lift did not materialise (paired Δ −0.008 ± 0.054).
    To close it out properly: re-run over ≥ 3 seeds with a size-matched
    (10 000 augmented-only) control.
-2. **Build on mass-plate location** — it is the one transferring goal
-   (§ 7b). Re-run `hpo_cfdac_variants.py` (now seeded) to confirm the
-   cnn2d/CFDAC result reproducibly, and characterise *why* it transfers
-   (floor-mode amplitude) as a template for the other goals.
+2. **Build on mass-plate location** — the one goal with partial real signal
+   (§ 7b). *Done this iteration:* the per-class breakdown (§ 7b.4) shows the
+   model resolves the lower three plates via floor-mode amplitude but
+   collapses F3→F2. Next: re-run `hpo_cfdac_variants.py` (now seeded) to
+   confirm reproducibly, and target the F2/F3 confusion specifically.
 3. **Fix the synthetic damage physics — recommended next investment.**
    Promote `variation_v2.py` → `variation.py` and regenerate the chunk set
    (P2.1 + P2.2, ≈ 24 h CPU). Asymmetric per-corner Crack/Hole damage
