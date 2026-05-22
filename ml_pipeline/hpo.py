@@ -417,7 +417,16 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=_REPO / "results")
     parser.add_argument("--epochs", type=int, default=4,
                           help="Per-trial epochs for Torch models.")
+    parser.add_argument("--seed", type=int, default=SEED,
+                          help="Override the global seed (split + torch + "
+                               "sklearn) for multi-seed variance runs.")
     args = parser.parse_args()
+    # Multi-seed support: rebind the seed everywhere it is read — this
+    # module's global (sklearn random_state + _train_torch.manual_seed) and
+    # train.SEED (make_split's random_state).
+    import ml_pipeline.train as _train
+    globals()["SEED"] = args.seed
+    _train.SEED = args.seed
     run_hpo(args.features, args.out, epochs=args.epochs)
 
 

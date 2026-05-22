@@ -356,7 +356,12 @@ def main() -> None:
                       default=_REPO / "dataset" / "features.h5")
     p.add_argument("--out", type=Path, default=_REPO / "results")
     p.add_argument("--epochs", type=int, default=4)
+    p.add_argument("--seed", type=int, default=SEED,
+                      help="Override the global seed for multi-seed runs.")
     args = p.parse_args()
+    import ml_pipeline.train as _train
+    globals()["SEED"] = args.seed
+    _train.SEED = args.seed
     run(args.features, args.out, args.epochs)
 
 
