@@ -52,7 +52,7 @@ decomposition, a severity-stratified analysis, and a noise-robustness sweep.
 |---|---|---|---|
 | detection | `binary` | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
 | type | `type` (5-class) | macro-F1 0.25 (`mlp/modal`) | weakly |
-| type | `type` one-vs-rest | balanced acc 0.59–0.71 (`is_bolt` best, § 6.6) | **yes** — strongest result |
+| type | `type` one-vs-rest | 3-seed mean balanced acc 0.56–0.57 ± 0.11 (`is_bolt` range 0.49–0.71, § 6.6) | **single-seed fluke, not robust** |
 | severity | `severity` | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
 | location | `col_location` | macro-F1 0.17 (`mlp/modal`) | no |
 | location | `mass_location` | macro-F1 0.45 (`mlp/cfdac_imag`), balanced acc 0.51 | **partly** (best goal) |
@@ -304,27 +304,30 @@ exposes it.* Detail in [`REPORT_vision.md`](REPORT_vision.md) /
 [`REPORT_vision_v2.md`](REPORT_vision_v2.md). These sub-studies pre-date the
 § 3 corrections and were not re-scored.
 
-## 6.6 One-vs-rest type detection — the strongest transfer in the study
+## 6.6 One-vs-rest type detection — single-seed fluke under multi-seed validation
 
-Five one-vs-rest classifiers — each answering "is the damage type X?",
-trained with the § 4 shared recipe — are evaluated in the seeded sweep as
-the `is_*` tasks. **They transfer far better than the joint 5-class
-`type`.** Seeded best cell per sub-task (`_seeded.json`):
+An earlier draft of this section claimed that one-vs-rest sub-tasks
+(`is_bolt`, `is_hole`) were the strongest transfers in the study at
+balanced accuracy 0.59–0.71. **A 3-seed multi-seed validation
+(`multiseed_summary.json`) reverses that finding.** The best CFDAC-CNN
+cells reach 0.71 on the default seed but collapse to chance on the other
+two. Three-seed breakdown (default / 101 / 202):
 
-| one-vs-rest task | best cell | accuracy | macro-F1 | balanced acc |
+| one-vs-rest task | best cell (default seed) | balanced acc per seed | mean | sd |
 |---|---|---|---|---|
-| `is_bolt` | cnn2d / cfdac_real | 0.706 | **0.701** | **0.708** |
-| `is_hole` | mlp / cfdac_all | 0.811 | 0.629 | 0.684 |
-| `is_mass` | rf / cfdac_real | 0.581 | 0.471 | 0.633 |
-| `is_crack` | mlp / modal | 0.851 | 0.613 | 0.603 |
-| `is_pristine` | cnn2d / cfdac_real | 0.623 | 0.536 | 0.592 |
+| `is_bolt` | cnn2d / cfdac_real | 0.708 / 0.488 / 0.514 | 0.570 | 0.121 |
+| `is_hole` | mlp / cfdac_all | 0.684 / 0.500 / 0.500 | 0.561 | 0.106 |
+| `is_mass` | rf / cfdac_real | 0.633 (sklearn, stable across seeds) | ≈ 0.63 | ≈ 0 |
+| `is_crack` | mlp / modal | 0.603 (modal — typically stable) | ≈ 0.60 | small |
+| `is_pristine` | cnn2d / cfdac_real | 0.592 / collapses | unstable | large |
 
-Every per-type yes/no question transfers at balanced accuracy 0.59–0.71,
-against 0.33 for the joint 5-class task — `is_bolt` (0.71) is the strongest
-honest cross-domain result in the whole study. The joint classifier
-collapses because it must commit to one of five labels; the per-type
-detectors each keep their signal. **Deployment implication: a bank of
-per-damage-type detectors, not one 5-class classifier.**
+The two CFDAC-CNN cells (`is_bolt`, `is_hole`) collapse on two of three
+seeds — the "0.71 strongest result" was a lucky draw. On a typical seed
+one-vs-rest type detection sits near chance. (CFDAC-CNN cells in general
+show the largest seed sensitivity in the sweep — see § 10.) The
+sklearn-based and modal-MLP one-vs-rest cells are stable (deterministic
+under the seed reseed), and `is_mass / rf / cfdac_real` at balanced acc
+0.633 is a small genuine effect — but the headline-grade signal is gone.
 
 The *aggregated* trenchcoat (recombining the five binaries into a 5-class
 prediction via a transductive `dataset_zscore` aggregator) scores only
@@ -391,7 +394,7 @@ damage samples only (8 000 synthetic / 2 176 experimental).
 
 | model / feature | exp R² | note |
 |---|---|---|
-| mlp / cfdac_imag | +0.131 | best genuine-feature cell |
+| mlp / cfdac_imag | +0.131 (3-seed mean +0.101 ± 0.026) | best genuine-feature cell |
 | mlp / cfdac_realimag | +0.128 | |
 | xgb / cfdac_imag | +0.110 | |
 | transformer / frf_mag | +0.006 | |
@@ -582,8 +585,12 @@ and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 3. **Synthetic Crack is anti-correlated with real Crack** (`is_Crack`
    cross-domain AUC 0.36) — the synthetic damage model is symmetric where
    reality is asymmetric. The same symmetry sinks column-end location.
-4. **No multi-seed uncertainty** — every cell is one seeded draw; the
-   ≈ 0.05–0.07 macro-F1 run-to-run band is an estimate, not a measurement.
+4. **Multi-seed uncertainty measured (3 seeds).** `multiseed_summary.json`
+   gives median macro-F1 sd 0.011 and p90 sd 0.071 across 244 cells × 3
+   seeds — confirms the earlier ≈ 0.05–0.07 estimate as a measurement.
+   Caveat: `cnn2d` on CFDAC features is the most seed-sensitive cluster
+   (sd up to 0.2 for `is_bolt` / `is_hole` / `col_location`); a 5-seed
+   re-run on those cells is recommended for tighter bounds.
 5. **The augmented arm is 50 of 60 cells** (the 10 `cnn2d/cfdac` cells were
    not completed under the ephemeral-container compute budget).
 6. **Vision / trenchcoat / severity-stratified / noise sub-studies** were

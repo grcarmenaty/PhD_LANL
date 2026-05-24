@@ -351,7 +351,7 @@ target normalised to [0, 1] per damage type, damage samples only.
 
 | model / feature | exp R² | note |
 |---|---|---|
-| mlp / cfdac_imag | +0.131 | best genuine-feature cell |
+| mlp / cfdac_imag | +0.131 (3-seed mean +0.101 ± 0.026) | best genuine-feature cell |
 | mlp / cfdac_realimag | +0.128 | |
 | xgb / cfdac_imag | +0.110 | |
 | transformer / frf_mag | +0.006 | |
@@ -525,9 +525,12 @@ control.
    chance (figure from [`REPORT_full.md` § 9](REPORT_full.md)). Synthetic
    Crack is symmetric across all 4 column corners; real Crack is per-corner
    asymmetric. The same symmetry is why column-end location fails.
-4. **No multi-seed uncertainty.** Every cell is one seeded draw; the
-   ≈ 0.05–0.07 macro-F1 run-to-run band is an estimate, not a measured
-   variance. Conclusions are drawn only where the effect exceeds it.
+4. **Multi-seed uncertainty measured (3 seeds, `multiseed_summary.json`).**
+   Median macro-F1 sd 0.011, p90 sd 0.071 across 244 cells × 3 seeds — the
+   earlier ≈ 0.05–0.07 estimate is now a measurement. CNN2D-on-CFDAC cells
+   are the most seed-sensitive cluster (sd up to 0.2 for `is_bolt` /
+   `is_hole` / `col_location`); a 5-seed re-run on those would tighten the
+   bound. Conclusions are drawn only where the effect exceeds the band.
 5. **The augmented arm is 50 of 60 cells** — the 10 `cnn2d/cfdac` cells
    (≈ 12 min each) were not completed under the ephemeral-container compute
    budget; they collapse to the class prior in the plain arm regardless.
