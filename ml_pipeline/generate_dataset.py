@@ -158,6 +158,18 @@ class ChunkWriter:
                 [p.severity for p in self.buf_params], dtype=np.float32))
 
             pgrp = f.create_group("params")
+
+            def _scalar(p, key):
+                # V2-compat: jsr_factor / damping_factor are list-valued in
+                # variation_v2; collapse to mean for the legacy scalar slot.
+                if hasattr(p, key):
+                    return float(getattr(p, key))
+                if key == "jsr_factor" and hasattr(p, "jsr_factor_per_end"):
+                    return float(np.mean(p.jsr_factor_per_end))
+                if key == "damping_factor" and hasattr(p, "damping_factor_per_mode"):
+                    return float(np.mean(p.damping_factor_per_mode))
+                raise AttributeError(key)
+
             for key in (
                 "young_factor", "density_factor", "jsr_factor",
                 "damping_factor", "plate_lx_factor", "plate_ly_factor",
@@ -166,8 +178,25 @@ class ChunkWriter:
                 "plate_extra_mass_dkg_fl2", "plate_extra_mass_dkg_fl3",
             ):
                 pgrp.create_dataset(key, data=np.array(
-                    [getattr(p, key) for p in self.buf_params],
+                    [_scalar(p, key) for p in self.buf_params],
                     dtype=np.float32))
+
+            # V2-only array fields: write as 2-D datasets when present.
+            v2_array_keys = (
+                "jsr_factor_per_end", "damping_factor_per_mode",
+                "sensor_gain", "sensor_phase_rad",
+            )
+            for key in v2_array_keys:
+                if all(hasattr(p, key) for p in self.buf_params):
+                    pgrp.create_dataset(key, data=np.array(
+                        [getattr(p, key) for p in self.buf_params],
+                        dtype=np.float32))
+
+            for key in ("input_gain", "input_shelf_db"):
+                if all(hasattr(p, key) for p in self.buf_params):
+                    pgrp.create_dataset(key, data=np.array(
+                        [getattr(p, key) for p in self.buf_params],
+                        dtype=np.float32))
 
             f.attrs["units_signals"]   = "(m/s^2)/N * N = m/s^2"
             f.attrs["units_time"]      = "second"
@@ -228,7 +257,21 @@ def main() -> None:
     parser.add_argument("--max-mb",   type=float, default=MAX_CHUNK_MB)
     parser.add_argument("--limit",    type=int, default=None,
                           help="If set, only generate the first N samples (smoke test).")
+    parser.add_argument("--variation", choices=("v1", "v2"), default="v1",
+                          help="Use variation.py (v1, default) or variation_v2.py "
+                               "(v2 — widened DR + asymmetric Crack/Hole damage). "
+                               "v2 rebinds sample_params / geometry_from_params at "
+                               "module scope; v1 is the legacy behaviour.")
     args = parser.parse_args()
+
+    if args.variation == "v2":
+        from ml_pipeline import variation_v2 as _var
+        globals()["SampleParams"] = _var.SampleParamsV2
+        globals()["sample_params"] = _var.sample_params
+        globals()["geometry_from_params"] = _var.geometry_from_params
+        print(f"[variation: v2 (widened DR + asymmetric Crack/Hole)]")
+    else:
+        print(f"[variation: v1 (legacy)]")
 
     rng = np.random.default_rng(args.seed)
     time_axis, chirp = make_chirp()
