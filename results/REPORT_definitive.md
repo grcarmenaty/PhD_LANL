@@ -20,25 +20,24 @@ chronological ablation table is in [`ablation_log.json`](ablation_log.json).
 |---|---|---|---|---|
 | 1 | **Damage detection** | `binary` (damage vs pristine) | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
 | 2 | **Damage type** | `type` (5-class) | macro-F1 0.25, balanced acc 0.33 | **weakly** |
-| 2 | | `type` one-vs-rest (is X?) | balanced acc 0.59–0.71 (`is_bolt` best, § 5.6) | **yes** — strongest result |
+| 2 | | `type` one-vs-rest (is X?) | 3-seed mean balanced acc 0.56–0.57 ± 0.11 (`is_bolt` range 0.49–0.71, § 5.6) | **single-seed fluke, not robust** |
 | 3 | **Damage severity** | `severity` (regression) | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
 | 4 | **Damage location** | `col_location` (column-end) | macro-F1 0.17, balanced acc 0.27 | **no** |
 | 4 | | `mass_location` (mass-plate) | macro-F1 0.45, balanced acc 0.51 | **partly** |
 
-> **One-paragraph summary.** The seeded 244-cell sweep shows the strongest
-> honest transfer is **one-vs-rest damage-type detection** — synth-trained
-> "is the damage type X?" classifiers reach balanced accuracy 0.59–0.71
-> (`is_bolt` 0.71, § 5.6), far above the joint 5-class `type` task (0.33)
-> which collapses by having to commit to one label. After that:
-> **mass-plate location** is a partial success (macro-F1 0.45, balanced
-> accuracy 0.51 ≈ 2× chance); **severity** transfers weakly (R² ≈ 0.12
-> across three CFDAC cells); **detection** has weak signal (balanced
-> accuracy 0.585) but no operationally usable cell; **column-end location**
-> does not transfer. Two cautionary findings: the previous draft's accuracy
-> headlines (type 0.507, binary 0.825) were **class-prior collapse**; and
-> the report-era "best" column-location cell (`cnn2d/cfdac_mag`, accuracy
-> 0.508) was a **non-reproducible fluke** that collapses to chance once the
-> training is seeded.
+> **One-paragraph summary.** A **3-seed multi-seed validation**
+> (`multiseed_summary.json`) reverses the iteration-3 headline: the
+> one-vs-rest finding (`is_bolt` balanced accuracy 0.71) was a **single-seed
+> fluke** — on the other two seeds it gives 0.49 and 0.51 (chance); mean
+> 0.57 ± 0.12. The robust honest headline is **mass-plate location**
+> (`mass_location`, `mlp/cfdac_imag`, mean macro-F1 0.42 ± 0.07, ≈ 2×
+> chance) — the only goal whose strongest signal survives multi-seed.
+> Beyond that: 5-class type transfers weakly (macro-F1 0.27 ± 0.02);
+> severity weakly (R² 0.10 ± 0.03 on CFDAC features); detection marginal
+> (balanced acc 0.52 ± 0.05); column-end location does not transfer. The
+> measured macro-F1 run-to-run noise band is **median sd 0.011, p90 sd
+> 0.07** (244 cells × 3 seeds) — confirming the earlier ≈0.05–0.07 estimate
+> as a real measurement.
 
 ---
 
@@ -292,31 +291,34 @@ real skill gain. Under macro-F1 / balanced accuracy on the Pristine-
 inclusive set there is at most a small genuine effect, and only for one
 CFDAC cell — not the breakthrough the accuracy figure suggested.
 
-### 5.6 One-vs-rest type detection — the strongest transfer in the study
+### 5.6 One-vs-rest type detection — single-seed fluke under multi-seed validation
 
-The 5-class `type` task transfers weakly (§ 5.2, macro-F1 0.25). But the
-**binary-trenchcoat decomposition** — five one-vs-rest classifiers, each
-answering "is the damage type X?", trained with the § 3 shared recipe —
-transfers *far* better. Seeded best cell per sub-task:
+An earlier draft of this section reported that one-vs-rest sub-tasks
+(`is_bolt` etc.) transfer at balanced accuracy 0.59–0.71 — the
+*strongest* honest cross-domain result in the study. **A 3-seed multi-seed
+validation reverses that finding.** The best cell on the default seed
+(`is_bolt / cnn2d / cfdac_real`) gives balanced accuracy 0.71, but on the
+other two seeds it gives 0.49 and 0.51 — i.e. chance. The same pattern
+holds for `is_hole`. The "best" single-seed value was a lucky draw, not a
+robust signal.
 
-| one-vs-rest task | best cell | balanced acc | macro-F1 |
-|---|---|---|---|
-| `is_bolt` | cnn2d / cfdac_real | **0.708** | 0.701 |
-| `is_hole` | mlp / cfdac_all | 0.684 | 0.629 |
-| `is_mass` | rf / cfdac_real | 0.633 | 0.471 |
-| `is_crack` | mlp / modal | 0.603 | 0.613 |
-| `is_pristine` | cnn2d / cfdac_real | 0.592 | 0.536 |
+3-seed best-cell numbers per sub-task (`multiseed_summary.json`):
 
-Every per-type yes/no question transfers at balanced accuracy 0.59–0.71,
-against 0.33 for the joint 5-class task. **`is_bolt` (balanced accuracy
-0.71, macro-F1 0.70) is the strongest honest cross-domain result in the
-whole study** — stronger than mass-plate location (§ 7.2). The joint
-5-class classifier collapses because it must commit to a single label; the
-per-type detectors each keep their signal. Deployment implication: build a
-**bank of per-damage-type detectors**, not one 5-class classifier. (The
-*aggregated* trenchcoat — recombining the five into a 5-class prediction —
-loses this and scores only ≈ 0.29 macro-F1; the aggregation, not the
-binaries, is the weak link.)
+| one-vs-rest task | best cell (default seed) | balanced acc per seed (default / 101 / 202) | mean | sd |
+|---|---|---|---|---|
+| `is_bolt` | cnn2d / cfdac_real | 0.708 / 0.488 / 0.514 | 0.570 | 0.121 |
+| `is_hole` | mlp / cfdac_all | 0.684 / 0.500 / 0.500 | 0.561 | 0.106 |
+| `is_mass` | rf / cfdac_real | 0.633 / — / — | (sklearn — same across seeds) | — |
+| `is_crack` | mlp / modal | 0.603 / — / — | (modal — typically stable) | — |
+| `is_pristine` | cnn2d / cfdac_real | 0.592 / — / — | | |
+
+The two CFDAC-CNN cells (`is_bolt`, `is_hole`) collapse on two of three
+seeds. The honest read: one-vs-rest type detection is **not a robust win**;
+on a typical seed it sits at chance. (The torch-cell variance here is much
+larger than the median macro-F1 sd ≈ 0.01 across the 244-cell sweep — these
+specific cells are particularly seed-sensitive.) The aggregated trenchcoat
+(macro-F1 ≈ 0.29) was always weaker; under multi-seed the binaries don't
+rescue it.
 
 ---
 
