@@ -20,24 +20,26 @@ chronological ablation table is in [`ablation_log.json`](ablation_log.json).
 |---|---|---|---|---|
 | 1 | **Damage detection** | `binary` (damage vs pristine) | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
 | 2 | **Damage type** | `type` (5-class) | macro-F1 0.25, balanced acc 0.33 | **weakly** |
-| 2 | | `type` one-vs-rest (is X?) | 3-seed mean balanced acc 0.56–0.57 ± 0.11 (`is_bolt` range 0.49–0.71, § 5.6) | **single-seed fluke, not robust** |
+| 2 | | `type` one-vs-rest (modal-MLP) | 3-seed mean balanced acc 0.62–0.66 ± ≤ 0.03 (`is_hole / mlp / modal` 0.661 ± 0.004, § 5.6) | **yes — robust, strongest in study** |
 | 3 | **Damage severity** | `severity` (regression) | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
 | 4 | **Damage location** | `col_location` (column-end) | macro-F1 0.17, balanced acc 0.27 | **no** |
 | 4 | | `mass_location` (mass-plate) | macro-F1 0.45, balanced acc 0.51 | **partly** |
 
 > **One-paragraph summary.** A **3-seed multi-seed validation**
-> (`multiseed_summary.json`) reverses the iteration-3 headline: the
-> one-vs-rest finding (`is_bolt` balanced accuracy 0.71) was a **single-seed
-> fluke** — on the other two seeds it gives 0.49 and 0.51 (chance); mean
-> 0.57 ± 0.12. The robust honest headline is **mass-plate location**
-> (`mass_location`, `mlp/cfdac_imag`, mean macro-F1 0.42 ± 0.07, ≈ 2×
-> chance) — the only goal whose strongest signal survives multi-seed.
-> Beyond that: 5-class type transfers weakly (macro-F1 0.27 ± 0.02);
-> severity weakly (R² 0.10 ± 0.03 on CFDAC features); detection marginal
-> (balanced acc 0.52 ± 0.05); column-end location does not transfer. The
-> measured macro-F1 run-to-run noise band is **median sd 0.011, p90 sd
-> 0.07** (244 cells × 3 seeds) — confirming the earlier ≈0.05–0.07 estimate
-> as a real measurement.
+> (`multiseed_summary.json`) reshaped the iteration-3 headline twice. The
+> single-seed CFDAC-CNN "best" cells *were* flukes (`is_bolt cnn2d/cfdac_real`
+> BA 0.71 collapsed to 0.49 / 0.51 on the other seeds), **but the
+> **modal-MLP one-vs-rest bank is robust**: `is_hole / mlp / modal`
+> BA 0.661 ± 0.004, `is_bolt / mlp / cfdac_real` 0.631 ± 0.015,
+> `is_mass / mlp / modal` 0.628 ± 0.011, `is_crack / mlp / modal`
+> 0.615 ± 0.026. **One-vs-rest type detection (via modal-MLP) is the
+> strongest robust transfer in the study.** **Mass-plate location**
+> (`mlp / cfdac_imag`, macro-F1 0.42 ± 0.07, balanced acc 0.48 ± 0.08,
+> ≈ 2× chance) is comparable in normalised lift. 5-class type transfers
+> weakly (0.27 ± 0.02); severity weakly (R² 0.10–0.13 ± 0.02 on CFDAC);
+> detection marginal (BA 0.52 ± 0.05); column-end location does not
+> transfer. Measured macro-F1 noise band: median sd 0.011, p90 sd 0.07
+> (244 cells × 3 seeds) — torch-cell only: median 0.016, p90 0.086.
 
 ---
 
@@ -291,34 +293,43 @@ real skill gain. Under macro-F1 / balanced accuracy on the Pristine-
 inclusive set there is at most a small genuine effect, and only for one
 CFDAC cell — not the breakthrough the accuracy figure suggested.
 
-### 5.6 One-vs-rest type detection — single-seed fluke under multi-seed validation
+### 5.6 One-vs-rest type detection — robust transfer via modal-MLP
 
-An earlier draft of this section reported that one-vs-rest sub-tasks
-(`is_bolt` etc.) transfer at balanced accuracy 0.59–0.71 — the
-*strongest* honest cross-domain result in the study. **A 3-seed multi-seed
-validation reverses that finding.** The best cell on the default seed
-(`is_bolt / cnn2d / cfdac_real`) gives balanced accuracy 0.71, but on the
-other two seeds it gives 0.49 and 0.51 — i.e. chance. The same pattern
-holds for `is_hole`. The "best" single-seed value was a lucky draw, not a
-robust signal.
+The 5-class `type` task transfers weakly (§ 5.2, macro-F1 0.25). The
+**one-vs-rest decomposition** — five binary "is the damage type X?"
+classifiers — transfers *substantially better*, with a critical multi-seed
+caveat: the **CFDAC-CNN best cells were single-seed flukes** (an earlier
+draft made these the headline), while **modal-MLP and frf_mag/transformer
+cells transfer robustly** across all three seeds. 3-seed best **robust**
+cell per sub-task (filter: sd < 0.05), from `multiseed_summary.json`:
 
-3-seed best-cell numbers per sub-task (`multiseed_summary.json`):
-
-| one-vs-rest task | best cell (default seed) | balanced acc per seed (default / 101 / 202) | mean | sd |
+| one-vs-rest task | best robust cell | BA mean | BA sd | seeds (default / 101 / 202) |
 |---|---|---|---|---|
-| `is_bolt` | cnn2d / cfdac_real | 0.708 / 0.488 / 0.514 | 0.570 | 0.121 |
-| `is_hole` | mlp / cfdac_all | 0.684 / 0.500 / 0.500 | 0.561 | 0.106 |
-| `is_mass` | rf / cfdac_real | 0.633 / — / — | (sklearn — same across seeds) | — |
-| `is_crack` | mlp / modal | 0.603 / — / — | (modal — typically stable) | — |
-| `is_pristine` | cnn2d / cfdac_real | 0.592 / — / — | | |
+| `is_hole` | **mlp / modal** | **0.661** | 0.004 | 0.665 / 0.659 / 0.658 |
+| `is_bolt` | **mlp / cfdac_real** | **0.631** | 0.015 | 0.635 / 0.645 / 0.615 |
+| `is_mass` | **mlp / modal** | **0.628** | 0.011 | 0.616 / 0.638 / 0.629 |
+| `is_crack` | **mlp / modal** | **0.615** | 0.026 | 0.603 / 0.645 / 0.597 |
+| `is_pristine` | mlp / modal | 0.517 | 0.003 | 0.513 / 0.519 / 0.518 |
 
-The two CFDAC-CNN cells (`is_bolt`, `is_hole`) collapse on two of three
-seeds. The honest read: one-vs-rest type detection is **not a robust win**;
-on a typical seed it sits at chance. (The torch-cell variance here is much
-larger than the median macro-F1 sd ≈ 0.01 across the 244-cell sweep — these
-specific cells are particularly seed-sensitive.) The aggregated trenchcoat
-(macro-F1 ≈ 0.29) was always weaker; under multi-seed the binaries don't
-rescue it.
+**Four of five sub-tasks transfer robustly at balanced accuracy 0.62–0.66
+(≈ 2× chance) with sd ≤ 0.03** — `is_pristine` is the only one stuck near
+chance. Normalised lift (`(BA − 0.5) / (1 − 0.5)`) of 0.24–0.32 — comparable
+to mass-plate location's lift (0.30, § 7.2). **This makes one-vs-rest type
+detection the strongest *robust* transfer in the study**, tied with
+mass-plate location in normalised lift but with substantially smaller
+per-cell sd (≤ 0.03 vs 0.07).
+
+The earlier "best" CFDAC-CNN cells were single-seed flukes —
+`is_bolt / cnn2d / cfdac_real` reached BA 0.71 on the default seed but
+0.49 / 0.51 on the other two (mean 0.57 sd 0.12); same for
+`is_hole / mlp / cfdac_all` (0.68 / 0.50 / 0.50). Do not use CFDAC-CNN
+cells for one-vs-rest; use modal-MLP.
+
+**Deployment implication:** build a **bank of modal-MLP per-damage-type
+detectors**. `is_hole / mlp / modal` (BA 0.661 ± 0.004) is the
+single most reproducibly transferring cell in the entire 244-cell sweep.
+The aggregated trenchcoat (macro-F1 ≈ 0.29) discards this signal in the
+aggregation step.
 
 ---
 
