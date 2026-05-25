@@ -106,6 +106,38 @@ The expectation given C4 fails by 0.153 on seed 42 (≈ 39× the v1 sd
 of 0.004) is that the floor failure replicates; the report will be
 amended if it does not.
 
+## 6. Recommended next experiment — v2a / v2b ablation
+
+The v2 change-set bundles two physically motivated changes:
+
+* **(P1.2) widened domain randomisation**: per-end JSR factor (×24),
+  per-mode damping (×9), per-channel sensor gain (×9), per-channel
+  sensor phase (×9), input gain, input low-shelf gain — 24 + 9 + 9 +
+  9 + 2 = **53 new randomised scalars per sample** on top of the v1
+  per-sample randomisation.
+* **(P2.1 / P2.2) asymmetric Crack and Hole damage** — physics
+  correction (single-end stiffness reduction matching the LANL
+  bookcase saw-cut / drilled-hole).
+
+The regression cannot be attributed cleanly to either. **Future work:**
+
+* **v2a** — only the asymmetric Crack/Hole damage; v1 randomisation
+  otherwise. Tests whether the physics fix improves transfer when
+  not buried under noise.
+* **v2b** — only the widened DR; symmetric (v1) Crack/Hole damage.
+  Confirms that the widened DR is itself the regression driver.
+
+Without this disentangling we cannot say whether **the physics fix
+was correct but masked**, or **the physics fix was also wrong**. The
+strong prior is that the widened DR is the culprit (the modal feature
+is a learned amplitude-vs-frequency signature; 53 nuisance scalars
+per sample drown the signal that v1 cleanly preserved), but this is
+testable with v2a.
+
+For now: **v1 is the production configuration**, multi-seed-validated
+modal-MLP one-vs-rest cells are the headline transfer (see § 9.5 of
+[`REPORT_full.md`](REPORT_full.md) for the seed-robustness ranking).
+
 ## 6. Cost / wall-clock log
 
 | stage | start | end | notes |
