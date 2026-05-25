@@ -30,8 +30,8 @@ from typing import Optional
 _REPO = Path(__file__).resolve().parents[1]
 
 
-def _load_v2_seed(out_dir: Path, seed: int) -> Optional[list[dict]]:
-    p = out_dir / f"experimental_full_evaluation_v2_seed{seed}.json"
+def _load_v2_seed(out_dir: Path, seed: int, label: str = "v2") -> Optional[list[dict]]:
+    p = out_dir / f"experimental_full_evaluation_{label}_seed{seed}.json"
     if not p.exists():
         return None
     try:
@@ -84,13 +84,20 @@ def main() -> None:
     p.add_argument("--v1", type=Path,
                    default=_REPO / "results" / "multiseed_summary.json")
     p.add_argument("--v2-dir", type=Path, default=_REPO / "results")
-    p.add_argument("--out", type=Path,
-                   default=_REPO / "results" / "chunk_regen_v2_decision.json")
+    p.add_argument("--label", default="v2",
+                   help="Label in the eval JSON filename — 'v2' looks for "
+                        "experimental_full_evaluation_v2_seedN.json; 'v2a' "
+                        "for the v2a ablation; etc.")
+    p.add_argument("--out", type=Path, default=None,
+                   help="Output JSON path; defaults to "
+                        "results/chunk_regen_<label>_decision.json.")
     args = p.parse_args()
+    if args.out is None:
+        args.out = _REPO / "results" / f"chunk_regen_{args.label}_decision.json"
 
     v1_rows = json.loads(args.v1.read_text())
     seeds_rows = {sd: r for sd in (42, 101, 202)
-                  if (r := _load_v2_seed(args.v2_dir, sd)) is not None}
+                  if (r := _load_v2_seed(args.v2_dir, sd, args.label)) is not None}
     if not seeds_rows:
         print("No v2 seed evals found yet — nothing to compare.")
         return
