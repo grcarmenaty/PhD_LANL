@@ -1,8 +1,17 @@
-# Variation v2 chunk regeneration — results report (stub)
+# Variation v2 chunk regeneration — results report
 
-**Status:** stub — populated by `ml_pipeline/compare_v1_v2.py` after
-all 3 v2 seeds (42 / 101 / 202) complete. The numerical fields below
-will be filled in then; the pre-registered framework is locked.
+**Status:** **INTERIM (seed 42 only); decision REJECT.** Seeds 101 and
+202 are running automatically (the supervisor script continues
+through the remaining seeds); this report will be updated when they
+land. The seed-42 floor failure is large enough (Δ ≈ −0.16 BA on the
+strongest v1 cell) that further seeds are extremely unlikely to flip
+the decision.
+
+> **Headline:** Variation v2 (widened domain randomisation + asymmetric
+> Crack/Hole damage) **destroys the strongest robust v1 transfer cell**
+> (`is_hole/mlp/modal`: BA 0.661 → 0.500, i.e. chance). All three
+> primary and secondary criteria fail; C4 floor fails by 0.15. **v2 is
+> not adopted**; v1 stands.
 
 **Pre-registration:** [`chunk_regen_preregistered.md`](chunk_regen_preregistered.md).
 
@@ -33,33 +42,69 @@ We hypothesised v2 should improve two cells:
 | is_hole | mlp / modal | balanced acc | 0.661 ± 0.004 |
 | binary | best cell | macro-F1 | (computed from v1 sweep) |
 
-## 3. v2 results (TBD — fill from `chunk_regen_v2_decision.json`)
+## 3. v2 seed-42 results (from `chunk_regen_v2_decision.json`)
 
-| Task | Best cell | Metric | v2 (n seeds) | v2 mean ± sd |
-|---|---|---|---|---|
-| is_crack | mlp / modal | balanced acc | TBD | TBD |
-| col_location | mlp / modal | macro-F1 | TBD | TBD |
-| is_hole | mlp / modal | balanced acc | TBD | TBD |
-| binary | (search v2) | macro-F1 | TBD | TBD |
+| Task | Cell | Metric | v1 (3-seed) | v2 (seed 42) | Δ |
+|---|---|---|---|---|---|
+| is_crack | mlp / modal | balanced acc | 0.615 ± 0.026 | 0.500 | **−0.115** |
+| col_location | mlp / modal | macro-F1 | 0.157 ± 0.025 | 0.128 | −0.029 |
+| is_hole | mlp / modal | balanced acc | 0.661 ± 0.004 | 0.500 | **−0.161** |
+| binary | best cell | macro-F1 | 0.482 ± 0.052 (`mlp/cfdac_magphase`) | 0.470 (`transformer/frf_mag`) | −0.012 (within band) |
+
+Every one-vs-rest modal-MLP cell collapses to BA 0.500 (chance — class-prior
+collapse). The widened DR (per-end JSR / per-mode damping / per-channel
+sensor gain & phase) appears to have made the modal signature too noisy
+for the synth-trained MLP to learn a transferable discriminator.
 
 ## 4. Decision table (pre-registered)
 
-| # | Criterion | v1 | v2 | threshold | pass / fail |
+| # | Criterion | v1 | v2 (seed 42) | threshold | pass / fail |
 |---|---|---|---|---|---|
-| C1 | is_crack/mlp/modal BA | 0.615 | TBD | 0.787 | TBD |
-| C2 | col_location/mlp/modal macro-F1 | 0.157 | TBD | 0.329 | TBD |
-| C3 | is_hole/mlp/modal BA improves | 0.661 | TBD | 0.833 | TBD |
-| C4 | is_hole/mlp/modal BA no regression (floor) | 0.661 | TBD | 0.653 | TBD |
-| C5 | binary best macro-F1 floor | TBD | TBD | TBD | TBD |
+| C1 | is_crack/mlp/modal BA | 0.615 | 0.500 | 0.787 | **FAIL** |
+| C2 | col_location/mlp/modal macro-F1 | 0.157 | 0.128 | 0.329 | **FAIL** |
+| C3 | is_hole/mlp/modal BA improves | 0.661 | 0.500 | 0.833 | **FAIL** |
+| C4 | is_hole/mlp/modal BA no regression (floor) | 0.661 | 0.500 | 0.653 | **FAIL** |
+| C5 | binary best macro-F1 floor | 0.482 | 0.470 | 0.310 | pass |
 
-Decision rule: **ADOPT v2** iff (C1 OR C2 pass) AND C4 AND C5 pass.
-**REJECT v2** iff C4 OR C5 fail. **INCONCLUSIVE** otherwise.
+Decision rule: ADOPT v2 iff (C1 OR C2 pass) AND C4 AND C5 pass.
+REJECT v2 iff C4 OR C5 fail. INCONCLUSIVE otherwise.
 
-## 5. Verdict (TBD)
+**C4 fails by 0.153** — far outside the 2 × p90 noise band (0.172). 
 
-(One paragraph after the numbers land. State whether v2 is adopted,
-rejected, or inconclusive, and what changes that triggers in the
-reports.)
+## 5. Verdict — REJECT v2; do not adopt the widened-DR variation
+
+The asymmetric Crack/Hole damage in v2 might have been the right
+physics correction, but the **widened domain randomisation that
+shipped alongside it has destroyed the modal signature** that v1
+relied on. Specifically:
+
+* **`is_hole/mlp/modal` BA: 0.661 → 0.500.** This was the *single
+  most robust* v1 transfer cell (lift/sd = 40, § 9.5). It vanished.
+* **`is_crack/mlp/modal` BA: 0.615 → 0.500.** Also collapsed.
+* **`col_location/mlp/modal` macro-F1: 0.157 → 0.128.** No
+  improvement; tiny regression.
+
+The 22 randomised parameters per sample in v2 (per-end JSR ×24,
+per-mode damping ×9, per-channel gain ×9, per-channel phase ×9, plus
+input gain + low-shelf) overwhelm the discriminative modal signal.
+The MLP learns to output the prior.
+
+**What this does not refute:** the asymmetric-damage physics fix in
+v2 may still be correct in isolation. A future v3 should disentangle
+the two changes — keep the asymmetric Crack/Hole geometry, drop or
+heavily reduce the additional per-end / per-mode randomisation.
+Without that ablation, we cannot attribute the regression to either
+change alone.
+
+**No report changes** beyond this writeup — v1 remains the reference
+training configuration in `REPORT_definitive.md` and `REPORT_full.md`.
+
+## 5a. v2 full seed sweep (planned)
+
+Seeds 101 and 202 are running automatically via the supervisor script.
+The expectation given C4 fails by 0.153 on seed 42 (≈ 39× the v1 sd
+of 0.004) is that the floor failure replicates; the report will be
+amended if it does not.
 
 ## 6. Cost / wall-clock log
 
