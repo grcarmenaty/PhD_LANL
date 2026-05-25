@@ -613,9 +613,14 @@ and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 4. **Multi-seed uncertainty measured (3 seeds).** `multiseed_summary.json`
    gives median macro-F1 sd 0.011 and p90 sd 0.071 across 244 cells × 3
    seeds — confirms the earlier ≈ 0.05–0.07 estimate as a measurement.
-   Caveat: `cnn2d` on CFDAC features is the most seed-sensitive cluster
-   (sd up to 0.2 for `is_bolt` / `is_hole` / `col_location`); a 5-seed
-   re-run on those cells is recommended for tighter bounds.
+   **By family** (balanced-accuracy sd, n cells): torch (`cnn / cnn2d /
+   mlp / transformer`) n = 120, median 0.019, p90 0.075. sklearn (`rf /
+   xgb`) n = 35, median 0.031, p90 0.079. Sklearn cells carry a slightly
+   higher median sd (driven by train/val/test split variance) but
+   comparable tails. Caveat: `cnn2d` on CFDAC features is the most
+   seed-sensitive cluster individually (sd up to 0.2 for `is_bolt` /
+   `is_hole` / `col_location`); a 5-seed re-run on those cells is
+   recommended for tighter bounds.
 5. **The augmented arm is 50 of 60 cells** (the 10 `cnn2d/cfdac` cells were
    not completed under the ephemeral-container compute budget).
 6. **Vision / trenchcoat / severity-stratified / noise sub-studies** were

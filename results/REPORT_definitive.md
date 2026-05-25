@@ -551,10 +551,18 @@ control.
    asymmetric. The same symmetry is why column-end location fails.
 4. **Multi-seed uncertainty measured (3 seeds, `multiseed_summary.json`).**
    Median macro-F1 sd 0.011, p90 sd 0.071 across 244 cells × 3 seeds — the
-   earlier ≈ 0.05–0.07 estimate is now a measurement. CNN2D-on-CFDAC cells
-   are the most seed-sensitive cluster (sd up to 0.2 for `is_bolt` /
-   `is_hole` / `col_location`); a 5-seed re-run on those would tighten the
-   bound. Conclusions are drawn only where the effect exceeds the band.
+   earlier ≈ 0.05–0.07 estimate is now a measurement. **Noise band split by
+   model family** (`balanced_acc_sd`, n cells):
+   * torch (`cnn`, `cnn2d`, `mlp`, `transformer`): n = 120, median 0.019, p90 0.075.
+   * sklearn (`rf`, `xgb`): n = 35, median 0.031, p90 0.079.
+
+   Sklearn cells carry a slightly higher *median* sd than torch (the
+   seeded train/val/test split is the dominant variance source — RF/XGB are
+   otherwise deterministic per fold) but the **tails are comparable**
+   (p90 ≈ 0.08 for both). CNN2D-on-CFDAC cells are the most seed-sensitive
+   cluster individually (sd up to 0.2 for `is_bolt` / `is_hole` /
+   `col_location`); a 5-seed re-run on those would tighten the bound.
+   Conclusions are drawn only where the effect exceeds the band.
 5. **The augmented arm is 50 of 60 cells** — the 10 `cnn2d/cfdac` cells
    (≈ 12 min each) were not completed under the ephemeral-container compute
    budget; they collapse to the class prior in the plain arm regardless.
