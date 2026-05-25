@@ -257,10 +257,12 @@ def main() -> None:
     parser.add_argument("--max-mb",   type=float, default=MAX_CHUNK_MB)
     parser.add_argument("--limit",    type=int, default=None,
                           help="If set, only generate the first N samples (smoke test).")
-    parser.add_argument("--variation", choices=("v1", "v2"), default="v1",
-                          help="Use variation.py (v1, default) or variation_v2.py "
-                               "(v2 — widened DR + asymmetric Crack/Hole damage). "
-                               "v2 rebinds sample_params / geometry_from_params at "
+    parser.add_argument("--variation", choices=("v1", "v2", "v2a"), default="v1",
+                          help="Use variation.py (v1, default), variation_v2.py "
+                               "(v2 — widened DR + asymmetric Crack/Hole damage), "
+                               "or variation_v2a.py (v2a — v1 DR + v2 asymmetric "
+                               "damage; ablation of v2's two changes). "
+                               "v2/v2a rebind sample_params / geometry_from_params at "
                                "module scope; v1 is the legacy behaviour.")
     args = parser.parse_args()
 
@@ -270,6 +272,12 @@ def main() -> None:
         globals()["sample_params"] = _var.sample_params
         globals()["geometry_from_params"] = _var.geometry_from_params
         print(f"[variation: v2 (widened DR + asymmetric Crack/Hole)]")
+    elif args.variation == "v2a":
+        from ml_pipeline import variation_v2a as _var
+        # v2a re-uses v1's SampleParams / sample_params unchanged; only
+        # geometry_from_params (the damage application) differs.
+        globals()["geometry_from_params"] = _var.geometry_from_params
+        print(f"[variation: v2a (v1 DR + v2 asymmetric Crack/Hole — ablation)]")
     else:
         print(f"[variation: v1 (legacy)]")
 
