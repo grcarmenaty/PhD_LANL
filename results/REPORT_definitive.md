@@ -500,6 +500,21 @@ amplitudes by a large, location-specific amount that partly survives the
 domain gap; no single cell resolves all four plates uniformly. This is the
 result to build on.
 
+**Logit-averaging ensemble — tried, refuted.** The iteration-3 advocate
+review proposed combining `mlp/cfdac_imag` with `cnn2d/cfdac_real` (the
+two complementary-looking cells above) via pre-softmax logit averaging,
+expecting the strengths to add. The experiment
+(`ml_pipeline/ensemble_mass_location.py`,
+`results/ensemble_mass_location.json`) shows the ensemble
+*under*performs both components: macro-F1 0.32 vs 0.45 / 0.37,
+balanced acc 0.41 vs 0.51 / 0.45. The cnn2d cell is seed-unstable
+(3-seed mass_location macro-F1 0.28 ± 0.18 — sd > mean) and on most
+seeds collapses to two of four plates; its high-magnitude logits pull
+the mlp's correct decisions toward the cnn2d prior. A second pairing
+(`mlp/cfdac_imag + mlp/modal`) also regressed (macro-F1 0.26 vs 0.45).
+**The strongest single cell stands.** Detail in
+[`REPORT_full.md` § 9.4](REPORT_full.md).
+
 ---
 
 ## 8. Cross-cutting — physics-aware augmentation A/B
