@@ -601,12 +601,22 @@ In cost / impact order, all synth-only.
    report-era `cnn2d/cfdac_real` had the opposite weakness. Next: a model
    that combines both (e.g. an ensemble, or training on `cfdac_all`) should
    resolve all four plates; that is the concrete next experiment.
-3. **Fix the synthetic damage physics — recommended next investment.**
-   Promote `variation_v2.py` → `variation.py` and regenerate the chunk set
-   (P2.1 + P2.2, ≈ 24 h CPU). Asymmetric per-corner Crack/Hole damage
-   directly targets the two biggest failures — the `is_Crack` AUC-0.36
-   anti-correlation (§ 9.3) and the column-end symmetry (§ 7.1). Expected:
-   `is_Crack` AUC 0.36 → ≥ 0.5 and a non-degenerate `col_location`.
+3. **Fix the synthetic damage physics — tried (v2) and REJECTED;
+   ablation needed.** The v2 chunk regeneration (P1.2 widened DR +
+   P2.1 / P2.2 asymmetric Crack/Hole damage) was run pre-registered
+   against fixed criteria
+   ([`chunk_regen_preregistered.md`](chunk_regen_preregistered.md))
+   and **failed the floor test** on seed 42: `is_hole/mlp/modal`
+   balanced accuracy crashed from 0.661 ± 0.004 (the *most robust*
+   v1 cell) to 0.500 (chance). All three primary/secondary criteria
+   also failed. Detail and decision JSON in
+   [`REPORT_v2_chunk_regen.md`](REPORT_v2_chunk_regen.md). The v2
+   change-set bundles two changes; without disentangling them via
+   **v2a (asymmetric damage only) / v2b (widened DR only)** we
+   cannot say whether the asymmetric-damage physics fix is itself
+   wrong or whether the widened DR (53 additional randomised scalars
+   per sample) is masking it. Recommend running v2a first as the
+   minimum-cost ablation.
 4. **SSL pretrain on unlabelled experimental data** (P2.3) — **withdrawn as
    stated.** The proposal pretrains on all 2 638 experimental cases, but
    2 176 of those are damaged-structure measurements that a genuine

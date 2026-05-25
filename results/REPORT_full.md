@@ -716,11 +716,18 @@ Three observations:
    `mlp/cfdac_imag` (macro-F1 0.45) resolves the upper plates while the
    report-era `cnn2d/cfdac_real` resolved the lower ones — complementary.
    Next: a cell that resolves all four plates (ensemble, or `cfdac_all`).
-3. **Fix the synthetic damage physics — recommended next investment.**
-   Promote `variation_v2.py` → `variation.py`, regenerate the chunk set
-   (P2.1 + P2.2, ≈ 24 h CPU). Asymmetric per-corner Crack/Hole damage
-   targets the two biggest failures — the `is_Crack` AUC-0.36
-   anti-correlation and the column-end symmetry.
+3. **Fix the synthetic damage physics — tried (v2) and REJECTED.**
+   The v2 chunk regeneration (P1.2 widened DR + P2.1/P2.2 asymmetric
+   Crack/Hole damage) was run pre-registered against fixed criteria
+   ([`chunk_regen_preregistered.md`](chunk_regen_preregistered.md))
+   and **failed the floor test** on seed 42: `is_hole/mlp/modal` BA
+   crashed from 0.661 (the most robust v1 cell, § 9.5) to 0.500
+   (chance). All three primary/secondary criteria also failed. Full
+   detail in [`REPORT_v2_chunk_regen.md`](REPORT_v2_chunk_regen.md).
+   The v2 bundle changed 53 additional randomised scalars per sample
+   *and* the damage geometry; without ablation we cannot attribute
+   the regression. **Recommend v2a (asymmetric damage only)** as the
+   minimum-cost disentangling experiment.
 4. **SSL pretrain on unlabelled experimental data** (P2.3) — **withdrawn as
    stated.** It pretrains on all 2 638 experimental cases, 2 176 of which
    are damaged-structure measurements unavailable before deployment
