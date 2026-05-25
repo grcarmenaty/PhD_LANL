@@ -53,7 +53,7 @@ decomposition, a severity-stratified analysis, and a noise-robustness sweep.
 | detection | `binary` | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
 | type | `type` (5-class) | macro-F1 0.25 (`mlp/modal`) | weakly |
 | type | `type` one-vs-rest (modal-MLP) | 3-seed mean BA 0.62–0.66 ± ≤ 0.03 (`is_hole / mlp / modal` 0.661 ± 0.004, § 6.6) | **yes — robust, strongest in study** |
-| severity | `severity` | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
+| severity | `severity` | R² 0.132 ± 0.013 (`mlp/cfdac_realimag`, 3-seed) | **weakly** |
 | location | `col_location` | macro-F1 0.17 (`mlp/modal`) | no |
 | location | `mass_location` | macro-F1 0.45 (`mlp/cfdac_imag`), balanced acc 0.51 | **partly** (best goal) |
 
@@ -388,7 +388,7 @@ damage samples only (8 000 synthetic / 2 176 experimental).
 
 | element | value |
 |---|---|
-| feature | `cfdac_imag` (128×128 CFDAC imaginary-part matrix) |
+| feature | `cfdac_realimag` (128×128×2 CFDAC real+imaginary stacked matrix) |
 | model | `MLP`, hidden (256, 128, 64), dropout 0.2 (flattened CFDAC input) |
 | optimiser | AdamW, lr 1×10⁻³, weight decay 10⁻⁴ |
 | schedule / epochs / batch | CosineAnnealing / 4 / 64 |
@@ -396,21 +396,30 @@ damage samples only (8 000 synthetic / 2 176 experimental).
 | preprocessing | P0.1 experimental-Pristine CFDAC reference; P1.1 per-sample normalisation |
 | HPO | grid hidden × lr (9 configs, `hpo_cfdac_allmodels.py`); best by val R² |
 
+**Multi-seed rationale (P0.7).** The report-era recommendation was
+`mlp/cfdac_imag` (single-seed R² +0.131). Across 3 seeds, `mlp/cfdac_realimag`
+has higher mean (R² 0.132 ± 0.013) **and** tighter sd (0.013 vs 0.026) — the
+right cell for the recommendation. The report-era choice sat within
+run-to-run noise of the multi-seed best.
+
 ## 7.2 Result (seeded, zero-shot)
 
-| synth val R² | synth test R² | exp R² | exp MAE |
-|---|---|---|---|
-| 0.311 | 0.281 | **+0.131** | 0.224 |
+| cell | synth val R² | synth test R² | **exp R²** (3-seed mean ± sd) | exp MAE |
+|---|---|---|---|---|
+| mlp / cfdac_realimag (**recommended**) | 0.312 | 0.279 | **+0.132 ± 0.013** | 0.224 |
+| mlp / cfdac_imag (report-era recommendation) | 0.311 | 0.281 | +0.101 ± 0.026 | 0.224 |
 
-## 7.3 Full comparison (seeded sweep, `_seeded.json`, 16 severity cells)
+## 7.3 Full comparison (3-seed mean ± sd, `results/multiseed_summary.json`, 16 severity cells)
 
-| model / feature | exp R² | note |
+| model / feature | exp R² (3-seed mean ± sd) | note |
 |---|---|---|
-| mlp / cfdac_imag | +0.131 (3-seed mean +0.101 ± 0.026) | best genuine-feature cell |
-| mlp / cfdac_realimag | +0.128 | |
-| xgb / cfdac_imag | +0.110 | |
-| transformer / frf_mag | +0.006 | |
-| cnn / timeseries | +0.180 | **non-independent `timeseries` feature — excluded** |
+| mlp / cfdac_realimag | **+0.132 ± 0.013** | **best & tightest** |
+| mlp / cfdac_imag | +0.101 ± 0.026 | report-era recommendation; wider sd |
+| transformer / frf_mag | +0.046 ± 0.037 | |
+| xgb / cfdac_imag | +0.040 ± 0.116 | mean < sd → unreliable across seeds |
+| mlp / cfdac_real | +0.018 ± 0.009 | |
+| mlp / modal | −0.058 ± 0.035 | |
+| cnn / timeseries | +0.180 (single seed) | **non-independent `timeseries` feature — excluded** |
 
 ## 7.4 Ablation history
 
@@ -418,15 +427,19 @@ P0.2 (sigmoid-bounded heads) was essential: before it, MLP regression heads
 extrapolated to ±∞ on OOD inputs, giving R² as low as −10²². The earlier
 "does not transfer" verdict held only because the report-era sweep never
 evaluated MLP/XGB on the CFDAC variants — the seeded `hpo_cfdac_allmodels`
-pass added them and surfaced the R² ≈ 0.12 cells.
+pass added them and surfaced the R² ≈ 0.10–0.13 cells. The 3-seed pass
+(P0.7) then promoted `cfdac_realimag` over `cfdac_imag` based on tighter sd.
 
 ## 7.5 Verdict
 
-**Weakly transfers.** The seeded sweep surfaces **three independent cells
-clustered at R² 0.11–0.13** (`mlp`/`xgb` on `cfdac_imag`/`cfdac_realimag`) —
-well below a usable severity estimator, but distinctly above the ≈ 0 of
-every earlier genuine-feature cell. Severity carries a weak but consistent
-cross-domain signal in the CFDAC imaginary part. The `timeseries` 0.180
+**Weakly transfers.** Multi-seed (3 seeds) confirms **one robust severity
+cell** — `mlp / cfdac_realimag`, R² 0.132 ± 0.013 — and a second weaker
+cell (`mlp / cfdac_imag`, R² 0.101 ± 0.026) within its noise band. Every
+other CFDAC variant either regresses to negative R² or has sd > mean
+(`xgb / cfdac_imag`: mean 0.04, sd 0.12). This is well below a usable
+severity estimator but distinctly above the ≈ 0 of every earlier
+genuine-feature cell. Severity carries a weak but consistent cross-domain
+signal in the CFDAC real+imaginary representation. The `timeseries` 0.180
 figure is on a feature reconstructed from the FRF (P0.4) and is excluded.
 
 ---

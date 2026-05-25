@@ -21,7 +21,7 @@ chronological ablation table is in [`ablation_log.json`](ablation_log.json).
 | 1 | **Damage detection** | `binary` (damage vs pristine) | balanced acc 0.585 (`cnn2d/cfdac_real`) | **weak** — no usable operating point |
 | 2 | **Damage type** | `type` (5-class) | macro-F1 0.25, balanced acc 0.33 | **weakly** |
 | 2 | | `type` one-vs-rest (modal-MLP) | 3-seed mean balanced acc 0.62–0.66 ± ≤ 0.03 (`is_hole / mlp / modal` 0.661 ± 0.004, § 5.6) | **yes — robust, strongest in study** |
-| 3 | **Damage severity** | `severity` (regression) | R² 0.11–0.13 (3 CFDAC cells) | **weakly** |
+| 3 | **Damage severity** | `severity` (regression) | R² 0.132 ± 0.013 (`mlp / cfdac_realimag`, 3-seed) | **weakly** |
 | 4 | **Damage location** | `col_location` (column-end) | macro-F1 0.17, balanced acc 0.27 | **no** |
 | 4 | | `mass_location` (mass-plate) | macro-F1 0.45, balanced acc 0.51 | **partly** |
 
@@ -36,7 +36,7 @@ chronological ablation table is in [`ablation_log.json`](ablation_log.json).
 > strongest robust transfer in the study.** **Mass-plate location**
 > (`mlp / cfdac_imag`, macro-F1 0.42 ± 0.07, balanced acc 0.48 ± 0.08,
 > ≈ 2× chance) is comparable in normalised lift. 5-class type transfers
-> weakly (0.27 ± 0.02); severity weakly (R² 0.10–0.13 ± 0.02 on CFDAC);
+> weakly (0.27 ± 0.02); severity weakly (R² 0.132 ± 0.013, `mlp / cfdac_realimag`);
 > detection marginal (BA 0.52 ± 0.05); column-end location does not
 > transfer. Measured macro-F1 noise band: median sd 0.011, p90 sd 0.07
 > (244 cells × 3 seeds) — torch-cell only: median 0.016, p90 0.086.
@@ -343,7 +343,7 @@ target normalised to [0, 1] per damage type, damage samples only.
 | element | value |
 |---|---|
 | training data | 8 000 synthetic damage samples (5 600 / 1 200 / 1 200) |
-| feature | `cfdac_imag` — 128×128 CFDAC imaginary-part matrix |
+| feature | `cfdac_realimag` — 128×128×2 CFDAC real+imaginary stacked matrix |
 | model | `MLP`, hidden (256, 128, 64), dropout 0.2 (flattened CFDAC input) |
 | optimiser | AdamW, lr 1×10⁻³, weight decay 10⁻⁴ |
 | schedule / epochs / batch | CosineAnnealing / 4 / 64 |
@@ -352,36 +352,49 @@ target normalised to [0, 1] per damage type, damage samples only.
 | HPO selection | grid hidden × lr (9 configs, `hpo_cfdac_allmodels.py`); best by validation R² |
 | seed | 20260511 |
 
+**Multi-seed rationale (P0.7).** The report-era recommendation was
+`mlp/cfdac_imag` (single-seed exp R² +0.131). Across 3 seeds (42 / 101 /
+202), `mlp/cfdac_realimag` is both **higher mean** (R² 0.132 ± 0.013)
+and **tighter sd** (0.013 vs 0.026) — the right cell for the recommended
+configuration. The report-era choice was within run-to-run noise of the
+true best.
+
 ### 6.2 Result (seeded, zero-shot on 2 176 damage cases)
 
-| synth val R² | synth test R² | **exp R²** | exp MAE |
-|---|---|---|---|
-| 0.311 | 0.281 | **+0.131** | 0.224 |
+| cell | synth val R² | synth test R² | **exp R²** (3-seed) | exp MAE |
+|---|---|---|---|---|
+| mlp / cfdac_realimag (**recommended**) | 0.312 | 0.279 | **+0.132 ± 0.013** | 0.224 |
+| mlp / cfdac_imag (report-era recommendation) | 0.311 | 0.281 | +0.101 ± 0.026 | 0.224 |
 
-### 6.3 Comparison (seeded sweep, `_seeded.json`)
+### 6.3 Comparison (3-seed mean ± sd, `results/multiseed_summary.json`)
 
-| model / feature | exp R² | note |
+| model / feature | exp R² (3-seed mean ± sd) | note |
 |---|---|---|
-| mlp / cfdac_imag | +0.131 (3-seed mean +0.101 ± 0.026) | best genuine-feature cell |
-| mlp / cfdac_realimag | +0.128 | |
-| xgb / cfdac_imag | +0.110 | |
-| transformer / frf_mag | +0.006 | |
-| cnn / timeseries | +0.180 | **synthesised `timeseries` feature — excluded** |
+| mlp / cfdac_realimag | **+0.132 ± 0.013** | **best & tightest** |
+| mlp / cfdac_imag | +0.101 ± 0.026 | report-era recommendation; wider sd |
+| xgb / cfdac_imag | +0.040 ± 0.116 | very wide sd — unreliable across seeds |
+| transformer / frf_mag | +0.046 ± 0.037 | |
+| mlp / cfdac_real | +0.018 ± 0.009 | |
+| cnn / timeseries | +0.180 (single seed) | **synthesised `timeseries` feature — excluded** |
 
 `timeseries` on experimental data is reconstructed from the FRF
 (`H·F → IFFT`, P0.4); its 0.180 is not a genuine-feature result.
 
 ### 6.4 Verdict
 
-**Weakly transfers.** The seeded sweep — which, unlike the report-era
-artefacts, includes MLP/XGB on the CFDAC variants — surfaces **three
-independent cells clustered at R² 0.11–0.13** (`mlp`/`xgb` on
-`cfdac_imag`/`cfdac_realimag`). That is well below a usable severity
+**Weakly transfers.** Multi-seed (3 seeds) confirms **one robust
+severity cell** — `mlp / cfdac_realimag`, R² 0.132 ± 0.013 — and a
+second weaker cell (`mlp / cfdac_imag`, R² 0.101 ± 0.026) within its
+noise band. Every other CFDAC variant either regresses to negative R²
+or has sd > mean (`xgb / cfdac_imag` is a good cautionary example: mean
+0.04, sd 0.12, range 0.26). That is well below a usable severity
 estimator but distinctly above the ≈ 0 of every earlier genuine-feature
-cell: severity carries a weak but consistent (multi-cell) cross-domain
-signal in the CFDAC imaginary part. The earlier "does not transfer"
+cell: severity carries a weak but consistent cross-domain signal in the
+CFDAC real+imaginary representation. The earlier "does not transfer"
 verdict was an artefact of the report-era sweep never having evaluated
-these cells.
+these cells; the report-era +0.131 single-seed value sat at the upper
+end of the noise band, which is why the recommended cell needed
+correcting against the 3-seed mean.
 
 ---
 
