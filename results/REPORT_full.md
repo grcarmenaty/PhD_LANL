@@ -595,7 +595,44 @@ Gaussian noise on the time series (per-sample, per-channel, controlled SNR)
 and on a mixed-SNR variant. Detail in [`REPORT_noise.md`](REPORT_noise.md)
 and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 
-## 9.4 Seed-robustness ranking (3-seed cells, by lift/sd reliability)
+## 9.4 Mass-plate logit-averaging ensemble — negative result
+
+The iteration-3 advocate review proposed combining the two
+complementary-looking cells on `mass_location` via pre-softmax logit
+averaging:
+
+  * `mlp / cfdac_imag` — macro-F1 0.45, balanced acc 0.51 (best individual).
+  * `cnn2d / cfdac_real` — macro-F1 0.37, balanced acc 0.45 — visually
+    different errors on seed 42.
+
+Implementation: `ml_pipeline/ensemble_mass_location.py` reloads the two
+seeded `.pt` blobs, runs forward inference on the 238 experimental Mass
+cases, averages pre-softmax logits, takes the argmax. Output:
+`results/ensemble_mass_location.json`.
+
+| cell | macro-F1 | balanced acc | accuracy |
+|---|---|---|---|
+| `mlp / cfdac_imag` | 0.452 | 0.512 | 0.441 |
+| `cnn2d / cfdac_real` | 0.367 | 0.454 | 0.525 |
+| **ENSEMBLE (logit-mean)** | **0.316** | **0.406** | **0.370** |
+
+The ensemble **underperforms either component** on macro-F1 and
+balanced accuracy. Confusion matrices explain the regression: on seed
+42 the `cnn2d/cfdac_real` cell is class-prior-collapsed (its 4×4
+confusion is `[[89,0,0,8], [61,0,0,0], [40,0,0,0], [4,0,0,36]]` — it
+puts mass on only two of the four plates). Multi-seed corroborates the
+instability: `cnn2d / cfdac_real` on `mass_location` is macro-F1 0.28 ±
+0.18 across the 3 seeds — sd > mean, range 0.42, the
+bottom of the robustness table (§ 9.5). Averaging its high-magnitude
+logits with the more reliable `mlp / cfdac_imag` pulls the mlp's
+correct predictions toward the cnn2d's prior.
+
+A second pairing — `mlp/cfdac_imag` + `mlp/modal` — also regressed
+(macro-F1 0.255 vs 0.452 standalone). Conclusion: **the strongest
+individual cell stands**; the advocate's iteration-3 ensemble
+hypothesis is refuted on both pairings tested.
+
+## 9.5 Seed-robustness ranking (3-seed cells, by lift/sd reliability)
 
 The 3-seed multi-seed pass measures both **mean lift over chance** and
 **run-to-run sd** per cell. Their ratio (lift / sd) is a reliability
