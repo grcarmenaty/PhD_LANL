@@ -95,7 +95,10 @@ results/experimental_full_per_case_basescore.json
 # Multi-seed scratch run dirs (eval JSONs are copied into results/)
 results_seed*/
 
-# V2 chunk regeneration scratch dirs (regenerate via generate_dataset --variation v2)
+# V2 / V2a chunk regeneration scratch dirs (regenerate via generate_dataset --variation v2|v2a)
 dataset_v2/
+dataset_v2a/
 dataset/features_v2.h5
+dataset/features_v2a.h5
 results_v2_seed*/
+results_v2a_seed*/
