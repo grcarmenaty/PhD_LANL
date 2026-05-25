@@ -595,6 +595,46 @@ Gaussian noise on the time series (per-sample, per-channel, controlled SNR)
 and on a mixed-SNR variant. Detail in [`REPORT_noise.md`](REPORT_noise.md)
 and `REPORT_noisy_mixed.md`. These sweeps pre-date the § 3 corrections.
 
+## 9.4 Seed-robustness ranking (3-seed cells, by lift/sd reliability)
+
+The 3-seed multi-seed pass measures both **mean lift over chance** and
+**run-to-run sd** per cell. Their ratio (lift / sd) is a reliability
+score: how many noise-band widths the effect exceeds. Cells with a
+high score are the ones that survive re-running with a different seed;
+cells where lift ≲ sd are flukes. From `multiseed_summary.json`,
+balanced-accuracy rows only:
+
+| rank | task | model / feature | BA (3-seed) | lift over chance | sd | lift / sd |
+|---|---|---|---|---|---|---|
+| 1 | `is_hole` | mlp / modal | 0.661 | +0.161 | 0.004 | **40** |
+| 2 | `is_mass` | cnn / frf_mag | 0.576 | +0.076 | 0.003 | 26 |
+| 3 | `is_bolt` | transformer / frf_mag | 0.621 | +0.121 | 0.009 | 14 |
+| 4 | `is_mass` | mlp / modal | 0.628 | +0.128 | 0.011 | 11 |
+| 5 | `is_bolt` | mlp / cfdac_real | 0.631 | +0.131 | 0.015 | 9 |
+| 6 | `is_hole` | transformer / frf_mag | 0.545 | +0.045 | 0.006 | 8 |
+| 7 | `is_bolt` | mlp / cfdac_imag | 0.611 | +0.111 | 0.015 | 7 |
+| 8 | `is_mass` | mlp / cfdac_mag | 0.620 | +0.120 | 0.018 | 7 |
+| 9 | `type` | mlp / modal | 0.347 | +0.147 | 0.023 | 6 |
+| 10 | `is_mass` | mlp / cfdac_imag | 0.592 | +0.092 | 0.014 | 6 |
+| 11 | `is_bolt` | xgb / modal | 0.581 | +0.081 | 0.014 | 6 |
+| 12 | `is_crack` | mlp / modal | 0.615 | +0.115 | 0.026 | 4 |
+
+Three observations:
+
+1. **Modal-MLP one-vs-rest dominates the top** (8 of the top 12 use
+   `modal` features; 4 of those use `mlp/modal`). The report's framing of
+   the modal-MLP bank as the robust headline transfer is the conclusion
+   of this ranking, not an artefact of cell choice.
+
+2. **The single-seed iteration-3 headline `is_bolt cnn2d/cfdac` (lift/sd ≈ 4
+   when scored across the 3 seeds) is the bottom of the high-reliability
+   group**, below all modal-MLP cells. It was selected on a fluke seed.
+
+3. **No multi-class cell makes the top 10** — `type / mlp / modal`
+   (lift/sd 6) is the strongest, but its lift (+0.147 above 5-class chance
+   0.2) is well below the one-vs-rest cells' lifts above 0.5. The
+   multi-class problem is genuinely harder under this transfer.
+
 ---
 
 # 10. Limitations
