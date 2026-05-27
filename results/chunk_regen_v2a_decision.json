@@ -1,8 +1,9 @@
 {
   "v2_seeds_evaluated": [
-    42
+    42,
+    101
   ],
-  "n_v2_seeds": 1,
+  "n_v2_seeds": 2,
   "noise_band_2x_p90_torch": 0.172,
   "criteria": [
     {
@@ -11,10 +12,11 @@
       "name": "is_crack/mlp/modal BA",
       "v1_mean": 0.6147590415588151,
       "v1_sd": 0.026125383365905155,
-      "v2_mean": 0.651503181622088,
-      "v2_sd": 0.0,
+      "v2_mean": 0.6462319348576359,
+      "v2_sd": 0.007454668664903483,
       "v2_seeds": [
-        42
+        42,
+        101
       ],
       "threshold": 0.786759041558815,
       "pass": false
@@ -25,10 +27,11 @@
       "name": "col_location/mlp/modal macro-F1",
       "v1_mean": 0.1570021779942248,
       "v1_sd": 0.02531060010337937,
-      "v2_mean": 0.11150674920570425,
-      "v2_sd": 0.0,
+      "v2_mean": 0.13687417165516852,
+      "v2_sd": 0.03587495287048007,
       "v2_seeds": [
-        42
+        42,
+        101
       ],
       "threshold": 0.3290021779942248,
       "pass": false
@@ -39,10 +42,11 @@
       "name": "is_hole/mlp/modal BA improves",
       "v1_mean": 0.6605012318752777,
       "v1_sd": 0.003970951969409601,
-      "v2_mean": 0.6584741912031988,
-      "v2_sd": 0.0,
+      "v2_mean": 0.6417105900884527,
+      "v2_sd": 0.023707312050686775,
       "v2_seeds": [
-        42
+        42,
+        101
       ],
       "threshold": 0.8325012318752776,
       "pass": false
@@ -53,13 +57,14 @@
       "name": "is_hole/mlp/modal BA no regression",
       "v1_mean": 0.6605012318752777,
       "v1_sd": 0.003970951969409601,
-      "v2_mean": 0.6584741912031988,
-      "v2_sd": 0.0,
+      "v2_mean": 0.6417105900884527,
+      "v2_sd": 0.023707312050686775,
       "v2_seeds": [
-        42
+        42,
+        101
       ],
       "threshold": 0.6525593279364584,
-      "pass": true
+      "pass": false
     },
     {
       "id": "C5",
@@ -67,14 +72,15 @@
       "name": "binary best macro-F1 (v1 best: mlp/cfdac_magphase; v2 best: mlp/modal)",
       "v1_mean": 0.4820046154864909,
       "v1_sd": 0.0523387611984343,
-      "v2_mean": 0.48742587342673627,
-      "v2_sd": 0.0,
+      "v2_mean": 0.49002485465101153,
+      "v2_sd": 0.00367551449572315,
       "v2_seeds": [
-        42
+        42,
+        101
       ],
       "threshold": 0.3100046154864909,
       "pass": true
     }
   ],
-  "decision": "INCONCLUSIVE"
+  "decision": "REJECT"
 }
