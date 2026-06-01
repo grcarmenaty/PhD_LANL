@@ -48,10 +48,10 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.8248673237300985,
+    "value": 0.2058377558756634,
     "mae": null,
-    "macro_f1": 0.45201495637723305,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.18927990153903929,
+    "balanced_acc": 0.5169071890119684,
     "n_cases": 2638
   },
   {
@@ -103,10 +103,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.8142532221379833,
+    "value": 0.8176648976497346,
     "mae": null,
-    "macro_f1": 0.46820205211753185,
-    "balanced_acc": 0.502090893175452,
+    "macro_f1": 0.4695935876937225,
+    "balanced_acc": 0.5041589078813343,
     "n_cases": 2638
   },
   {
@@ -114,10 +114,10 @@
     "model": "mlp",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.7839272175890827,
+    "value": 0.810841546626232,
     "mae": null,
-    "macro_f1": 0.4624878996684116,
-    "balanced_acc": 0.48711842691622104,
+    "macro_f1": 0.45557249875200745,
+    "balanced_acc": 0.4949080484466514,
     "n_cases": 2638
   },
   {
@@ -136,10 +136,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.8218347232752085,
+    "value": 0.8229719484457922,
     "mae": null,
-    "macro_f1": 0.46342852493694575,
-    "balanced_acc": 0.5032765947288006,
+    "macro_f1": 0.4638498400400738,
+    "balanced_acc": 0.5039659329640948,
     "n_cases": 2638
   },
   {
@@ -147,10 +147,10 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "accuracy",
-    "value": 0.8218347232752085,
+    "value": 0.8214556482183473,
     "mae": null,
-    "macro_f1": 0.46342852493694575,
-    "balanced_acc": 0.5032765947288006,
+    "macro_f1": 0.4551582455409509,
+    "balanced_acc": 0.4996369286350904,
     "n_cases": 2638
   },
   {
@@ -169,10 +169,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.17437452615617893,
+    "value": 0.1762699014404852,
     "mae": null,
-    "macro_f1": 0.14917440257026285,
-    "balanced_acc": 0.4952780828240387,
+    "macro_f1": 0.1505534008766274,
+    "balanced_acc": 0.5006893382352942,
     "n_cases": 2638
   },
   {
@@ -180,10 +180,10 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.7149355572403336,
+    "value": 0.8248673237300985,
     "mae": null,
-    "macro_f1": 0.44370961952620247,
-    "balanced_acc": 0.4521183473389355,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -191,10 +191,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.17513267626990145,
+    "value": 0.27634571645185746,
     "mae": null,
-    "macro_f1": 0.14903225806451612,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.27600770292971544,
+    "balanced_acc": 0.5025305576776165,
     "n_cases": 2638
   },
   {
@@ -202,10 +202,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.2960576194086429,
+    "value": 0.17589082638362397,
     "mae": null,
-    "macro_f1": 0.2948090776039292,
-    "balanced_acc": 0.5596600856251591,
+    "macro_f1": 0.15004674362617904,
+    "balanced_acc": 0.5004595588235294,
     "n_cases": 2638
   },
   {
@@ -224,10 +224,10 @@
     "model": "transformer",
     "feature": "frf_mag",
     "metric": "accuracy",
-    "value": 0.8191811978771797,
+    "value": 0.8199393479909022,
     "mae": null,
-    "macro_f1": 0.4702148863046452,
-    "balanced_acc": 0.5050780255283932,
+    "macro_f1": 0.47052622016018797,
+    "balanced_acc": 0.5055375843519225,
     "n_cases": 2638
   },
   {
@@ -279,10 +279,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.8248673237300985,
+    "value": 0.8146322971948445,
     "mae": null,
-    "macro_f1": 0.45201495637723305,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.4489241696260706,
+    "balanced_acc": 0.4937959558823529,
     "n_cases": 2638
   },
   {
@@ -290,10 +290,10 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "metric": "accuracy",
-    "value": 0.26212590299277605,
+    "value": 0.2884416924664603,
     "mae": null,
-    "macro_f1": 0.11889152025760473,
-    "balanced_acc": 0.12115298710798088,
+    "macro_f1": 0.1451367958692554,
+    "balanced_acc": 0.13053210858155928,
     "n_cases": 1938
   },
   {
@@ -301,10 +301,10 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.15118679050567596,
+    "value": 0.19814241486068113,
     "mae": null,
-    "macro_f1": 0.06800397791211954,
-    "balanced_acc": 0.14091839519650656,
+    "macro_f1": 0.10437417900104468,
+    "balanced_acc": 0.16310277017783859,
     "n_cases": 1938
   },
   {
@@ -312,9 +312,9 @@
     "model": "cnn2d",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.02063983488132095,
+    "value": 0.1651186790505676,
     "mae": null,
-    "macro_f1": 0.006740815638692281,
+    "macro_f1": 0.047239444936522,
     "balanced_acc": 0.16666666666666666,
     "n_cases": 1938
   },
@@ -323,10 +323,10 @@
     "model": "cnn2d",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.04231166150670795,
+    "value": 0.1651186790505676,
     "mae": null,
-    "macro_f1": 0.01649763353617309,
-    "balanced_acc": 0.11041666666666666,
+    "macro_f1": 0.047239444936522,
+    "balanced_acc": 0.16666666666666666,
     "n_cases": 1938
   },
   {
@@ -345,9 +345,9 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.37719298245614036,
+    "value": 0.02063983488132095,
     "mae": null,
-    "macro_f1": 0.09129511677282377,
+    "macro_f1": 0.006740815638692281,
     "balanced_acc": 0.16666666666666666,
     "n_cases": 1938
   },
@@ -356,10 +356,10 @@
     "model": "cnn",
     "feature": "frf_mag",
     "metric": "accuracy",
-    "value": 0.4179566563467492,
+    "value": 0.3751289989680083,
     "mae": null,
-    "macro_f1": 0.1369753370355468,
-    "balanced_acc": 0.18597814536261004,
+    "macro_f1": 0.10463442717328729,
+    "balanced_acc": 0.1657546739626083,
     "n_cases": 1938
   },
   {
@@ -367,10 +367,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.3570691434468524,
+    "value": 0.325593395252838,
     "mae": null,
-    "macro_f1": 0.09832338732594487,
-    "balanced_acc": 0.15777473780209758,
+    "macro_f1": 0.08954164892862211,
+    "balanced_acc": 0.14386684906520747,
     "n_cases": 1938
   },
   {
@@ -378,10 +378,10 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.18988648090815274,
+    "value": 0.282249742002064,
     "mae": null,
-    "macro_f1": 0.06888313592936253,
-    "balanced_acc": 0.10066691955547326,
+    "macro_f1": 0.12326248528705863,
+    "balanced_acc": 0.13611221459573303,
     "n_cases": 1938
   },
   {
@@ -389,10 +389,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.02063983488132095,
+    "value": 0.434468524251806,
     "mae": null,
-    "macro_f1": 0.015723270440251572,
-    "balanced_acc": 0.009704027171276079,
+    "macro_f1": 0.2342380194100436,
+    "balanced_acc": 0.28544442386818986,
     "n_cases": 1938
   },
   {
@@ -400,10 +400,10 @@
     "model": "mlp",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.16718266253869968,
+    "value": 0.38596491228070173,
     "mae": null,
-    "macro_f1": 0.09447900100298852,
-    "balanced_acc": 0.07990950264537622,
+    "macro_f1": 0.17546483226160212,
+    "balanced_acc": 0.2518049855601155,
     "n_cases": 1938
   },
   {
@@ -413,8 +413,8 @@
     "metric": "accuracy",
     "value": 0.1197110423116615,
     "mae": null,
-    "macro_f1": 0.08796765832769889,
-    "balanced_acc": 0.05426821214251246,
+    "macro_f1": 0.07503548976659867,
+    "balanced_acc": 0.06272299515927017,
     "n_cases": 1938
   },
   {
@@ -422,10 +422,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.16666666666666666,
+    "value": 0.06346749226006192,
     "mae": null,
-    "macro_f1": 0.098093032529755,
-    "balanced_acc": 0.19349260184084469,
+    "macro_f1": 0.025990757460271952,
+    "balanced_acc": 0.1559315866084425,
     "n_cases": 1938
   },
   {
@@ -433,10 +433,10 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "accuracy",
-    "value": 0.130546955624355,
+    "value": 0.12538699690402477,
     "mae": null,
-    "macro_f1": 0.07469591493607601,
-    "balanced_acc": 0.18538151694786442,
+    "macro_f1": 0.07126046509168028,
+    "balanced_acc": 0.18310153518771852,
     "n_cases": 1938
   },
   {
@@ -444,10 +444,10 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.18163054695562436,
+    "value": 0.13777089783281735,
     "mae": null,
-    "macro_f1": 0.1281173311174993,
-    "balanced_acc": 0.13069048558965238,
+    "macro_f1": 0.0916183155369335,
+    "balanced_acc": 0.08974466299247773,
     "n_cases": 1938
   },
   {
@@ -455,10 +455,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.06398348813209494,
+    "value": 0.13673890608875128,
     "mae": null,
-    "macro_f1": 0.04496607636492067,
-    "balanced_acc": 0.20953816119471044,
+    "macro_f1": 0.0673687002238707,
+    "balanced_acc": 0.13099278955768354,
     "n_cases": 1938
   },
   {
@@ -466,10 +466,10 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.02063983488132095,
+    "value": 0.3720330237358101,
     "mae": null,
-    "macro_f1": 0.006740815638692281,
-    "balanced_acc": 0.16666666666666666,
+    "macro_f1": 0.10404040404040404,
+    "balanced_acc": 0.16438668490652075,
     "n_cases": 1938
   },
   {
@@ -477,10 +477,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.048503611971104234,
+    "value": 0.09958720330237358,
     "mae": null,
-    "macro_f1": 0.042136678617533084,
-    "balanced_acc": 0.15997232846373036,
+    "macro_f1": 0.09581321113328846,
+    "balanced_acc": 0.16617987334485604,
     "n_cases": 1938
   },
   {
@@ -488,9 +488,9 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.02063983488132095,
+    "value": 0.1651186790505676,
     "mae": null,
-    "macro_f1": 0.006778512116590408,
+    "macro_f1": 0.05541125541125541,
     "balanced_acc": 0.16666666666666666,
     "n_cases": 1938
   },
@@ -499,10 +499,10 @@
     "model": "rf",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.2739938080495356,
+    "value": 0.2755417956656347,
     "mae": null,
-    "macro_f1": 0.11974635098531622,
-    "balanced_acc": 0.1265867776987915,
+    "macro_f1": 0.1298576589600225,
+    "balanced_acc": 0.21443296073718746,
     "n_cases": 1938
   },
   {
@@ -510,10 +510,10 @@
     "model": "transformer",
     "feature": "frf_mag",
     "metric": "accuracy",
-    "value": 0.37306501547987614,
+    "value": 0.3875128998968008,
     "mae": null,
-    "macro_f1": 0.10499963665431293,
-    "balanced_acc": 0.16487188626508456,
+    "macro_f1": 0.11773903417739034,
+    "balanced_acc": 0.17166470528497782,
     "n_cases": 1938
   },
   {
@@ -521,10 +521,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.3364293085655315,
+    "value": 0.19607843137254902,
     "mae": null,
-    "macro_f1": 0.14795219456297984,
-    "balanced_acc": 0.17077617614866944,
+    "macro_f1": 0.12973198314435727,
+    "balanced_acc": 0.24315684175399957,
     "n_cases": 1938
   },
   {
@@ -532,10 +532,10 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "metric": "accuracy",
-    "value": 0.6383623957543594,
+    "value": 0.5955269143290371,
     "mae": null,
-    "macro_f1": 0.61904741721726,
-    "balanced_acc": 0.641739105438657,
+    "macro_f1": 0.539935487087202,
+    "balanced_acc": 0.6006588478785788,
     "n_cases": 2638
   },
   {
@@ -543,10 +543,10 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.6178923426838514,
+    "value": 0.5720242608036391,
     "mae": null,
-    "macro_f1": 0.5660235340198783,
-    "balanced_acc": 0.6230016097504887,
+    "macro_f1": 0.49054185420882146,
+    "balanced_acc": 0.5779050247211682,
     "n_cases": 2638
   },
   {
@@ -565,10 +565,10 @@
     "model": "cnn2d",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.4927975739196361,
+    "value": 0.4931766489764973,
     "mae": null,
-    "macro_f1": 0.33011681056373793,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.35442016431415724,
+    "balanced_acc": 0.4999586064160055,
     "n_cases": 2638
   },
   {
@@ -609,10 +609,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.5288097043214557,
+    "value": 0.5200909780136467,
     "mae": null,
-    "macro_f1": 0.4045718745477363,
-    "balanced_acc": 0.5355007473841554,
+    "macro_f1": 0.3873287030412434,
+    "balanced_acc": 0.5269058295964125,
     "n_cases": 2638
   },
   {
@@ -620,10 +620,10 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.5496588324488249,
+    "value": 0.5318423047763458,
     "mae": null,
-    "macro_f1": 0.4466906779661017,
-    "balanced_acc": 0.5559882718178683,
+    "macro_f1": 0.43352593517610016,
+    "balanced_acc": 0.5379550419684949,
     "n_cases": 2638
   },
   {
@@ -653,10 +653,10 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.45830174374526156,
+    "value": 0.4681576952236543,
     "mae": null,
-    "macro_f1": 0.4178982489087818,
-    "balanced_acc": 0.46219271012992985,
+    "macro_f1": 0.3641303964999901,
+    "balanced_acc": 0.4740824422214557,
     "n_cases": 2638
   },
   {
@@ -664,10 +664,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.4927975739196361,
+    "value": 0.5272934040940106,
     "mae": null,
-    "macro_f1": 0.33011681056373793,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.41470555005475596,
+    "balanced_acc": 0.5337219730941704,
     "n_cases": 2638
   },
   {
@@ -686,10 +686,10 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.565959059893859,
+    "value": 0.530705079605762,
     "mae": null,
-    "macro_f1": 0.47319090378723994,
-    "balanced_acc": 0.5721225710014948,
+    "macro_f1": 0.4082591115417815,
+    "balanced_acc": 0.5373692077727952,
     "n_cases": 2638
   },
   {
@@ -697,10 +697,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.4806671721000758,
+    "value": 0.5572403335860501,
     "mae": null,
-    "macro_f1": 0.3774838224270218,
-    "balanced_acc": 0.4749011153271243,
+    "macro_f1": 0.5448060762174566,
+    "balanced_acc": 0.5549747039208923,
     "n_cases": 2638
   },
   {
@@ -708,10 +708,10 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.47763457164518575,
+    "value": 0.34685367702805153,
     "mae": null,
-    "macro_f1": 0.323242688558235,
-    "balanced_acc": 0.4846153846153846,
+    "macro_f1": 0.34280713600469626,
+    "balanced_acc": 0.34579510175922734,
     "n_cases": 2638
   },
   {
@@ -719,10 +719,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.4268385140257771,
+    "value": 0.4689158453373768,
     "mae": null,
-    "macro_f1": 0.38422035480859007,
-    "balanced_acc": 0.4231367138093596,
+    "macro_f1": 0.4353701993478057,
+    "balanced_acc": 0.46550132229504426,
     "n_cases": 2638
   },
   {
@@ -730,10 +730,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.49128127369219105,
+    "value": 0.43669446550416985,
     "mae": null,
-    "macro_f1": 0.3294356888662939,
-    "balanced_acc": 0.49846153846153846,
+    "macro_f1": 0.424500131246928,
+    "balanced_acc": 0.434687823387375,
     "n_cases": 2638
   },
   {
@@ -752,10 +752,10 @@
     "model": "transformer",
     "feature": "frf_mag",
     "metric": "accuracy",
-    "value": 0.4871114480667172,
+    "value": 0.48028809704321457,
     "mae": null,
-    "macro_f1": 0.3275554422635738,
-    "balanced_acc": 0.49423076923076925,
+    "macro_f1": 0.32445582586427657,
+    "balanced_acc": 0.48730769230769233,
     "n_cases": 2638
   },
   {
@@ -763,10 +763,10 @@
     "model": "xgb",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.4890068233510235,
+    "value": 0.4927975739196361,
     "mae": null,
-    "macro_f1": 0.3284114052953157,
-    "balanced_acc": 0.49615384615384617,
+    "macro_f1": 0.33011681056373793,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -785,10 +785,10 @@
     "model": "xgb",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.5265352539802881,
+    "value": 0.488248673237301,
     "mae": null,
-    "macro_f1": 0.43557577023151617,
-    "balanced_acc": 0.5324284235943428,
+    "macro_f1": 0.34785092772797294,
+    "balanced_acc": 0.49503506956421756,
     "n_cases": 2638
   },
   {
@@ -796,10 +796,10 @@
     "model": "xgb",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.4965883244882487,
+    "value": 0.4962092494313874,
     "mae": null,
-    "macro_f1": 0.3383756277686789,
-    "balanced_acc": 0.5037369207772795,
+    "macro_f1": 0.345769655590159,
+    "balanced_acc": 0.5032212257100149,
     "n_cases": 2638
   },
   {
@@ -807,10 +807,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.5109931766489765,
+    "value": 0.4927975739196361,
     "mae": null,
-    "macro_f1": 0.3734483594128014,
-    "balanced_acc": 0.5178498332758422,
+    "macro_f1": 0.33011681056373793,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -829,10 +829,10 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.8786959818043972,
+    "value": 0.8771796815769523,
     "mae": null,
-    "macro_f1": 0.46771589991928975,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.4672859450726979,
+    "balanced_acc": 0.499137187230371,
     "n_cases": 2638
   },
   {
@@ -895,10 +895,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.8737680060652009,
+    "value": 0.7729340409401061,
     "mae": null,
-    "macro_f1": 0.4663160024276755,
-    "balanced_acc": 0.4971958584987058,
+    "macro_f1": 0.4359632242890742,
+    "balanced_acc": 0.4398188093183779,
     "n_cases": 2638
   },
   {
@@ -917,10 +917,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.7615617892342684,
+    "value": 0.756633813495072,
     "mae": null,
-    "macro_f1": 0.4323219281256725,
-    "balanced_acc": 0.4333477135461605,
+    "macro_f1": 0.430729391454467,
+    "balanced_acc": 0.43054357204486626,
     "n_cases": 2638
   },
   {
@@ -961,10 +961,10 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "accuracy",
-    "value": 0.8786959818043972,
+    "value": 0.8779378316906747,
     "mae": null,
-    "macro_f1": 0.46771589991928975,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.46750100928542593,
+    "balanced_acc": 0.4995685936151855,
     "n_cases": 2638
   },
   {
@@ -983,10 +983,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.34495830174374525,
+    "value": 0.12130401819560273,
     "mae": null,
-    "macro_f1": 0.2962518340669601,
-    "balanced_acc": 0.3417439603106126,
+    "macro_f1": 0.10818120351588911,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -1005,10 +1005,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.6948445792266869,
+    "value": 0.12130401819560273,
     "mae": null,
-    "macro_f1": 0.43064773642801896,
-    "balanced_acc": 0.4196262942191544,
+    "macro_f1": 0.10818120351588911,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -1016,10 +1016,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.20166793025018953,
+    "value": 0.26648976497346477,
     "mae": null,
-    "macro_f1": 0.20032760551459688,
-    "balanced_acc": 0.5457290767903364,
+    "macro_f1": 0.26607117824034965,
+    "balanced_acc": 0.5826143226919759,
     "n_cases": 2638
   },
   {
@@ -1071,10 +1071,10 @@
     "model": "xgb",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.8786959818043972,
+    "value": 0.8771796815769523,
     "mae": null,
-    "macro_f1": 0.46771589991928975,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.4672859450726979,
+    "balanced_acc": 0.499137187230371,
     "n_cases": 2638
   },
   {
@@ -1159,10 +1159,10 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.8942380591357089,
+    "value": 0.8021228203184231,
     "mae": null,
-    "macro_f1": 0.47563079093328203,
-    "balanced_acc": 0.5017857142857143,
+    "macro_f1": 0.4882215998287427,
+    "balanced_acc": 0.4880270810614322,
     "n_cases": 2638
   },
   {
@@ -1181,10 +1181,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.8332069749810462,
+    "value": 0.8191811978771797,
     "mae": null,
-    "macro_f1": 0.4697942798882508,
-    "balanced_acc": 0.47708863443596267,
+    "macro_f1": 0.45441869237489674,
+    "balanced_acc": 0.4613746516418272,
     "n_cases": 2638
   },
   {
@@ -1203,10 +1203,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.7877179681576952,
+    "value": 0.7922668688400303,
     "mae": null,
-    "macro_f1": 0.46408256135218595,
-    "balanced_acc": 0.46265903307888046,
+    "macro_f1": 0.46923867708394523,
+    "balanced_acc": 0.46835090270204777,
     "n_cases": 2638
   },
   {
@@ -1236,10 +1236,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.865049279757392,
+    "value": 0.8991660348749052,
     "mae": null,
-    "macro_f1": 0.4902692140686062,
-    "balanced_acc": 0.4996213498121895,
+    "macro_f1": 0.5269737179158769,
+    "balanced_acc": 0.5281473403610808,
     "n_cases": 2638
   },
   {
@@ -1269,10 +1269,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.17664897649734648,
+    "value": 0.11751326762699014,
     "mae": null,
-    "macro_f1": 0.17619392684610075,
-    "balanced_acc": 0.5142614806736944,
+    "macro_f1": 0.10951572265760938,
+    "balanced_acc": 0.5063613231552163,
     "n_cases": 2638
   },
   {
@@ -1280,10 +1280,10 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.8938589840788476,
+    "value": 0.8688400303260045,
     "mae": null,
-    "macro_f1": 0.47197758206565255,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.5424959650336331,
+    "balanced_acc": 0.5363625348358173,
     "n_cases": 2638
   },
   {
@@ -1291,10 +1291,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.2221379833206975,
+    "value": 0.10614101592115238,
     "mae": null,
-    "macro_f1": 0.2211907495489585,
-    "balanced_acc": 0.5129543802253725,
+    "macro_f1": 0.09595613433858807,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -1302,10 +1302,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.19067475360121305,
+    "value": 0.1489764973464746,
     "mae": null,
-    "macro_f1": 0.19067184613233562,
-    "balanced_acc": 0.5063704107597238,
+    "macro_f1": 0.14879045315408945,
+    "balanced_acc": 0.42324609233006183,
     "n_cases": 2638
   },
   {
@@ -1357,10 +1357,10 @@
     "model": "xgb",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.8938589840788476,
+    "value": 0.8934799090219864,
     "mae": null,
-    "macro_f1": 0.47197758206565255,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.47187187187187185,
+    "balanced_acc": 0.4997879558948261,
     "n_cases": 2638
   },
   {
@@ -1379,10 +1379,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.8737680060652009,
+    "value": 0.8934799090219864,
     "mae": null,
-    "macro_f1": 0.4663160024276755,
-    "balanced_acc": 0.48876166242578456,
+    "macro_f1": 0.47187187187187185,
+    "balanced_acc": 0.4997879558948261,
     "n_cases": 2638
   },
   {
@@ -1390,10 +1390,10 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "metric": "accuracy",
-    "value": 0.8457164518574678,
+    "value": 0.8017437452615618,
     "mae": null,
-    "macro_f1": 0.512475917037002,
-    "balanced_acc": 0.5121043417366947,
+    "macro_f1": 0.5240565209487036,
+    "balanced_acc": 0.5352503501400561,
     "n_cases": 2638
   },
   {
@@ -1401,10 +1401,10 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.09855951478392722,
+    "value": 0.14404852160727824,
     "mae": null,
-    "macro_f1": 0.09247513305098035,
-    "balanced_acc": 0.5045833333333334,
+    "macro_f1": 0.14291346490877183,
+    "balanced_acc": 0.5295833333333333,
     "n_cases": 2638
   },
   {
@@ -1423,10 +1423,10 @@
     "model": "cnn2d",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.7934040940106141,
+    "value": 0.7748294162244125,
     "mae": null,
-    "macro_f1": 0.4424011836820968,
-    "balanced_acc": 0.43604166666666666,
+    "macro_f1": 0.43985581123339734,
+    "balanced_acc": 0.42961834733893556,
     "n_cases": 2638
   },
   {
@@ -1434,10 +1434,10 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.9097801364670205,
+    "value": 0.9086429112964367,
     "mae": null,
-    "macro_f1": 0.4763795156808257,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.4760675273088381,
+    "balanced_acc": 0.499375,
     "n_cases": 2638
   },
   {
@@ -1456,10 +1456,10 @@
     "model": "cnn",
     "feature": "frf_mag",
     "metric": "accuracy",
-    "value": 0.11258529188779379,
+    "value": 0.13381349507202425,
     "mae": null,
-    "macro_f1": 0.10848053624345189,
-    "balanced_acc": 0.5122916666666667,
+    "macro_f1": 0.13192629806096418,
+    "balanced_acc": 0.5239583333333333,
     "n_cases": 2638
   },
   {
@@ -1467,10 +1467,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.8301743745261562,
+    "value": 0.4139499620924943,
     "mae": null,
-    "macro_f1": 0.4536039768019884,
-    "balanced_acc": 0.45625,
+    "macro_f1": 0.36448077928764344,
+    "balanced_acc": 0.5643662464985995,
     "n_cases": 2638
   },
   {
@@ -1478,10 +1478,10 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.3574677786201668,
+    "value": 0.27293404094010615,
     "mae": null,
-    "macro_f1": 0.331596130937744,
-    "balanced_acc": 0.5976698179271709,
+    "macro_f1": 0.2666601734500489,
+    "balanced_acc": 0.6004166666666667,
     "n_cases": 2638
   },
   {
@@ -1489,10 +1489,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.8805913570887035,
+    "value": 0.8802122820318423,
     "mae": null,
-    "macro_f1": 0.46825236847409796,
-    "balanced_acc": 0.4839583333333333,
+    "macro_f1": 0.4681451612903226,
+    "balanced_acc": 0.48375,
     "n_cases": 2638
   },
   {
@@ -1500,10 +1500,10 @@
     "model": "mlp",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.5598938589840788,
+    "value": 0.7983320697498104,
     "mae": null,
-    "macro_f1": 0.451432041073845,
-    "balanced_acc": 0.5953693977591037,
+    "macro_f1": 0.443929173693086,
+    "balanced_acc": 0.43875,
     "n_cases": 2638
   },
   {
@@ -1511,10 +1511,10 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.6982562547384382,
+    "value": 0.7691432903714935,
     "mae": null,
-    "macro_f1": 0.5184387111569774,
-    "balanced_acc": 0.6013883053221288,
+    "macro_f1": 0.4347546603814013,
+    "balanced_acc": 0.42270833333333335,
     "n_cases": 2638
   },
   {
@@ -1522,10 +1522,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.7862016679302501,
+    "value": 0.8013646702047005,
     "mae": null,
-    "macro_f1": 0.5388597888681572,
-    "balanced_acc": 0.5664513305322129,
+    "macro_f1": 0.4630146437273134,
+    "balanced_acc": 0.45934173669467787,
     "n_cases": 2638
   },
   {
@@ -1533,10 +1533,10 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "accuracy",
-    "value": 0.7926459438968916,
+    "value": 0.7255496588324488,
     "mae": null,
-    "macro_f1": 0.5800286095552423,
-    "balanced_acc": 0.6381232492997199,
+    "macro_f1": 0.549181597075352,
+    "balanced_acc": 0.6485609243697479,
     "n_cases": 2638
   },
   {
@@ -1544,10 +1544,10 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.366565579984837,
+    "value": 0.5579984836997726,
     "mae": null,
-    "macro_f1": 0.33678534304120794,
-    "balanced_acc": 0.5875297619047619,
+    "macro_f1": 0.4755420697406686,
+    "balanced_acc": 0.7097706582633053,
     "n_cases": 2638
   },
   {
@@ -1577,10 +1577,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.444275966641395,
+    "value": 0.21190295678544352,
     "mae": null,
-    "macro_f1": 0.37819071929902415,
-    "balanced_acc": 0.5393977591036414,
+    "macro_f1": 0.21112201899986408,
+    "balanced_acc": 0.566875,
     "n_cases": 2638
   },
   {
@@ -1588,10 +1588,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.9097801364670205,
+    "value": 0.08339651250947688,
     "mae": null,
-    "macro_f1": 0.4763795156808257,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.08017987202921882,
+    "balanced_acc": 0.40162464985994395,
     "n_cases": 2638
   },
   {
@@ -1621,10 +1621,10 @@
     "model": "xgb",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.10045489006823351,
+    "value": 0.11220621683093253,
     "mae": null,
-    "macro_f1": 0.09466292902634064,
-    "balanced_acc": 0.505625,
+    "macro_f1": 0.10805348159945855,
+    "balanced_acc": 0.5120833333333333,
     "n_cases": 2638
   },
   {
@@ -1643,10 +1643,10 @@
     "model": "xgb",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.09135708870356331,
+    "value": 0.10614101592115238,
     "mae": null,
-    "macro_f1": 0.08408867613707718,
-    "balanced_acc": 0.500625,
+    "macro_f1": 0.10611583986314976,
+    "balanced_acc": 0.33653186274509805,
     "n_cases": 2638
   },
   {
@@ -1654,10 +1654,10 @@
     "model": "xgb",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.9097801364670205,
+    "value": 0.909021986353298,
     "mae": null,
-    "macro_f1": 0.4763795156808257,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.4761715647339158,
+    "balanced_acc": 0.4995833333333333,
     "n_cases": 2638
   },
   {
@@ -1665,10 +1665,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.7441243366186505,
+    "value": 0.535253980288097,
     "mae": null,
-    "macro_f1": 0.4266463812214736,
-    "balanced_acc": 0.4089583333333333,
+    "macro_f1": 0.43999653697643415,
+    "balanced_acc": 0.6007528011204482,
     "n_cases": 2638
   },
   {
@@ -1698,10 +1698,10 @@
     "model": "cnn2d",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.8248673237300985,
+    "value": 0.8180439727065959,
     "mae": null,
-    "macro_f1": 0.45201495637723305,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.4499582985821518,
+    "balanced_acc": 0.4958639705882353,
     "n_cases": 2638
   },
   {
@@ -1731,10 +1731,10 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.8248673237300985,
+    "value": 0.7191053828658074,
     "mae": null,
-    "macro_f1": 0.45201495637723305,
-    "balanced_acc": 0.5,
+    "macro_f1": 0.42858086640203713,
+    "balanced_acc": 0.4427113174815381,
     "n_cases": 2638
   },
   {
@@ -1753,10 +1753,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.7759666413949962,
+    "value": 0.7846853677028052,
     "mae": null,
-    "macro_f1": 0.44988978798433216,
-    "balanced_acc": 0.4771782292462439,
+    "macro_f1": 0.4531700708871994,
+    "balanced_acc": 0.4824631557168322,
     "n_cases": 2638
   },
   {
@@ -1764,10 +1764,10 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.8237300985595147,
+    "value": 0.8248673237300985,
     "mae": null,
-    "macro_f1": 0.4516732488048223,
-    "balanced_acc": 0.4993106617647059,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -1775,10 +1775,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.7172100075815011,
+    "value": 0.71986353297953,
     "mae": null,
-    "macro_f1": 0.4423717959616224,
-    "balanced_acc": 0.45179208046855107,
+    "macro_f1": 0.43630571682941516,
+    "balanced_acc": 0.4482857063279857,
     "n_cases": 2638
   },
   {
@@ -1808,10 +1808,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.821076573161486,
+    "value": 0.8237300985595147,
     "mae": null,
-    "macro_f1": 0.4631479463016874,
-    "balanced_acc": 0.5028170359052712,
+    "macro_f1": 0.4516732488048223,
+    "balanced_acc": 0.4993106617647059,
     "n_cases": 2638
   },
   {
@@ -1841,10 +1841,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.25435936315390445,
+    "value": 0.18764215314632296,
     "mae": null,
-    "macro_f1": 0.24927954536741054,
-    "balanced_acc": 0.5326794069900688,
+    "macro_f1": 0.1690109935015616,
+    "balanced_acc": 0.49309070218996687,
     "n_cases": 2638
   },
   {
@@ -1863,10 +1863,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.34230477634571643,
+    "value": 0.2596664139499621,
     "mae": null,
-    "macro_f1": 0.3387654502914345,
-    "balanced_acc": 0.5101182518461931,
+    "macro_f1": 0.25639399118326994,
+    "balanced_acc": 0.5239617153679654,
     "n_cases": 2638
   },
   {
@@ -1874,10 +1874,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.5697498104624715,
+    "value": 0.29946929492039426,
     "mae": null,
-    "macro_f1": 0.46639380387847496,
-    "balanced_acc": 0.49113111153552336,
+    "macro_f1": 0.2987239860246088,
+    "balanced_acc": 0.5549083269671505,
     "n_cases": 2638
   },
   {
@@ -1951,10 +1951,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.8002274450341168,
+    "value": 0.8248673237300985,
     "mae": null,
-    "macro_f1": 0.4445146346599284,
-    "balanced_acc": 0.4850643382352941,
+    "macro_f1": 0.45201495637723305,
+    "balanced_acc": 0.5,
     "n_cases": 2638
   },
   {
@@ -1962,10 +1962,10 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "metric": "accuracy",
-    "value": 0.23109243697478993,
+    "value": 0.16806722689075632,
     "mae": null,
-    "macro_f1": 0.14300991309071157,
-    "balanced_acc": 0.28865979381443296,
+    "macro_f1": 0.16084392014519056,
+    "balanced_acc": 0.13503464593544026,
     "n_cases": 238
   },
   {
@@ -1973,10 +1973,10 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.25630252100840334,
+    "value": 0.08823529411764706,
     "mae": null,
-    "macro_f1": 0.12655601659751037,
-    "balanced_acc": 0.25,
+    "macro_f1": 0.04794520547945205,
+    "balanced_acc": 0.0860655737704918,
     "n_cases": 238
   },
   {
@@ -1984,9 +1984,9 @@
     "model": "cnn2d",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.16806722689075632,
+    "value": 0.25630252100840334,
     "mae": null,
-    "macro_f1": 0.07194244604316546,
+    "macro_f1": 0.1020066889632107,
     "balanced_acc": 0.25,
     "n_cases": 238
   },
@@ -2006,9 +2006,9 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.25630252100840334,
+    "value": 0.16806722689075632,
     "mae": null,
-    "macro_f1": 0.10304054054054054,
+    "macro_f1": 0.07194244604316546,
     "balanced_acc": 0.25,
     "n_cases": 238
   },
@@ -2039,10 +2039,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.27310924369747897,
+    "value": 0.3403361344537815,
     "mae": null,
-    "macro_f1": 0.19506493506493505,
-    "balanced_acc": 0.20403075883048843,
+    "macro_f1": 0.2180787811222594,
+    "balanced_acc": 0.3015463917525773,
     "n_cases": 238
   },
   {
@@ -2050,10 +2050,10 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.23109243697478993,
+    "value": 0.20168067226890757,
     "mae": null,
-    "macro_f1": 0.18945659350283628,
-    "balanced_acc": 0.1864933665708974,
+    "macro_f1": 0.18841642228739003,
+    "balanced_acc": 0.1556532026364712,
     "n_cases": 238
   },
   {
@@ -2072,10 +2072,10 @@
     "model": "mlp",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.39915966386554624,
+    "value": 0.25630252100840334,
     "mae": null,
-    "macro_f1": 0.2686861502650976,
-    "balanced_acc": 0.32546053743451075,
+    "macro_f1": 0.10590277777777778,
+    "balanced_acc": 0.25,
     "n_cases": 238
   },
   {
@@ -2083,10 +2083,10 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.21428571428571427,
+    "value": 0.20168067226890757,
     "mae": null,
-    "macro_f1": 0.14527272727272728,
-    "balanced_acc": 0.15730099712692241,
+    "macro_f1": 0.1750051738410596,
+    "balanced_acc": 0.1556532026364712,
     "n_cases": 238
   },
   {
@@ -2094,10 +2094,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.33613445378151263,
+    "value": 0.42016806722689076,
     "mae": null,
-    "macro_f1": 0.22929164743885555,
-    "balanced_acc": 0.2381274294405949,
+    "macro_f1": 0.26241582491582494,
+    "balanced_acc": 0.2896738211931722,
     "n_cases": 238
   },
   {
@@ -2105,10 +2105,10 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "accuracy",
-    "value": 0.33613445378151263,
+    "value": 0.25210084033613445,
     "mae": null,
-    "macro_f1": 0.1988530465949821,
-    "balanced_acc": 0.2381274294405949,
+    "macro_f1": 0.1728395061728395,
+    "balanced_acc": 0.19722832516477945,
     "n_cases": 238
   },
   {
@@ -2127,10 +2127,10 @@
     "model": "rf",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.3445378151260504,
+    "value": 0.40756302521008403,
     "mae": null,
-    "macro_f1": 0.1357615894039735,
-    "balanced_acc": 0.211340206185567,
+    "macro_f1": 0.14477611940298507,
+    "balanced_acc": 0.25,
     "n_cases": 238
   },
   {
@@ -2138,9 +2138,9 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.16806722689075632,
+    "value": 0.40756302521008403,
     "mae": null,
-    "macro_f1": 0.07194244604316546,
+    "macro_f1": 0.14477611940298507,
     "balanced_acc": 0.25,
     "n_cases": 238
   },
@@ -2149,10 +2149,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.1638655462184874,
+    "value": 0.3445378151260504,
     "mae": null,
-    "macro_f1": 0.09900579512617738,
-    "balanced_acc": 0.15286145850937977,
+    "macro_f1": 0.16200115673799884,
+    "balanced_acc": 0.21742437045800236,
     "n_cases": 238
   },
   {
@@ -2171,10 +2171,10 @@
     "model": "rf",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.1092436974789916,
+    "value": 0.10084033613445378,
     "mae": null,
-    "macro_f1": 0.06862310667096358,
-    "balanced_acc": 0.1173155737704918,
+    "macro_f1": 0.06699243379571249,
+    "balanced_acc": 0.1048155737704918,
     "n_cases": 238
   },
   {
@@ -2193,10 +2193,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.08823529411764706,
+    "value": 0.10504201680672269,
     "mae": null,
-    "macro_f1": 0.05048076923076923,
-    "balanced_acc": 0.0860655737704918,
+    "macro_f1": 0.08223684210526316,
+    "balanced_acc": 0.10245901639344263,
     "n_cases": 238
   },
   {
@@ -2204,8 +2204,8 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "metric": "R2",
-    "value": 0.1386684775352478,
-    "mae": 0.23482894897460938,
+    "value": 0.1156582236289978,
+    "mae": 0.24404853582382202,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2215,8 +2215,8 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "R2",
-    "value": -0.043618202209472656,
-    "mae": 0.27176547050476074,
+    "value": -0.08298420906066895,
+    "mae": 0.2819421887397766,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2226,8 +2226,8 @@
     "model": "cnn2d",
     "feature": "cfdac_mag",
     "metric": "R2",
-    "value": -0.9328051805496216,
-    "mae": 0.35110682249069214,
+    "value": -1.7624502182006836,
+    "mae": 0.4295811355113983,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2237,8 +2237,8 @@
     "model": "cnn2d",
     "feature": "cfdac_magphase",
     "metric": "R2",
-    "value": -1.1115999221801758,
-    "mae": 0.36746346950531006,
+    "value": -1.8314030170440674,
+    "mae": 0.4349719285964966,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2248,8 +2248,8 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "metric": "R2",
-    "value": 0.004004955291748047,
-    "mae": 0.26644301414489746,
+    "value": -1.8221399784088135,
+    "mae": 0.43425679206848145,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2259,8 +2259,8 @@
     "model": "cnn2d",
     "feature": "cfdac_real",
     "metric": "R2",
-    "value": 0.062432050704956055,
-    "mae": 0.2641458809375763,
+    "value": 0.08340132236480713,
+    "mae": 0.2576144337654114,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2270,8 +2270,8 @@
     "model": "cnn",
     "feature": "frf_mag",
     "metric": "R2",
-    "value": -0.15944194793701172,
-    "mae": 0.2918991148471832,
+    "value": 0.18001335859298706,
+    "mae": 0.21596170961856842,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2281,8 +2281,8 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "R2",
-    "value": -0.0392458438873291,
-    "mae": 0.26954662799835205,
+    "value": -0.046971797943115234,
+    "mae": 0.27070605754852295,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2292,8 +2292,8 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "R2",
-    "value": 0.04122507572174072,
-    "mae": 0.25874364376068115,
+    "value": 0.035511791706085205,
+    "mae": 0.25722572207450867,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2303,8 +2303,8 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "R2",
-    "value": -0.03913748264312744,
-    "mae": 0.26899904012680054,
+    "value": -0.004555940628051758,
+    "mae": 0.2648577392101288,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2314,8 +2314,8 @@
     "model": "mlp",
     "feature": "cfdac_magphase",
     "metric": "R2",
-    "value": -0.059288620948791504,
-    "mae": 0.2743280827999115,
+    "value": -0.0661078691482544,
+    "mae": 0.27512863278388977,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2325,8 +2325,8 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "metric": "R2",
-    "value": -0.8874390125274658,
-    "mae": 0.37641194462776184,
+    "value": -0.6833282709121704,
+    "mae": 0.3616335093975067,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2336,8 +2336,8 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "R2",
-    "value": -0.023464679718017578,
-    "mae": 0.2684301435947418,
+    "value": -0.001428365707397461,
+    "mae": 0.26461443305015564,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2347,8 +2347,8 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "R2",
-    "value": -0.0463484525680542,
-    "mae": 0.27105727791786194,
+    "value": -0.046484947204589844,
+    "mae": 0.2715548872947693,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2358,8 +2358,8 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "R2",
-    "value": 0.17175441980361938,
-    "mae": 0.22918716073036194,
+    "value": 0.14371049404144287,
+    "mae": 0.2362472265958786,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2369,8 +2369,8 @@
     "model": "rf",
     "feature": "modal",
     "metric": "R2",
-    "value": 0.09926582071058954,
-    "mae": 0.2466387927717507,
+    "value": 0.08520129596973647,
+    "mae": 0.2555503910764101,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2380,8 +2380,8 @@
     "model": "transformer",
     "feature": "frf_mag",
     "metric": "R2",
-    "value": -0.05893731117248535,
-    "mae": 0.26976731419563293,
+    "value": -0.05354344844818115,
+    "mae": 0.27315741777420044,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2391,8 +2391,8 @@
     "model": "xgb",
     "feature": "cfdac_imag",
     "metric": "R2",
-    "value": -0.5338507890701294,
-    "mae": 0.33352339267730713,
+    "value": -1.1262578964233398,
+    "mae": 0.3885889947414398,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2402,8 +2402,8 @@
     "model": "xgb",
     "feature": "cfdac_mag",
     "metric": "R2",
-    "value": -0.03457605838775635,
-    "mae": 0.27317899465560913,
+    "value": -1.0002989768981934,
+    "mae": 0.3577345013618469,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2413,8 +2413,8 @@
     "model": "xgb",
     "feature": "cfdac_phase",
     "metric": "R2",
-    "value": -0.9806071519851685,
-    "mae": 0.3587654232978821,
+    "value": -1.7120518684387207,
+    "mae": 0.4475530683994293,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2424,8 +2424,8 @@
     "model": "xgb",
     "feature": "cfdac_real",
     "metric": "R2",
-    "value": -0.16172921657562256,
-    "mae": 0.2891937792301178,
+    "value": 0.07920277118682861,
+    "mae": 0.2308569699525833,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2435,8 +2435,8 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "R2",
-    "value": 0.13323819637298584,
-    "mae": 0.23721659183502197,
+    "value": -0.13666343688964844,
+    "mae": 0.2941555678844452,
     "macro_f1": null,
     "balanced_acc": null,
     "n_cases": 2176
@@ -2446,10 +2446,10 @@
     "model": "cnn2d",
     "feature": "cfdac",
     "metric": "accuracy",
-    "value": 0.31197877179681577,
+    "value": 0.3498862774829416,
     "mae": null,
-    "macro_f1": 0.20602146944904906,
-    "balanced_acc": 0.3178230281105512,
+    "macro_f1": 0.20777949434261242,
+    "balanced_acc": 0.25982259189856133,
     "n_cases": 2638
   },
   {
@@ -2457,10 +2457,10 @@
     "model": "cnn2d",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.25815011372251706,
+    "value": 0.10159211523881728,
     "mae": null,
-    "macro_f1": 0.13622909281013454,
-    "balanced_acc": 0.26621823617339313,
+    "macro_f1": 0.04222238660600905,
+    "balanced_acc": 0.20448430493273545,
     "n_cases": 2638
   },
   {
@@ -2479,10 +2479,10 @@
     "model": "cnn2d",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.5072024260803639,
+    "value": 0.14783927217589082,
     "mae": null,
-    "macro_f1": 0.1346076458752515,
-    "balanced_acc": 0.2,
+    "macro_f1": 0.07452916642613866,
+    "balanced_acc": 0.17021517127030186,
     "n_cases": 2638
   },
   {
@@ -2490,10 +2490,10 @@
     "model": "cnn2d",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.09021986353297953,
+    "value": 0.09438968915845337,
     "mae": null,
-    "macro_f1": 0.03311304347826087,
-    "balanced_acc": 0.2,
+    "macro_f1": 0.05898399845768267,
+    "balanced_acc": 0.19131652661064427,
     "n_cases": 2638
   },
   {
@@ -2523,10 +2523,10 @@
     "model": "mlp",
     "feature": "cfdac_all",
     "metric": "accuracy",
-    "value": 0.2414708112206217,
+    "value": 0.16300227445034116,
     "mae": null,
-    "macro_f1": 0.1717353717353717,
-    "balanced_acc": 0.2716518581545949,
+    "macro_f1": 0.11167200149371741,
+    "balanced_acc": 0.22504130310909526,
     "n_cases": 2638
   },
   {
@@ -2534,10 +2534,10 @@
     "model": "mlp",
     "feature": "cfdac_imag",
     "metric": "accuracy",
-    "value": 0.2001516300227445,
+    "value": 0.19863532979529946,
     "mae": null,
-    "macro_f1": 0.12985370817834582,
-    "balanced_acc": 0.24226734313782586,
+    "macro_f1": 0.13268087268330025,
+    "balanced_acc": 0.24677106064602766,
     "n_cases": 2638
   },
   {
@@ -2545,10 +2545,10 @@
     "model": "mlp",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.1853677028051554,
+    "value": 0.23843821076573163,
     "mae": null,
-    "macro_f1": 0.11062252659805642,
-    "balanced_acc": 0.14252072292431037,
+    "macro_f1": 0.12338953027854067,
+    "balanced_acc": 0.2363527653213752,
     "n_cases": 2638
   },
   {
@@ -2556,10 +2556,10 @@
     "model": "mlp",
     "feature": "cfdac_magphase",
     "metric": "accuracy",
-    "value": 0.1087945413191812,
+    "value": 0.20318423047763456,
     "mae": null,
-    "macro_f1": 0.053958871877583824,
-    "balanced_acc": 0.20845805913070486,
+    "macro_f1": 0.15038616789367262,
+    "balanced_acc": 0.2917640592723025,
     "n_cases": 2638
   },
   {
@@ -2567,10 +2567,10 @@
     "model": "mlp",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.35633055344958303,
+    "value": 0.2952994692949204,
     "mae": null,
-    "macro_f1": 0.12198582120340504,
-    "balanced_acc": 0.15040230849779782,
+    "macro_f1": 0.12075068594118403,
+    "balanced_acc": 0.158652956392504,
     "n_cases": 2638
   },
   {
@@ -2578,10 +2578,10 @@
     "model": "mlp",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.18953752843062927,
+    "value": 0.24071266110689918,
     "mae": null,
-    "macro_f1": 0.16027202529931045,
-    "balanced_acc": 0.20614543330581317,
+    "macro_f1": 0.17141420183011796,
+    "balanced_acc": 0.22500756519485088,
     "n_cases": 2638
   },
   {
@@ -2589,10 +2589,10 @@
     "model": "mlp",
     "feature": "cfdac_realimag",
     "metric": "accuracy",
-    "value": 0.2441243366186505,
+    "value": 0.17058377558756635,
     "mae": null,
-    "macro_f1": 0.18132897574835696,
-    "balanced_acc": 0.19833213218022633,
+    "macro_f1": 0.13008604458721745,
+    "balanced_acc": 0.1963577255198859,
     "n_cases": 2638
   },
   {
@@ -2600,10 +2600,10 @@
     "model": "mlp",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.22062168309325247,
+    "value": 0.2744503411675512,
     "mae": null,
-    "macro_f1": 0.17097974680153408,
-    "balanced_acc": 0.2771054786570152,
+    "macro_f1": 0.19236475870671116,
+    "balanced_acc": 0.29514664773369603,
     "n_cases": 2638
   },
   {
@@ -2622,10 +2622,10 @@
     "model": "rf",
     "feature": "cfdac_mag",
     "metric": "accuracy",
-    "value": 0.5072024260803639,
+    "value": 0.4184988627748294,
     "mae": null,
-    "macro_f1": 0.1346076458752515,
-    "balanced_acc": 0.2,
+    "macro_f1": 0.11938361719383617,
+    "balanced_acc": 0.16502242152466368,
     "n_cases": 2638
   },
   {
@@ -2633,10 +2633,10 @@
     "model": "rf",
     "feature": "cfdac_phase",
     "metric": "accuracy",
-    "value": 0.09552691432903715,
+    "value": 0.09021986353297953,
     "mae": null,
-    "macro_f1": 0.0374830057587911,
-    "balanced_acc": 0.20209267563527655,
+    "macro_f1": 0.033101529902642556,
+    "balanced_acc": 0.2,
     "n_cases": 2638
   },
   {
@@ -2644,10 +2644,10 @@
     "model": "rf",
     "feature": "cfdac_real",
     "metric": "accuracy",
-    "value": 0.44351781652767247,
+    "value": 0.09021986353297953,
     "mae": null,
-    "macro_f1": 0.1788464994864772,
-    "balanced_acc": 0.25157327504993027,
+    "macro_f1": 0.033101529902642556,
+    "balanced_acc": 0.2,
     "n_cases": 2638
   },
   {
@@ -2655,10 +2655,10 @@
     "model": "rf",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.11751326762699014,
+    "value": 0.15238817285822592,
     "mae": null,
-    "macro_f1": 0.07427776793228388,
-    "balanced_acc": 0.22918792629159287,
+    "macro_f1": 0.10008112191469354,
+    "balanced_acc": 0.19792331119157813,
     "n_cases": 2638
   },
   {
@@ -2666,10 +2666,10 @@
     "model": "transformer",
     "feature": "frf_mag",
     "metric": "accuracy",
-    "value": 0.20053070507960577,
+    "value": 0.2156937073540561,
     "mae": null,
-    "macro_f1": 0.10624486827782971,
-    "balanced_acc": 0.2110997224001708,
+    "macro_f1": 0.09729873102585734,
+    "balanced_acc": 0.20749131287247877,
     "n_cases": 2638
   },
   {
@@ -2677,10 +2677,10 @@
     "model": "xgb",
     "feature": "modal",
     "metric": "accuracy",
-    "value": 0.22554965883244882,
+    "value": 0.11296436694465505,
     "mae": null,
-    "macro_f1": 0.14559483850126181,
-    "balanced_acc": 0.23832937659368678,
+    "macro_f1": 0.07902480829113274,
+    "balanced_acc": 0.18255382136548057,
     "n_cases": 2638
   }
 ]
