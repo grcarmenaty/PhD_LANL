@@ -1,5 +1,10 @@
 # Variation v2 chunk regeneration — results report
 
+> **⚠️ Single-seed (seed 42). Superseded by the multi-seed verdict in
+> [`REPORT_dt_3way_verdict.md`](REPORT_dt_3way_verdict.md).** The v2
+> rejection here is confirmed across 3 seeds, and the cause is now isolated
+> (widened domain randomisation P1.2, via the v2a ablation).
+
 **Status:** **INTERIM (seed 42 only); decision REJECT.** Seeds 101 and
 202 are running automatically (the supervisor script continues
 through the remaining seeds); this report will be updated when they

@@ -1,5 +1,18 @@
 # Sim-to-real damage diagnosis on the LANL 3SBB — definitive report
 
+> **⚠️ Update (superseded in part).** §10 rec 3's verdict — *"v2 synthetic
+> physics tried and REJECTED; ablation needed"* — has been resolved by a
+> multi-seed, damage-threshold-stratified re-evaluation. The v2 rejection is
+> **upheld and now explained**: the regression was caused by v2's **widened
+> domain randomisation (P1.2)**, not the asymmetric-damage geometry — proven
+> by the **v2a ablation** (asymmetric damage on v1's DR does *not* collapse).
+> The DT-stratified analysis also shows the pooled `binary` detection gate
+> used to assess the variants was the wrong metric, and that type / bolt-
+> severity / hole-size / bolt-detection all transfer at high severity for all
+> three physics variants. See
+> [`REPORT_dt_3way_verdict.md`](REPORT_dt_3way_verdict.md) for the corrected
+> verdict. The goal-by-goal v1 results below stand.
+
 How well damage diagnosis trained **only on synthetic data** transfers,
 **zero-shot**, to **real** measurements of the LANL 3-Storey Bookcase
 Benchmark (3SBB) — reported **goal by goal**, with the exact training

@@ -1,5 +1,9 @@
 # DT/IT-swept evaluation — reproducing the paper's sensitivity methodology
 
+> **Note.** Extended to a 3-way variant comparison (v1/v2/v2a) with a
+> per-damage-type physical-axis sweep in
+> [`REPORT_dt_3way_verdict.md`](REPORT_dt_3way_verdict.md).
+
 **Date:** 2026-05-28. **Trigger:** the question *"are you accounting for what
 happens with ever-more-restrictive minimum damage?"* — i.e. the Damage
 Threshold / Improvement Threshold sensitivity analysis from the CFDAC
