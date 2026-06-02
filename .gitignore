@@ -52,3 +52,19 @@ logs/
 
 # Mixed-training VDS pointer file (regenerate via build_mixed_features.py)
 dataset/features_mixed.h5
+
+# v2/v2a synthetic-physics derived data (regenerate via variation_v2.py / build_features.py)
+dataset/features_v2.h5
+dataset_v2/
+dataset_v2a/
+
+# Per-seed training output directories (~87 MB each, regenerate via train.py + evaluate_full_experimental.py)
+results_seed*/
+results_v1_seed*/
+results_v2_seed*/
+results_v2a_seed*/
+
+# Scratch per-case eval blobs from one-off experiments (regenerate via evaluate_full_experimental.py)
+results/experimental_full_per_case_aug.json
+results/experimental_full_per_case_basescore.json
+results/experimental_full_per_case_plain.json
