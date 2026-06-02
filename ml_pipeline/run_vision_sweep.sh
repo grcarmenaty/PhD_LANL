@@ -38,13 +38,27 @@ for variant in v1 v2 v2a; do
   for seed in $SEEDS; do
     out="results_vision/${variant}_seed${seed}"
     pc="$out/per_case_vision"
-    echo "===== VARIANT=$variant SEED=$seed  @ $(date -u +%Y-%m-%dT%H:%M:%SZ) ====="
-    python -m ml_pipeline.train_vision \
-      --syn "$syn" --exp dataset/experimental_features.h5 \
-      --out "$out" --per-case-out "$pc" --no-save-model \
-      --backbones $BACKBONES --features $FEATURES --tasks $TASKS \
-      --seed "$seed" --epochs $EP --probe-epochs $PROBE \
-      --subsample $SUB --batch $BATCH
+    expected=$((${#BACKBONES} * 0 + 90))   # 3 backbones × 3 features × 10 tasks
+    # Retry until this (variant, seed) actually has 90 per-case JSONs, so a
+    # killed/OOM'd python doesn't skip the rest of the (variant, seed).
+    attempt=0
+    while true; do
+      done_n=$(find "$pc" -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+      [ "$done_n" -ge 90 ] && break
+      attempt=$((attempt + 1))
+      echo "===== VARIANT=$variant SEED=$seed attempt=$attempt done=$done_n/90  @ $(date -u +%Y-%m-%dT%H:%M:%SZ) ====="
+      python -m ml_pipeline.train_vision \
+        --syn "$syn" --exp dataset/experimental_features.h5 \
+        --out "$out" --per-case-out "$pc" --no-save-model \
+        --backbones $BACKBONES --features $FEATURES --tasks $TASKS \
+        --seed "$seed" --epochs $EP --probe-epochs $PROBE \
+        --subsample $SUB --batch $BATCH || true
+      # If no new cells landed this attempt, sleep before retrying so we
+      # don't tight-loop on a persistent failure.
+      new_n=$(find "$pc" -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+      [ "$new_n" -le "$done_n" ] && sleep 15
+    done
+    echo "===== VARIANT=$variant SEED=$seed COMPLETE (90/90)  @ $(date -u +%Y-%m-%dT%H:%M:%SZ) ====="
   done
 done
 echo "ALL DONE @ $(date -u +%Y-%m-%dT%H:%M:%SZ)"
