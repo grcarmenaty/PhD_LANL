@@ -77,6 +77,22 @@ def build_targets(type_code: np.ndarray, storey: np.ndarray,
     y = end[mask].astype(np.int64)         # plate idx stored in 'end' field
     tasks["mass_location"] = (mask, y, "cls")
 
+    # ---- 6. binary "is this damage type?" decomposition --------------------
+    # Reframes the 5-class `type` task as five independent binary tasks
+    # so each can be trained with its own positive-class weighting and
+    # the best feature per class can be selected separately.  Aggregator
+    # at inference (argmax of the 5 binary sigmoids) recovers the 5-way
+    # prediction.  Every binary task uses all 10 000 samples (mask =
+    # ones), so each binary's "negative" class includes the other four
+    # damage types.
+    mask_all = np.ones_like(type_code, dtype=bool)
+    for label, tcode in (("is_pristine", TYPE_PRISTINE),
+                              ("is_bolt",     TYPE_BOLT),
+                              ("is_crack",    TYPE_CRACK),
+                              ("is_hole",     TYPE_HOLE),
+                              ("is_mass",     TYPE_MASS)):
+        tasks[label] = (mask_all, (type_code == tcode).astype(np.int64), "cls")
+
     return tasks
 
 
@@ -87,6 +103,11 @@ TASK_N_CLASSES = {
     "severity":      None,   # regression
     "col_location":  6,
     "mass_location": 4,
+    "is_pristine":   2,
+    "is_bolt":       2,
+    "is_crack":      2,
+    "is_hole":       2,
+    "is_mass":       2,
 }
 
 TASK_DESCRIPTION = {
@@ -95,4 +116,14 @@ TASK_DESCRIPTION = {
     "severity":      "Severity regression (normalised [0,1] per type)",
     "col_location":  "Column-damage location (storey x end)",
     "mass_location": "Mass plate location (Base/F1/F2/F3)",
+    "is_pristine":   "Binary: is this Pristine?",
+    "is_bolt":       "Binary: is this Bolt loosening?",
+    "is_crack":      "Binary: is this a Crack?",
+    "is_hole":       "Binary: is this a Hole?",
+    "is_mass":       "Binary: is this added Mass?",
 }
+
+# Subset of tasks that form the "trenchcoat" decomposition of `type`.
+BINARY_TYPE_DECOMPOSITION = (
+    "is_pristine", "is_bolt", "is_crack", "is_hole", "is_mass",
+)

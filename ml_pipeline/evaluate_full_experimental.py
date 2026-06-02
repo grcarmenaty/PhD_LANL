@@ -40,24 +40,37 @@ from ml_pipeline.tasks import build_targets                           # noqa: E4
 from ml_pipeline.train import (                                          # noqa: E402
     FEATURES_FLAT, FEATURES_SEQ, FEATURES_MAT,
     load_labels, load_feature, make_split, _CFDAC_VARIANTS,
+    _per_sample_normalize,
 )
 
 
 def _exp_load_feature(exp_path: Path, name: str,
-                       rows: np.ndarray | None = None) -> np.ndarray:
+                       rows: np.ndarray | None = None,
+                       normalize: bool = False) -> np.ndarray:
     """Read a feature out of experimental_features.h5 with the same
-    CFDAC stacking convention as load_feature on the synth file."""
+    CFDAC stacking convention as load_feature on the synth file.
+
+    With ``normalize=True`` each part is run through the shared
+    ``_per_sample_normalize`` (P1.1) so cross-domain inputs match the
+    synth-train statistics. Used by the vision pipeline; default
+    ``False`` preserves the bespoke-eval behaviour."""
     if name in _CFDAC_VARIANTS:
         parts, mode = _CFDAC_VARIANTS[name]
         layers = []
         with h5py.File(exp_path, "r") as f:
             for p in parts:
-                layers.append(f[p][:] if rows is None else f[p][rows])
+                arr = f[p][:] if rows is None else f[p][rows]
+                if normalize:
+                    arr = _per_sample_normalize(p, arr)
+                layers.append(arr)
         if mode == "stack2d":
             return np.stack(layers, axis=1)
         return np.stack(layers, axis=1)[:, np.newaxis, ...]
     with h5py.File(exp_path, "r") as f:
-        return f[name][:] if rows is None else f[name][rows]
+        data = f[name][:] if rows is None else f[name][rows]
+    if normalize:
+        data = _per_sample_normalize(name, data)
+    return data
 
 
 def _build_scalers(syn_path: Path) -> Dict[str, Dict[str, StandardScaler]]:

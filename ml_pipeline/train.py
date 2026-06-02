@@ -120,8 +120,43 @@ _CFDAC_VARIANTS = {
 }
 
 
+def _per_sample_normalize(name: str, X: np.ndarray) -> np.ndarray:
+    """P1.1: per-sample, deterministic input normalisation.
+
+    Synth and exp pipelines call this through the *same* function so
+    that training and cross-domain inference see identical input
+    statistics regardless of the absolute amplitude in each domain.
+    Modal and indicators are left alone -- they go through a
+    StandardScaler fitted per-fold by the caller.
+    """
+    if name == "frf_mag":
+        # (n, n_freq, 9) -> log + per-sample z-score over (freq, channel)
+        Xlog = np.log10(np.clip(X.astype(np.float32), 1e-8, None))
+        mu  = Xlog.mean(axis=(-2, -1), keepdims=True)
+        sig = Xlog.std (axis=(-2, -1), keepdims=True) + 1e-6
+        return ((Xlog - mu) / sig).astype(np.float32)
+    if name in ("frf_real", "frf_imag"):
+        m = np.maximum(np.abs(X).max(axis=(-2, -1), keepdims=True), 1e-12)
+        return (X / m).astype(np.float32)
+    if name in ("cfdac_real", "cfdac_imag"):
+        mu = X.mean(axis=(-2, -1), keepdims=True)
+        return (X - mu).astype(np.float32)
+    if name == "cfdac_mag":
+        Xs = 2.0 * X.astype(np.float32) - 1.0
+        mu = Xs.mean(axis=(-2, -1), keepdims=True)
+        return (Xs - mu).astype(np.float32)
+    if name == "cfdac_phase":
+        return (X.astype(np.float32) / np.float32(np.pi))
+    if name == "timeseries":
+        mu  = X.mean(axis=-2, keepdims=True)
+        sig = X.std (axis=-2, keepdims=True) + 1e-6
+        return ((X - mu) / sig).astype(np.float32)
+    return X
+
+
 def load_feature(features_path: Path, name: str,
-                  rows: np.ndarray | None = None) -> np.ndarray:
+                  rows: np.ndarray | None = None,
+                  normalize: bool = False) -> np.ndarray:
     """Load a feature array.
 
     For CFDAC variants, the on-disk arrays are individual H × W planes;
@@ -129,13 +164,22 @@ def load_feature(features_path: Path, name: str,
 
       * ``stack2d`` →  (n, C, H, W)  for Conv2d
       * ``stack3d`` →  (n, 1, D, H, W)  for Conv3d
+
+    With ``normalize=True`` each part is run through
+    ``_per_sample_normalize`` before stacking (used by the vision
+    pipeline so synth-train and exp-eval inputs share statistics). The
+    default is ``False`` to preserve the bespoke-model pipeline's
+    existing behaviour.
     """
     if name in _CFDAC_VARIANTS:
         parts, mode = _CFDAC_VARIANTS[name]
         layers = []
         with h5py.File(features_path, "r") as f:
             for p in parts:
-                layers.append(f[p][:] if rows is None else f[p][rows])
+                arr = f[p][:] if rows is None else f[p][rows]
+                if normalize:
+                    arr = _per_sample_normalize(p, arr)
+                layers.append(arr)
         if mode == "stack2d":
             return np.stack(layers, axis=1)
         # stack3d → add a singleton channel dim then stack along depth
@@ -148,6 +192,8 @@ def load_feature(features_path: Path, name: str,
             tmp = f[name][rows[order]]
             data = np.empty_like(tmp)
             data[order] = tmp
+    if normalize:
+        data = _per_sample_normalize(name, data)
     return data
 
 
