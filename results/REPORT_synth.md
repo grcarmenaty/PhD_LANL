@@ -178,7 +178,7 @@ Every classification cell loses 0.3–0.5 absolute accuracy crossing to the real
 ---
 ## 6. Vision backbones — synthetic test (running sweep)
 
-Source: `meta.synth_test` of every vision per-case JSON produced so far — **4 / 810** cells complete. This section refreshes when the script is re-run.
+Source: `meta.synth_test` of every vision per-case JSON produced so far — **30 / 810** cells complete. This section refreshes when the script is re-run.
 
 ![vision synthetic test](figures/synth/fig5_vision_synth.png)
 
@@ -186,7 +186,7 @@ Source: `meta.synth_test` of every vision per-case JSON produced so far — **4 
 
 | variant | seed42 | seed101 | seed202 |
 |---|---|---|---|
-| v1 | 4 | 0 | 0 |
+| v1 | 30 | 0 | 0 |
 | v2 | 0 | 0 | 0 |
 | v2a | 0 | 0 | 0 |
 
@@ -194,10 +194,36 @@ Source: `meta.synth_test` of every vision per-case JSON produced so far — **4 
 
 | task | backbone | feature | synth test | n |
 |---|---|---|---|---|
+| binary | convnext_tiny | cfdac_all | 0.809 | 1 |
+| binary | convnext_tiny | cfdac_mag | 0.756 | 1 |
+| binary | convnext_tiny | cfdac_realimag | 0.809 | 1 |
+| col_location | convnext_tiny | cfdac_all | 0.302 | 1 |
+| col_location | convnext_tiny | cfdac_mag | 0.333 | 1 |
+| col_location | convnext_tiny | cfdac_realimag | 0.271 | 1 |
 | is_bolt | convnext_tiny | cfdac_all | 0.827 | 1 |
+| is_bolt | convnext_tiny | cfdac_mag | 0.840 | 1 |
+| is_bolt | convnext_tiny | cfdac_realimag | 0.676 | 1 |
+| is_crack | convnext_tiny | cfdac_all | 0.796 | 1 |
+| is_crack | convnext_tiny | cfdac_mag | 0.796 | 1 |
+| is_crack | convnext_tiny | cfdac_realimag | 0.796 | 1 |
 | is_hole | convnext_tiny | cfdac_all | 0.427 | 1 |
+| is_hole | convnext_tiny | cfdac_mag | 0.800 | 1 |
+| is_hole | convnext_tiny | cfdac_realimag | 0.671 | 1 |
+| is_mass | convnext_tiny | cfdac_all | 0.684 | 1 |
+| is_mass | convnext_tiny | cfdac_mag | 0.787 | 1 |
+| is_mass | convnext_tiny | cfdac_realimag | 0.782 | 1 |
+| is_pristine | convnext_tiny | cfdac_all | 0.680 | 1 |
+| is_pristine | convnext_tiny | cfdac_mag | 0.809 | 1 |
+| is_pristine | convnext_tiny | cfdac_realimag | 0.667 | 1 |
+| mass_location | convnext_tiny | cfdac_all | 0.942 | 1 |
+| mass_location | convnext_tiny | cfdac_mag | 0.627 | 1 |
+| mass_location | convnext_tiny | cfdac_realimag | 0.676 | 1 |
 | severity | convnext_tiny | cfdac_all | 0.066 | 1 |
+| severity | convnext_tiny | cfdac_mag | 0.000 | 1 |
+| severity | convnext_tiny | cfdac_realimag | 0.013 | 1 |
 | type | convnext_tiny | cfdac_all | 0.480 | 1 |
+| type | convnext_tiny | cfdac_mag | 0.302 | 1 |
+| type | convnext_tiny | cfdac_realimag | 0.369 | 1 |
 
 
 ---
