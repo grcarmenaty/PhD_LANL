@@ -55,6 +55,7 @@ dataset/features_mixed.h5
 
 # v2/v2a synthetic-physics derived data (regenerate via variation_v2.py / build_features.py)
 dataset/features_v2.h5
+dataset/features_v2a.h5
 dataset_v2/
 dataset_v2a/
 
