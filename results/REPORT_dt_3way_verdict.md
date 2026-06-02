@@ -2,6 +2,8 @@
 
 **Supersedes** the v2 rejection in [`REPORT_definitive.md` §10 rec 3](REPORT_definitive.md)
 and the single-seed [`REPORT_v2_chunk_regen.md`](REPORT_v2_chunk_regen.md).
+See **[REPORT_dt_3way_full.md](REPORT_dt_3way_full.md)** for the comprehensive per-goal report with plots.
+
 This is the multi-seed (42 / 101 / 202), damage-threshold-stratified
 re-evaluation of all three synthetic-physics variants, scored on the
 2 638-case real LANL 3SBB experimental set.
