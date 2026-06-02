@@ -11,7 +11,7 @@ export HF_HUB_OFFLINE=1
 export PYTHONPATH="/home/user/pymodal:${PYTHONPATH:-}"
 
 BRANCH="claude/rescue-failing-session-xjHZb"
-COMMIT_EVERY=120
+COMMIT_EVERY=30
 LOG=/tmp/vsweep.log
 
 ensure_deps() {
