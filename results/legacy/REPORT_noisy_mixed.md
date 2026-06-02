@@ -1,3 +1,7 @@
+> **DEPRECATED — moved to `results/legacy/`.** Superseded by the canonical reports [`REPORT_CONSOLIDATED.md`](../REPORT_CONSOLIDATED.md) (full) and [`REPORT_synth.md`](../REPORT_synth.md) (synthetic-domain pre-transfer). Kept for history.
+
+---
+
 # Comprehensive report — LANL 3SBB synthetic damage dataset & ML pipeline
 
 > **NOTE - noisy-mixed variant.**  This report has the same structure as [`REPORT.md`](REPORT.md), but every cross-model table and per-indicator section below was rebuilt from the **noisy_mixed** pipeline outputs in `results/noisy_mixed/` (mixed-SNR additive Gaussian noise on the time series).  All hand-written sections (dataset, models, features, plot key) are inherited verbatim from `REPORT.md`; only the auto-generated results tables reflect the noisy run.

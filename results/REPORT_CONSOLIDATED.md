@@ -1629,10 +1629,10 @@ accelerator. No code changes required; the existing
 - `results/figures/dt_per_task/{task}.png` (10)
 - `results/figures/dt_3way/fig{1..7}_*.png` (7)
 
-### Superseded reports (kept for history, deprecation banners added)
-- `REPORT.md`, `REPORT_full.md`, `REPORT_definitive.md`, `REPORT_final.md`
-- `REPORT_dt_sweep.md`, `REPORT_dt_3way_verdict.md`, `REPORT_dt_3way_full.md`
-- `REPORT_v2_chunk_regen.md`, `REPORT_v2a_chunk_regen.md`
-- `REPORT_severity_stratified.md`, `REPORT_simtoreal.md`, `REPORT_noisy_mixed.md`
-- `REPORT_modal_gap_diagnostic.md`, `REPORT_noise.md`
-- `REPORT_vision.md`, `REPORT_vision_v2.md`
+### Canonical reports
+- `REPORT_CONSOLIDATED.md` (this file) — full cross-domain (experimental) study.
+- `REPORT_synth.md` — synthetic-domain (pre-transfer) training results.
+
+### Superseded reports (moved to `results/legacy/`, redirect banners added)
+- `legacy/REPORT.md` — earlier comprehensive synthetic-pipeline report.
+- `legacy/REPORT_noisy_mixed.md` — noisy-mixed-SNR variant of the above.

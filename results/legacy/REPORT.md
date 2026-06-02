@@ -1,3 +1,7 @@
+> **DEPRECATED — moved to `results/legacy/`.** Superseded by the canonical reports [`REPORT_CONSOLIDATED.md`](../REPORT_CONSOLIDATED.md) (full) and [`REPORT_synth.md`](../REPORT_synth.md) (synthetic-domain pre-transfer). Kept for history.
+
+---
+
 # Comprehensive report — LANL 3SBB synthetic damage dataset & ML pipeline
 
 A single document containing everything: the train / val / test
