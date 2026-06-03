@@ -497,3 +497,111 @@ The day also shows the now-standard pattern: every model/feature combination tha
 stream within memory is explicitly skipped rather than allowed to crash the sweep.
 
 ---
+
+## Phase 9 — HBTA Bridge, Report Twins & Channel-Normalised Calibration (2026-05-17)
+
+**Goal.** Replace the Flossgraben bridge with a better-suited structure — **HBTA** —
+and calibrate its FEM; enrich the ML reports with experimental-test "visual twins";
+and deepen the report analysis. (Merged via PRs #8, #9, #10.)
+
+### 9.1 Report consolidation (PRs #8–#10)
+
+- `758763e` (#8) **`noisy_mixed`: resolution sweep complete + `REPORT_noisy_mixed.md`.**
+- `0c7795f` → `89da31f` (#9) Generate a **full-depth `REPORT_noisy_mixed.md`** by
+  cloning `REPORT.md` and integrating the noisy results.
+- `ee745f4` / `a15fd07` / `59ecbb6` → `6439b29` (#10) **Experimental-test visual twins**:
+  `plots_experimental.py` produces exp-test counterparts of the test-time visuals, and
+  `integrate_report` embeds each twin with a **Δ caption per cell** — so every reported
+  metric is shown alongside its real-experimental analogue.
+- `689831c` Add **§2.7 exp-dataset deep-dive** + **§9.5 clean-vs-noisy transfer comparison**.
+
+### 9.2 HBTA bridge replaces Flossgraben
+
+- `76511f2` **Add HBTA bridge scaffold to replace Flossgraben.**
+- `6eeb259` Add the **HBTA pyMODAL loader** (`build_hbta_pymodal.py`).
+- `d77b35a` HBTA diagnostic: **median H1 FRF + output spectrum per class**.
+- `7761ca8` Remove `flossgraben_bridge`; add **HBTA `model.md`**.
+- `2a82705` HBTA **stage-1 FEM + UDS comparison**; `model.md §15` populated.
+
+### 9.3 HBTA calibration rounds
+
+- `2a9dac6` Round 2: per-sensor axis fix, valid-band restriction, DE calibration setup.
+- `e517b7a` Round 2: add **deck stringer beams** + widen DE bounds.
+- `86ce6dc` Round 2 calibration: DE over 6 knobs → **smooth-SCI 0.626**.
+- `c73bda7` DE loss: switch to **per-channel-normalised CFDAC**.
+- `3cba5cd` **Round 3 calibration: channel-normalised CFDAC → smooth-SCI 0.783.**
+
+### 9.4 Heartbeat control
+
+- `d805797` `session-start`: honour a **`PAUSE_PINGS` flag** to mute the 10-min heartbeat
+  — manual override for when the auto-relaunch loop should stay quiet.
+
+**Outcome.** The bridge strand switched to **HBTA** (Flossgraben removed), calibrated to
+**smooth-SCI 0.783** via channel-normalised CFDAC over a DE search. The ML reports
+gained experimental-test visual twins (with per-cell Δ captions) and two new analytical
+sections, all merged through PRs #8–#10.
+
+---
+
+## Phase 10 — Sim-to-Real Improvements (P0–P2) & Vision-Model Backbones (2026-05-18)
+
+**Goal.** A structured, numbered campaign (P0 → P2) to close the **sim-to-real gap**,
+followed by the introduction of modern **vision-model backbones** for CFDAC images.
+
+### 10.1 P0 — correctness and domain fixes
+
+- `c9864ea` **P0.1:** an **experimental-pristine reference** for CFDAC and pyMODAL
+  indicators (a clean real-data anchor).
+- `546ec60` **P0.2:** **bounded sigmoid heads** on severity; opt-out for unbounded
+  indicators (prevents the regression-head blow-ups seen earlier).
+- `83f0f61` **P0.3:** **per-domain scaler refit** — `exp_pristine` becomes the default.
+- `0aa7a2f` **P0.4 + P0.5:** drop timeseries from training; guard an FRF divide-by-zero.
+
+### 10.2 P1 — normalisation, augmentation, joint fine-tuning
+
+- `ca5ea8f` **P1.1–P1.4:** per-sample normalisation, widened damage-ratio ranges,
+  augmented chunks, and **joint synth+exp fine-tuning**.
+- `0718cd7` **P1.1 bugfix:** thread normalisation through `LazyCFDACDataset`.
+- `eb7e2c1` **P1.1 ablation:** per-sample feature normalisation, 30 cells retrained.
+- `b1fa398` / `b0ffdd5` Thread the `normalize` flag through `transfer_learn`; add
+  `--tasks` / `--unfreezes` filters for focused runs.
+- `86b5296` `transfer_learn`: **incremental JSON save after every cell**.
+- **P1.4 joint synth+exp fine-tune ablation**, task by task with snapshots between each:
+  - `4dc2ae6` severity (partial): **+0.7 R²**.
+  - `4f5b421` type (completed): **+0.22 accuracy**.
+  - `0a4b08a` **P1.4 ablation COMPLETE** across all 4 tasks (severity, type,
+    col_location, mass_location).
+
+### 10.3 P2 — asymmetric damage and self-supervised pretraining
+
+- `0403fb1` **P2.2 + P2.3 scaffolding:** asymmetric crack/hole damage, **SSL
+  pretraining**, and an `--init-from` flag for warm starts.
+
+### 10.4 New canonical reports
+
+- `1777ff0` Add **`REPORT_simtoreal.md`** — companion to `REPORT.md` documenting the sweep.
+- `327f127` Add 11 figures embedded in it (REPORT.md-style).
+- `e49158c` Add **`REPORT_final.md`** — a standalone canonical report with proper
+  diagnostic plots.
+
+### 10.5 Vision-model backbones enter the project
+
+- `8fe8ef2` **Add vision-model backbones — ResNet50, EfficientNet-B0, ConvNeXt-T,
+  Swin-T, ViT-B/16 — for CFDAC**, plus a synth-only training driver. This is the seed of
+  the vision-sweep work that dominates early June.
+- `21ec8c3` `train_vision`: **batch the exp-eval forward pass** + checkpoint partial runs.
+- `c9df92d` / `09c9f50` First vision-sweep results (ResNet50 + EfficientNet-B0 on
+  type/cfdac_all) + plots.
+- `62fe28e` gitignore `models_vision/*.pt`; drop stale under-trained artefacts.
+- `eead988` / `2b6af8e` Snapshot `vision_eval.json` as cfdac_all → cfdac_mag →
+  cfdac_realimag rows land (7/10 cells).
+
+**Outcome.** The sim-to-real gap was attacked methodically: bounded heads, per-domain
+scalers, per-sample normalisation, and **joint synth+exp fine-tuning** (measurably
+**+0.7 R²** on severity, **+0.22 accuracy** on type). The reporting set grew to include
+`REPORT_simtoreal.md` and a canonical `REPORT_final.md`. Crucially, **five modern
+vision backbones** (CNN and Transformer families) were introduced for CFDAC-image
+classification — the technical foundation for the large vision sweep that becomes the
+project's focus in June.
+
+---
