@@ -58,5 +58,17 @@
     "synth_test_metric": 0.26222222222222225,
     "synth_test_macro_f1": 0.17271983156715212,
     "runtime_s": 1845.7987480163574
+  },
+  "is_bolt_convnext_tiny_cfdac_realimag_hires1601": {
+    "task": "is_bolt",
+    "model": "convnext_tiny",
+    "feature": "cfdac_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "synth_val": 0.6334955034645438,
+    "synth_test_metric": 0.84,
+    "synth_test_macro_f1": 0.75,
+    "runtime_s": 2471.4748842716217
   }
 }
