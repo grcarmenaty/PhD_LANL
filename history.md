@@ -435,3 +435,65 @@ project's scope expanded with the **Flossgraben bridge** + pyMODAL build pipelin
 beginning of generalising the methodology beyond the 3SBB laboratory model.
 
 ---
+
+## Phase 8 — Largest Day: `noisy_mixed` Completes + Flossgraben FEM Calibration v2→v6 (2026-05-16)
+
+**Goal.** Finish the entire `noisy_mixed` pipeline and ship its report, while in
+parallel building and calibrating a finite-element model of the **Flossgraben bridge**.
+At 205 commits this is the single busiest day in the project. It also includes **PR #7**,
+the full feature-branch squash that merged the whole ML pipeline into `main`.
+
+### 8.1 Final resolution-sweep OOM mitigations
+
+The resolution sweep needed several more defensive patches to run cleanly:
+
+- `625427b` `resolution_sweep`: **`n_jobs=1` + free per-ratio buffers** (OOM).
+- `6e791ad` Skip a cell **if every ratio is already persisted** (idempotent resume).
+- `c292ce9` **Skip RF/XGB on CFDAC variants** (can't fit the cycle).
+- `285e224` / `c9bc78c` **Skip CNN- and Transformer-on-CFDAC** in the plan — a
+  pre-existing Conv1D failure mode, excluded rather than repeatedly failed.
+
+### 8.2 `noisy_mixed` reaches the finish line
+
+- `ee49024` / `931d9b9` / `e1d62ea` Sweep-progress snapshots: **69 → 191 → 251 / 375 rows**.
+- `9e674c0` **`noisy_mixed` pipeline complete — final `REPORT_noisy_mixed.md`** — the
+  culmination of the mixed-SNR study begun on May 13.
+
+### 8.3 Flossgraben bridge: from spec to a calibrated beam FEM
+
+A complete second-structure modelling effort happened in parallel, mirroring the 3SBB
+calibration arc but for a real bridge:
+
+- `94aea4c` Drop the noisy variant from the Flossgraben pyMODAL build.
+- `778eb81` Add a **Salome / Code_Aster model specification** for the bridge (a
+  high-fidelity FE route).
+- `88876f1` Add a **Python beam-FEM** + initial run results in `model.md §15`.
+- `bb2b731` Add a **SciPy `differential_evolution` calibration loop.**
+- `ca7a008` **v2 beam FEM** with torsion + per-band damping.
+- `daf7334` / `1dc49b0` Refactor the DE loss to module level and **load the experimental
+  cache at import** so parallel DE workers can see it.
+- `ce0ea94` / `311b603` `flush=True` + per-generation logging; **force single-thread
+  BLAS** in the DE calibrator (avoid oversubscription with DE's own parallelism).
+- `60b1ec8` **v3 FEM:** finite pier compliance + sensor-x offset.
+- `38900eb` **v4 calibrator:** smoothed-CFDAC SCI — an **OMA-appropriate metric**
+  (operational modal analysis, where only output data is available).
+- `0a8008b` **v5:** optimise smoothed-CFDAC at σ = 6 bins (1.5 Hz).
+- `185c88f` **v6 calibrator:** balanced min + mean SCI, seeded near v5.
+- `4b4d55a` **Final v6 calibration: smooth-SCI 0.82+ across all scenarios.**
+
+### 8.4 The big merge
+
+- `2db3ea4` **ML pipeline + datasets + reports: full feature-branch squash (#7)** — the
+  accumulated ML work is squash-merged into `main`.
+- `32c5a27` Merge `origin/main` back into `claude/create-ml-dataset-rMOoj` to re-sync
+  the working branch after the squash.
+
+**Outcome.** Two arcs concluded the same day: the **mixed-SNR ML study** finished with
+its consolidated `REPORT_noisy_mixed.md`, and the **Flossgraben bridge** went from a
+bare spec to a calibrated beam FEM achieving **smoothed-CFDAC SCI ≥ 0.82 across all
+scenarios** — using an OMA-appropriate metric suited to a field structure where only
+operational (output-only) data exists. PR #7 consolidated the ML pipeline into `main`.
+The day also shows the now-standard pattern: every model/feature combination that can't
+stream within memory is explicitly skipped rather than allowed to crash the sweep.
+
+---
