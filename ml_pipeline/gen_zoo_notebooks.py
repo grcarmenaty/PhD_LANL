@@ -87,6 +87,10 @@ EPOCHS   = 25
 SUBSAMPLE= 3000
 BATCH    = 16          # lower to 8 if CUDA OOM
 VISION_SIZE = 384      # conv vision backbones feed at this size (swin/vit fixed 224)
+# --- GitHub autosave (each finished cell -> a per-family results branch) ---
+FAMILY            = '{family_dir}'
+AUTOSAVE_GITHUB   = True                               # set False to disable
+GH_RESULTS_BRANCH = 'colab-hires-{family_dir}'         # never touches main
 # Full grid below. To run ONE cell this session set e.g.:
 #   CELLS = [('type','transformer','cfdac_realimag')]
 CELLS = Z.all_cfdac_cells(MODELS, TASKS, FEATURES)
@@ -115,7 +119,36 @@ with h5py.File(EXP,'r') as f:
     H_exp=(f['frf_real'][:]+1j*f['frf_imag'][:]).astype('complex64')
 print('context ready; exp FRFs', H_exp.shape)"""
 
-RUN = """import torch
+RUN = """import torch, os, shutil, subprocess
+def _tok():
+    try:
+        from google.colab import userdata; return userdata.get('GH_TOKEN')
+    except Exception: return os.environ.get('GH_TOKEN')
+GH_TOKEN = _tok()
+if AUTOSAVE_GITHUB and not GH_TOKEN:
+    print('AUTOSAVE_GITHUB is on but no GH_TOKEN secret found -> results go to Drive/zip only.')
+
+def git_autosave(msg):
+    \"\"\"Force-push the full Drive snapshot of THIS family to its own results
+    branch. Per-family branch + subdir => never conflicts with main or other
+    families; always reflects the complete accumulated Drive state.\"\"\"
+    if not (AUTOSAVE_GITHUB and GH_TOKEN): return
+    repo='/content/PhD_LANL'; dst=os.path.join(repo,'results_hires_zoo',FAMILY)
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    shutil.copytree(str(OUT), dst, dirs_exist_ok=True)
+    cwd=os.getcwd(); os.chdir(repo)
+    subprocess.run(['git','config','user.email','colab@gpu.run'])
+    subprocess.run(['git','config','user.name','colab-gpu'])
+    subprocess.run(['git','add','-f',f'results_hires_zoo/{FAMILY}'])
+    if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
+        subprocess.run(['git','commit','-q','-m',msg])
+        url=f'https://{GH_TOKEN}@github.com/grcarmenaty/phd_lanl.git'
+        r=subprocess.run(['git','push','--force',url,f'HEAD:{GH_RESULTS_BRANCH}'],
+                         capture_output=True,text=True)
+        print('  autosave:', f'pushed -> {GH_RESULTS_BRANCH}' if r.returncode==0
+              else 'FAILED '+r.stderr[-160:])
+    os.chdir(cwd)
+
 for (task, model, feature) in CELLS:
     try:
         Z.run_cell(task, model, feature, syn_h5=SYN, exp_h5=EXP, out_dir=OUT, dev=DEV,
@@ -123,6 +156,7 @@ for (task, model, feature) in CELLS:
                    H_ref_exp=H_ref_exp, H_exp=H_exp, exp_names=exp_names,
                    make_split=make_split, epochs=EPOCHS, subsample=SUBSAMPLE,
                    batch=BATCH, vision_size=VISION_SIZE)
+        git_autosave(f'colab autosave [{FAMILY}]: {task}/{model}/{feature}')
     except Exception as e:
         print('CELL FAILED', task, model, feature, '::', repr(e)[:200])
         if torch.cuda.is_available(): torch.cuda.empty_cache()
