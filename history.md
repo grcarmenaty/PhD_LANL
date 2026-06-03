@@ -392,3 +392,46 @@ science. This day is the clearest demonstration in the whole history of the
 checkpoint-and-auto-commit strategy working as intended.
 
 ---
+
+## Phase 7 — CFDAC All-Models Completion & the Flossgraben Bridge Dataset (2026-05-15)
+
+**Goal.** Finish the `noisy_mixed` `cfdac_allmodels` HPO step, contain the remaining
+multi-channel CFDAC OOMs, and — a new strand — begin bringing in a **second, real-world
+structure**: the **Flossgraben bridge**, packaged via pyMODAL. (104 commits, again
+mostly automated cell auto-commits.)
+
+### 7.1 Multi-channel CFDAC OOM containment
+
+The lazy/streaming layer from Phase 5 handled most cases, but a few model × feature
+combinations still exhausted memory and were explicitly skipped:
+
+- `3460d23` `hpo_cfdac_allmodels`: **skip RF/XGB on multi-channel CFDAC** (OOM) — the
+  tree models can't stream and blow up on the wide multi-channel CFDAC tensors.
+- `84fd392` `resolution_sweep`: **skip multi-channel CFDAC variants** (OOM).
+- `c574dac` `resolution_sweep`: also skip the **legacy `cfdac` alias** (still OOMing).
+
+### 7.2 `noisy_mixed` cfdac_allmodels step complete
+
+- `ce23fde` **`noisy_mixed`: cfdac_allmodels step complete** — a major milestone, the
+  most expensive HPO step of the mixed-SNR study finished.
+
+### 7.3 The Flossgraben bridge enters the project
+
+- `a026a25` **`flossgraben_bridge`: add pyMODAL build script + catalogue assets** — the
+  first appearance of a real bridge structure, set up to be processed with the
+  **pyMODAL** toolkit. This seeds the "bridge dataset → pyMODAL" work that becomes a
+  dedicated branch later in the project, broadening the scope from the 3SBB lab
+  structure to field bridge data.
+
+### 7.4 The continuing grind
+
+As on May 14, the bulk of the day's commits are heartbeat auto-commits of finished HPO
+cells; the substantive commits above are the signal within that noise.
+
+**Outcome.** The headline mixed-SNR `cfdac_allmodels` step reached completion, the
+last multi-channel CFDAC OOM holdouts were contained by explicit skips (RF/XGB and the
+legacy alias can't stream, so they're excluded rather than crashing the sweep), and the
+project's scope expanded with the **Flossgraben bridge** + pyMODAL build pipeline — the
+beginning of generalising the methodology beyond the 3SBB laboratory model.
+
+---
