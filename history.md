@@ -772,3 +772,130 @@ paper's DT/IT stiffness-sensitivity methodology, and a 2.7 GB stale-weights clea
 the repository manageable.
 
 ---
+
+## Phase 14 — DT-Stratified 3-Way Verdict & the timm Vision Sweep (2026-06-02)
+
+**Goal.** Close out the v1/v2/v2a comparison with a DT-stratified verdict, then launch a
+much larger, disk-light **vision sweep over `timm` backbones across all 10 tasks**.
+(54 commits.)
+
+### 14.1 The DT-stratified three-way comparison
+
+- `e8ba437` v2 seed 202 complete — finishing the re-eval matrix from Phase 13.
+- `38c6455` **DT-stratified 3-way comparison: v1 vs v2 vs v2a.**
+- `e3b3d90` Feature-dimensional DT sweep + a multi-axis tier filter.
+- `e84e237` Reports: **DT-stratified 3-way verdict** + **supersession banners** (older
+  reports explicitly marked as superseded).
+- `885b64a` / `178b514` DT-stratified **vision-vs-bespoke** check on the v1 type task;
+  full **DT-3way report with 7 plots**.
+
+### 14.2 The timm vision-sweep pipeline and its supervisor
+
+- `2a50e52` **Vision-sweep pipeline: `timm` backbones, all 10 tasks, disk-light
+  streaming** — a scaled-up, memory-frugal redesign of the vision sweep.
+- `c2ea528` Add a **vision-sweep supervisor**: deps + **resumable relaunch** + periodic
+  commit/push (the resilience pattern, applied to the vision sweep).
+- `0f288b2` **Retry per (variant, seed) until 90/90 — survive OOM kills**: the sweep
+  self-heals around the recurring OOM problem rather than aborting.
+- `c6c8a7e` / `701a1c2` **Tighten the supervisor commit cadence** 600 s → 120 s → **30 s**
+  to "bound the untracked window" — i.e. minimise how much work a container reclamation
+  can lose. (A direct, late-project response to exactly the lost-work risk this whole
+  history is about.)
+
+### 14.3 New synth report and report-tree tidy
+
+- `ae683bf` / `a8e6019` Add **`REPORT_synth.md`** — synthetic-domain (pre-transfer)
+  training results, fleshed out with 5 plots, per-task explanations, and the sim-to-real
+  gap.
+- `6234c63` Move non-canonical reports to **`results/legacy/`**.
+- `88916e2` / `bcb19d0` Ignore regenerable derived feature files (`features_v2a.h5` ~3 GB,
+  v2/v2a per-seed dirs) — disk hygiene.
+
+### 14.4 The vision sweep grinds
+
+- `83c97ab` → `14e2fb3` The vision sweep auto-commits per-case progress, climbing **3 →
+  5 → 8 → 13 → 23 → 30 → 42 → 46 per-case files**.
+- `07668a8` **Refresh synth report — ConvNeXt v1/seed42 complete (30 cells)**.
+
+**Outcome.** The v1/v2/v2a question was settled with a **DT-stratified 3-way verdict**
+(7 plots, supersession banners on the old reports), and a new **`timm`-based vision
+sweep across all 10 tasks** was launched with a self-healing, OOM-surviving supervisor.
+Notably, the supervisor's commit cadence was tightened all the way to **every 30 seconds**
+specifically to bound how much progress an ephemeral-container reclamation could destroy.
+
+---
+
+## Phase 15 — High-Resolution CFDAC Pipeline (2026-06-03, final activity)
+
+**Goal.** Push the CFDAC features to a **higher frequency resolution (1601 bins)** and
+train the top-performing model per task on these hi-res features. This is where the
+most recent session was working when its container was reclaimed.
+
+### 15.1 Finishing the standard-res vision sweep
+
+- `bf6233c` / `14e2fb3` Vision sweep reaches **42 → 46 per-case files** (continuing the
+  Phase 14 sweep into the new day).
+
+### 15.2 High-resolution CFDAC scaffolding and build scripts
+
+- `df56b76` **WIP: high-res CFDAC scaffolding** — `cfdac_runtime` + `train_vision_hires`.
+- `eff5621` `generate_dataset`: add **`--n-t` / `--fs`** args to override the module's
+  `N_T` / `FS` for hi-res regeneration.
+- `e395212` **Hi-res CFDAC pipeline: build scripts for synth + exp features at 1601 bins.**
+- `646d239` **Hi-res top-cell-per-task training driver** (lazy CFDAC, 1601 resolution) —
+  trains only the best-performing model/feature per task, at high resolution, using the
+  lazy/streaming dataset layer from Phase 5.
+
+### 15.3 Preliminary hi-res results (last commits)
+
+- `acca875` Hi-res preliminary: **in-progress per-case results**.
+- `bb4a91f` / `fd17cf1` Hi-res preliminary: **cell results** (the final commit, touching
+  `results_hires/synth_test.json`).
+
+**Status at last activity.** The synthetic hi-res cell results were being generated and
+committed; the natural next step — visible in the working session's own notes — was
+**running experimental-data inference at hi-res** ("synth done, exp inference next"). All
+of this work is committed and pushed to `claude/rescue-failing-session-xjHZb`; only the
+live session context was lost when the container was reclaimed.
+
+---
+
+## Cross-cutting Themes
+
+A few threads run through the entire history and are worth stating explicitly:
+
+1. **Resilience against ephemeral containers.** From the watchdog (May 12) through the
+   `hpo_ping` heartbeat, the SessionStart auto-resume hook, idempotent skip-if-exists
+   logic, trial-level checkpointing, and finally a **30-second** supervisor commit
+   cadence (June 2), an enormous amount of engineering went into ensuring that
+   multi-hour, multi-day runs survive container reclamation and VM suspend. This is the
+   same infrastructure relevant to the "stuck generating cloud container" problem.
+
+2. **OOM is the recurring adversary.** The single most common failure mode was
+   out-of-memory on wide CFDAC tensors. The durable fix was the **lazy/streaming dataset
+   layer** (`LazyCFDACDataset`); where streaming was impossible (RF/XGB, some
+   CNN/Transformer-on-CFDAC cells) those combinations were **explicitly skipped** rather
+   than allowed to crash.
+
+3. **Disk hygiene vs. committed results.** Large derived artefacts (`features_*.h5`,
+   `models_*/*.pt`, per-seed dirs, 2.7 GB stale weights) were repeatedly gitignored or
+   purged. At the same time, *results JSON* were committed continuously for durability —
+   which is what makes the per-case `results_*/` directories large, and what drives the
+   big branch diffs.
+
+4. **Scientific discipline.** Pre-registered success criteria, multi-seed replication
+   that overturned single-seed headlines, accepted negative results (v2, v2a, the
+   mass-plate ensemble), multi-round "council review", deterministic seeding, and
+   fairer metrics (macro-F1 / balanced accuracy) characterise the later phases.
+
+5. **Two structures, one methodology.** The CFDAC/SCI calibration-then-ML approach was
+   developed on the **3SBB** laboratory model and then generalised to a real bridge —
+   first **Flossgraben**, then **HBTA** — via pyMODAL and differential-evolution
+   calibration.
+
+---
+
+*This history was reconstructed from the git commit record on 2026-06-03 and is
+authoritative for what was changed and when. Quantitative figures are quoted directly
+from commit messages. For the underlying reasoning and discussion, consult the
+individual session transcripts in the Claude Code web app.*
