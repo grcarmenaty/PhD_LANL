@@ -251,7 +251,10 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         cnt = np.bincount(y[i_tr], minlength=n_out).astype(np.float32)
         cls_w = torch.tensor(cnt.sum() / np.clip(cnt * n_out, 1e-6, None)).float().to(dev)
     lossf = nn.CrossEntropyLoss(weight=cls_w) if kind == "cls" else nn.MSELoss()
-    scaler = torch.cuda.amp.GradScaler(enabled=(dev.type == "cuda"))
+    try:                                   # torch>=2.3 spelling
+        scaler = torch.amp.GradScaler("cuda", enabled=(dev.type == "cuda"))
+    except (AttributeError, TypeError):    # older torch fallback
+        scaler = torch.cuda.amp.GradScaler(enabled=(dev.type == "cuda"))
 
     # vision: freeze backbone for `warmup` epochs (head-only), then unfreeze.
     def trainable_params():
