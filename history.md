@@ -282,3 +282,74 @@ sweeps survive container reclamation. The recorded OOM kill also flagged the
 `hpo_cfdac_allmodels` memory pressure that shapes later decisions.
 
 ---
+
+## Phase 5 — OOM Engineering, Lazy/Streaming Datasets & the Mixed-SNR Pivot (2026-05-13)
+
+**Goal.** Finish the multi-SNR noise ladder, but more importantly **fix the
+memory-exhaustion problems** that were killing CFDAC HPO and resolution sweeps, and
+make every long job resilient to VM suspend/reboot. Mid-day the strategy pivots from
+running one sweep per noise level to a single **mixed-training** dataset. (104 commits.)
+
+### 5.1 Finishing the SNR ladder (overnight 35 → 25 dB)
+
+- `04f1e24` 35 dB `hpo_cfdac_allmodels` **DONE (189 cells**; "OOM at end is harmless").
+- `46fb80c` 35 dB indicators DONE; **eval/transfer FAILED** — missing
+  `experimental_features_balanced.h5` (a data-dependency gap, fixed later as "B.4").
+- `4187336` 35 dB done (resolution **OOM at trial 81/~143**, partial); **25 dB HPO
+  started** and progresses to ~83 all-models cells.
+
+### 5.2 The OOM fix — `LazyCFDACDataset` and true streaming
+
+The repeated OOMs were traced to loading entire CFDAC tensors into memory. The fix was
+a lazy, streaming data layer:
+
+- `91cf1b4` **OOM fix: switch CFDAC HPO + resolution_sweep to `LazyCFDACDataset`.**
+- `a7d4543` / `8dcaf35` Patched code runs `cfdac_all/imag/mag/magphase` **without OOM**,
+  pushing **past the prior trial-81 OOM** to trial 92/945 and beyond.
+- `38efbc0` `lazy_datasets`: add **reshape modes** (`conv2d`/`conv3d`/`seq`/`flat`) for
+  true streaming via `DataLoader`.
+- `1eda38b` / `41eefed` `hpo_cfdac_allmodels` and `hpo_cfdac_variants` now **stream**
+  CNN/Transformer/MLP via `DataLoader` over `LazyCFDACDataset`.
+- `acafff1` / `3066b80` `hpo.py`: **lazy-load features per cell** (pymodal-style
+  `Dataset`) **to survive VM suspend**.
+- `33e95b2` `hpo.py`: **sort the plan by feature cost** (`modal < frf_mag < timeseries
+  < cfdac`) so cheap cells finish first — "early wins" before expensive CFDAC work.
+
+### 5.3 The mixed-SNR training pivot
+
+- `66ca53e` **Halt the per-level sweep** (set a `PAUSE_SWEEP` flag) and **pivot to a
+  mixed-training design**: clean + 5 noisy levels = **60k samples**.
+- `7fcbb35` Mixed-training infrastructure: a **VDS (virtual dataset) builder** + a
+  per-SNR build helper.
+- `77035c5` / `4c56910` Drop the per-level results dirs; restore the tracked
+  `experimental_frfs_chunks`; gitignore the large `features_mixed.h5` VDS.
+
+### 5.4 Heartbeat, auto-relaunch, and auto-commit cadence
+
+To keep the `noisy_mixed` HPO grinding unattended across reboots, the monitoring layer
+matured into a heartbeat + auto-commit system:
+
+- `dd3d485` **`hpo_ping`: a 10-minute heartbeat + auto-relaunch helper.**
+- `57b8de3` `session-start`: nudge Claude to **re-arm the 10-min ping after VM reboot**.
+- `ceb809f` / `f43b5b5` Verbose per-tick status block; fix the cell counter (the script
+  writes `task__model__feat.json`, not `best.json`).
+- `5ed2ad4` `hpo_ping.sh`: **auto-commit new `noisy_mixed` artefacts each tick.**
+- `803a49a` Split into **two cadences** — a 60 s auto-commit and a 600 s verbose ping.
+- `347c9a5` Show **Barcelona local time** (Europe/Madrid) in the ping instead of UTC.
+
+### 5.5 noisy_mixed grinds through the day
+
+From `bf15418` onward the `noisy_mixed` HPO works through the task/model/feature grid,
+auto-committing "+2 cell artefacts" every ~10–20 minutes for the rest of the day
+(modal cells first, then severity/type across sklearn/MLP/RF/XGB). The day closes with
+an **orchestrator script** (`495afab`) wiring the hook + ping together.
+
+**Outcome.** The two defining changes of the project landed here: (1) a **lazy,
+streaming dataset layer** (`LazyCFDACDataset` + reshape modes + per-cell lazy loading)
+that eliminated the OOM kills and let jobs survive VM suspend; and (2) the strategic
+**pivot to a single mixed-SNR (60k-sample) training set** instead of one sweep per
+noise level. The monitoring layer also reached its mature form: a self-relaunching
+heartbeat that auto-commits results every minute — maximising survivable progress in
+ephemeral containers.
+
+---
