@@ -353,3 +353,42 @@ heartbeat that auto-commits results every minute — maximising survivable progr
 ephemeral containers.
 
 ---
+
+## Phase 6 — The `noisy_mixed` HPO Grind & Checkpointing Hardening (2026-05-14)
+
+**Goal.** Drive the mixed-SNR (60k-sample) HPO to completion across the full
+task × model × feature grid, while hardening the checkpoint/ETA machinery so the
+unattended run survives VM reboots. (132 commits — the large majority are automated
+`noisy_mixed: auto-commit N cell artefact change(s)` ticks.)
+
+### 6.1 Substantive engineering commits
+
+Buried among the auto-commits, a handful of commits did the real work of the day:
+
+- `b042959` `hpo_cfdac_variants`: fix a **`NameError(X_tr)`** in the model-save path.
+- `c4d2e87` **Trial-level checkpointing** for the CFDAC HPO — VM-reboot resilience at
+  finer granularity than per-cell (a resumed run no longer loses an in-progress cell's
+  completed trials).
+- `b9c8aac` `hpo_ping`: add an **ETA line per ping** (remaining trials in the active step).
+- `74d5b69` `hpo_ping`: **auto-commit *modified* artefacts**, not just new files — so
+  updated `best.json` cells are captured, not only first-write ones.
+- `521c160` Milestone: `severity__cnn2d__cfdac_magphase` cell complete.
+- `1647e90` **Extend the ETA** estimator to cover `hpo_cfdac_allmodels` (step 3, 140 cells).
+
+### 6.2 The unattended grind
+
+The remainder of the day is the heartbeat doing its job: ~120 automated commits, each
+capturing 1–4 newly-finished HPO cells roughly every few minutes, occasionally pausing
+for longer (e.g. the 10:35→12:25 and 13:24→16:04 gaps, consistent with container
+suspensions that the SessionStart hook later auto-resumed). This is precisely the
+pattern the watchdog/ping system was designed to produce — **continuous, durable,
+self-healing progress** that does not depend on a human or a live session being present.
+
+**Outcome.** The `noisy_mixed` HPO advanced steadily through its grid with no data loss
+across multiple suspend/resume cycles, validating the resilience design from Phase 5.
+The only hand-written changes were bug fixes (`X_tr` NameError), a finer **trial-level
+checkpoint** granularity, and **ETA reporting** — incremental hardening rather than new
+science. This day is the clearest demonstration in the whole history of the
+checkpoint-and-auto-commit strategy working as intended.
+
+---
