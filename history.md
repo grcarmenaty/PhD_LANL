@@ -605,3 +605,104 @@ classification — the technical foundation for the large vision sweep that beco
 project's focus in June.
 
 ---
+
+## Phase 11 — Vision Sweep, "Trenchcoat" Decomposition & Report Consolidation (2026-05-19 → 2026-05-20)
+
+**Goal.** Complete the first full vision sweep, explore a binary-decomposition trick to
+improve classification, run severity-stratified analysis, and consolidate the sprawling
+report set — while tightening reproducibility.
+
+### 11.1 First vision sweep and its report
+
+- `d38f303` **Vision sweep complete: 5 models × 3 features × type (15 cells).**
+- `58c73dd` Add **`REPORT_vision.md`** — 5 vision backbones × 3 CFDAC features, synth-only.
+
+### 11.2 The "trenchcoat" binary decomposition
+
+- `25635dd` **Vision sweep v2: Tier-1 fixes + binary-"trenchcoat" decomposition** —
+  decomposing a multi-class problem into a stack of binary classifiers ("a trenchcoat
+  full of binaries").
+- `9203899` Trenchcoat: **three aggregator strategies** + a diagnostic plot suite.
+- `219854a` Add **`REPORT_vision_v2.md`** — Tier-1 + trenchcoat results, 5 plots.
+
+### 11.3 Severity-stratified analysis and report set consolidation
+
+- `1de53e7` Severity-stratified analysis: **accuracy vs severity-threshold curves**.
+- `348b8d3` v2: widen to 12 cells (non-vision + vision + trenchcoat) and **correct the
+  prior conclusion** — an explicit self-correction.
+- `06eb330` Add **`REPORT_full.md`** (comprehensive catalogue) + **`REPORT_definitive.md`**
+  (executive summary).
+- `30f0aa0` `REPORT_definitive.md`: add **physics-aware augmentation**; drop the joint
+  synth+exp fine-tune from the headline recommendation.
+
+### 11.4 Housekeeping and reproducibility (May 20)
+
+- `9c87a0a` **Discard the abandoned per-SNR noise sweep** (superseded by mixed-SNR).
+- `ac1542d` / `c7f8e88` Bring **all report figures under the 2000px image limit** (so
+  they render/are readable in tooling that caps image dimensions).
+- `a40ed6d` `hpo.py`: **deterministic torch seeding**; eval adds **macro-F1 / balanced
+  accuracy** (fairer metrics for imbalanced classes).
+- `87815a3` / `c1f114e` / `39e391d` WIP: a **controlled A/B sweep** — plain vs augmented
+  features — with the plain arm seeded and completed, the augmented arm resuming.
+
+**Outcome.** The first vision sweep produced `REPORT_vision.md`; the trenchcoat
+binary-decomposition idea was implemented and reported (v2); severity-stratified
+analysis prompted an honest correction of an earlier conclusion; the report set was
+consolidated into a comprehensive `REPORT_full.md` plus an executive `REPORT_definitive.md`.
+Reproducibility hardened with **deterministic seeding** and **macro-F1 / balanced-accuracy**
+metrics, and a **controlled A/B (plain vs augmented)** experiment was launched.
+
+---
+
+## Phase 12 — Seeded A/B Evidence & the Council-Reviewed Definitive Report (2026-05-21)
+
+**Goal.** Turn the A/B experiment into rigorous, seeded, reproducible evidence; restructure
+the reports around four clear diagnosis goals; and harden everything through several rounds
+of "council" review. (58 commits — most are the ~15-min auto-checkpoints of the seeded
+`hpo_cfdac` re-run.)
+
+### 12.1 Controlled A/B evidence
+
+- `bfa102b` **Controlled A/B evidence:** seeded plain vs augmented + baseline **macro-F1
+  re-score** — a like-for-like comparison with fixed seeds.
+- `f3ceeaf` `hpo_cfdac_*`: **deterministic torch seeding** (consistency with `hpo.py`).
+
+### 12.2 The "council review" loop on `REPORT_definitive.md`
+
+A multi-round internal review/verification process polished the definitive report:
+
+- `52f43a5` Methodology-corrected edition.
+- `d04b83f` Address **council review (round 1)**.
+- `c075b36` Address **council verification (round 2)**.
+- `05cf49b` **Final-gate polish (round 3)**.
+
+### 12.3 Restructure around the four diagnosis goals
+
+- `f4f505f` / `f0417f8` / `22d61e7` Restructure `REPORT_definitive.md` and `REPORT_full.md`,
+  then **consolidate the whole report set around the four diagnosis goals**.
+- `b43d449` Reports: cell grid, deployment-data assumption, **honest high-severity eval**.
+- `b8b0593` Iteration 1: characterise **mass-plate location** (recommendation 2).
+- `8535ef6` Iteration 2: consistency fixes + reproducible artefacts.
+
+### 12.4 The seeded full re-run
+
+- `f30a7b8` → `c8b9fe0` A long seeded `hpo_cfdac` re-run, auto-checkpointed every ~15 min
+  through the day (with `hpo_cfdac_variants` done mid-run).
+- `9861967` `hpo_cfdac_allmodels` partial (**326 cells**, pre-relaunch).
+- `ca970fe` / `6b13b4b` **Seeded `hpo_cfdac_allmodels` done; full seeded sweep +
+  evaluation complete.**
+
+### 12.5 Folding the seeded results back into the reports
+
+- `0c06d8f` / `78d9fc1` Fold the seeded `hpo_cfdac` sweep into `REPORT_definitive.md`
+  and `REPORT_full.md`.
+- `f4cbbd6` / `d02cc47` Iteration 3: surface **one-vs-rest type detection**, fix the
+  detection cell, and propagate the findings.
+
+**Outcome.** The project reached a **rigorously reproducible** state: a fully **seeded**
+HPO sweep re-run end to end, a controlled **A/B (plain vs augmented)** comparison on fixed
+seeds, fairer **macro-F1 / balanced-accuracy** metrics, and a `REPORT_definitive.md`
+hardened through three rounds of council review and restructured (with `REPORT_full.md`)
+around four explicit diagnosis goals. This is the project's "publishable-rigor" milestone.
+
+---
