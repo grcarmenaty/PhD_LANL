@@ -895,7 +895,168 @@ A few threads run through the entire history and are worth stating explicitly:
 
 ---
 
-*This history was reconstructed from the git commit record on 2026-06-03 and is
+*Part I above was reconstructed from the git commit record on 2026-06-03 and is
 authoritative for what was changed and when. Quantitative figures are quoted directly
-from commit messages. For the underlying reasoning and discussion, consult the
-individual session transcripts in the Claude Code web app.*
+from commit messages. **Part II below** adds the human-driven narrative recovered from
+the actual Claude Code web-session transcripts (exported via the session event API),
+capturing the reasoning, instructions, and operational reality the commits don't show.*
+
+---
+
+# Part II — Session Narratives (recovered from transcripts)
+
+> Reconstructed from the full event streams of the Claude Code web sessions
+> (exported through the `/v1/sessions/<id>/events` API). These consolidate **what was
+> asked and why**, complementing the commit-based phases above.
+
+## Session `015b788` — The Master Rescue & Autonomous-Improvement Session (2026-05-20 → 2026-06-03)
+
+**Scale.** 33,934 events over ~14 days (≈10,200 assistant turns, ≈4,200 user events,
+≈2,800 result events). This single session is the spine of the entire final fortnight —
+it began as a rescue of a *different* failed session and grew into a continuous,
+council-driven, compute-heavy improvement loop that produced almost all of the May 20 →
+June 3 commits (Phases 11–15).
+
+### Origin — why it exists
+
+The session opened (05-20 08:57) with:
+> *"https://claude.ai/code/session_015ja563… This session started failing. Assess why,
+> rescue everything from there, push into main, be prepared to continue."*
+
+The root cause of the original failure, in the user's words (09:10):
+> *"An image in the conversation exceeds the dimension limit for many-image requests
+> (2000px). Start a new session with fewer images."*
+
+So `session_015ja563` (the original ML workhorse) **died on the 2000px many-image
+limit** — which is exactly why the late-May commits repeatedly forced every report
+figure under 2000px. `015b788` was spun up to rescue that work and carry it forward.
+
+### Arc 1 — the two reports (05-20)
+
+The first mandate (12:16): a comprehensive **`REPORT_full.md`** (a graph for every
+experiment, all figures inline) plus a polished **`REPORT_definitive.md`** (problem →
+improvements → limitations → solution → implementation → results, with the **best
+synth-trained / real-tested** models). Two corrections the user demanded immediately:
+- **Physics-aware augmentation** (`variation_v2.py` widened domain randomisation +
+  `build_augmented_chunks.py`) had been *underplayed* — it got its own section.
+- The **joint synth+exp fine-tune** story was **cut** from the definitive report — the
+  canonical claim became strictly *synth-only training, real-data testing*. The headline
+  synth-only numbers settled around: binary 0.825 (= class-prior floor), type macro
+  ≈0.51, type@severity≥0.7 ≈0.66, severity R² ≈0.18, col/mass-location ≈0.51–0.53.
+
+### Arc 2 — the 5-agent council and the methodology reckoning (05-20 → 05-21)
+
+The defining instruction (05-20 16:02):
+> *"have a council of 5 agents, one very critical, one very adulatory, the remaining
+> three in between, evaluate it. Give them the real data and tell them to stick to it.
+> After that, assess and continue until nothing else can be improved."*
+
+This established the recurring **5-reviewer council pattern** (harsh critic, appreciative,
+scientific-rigor, clarity, completeness — each forced to *verify every number against the
+result JSONs*). Successive council rounds drove the project's biggest corrections:
+- The HPO pipeline was **unseeded** → seeding added across `hpo.py` / `hpo_cfdac_*`.
+- Accuracy headlines were **class-prior collapse** → switched to **macro-F1 / balanced
+  accuracy**; a "best" cell was exposed as a non-reproducible fluke.
+- The augmentation A/B was **single-seed and confounded** (20k aug vs 10k plain) →
+  reframed from "negative result" to "predicted lift not observed; inconclusive."
+
+The user then set the autonomous loop (05-21 08:28):
+> *"Follow recommendations. Once all recommendations are done, summon the council and
+> draft new recommendations. Follow those and repeat. Stop once you're not able to come
+> up with recommendations."* — plus *"Perform even heavy compute ones, save regular
+> checkpoints."*
+
+### Arc 3 — seeded sweep & multi-seed validation (05-21 → 05-24)
+
+A **seeded 244-cell sweep** (`experimental_full_evaluation_seeded.json`) became canonical,
+then a **3-seed validation** (seeds 42/101/202, `multiseed_summary.json`). The textbook
+result: the iteration-3 headline **`is_bolt` 0.71 was a single-seed fluke** (seeds 101/202
+gave 0.49/0.51); but the multi-seed view *also* found the genuinely **robust survivors** —
+modal-MLP one-vs-rest cells (`is_hole`/mlp/modal ≈0.661 ± 0.004). Measured noise band:
+median sd 0.011, p90 ≈0.071.
+
+### Arc 4 — the v2 / v2a physics ablations (05-24 → 06-02)
+
+To test whether richer synthetic physics helps, three variants were compared on equal
+footing (3 seeds each): **v1** (baseline), **v2** (widened DR + asymmetric crack/hole
+damage), and **v2a** (v1 DR + asymmetric damage — the disentangling ablation). Verdict:
+**v2 hurt**, and v2a isolated the cause — the **widened domain randomisation**, not the
+asymmetric geometry, was the harmful driver. (This required a `SampleParamsV2` schema
+bridge so `generate_dataset.py --variation v2` could dump scalar params from per-end/
+per-mode arrays.)
+
+### Arc 5 — DT-stratified analysis (the user's core hypothesis) (05-28 → 06-02)
+
+Prompted by a reference paper, the user pushed a **damage-threshold (DT) stratification**:
+> *"apply metrics on ALL, not only is_bolt and mass_location. My hunch is that once DT
+> sweeps are done, we will see learning across more models and use cases, only they only
+> work for high damage scenarios."*
+
+and a feature-dimensional version:
+> *"DT sweeps based on feature dimensions… mass, tightness, column section, crack depth,
+> hole size… For is_pristine use a multi-axis threshold to see when it gets interesting
+> based on what damaged spectra you're excluding."*
+
+This produced `dt_compare_variants.py`, `dt_feature_sweep.py` (tiers all/med+/severe), a
+**DT-stratified 3-way verdict** (`REPORT_dt_3way_*.md`, 7 plots), and confirmed the
+hypothesis shape: detection (binary/is_pristine) flat-drops under restriction (class
+collapse — the user caught a suspicious 0.825 binary as all-damaged), while signal
+concentrates in high-damage regimes. The user also caught that **0.825 binary was class
+collapse**, not signal.
+
+### Arc 6 — vision-model transfer learning (06-02)
+
+The user repeatedly flagged the biggest omission:
+> *"I see vision model transfer learning wasn't used, that's where my paper found
+> strongest gains."*
+
+→ the `timm` vision sweep (ResNet50, EfficientNet-B0, ConvNeXt-T, Swin-T, ViT-B/16),
+extended to the **top-3 backbones across all applicable cells**, plus `REPORT_synth.md`
+(pre-transfer synthetic-domain results) and a move of non-canonical reports to
+`results/legacy/`.
+
+### Arc 7 — high-resolution CFDAC (06-03, the final push)
+
+A late pivot on resolution:
+> *"what's the CFDAC resolution you've been using?" → "Why not full? Experiments can have
+> CFDACs of up to 1601×1601" → "Pause the sweep, I want it now" → "regenerate synth, more
+> simulation time, whatever is needed. I want for each task, top CFDAC model, trained on
+> full 1601 resolution synth, tested on both synth and non-synth."*
+
+This is the **hi-res CFDAC pipeline** (`cfdac_runtime`, `train_vision_hires`, 1601-bin
+features, top-cell-per-task driver) — the work that was mid-flight when the container was
+reclaimed (Phase 15). Final exchanges clarified channel counts (experimental has many
+channels) and asked *"why no GPU?"* — the recurring constraint below.
+
+### The operational saga — fighting container reclamation
+
+The transcript's single most pervasive theme isn't ML at all; it's **keeping the session
+alive on an ephemeral, idle-suspending, GPU-less 4-core container.** The user typed
+*"keep going"* / *"status report"* / *"How is it going?"* **dozens of times**, plus
+escalating nudges: *"4h ago, re-think how not to let this die"*, *"what do you recommend
+to keep this alive? Diagnose, solve"*, *"Hey I'm going to go sleep. Please stay running
+for the night."* The engineering response evolved through:
+- a **heartbeat protocol** — *"read nothing and say hi, nothing else, every 15 minutes,
+  until the task finishes"* (later realised **only tool calls reset the idle timer**,
+  not text);
+- **Monitor-based keep-alive** + **auto-restart** drivers with PID files;
+- bug fixes for **`pgrep` self-matching** (switched to `kill -0 $(cat …pid)` and
+  `awk '$2==1'` init-parent matching);
+- a driver `rm -rf models` **cleanup bug** that overwrote a good seed result with a
+  2-byte empty JSON (recovered from git);
+- finally a **`/loop`** self-pacing supervisor and a **30-second** commit cadence.
+
+This is the real-world counterpart to the watchdog/checkpoint infrastructure documented
+in Phases 4–6 — and the direct backstory to the "stuck generating cloud container"
+problem that started this whole investigation. The user also twice asked to *"clean your
+context by removing pings and status reports"* — which can't be done to a fixed
+transcript, and is precisely why this `history.md` exists.
+
+### Context compactions
+
+The session ran out of context and **auto-compacted at least twice** (05-24 and 06-02),
+each time regenerating a detailed state summary and resuming — itself a testament to the
+session's length.
+
+*(Sessions `015ja563` — the original failed ML workhorse — and `01PJh21S` to be added
+from their transcripts when exported.)*
