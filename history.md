@@ -706,3 +706,69 @@ hardened through three rounds of council review and restructured (with `REPORT_f
 around four explicit diagnosis goals. This is the project's "publishable-rigor" milestone.
 
 ---
+
+## Phase 13 — Multi-Seed Variance, Pre-Registered Ablations & Negative Results (2026-05-22 → 2026-06-01)
+
+**Goal.** Replace single-run claims with **multi-seed variance estimates** (seeds 42 /
+101 / 202), and test several dataset-improvement hypotheses under **pre-registered
+success criteria** — accepting the verdicts even when negative. This ~11-day stretch is
+sparse in commit count (long runs, one checkpoint per completed seed) but high in
+scientific rigour.
+
+### 13.1 Multi-seed variance and a reversed headline
+
+- `3d0c7a6` `hpo.py` / `hpo_cfdac_*`: add **`--seed`** for multi-seed variance runs.
+- `0c7894c` → `3391e17` Seeds **101** and **202** complete (over several days).
+- `9bfca5f` **Multi-seed (3 seeds) complete — reverses the iteration-3 `is_bolt`
+  headline**: a conclusion that held for one seed did not survive replication.
+- `5f226c7` / `43fac83` Iteration 4: propagate the reversal to `REPORT_full`, add a
+  severity SD column, and **re-frame one-vs-rest around robust modal-MLP cells**.
+
+### 13.2 The V2 dataset experiment — pre-registered and REJECTED
+
+- `7083615` `generate_dataset`: a **V2 schema bridge** (scalar means + array fields).
+- `d88ad6c` / `9fe3329` **Pre-register v2 success criteria** + a `compare_v1_v2.py`
+  harness that judges against those criteria.
+- `e5a3b0c` / `3bbee35` **v2 seed-42 REJECT:** the widened damage-ratio (DR) range
+  **collapses the modal-MLP one-vs-rest cells**.
+- `ee3f3f1` / `f70935c` Report the rejection; recommend a **v2a/v2b ablation** to
+  disentangle *DR widening* from *asymmetric damage*.
+
+### 13.3 The V2a ablation — also REJECTED, but it isolates the cause
+
+- `be70907` **v2a ablation:** v1 DR + v2 **asymmetric Crack/Hole damage**; pre-register
+  criteria. `781b32a` parameterises the comparison harness via `--label`.
+- `f0483f5` Seed 42 only → **INCONCLUSIVE**, awaiting seeds 101 + 202.
+- `a7d3ae3` 2-seed decision: **REJECT** (`is_hole` floor regressed 0.661 → 0.642, miss
+  by 0.011 — a quantified, narrow miss).
+- `affe029` **v2a REJECTED across 3 seeds:** asymmetric damage is *net-harmful*; the
+  **widened DR was the dominant (harmful) v2 driver** — the ablation successfully
+  attributes the v2 failure.
+
+### 13.4 The modal-gap diagnostic and paper-style sensitivity eval
+
+- `c637248` **Modal-gap diagnostic:** the synth-real gap is an **absolute-magnitude
+  covariate shift that inverts the discriminant** — a precise mechanistic explanation
+  of why synth-trained models mis-transfer to experimental data.
+- `4cff853` Add a **DT/IT-swept evaluation:** accuracy vs minimum stiffness reduction,
+  following the **paper's sensitivity methodology** — aligning the project's evaluation
+  with the reference literature.
+
+### 13.5 Disk hygiene and the v1/v2 re-evaluation
+
+- `b278810` **Remove stale single-seed v1 model weights (2.7 GB)** — predictions
+  retained in `_seeded.json`; v1 regenerated fresh for the DT re-eval. (A deliberate
+  large-artefact cleanup — directly relevant to keeping containers lean.)
+- `0d9a71a` → `05ef475` A multi-day **re-evaluation** under the new DT-swept methodology:
+  v1 seeds 42/101/202 and v2 seeds 42/101 complete, one checkpoint per seed.
+
+**Outcome.** This phase is the project at its most scientifically disciplined: a
+single-seed headline (`is_bolt`) was **overturned by replication**; two pre-registered
+dataset hypotheses (**v2** widened-DR and **v2a** asymmetric-damage) were **rejected on
+their own stated criteria**, with the ablation cleanly attributing v2's failure to DR
+widening; and the sim-to-real gap got a precise mechanistic account (**absolute-magnitude
+covariate shift inverting the discriminant**). Evaluation was realigned to the reference
+paper's DT/IT stiffness-sensitivity methodology, and a 2.7 GB stale-weights cleanup kept
+the repository manageable.
+
+---
