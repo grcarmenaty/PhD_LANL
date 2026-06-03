@@ -70,5 +70,17 @@
     "synth_test_metric": 0.84,
     "synth_test_macro_f1": 0.75,
     "runtime_s": 2471.4748842716217
+  },
+  "is_crack_convnext_tiny_cfdac_realimag_hires1601": {
+    "task": "is_crack",
+    "model": "convnext_tiny",
+    "feature": "cfdac_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "synth_val": 0.4433497536945813,
+    "synth_test_metric": 0.7955555555555556,
+    "synth_test_macro_f1": 0.4430693069306931,
+    "runtime_s": 939.1657264232635
   }
 }
