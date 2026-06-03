@@ -221,3 +221,64 @@ consolidated `REPORT.md` with inline figures. This set the stage for the large
 multi-day sweeps that follow.
 
 ---
+
+## Phase 4 — Transfer Learning, Resolution & Noise Sweeps; the Watchdog (2026-05-12)
+
+**Goal.** Systematically probe how the ML pipeline behaves under three axes of
+variation — **transfer learning** (synth→exp), **frequency resolution**, and
+**measurement noise** — and build the automation needed to run these long sweeps
+unattended across ephemeral web-session containers. (73 commits this day.)
+
+### 4.1 Transfer-learning and resolution sweeps
+
+- `7219aa7` Drop unbalanced refs + add **transfer-learning** and **resolution-sweep**
+  scaffolding.
+- `dd1d31c` **Transfer-learning sweep (850 rows)** + resolution-sweep scaffolding.
+- `544e14f` → `27dbd29` **Resolution sweep** runs as a background job, writing §11 of
+  the report incrementally via a string of checkpoints (25 → 34 → 268 → 293 → 331 →
+  360 → 382 → 410 cells). **Final: resolution sweep complete, 410/495 cells.**
+- `44dab45` Plots + detailed analysis for §10 (transfer learning) and §11 (resolution).
+
+### 4.2 Noise sweep — Gaussian noise on the timeseries
+
+- `ca80d5c` **Noise-sweep framework** — add Gaussian noise to the timeseries and do a
+  **full re-extraction** of features/CFDAC from the noised signals.
+- `94e9bb3` → `1461def` The **20 dB** case runs first: features + CFDAC complete, then
+  HPO checkpoints climb 22 → 38 → 52 → 66 → … → **189 HPO cells complete**.
+- `c2ea360` **OOM event recorded:** `hpo_cfdac_allmodels` killed (out-of-memory after
+  2 h 14 m), but **189 cells were saved** thanks to checkpointing; indicators continued
+  at 52/66 — an early sign that the all-models CFDAC HPO is memory-hungry.
+- `3b6dcb9` → `0fab7ea` 20 dB indicators + balanced eval done; transfer learning runs.
+- `93c2182` **20 dB pipeline complete; launched a 35 / 25 / 15 / 10 dB sweep** — the
+  noise study is generalised to a multi-SNR ladder.
+
+### 4.3 The watchdog and SessionStart auto-resume — surviving ephemeral containers
+
+This is the pivotal infrastructure of the day: the work was being run in ephemeral
+web-session containers that get reclaimed, so a **watchdog** and a **SessionStart hook**
+were built to make the long sweeps self-resuming and self-checkpointing:
+
+- `99cb4ab` **`watchdog` auto-checkpoint** commits begin (committed under a `watchdog`
+  author identity), tagging each with the sweep PID and a UTC timestamp.
+- `f83a8f8` Add the **watchdog script** + ignore local sweep-launcher logs.
+- `621ace9` **`SessionStart` hook: install deps + auto-resume the noise sweep on web
+  sessions** — so a freshly-provisioned container automatically picks the sweep back up.
+- `75b3675` HPO / indicator regression now **skip cells whose JSON already exists** —
+  idempotent resume, so a restarted sweep doesn't redo finished work.
+
+### 4.4 35 dB sweep grinds through the night
+
+From `b2f03fa` onward the 35 dB stage runs overnight, with the watchdog committing an
+auto-checkpoint roughly every ~10 minutes and Claude committing per-cell progress in
+between. The HPO cells advance through the task families that recur throughout the
+project — **severity**, **col_location**, **mass_location**, the CFDAC variants, and
+the all-models CFDAC HPO (89 → 109 → 127 cells by end of day).
+
+**Outcome.** May 12 established both the **scientific sweep matrix** (transfer learning,
+resolution 410/495, and a multi-SNR noise ladder starting at 20 dB and 35 dB) and,
+critically, the **resilience infrastructure** — watchdog auto-checkpointing + a
+SessionStart auto-resume hook + idempotent skip-if-exists logic — that let multi-hour
+sweeps survive container reclamation. The recorded OOM kill also flagged the
+`hpo_cfdac_allmodels` memory pressure that shapes later decisions.
+
+---
