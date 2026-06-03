@@ -77,3 +77,5 @@ dataset/experimental_features_hires.h5
 
 # transient hires sweep runner stdout
 results_hires/sweep.nohup
+results_hires/sweep.log
+results_hires/.sweep_complete

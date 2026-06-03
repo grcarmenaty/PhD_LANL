@@ -16,8 +16,9 @@ for task in "${TASKS[@]}"; do
   python3 ml_pipeline/train_hires_top_cells.py --tasks "$task" >> "$LOG" 2>&1
   rc=$?
   echo "--- [$task] python rc=$rc $(date -u +%H:%M:%S)UTC ---" | tee -a "$LOG"
-  # Commit whatever landed (per_case JSON + synth_test.json + log).
-  git add results_hires/per_case/*.json results_hires/synth_test.json results_hires/sweep.log 2>/dev/null
+  # Commit whatever landed (result JSONs only; sweep.log is gitignored so
+  # the working tree stays clean between cells).
+  git add results_hires/per_case/*.json results_hires/synth_test.json 2>/dev/null
   if ! git diff --cached --quiet; then
     git commit -q -m "hires sweep: ${task} cell @1601 (synth + exp)" \
       && echo "[$task] committed" | tee -a "$LOG"
