@@ -228,11 +228,23 @@ def main() -> None:
     parser.add_argument("--max-mb",   type=float, default=MAX_CHUNK_MB)
     parser.add_argument("--limit",    type=int, default=None,
                           help="If set, only generate the first N samples (smoke test).")
+    parser.add_argument("--n-t",      type=int, default=None,
+                          help="Override samples-per-signal (default 1024). "
+                                "4096 = 16 s simulation, gives 2049 FFT bins.")
+    parser.add_argument("--fs",       type=float, default=None,
+                          help="Override sampling frequency Hz (default 256).")
     args = parser.parse_args()
 
+    global N_T, FS, T_DURATION
+    if args.n_t is not None:
+        N_T = int(args.n_t)
+    if args.fs is not None:
+        FS = float(args.fs)
+    T_DURATION = N_T / FS
+
     rng = np.random.default_rng(args.seed)
-    time_axis, chirp = make_chirp()
-    freq_array       = fft_freqs()
+    time_axis, chirp = make_chirp(n_t=N_T, fs=FS)
+    freq_array       = fft_freqs(n_t=N_T, fs=FS)
 
     schedule = expand_samples(args.per_type)
     # Shuffle the schedule so each chunk contains a class-balanced mix.
