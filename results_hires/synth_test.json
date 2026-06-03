@@ -18,9 +18,9 @@
     "n_target": 1601,
     "kind": "cls",
     "n_out": 6,
-    "synth_val": 0.1335008009319936,
-    "synth_test_metric": 0.2577777777777778,
-    "synth_test_macro_f1": 0.13522549438042394,
-    "runtime_s": 855.0276577472687
+    "synth_val": 0.05979713465146006,
+    "synth_test_metric": 0.17777777777777778,
+    "synth_test_macro_f1": 0.0696494621466626,
+    "runtime_s": 1782.293564081192
   }
 }
