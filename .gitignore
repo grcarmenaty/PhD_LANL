@@ -74,3 +74,6 @@ results/experimental_full_per_case_plain.json
 dataset_hires/
 dataset/features_hires.h5
 dataset/experimental_features_hires.h5
+
+# transient hires sweep runner stdout
+results_hires/sweep.nohup
