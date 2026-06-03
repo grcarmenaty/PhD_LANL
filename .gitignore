@@ -69,3 +69,8 @@ results_v2a_seed*/
 results/experimental_full_per_case_aug.json
 results/experimental_full_per_case_basescore.json
 results/experimental_full_per_case_plain.json
+
+# Hires CFDAC preliminary derived data (regenerable from chunks)
+dataset_hires/
+dataset/features_hires.h5
+dataset/experimental_features_hires.h5
