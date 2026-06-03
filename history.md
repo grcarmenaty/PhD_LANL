@@ -1058,5 +1058,141 @@ The session ran out of context and **auto-compacted at least twice** (05-24 and 
 each time regenerating a detailed state summary and resuming — itself a testament to the
 session's length.
 
-*(Sessions `015ja563` — the original failed ML workhorse — and `01PJh21S` to be added
-from their transcripts when exported.)*
+## Session `01PJh21S` — Genesis: Dataset, First ML Pipeline & CFDAC Variants (2026-05-10 → 2026-05-13)
+
+**Scale.** 7,206 events over ~3 days (≈3,200 assistant turns). This is the **earliest**
+session — where the machine-learning side of the project was born. It maps onto Phases
+3–5 and ran on branch `claude/create-ml-dataset-rMOoj`.
+
+### The founding request
+
+The very first instruction (05-10 23:21):
+> *"create a dataset of 10000 samples, with all cases having an equal amount of samples,
+> distributed in files of less than 20MB. Each sample slightly different… variable but
+> bounded variation, holes from 1 to 6mm… holes of 3.234574mm in one case and 1.348285mm
+> in another. The purpose is to train ML models. Once you're done, train models and test
+> them against experimental data."*
+
+…immediately amended (23:23): *"noise should not be included in this."* This produced
+the 10,000-sample synthetic damage dataset and the first model fleet (Phase 3).
+
+### What the user demanded — depth of reporting
+
+A defining trait of this session (and the whole project) appears here: an exacting
+standard for **explanatory reporting**. The user repeatedly pushed for more:
+- *"I want plots and graphs… confusion matrices… the theory behind all this, why the
+  models were constructed as they were, the exact parameters, what libraries and
+  implementations were used. Have all models gone through HPO? I want response surfaces."*
+- *"For each plot I want indications on what the plot is, how to interpret it, what can
+  be seen, and what conclusions can be taken."*
+- *"I get file not found for all these links" / "I see links not figures"* → the push to
+  **embed every figure inline** (the `![]()` fixes in the commits).
+- *"I want a single REPORT.md file with everything neatly organized"* → the consolidation
+  into one canonical `REPORT.md`.
+
+### CFDAC variants and the indicator pivot
+
+The major technical expansion (05-11 16:50):
+> *"For CFDAC you're only using magnitudes, train models using real part, imaginary part,
+> phase part, 3d-cnns with real + imaginary, magnitude + phase, and 5d-cnns with all
+> parts of the CFDAC. There are close to 3000 experimental FRFs, so use those to test.
+> Also disregard the damage indicators as input features, but give me models to predict
+> all of them… (regression model to get SCI independent of damage typology or location).
+> Explain location distribution in the data."*
+
+This created the **CFDAC-variant catalogue** (real/imag/mag/phase, 3D real+imag and
+mag+phase, and an "all-parts" stack), the move to evaluate on the **full 2,638-case
+experimental set**, the **22 indicator regressors** (RF/modal hit R² 0.85–0.999 on most
+indicators), and the dropping of indicators as *input* features.
+
+### The pymodal / OOM lesson
+
+A pivotal user correction (05-11 17:55):
+> *"pymodal is literally made to make models while loading from disks without worrying
+> about memory."*
+
+This — after CFDAC HPO was **OOM-killed at trial 80** on the `cfdac_all` variant —
+seeded `lazy_datasets.py` / `LazyCFDACDataset`, the lazy/streaming layer that became the
+project's durable fix for memory exhaustion (Phase 5).
+
+### Transfer, resolution, and noise — the sweep trilogy is born
+
+- (05-12 05:42) *"take the synth models and retrain them (only last layers unfrozen) with
+  experimental data. 10% 20% 30% 40% 50%… test against the remaining experimental… Also
+  map for everything the effect of feature resolution (from full to half resolution, with
+  5 divisions total)."* → the **transfer-learning** and **resolution sweeps** (Phase 4).
+- (05-12 12:21) *"now let's go for a new file… exactly the same study but with gaussian
+  noise added to the synth dataset."* → the **noise sweep** (Phase 4).
+
+The session also shows the first **context compaction** (05-11 18:24) and the first
+"Report every now and then" cadence request — early seeds of the heartbeat behaviour.
+
+---
+
+## Session `015ja563` — The Sim-to-Real Diagnosis & Fix Workhorse (2026-05-18 → 2026-06-02)
+
+**Scale.** 2,898 events (≈1,100 assistant turns). This is **the session that "started
+failing"** and was rescued by `015b788`. Its substantive work (05-18 → 05-20) maps onto
+Phase 10 and the front of Phase 11; the later sparse events are the failing tail.
+
+### Framing the problem
+
+It opened (05-18 06:59) with the project's thesis stated plainly:
+> *"The main gist of this repo is finding a way to train on FE models and work with
+> experimental, real, data. The current approach clearly under-performs. What can be
+> done?"* → *"Make a comprehensive plan to fix all of this."*
+
+### Three-front diagnostic investigation
+
+Rather than guess, the session launched **three deep, parallel investigations** (visible
+as long structured subagent prompts) into the exact mechanics of the sim-to-real gap
+(type accuracy **0.88 synth → 0.25 experimental**):
+1. **Feature pipeline** — found the **reference-FRF bug**: experimental CFDAC and the 22
+   indicators were computed against the *synthetic* pristine mean
+   (`build_experimental_features.py:77`), never an experimental pristine reference;
+   unbounded severity heads; inconsistent scaling; fabricated experimental timeseries.
+2. **Physics knobs** — found domain randomisation far too narrow (`JITTER_JSR` ±5% vs
+   per-case overrides spanning 0.3–3.0×), a purely linear ROM, and **symmetric crack/hole
+   damage** making BD vs AD degenerate (the ~0.67 `col_location` ceiling).
+3. **Training/eval wiring** — mapped where to slot fixes (joint training in
+   `transfer_learn.py`, richer corruption in `build_noisy_chunks.py`, bounded heads in
+   `models.py`).
+
+### The phased fix plan (P0 → P2)
+
+These fed a single **execution-ready phased plan** — the P0/P1/P2 structure that became
+Phase 10's commits: P0 (reference-FRF fix, per-sample normalisation, bounded sigmoid
+heads, per-domain scaler, drop timeseries, div-zero guard), P1 (widened DR, augmented
+chunks, joint synth+exp fine-tune), P2 (asymmetric crack/hole, SSL pretraining,
+nonlinear bolt — scaffolded).
+
+### Synth-only focus, vision models, and the trenchcoat
+
+- (05-18 16:27) *"I'm most interested in what happens when you train without using
+  experimental data… Add general-purpose vision models and retraining them to use CFDAC
+  (all possible features). Pick top 5 vision models."* → the **vision backbones** (Phase
+  10/11).
+- (05-19 14:56) *"the results are underwhelming. analyze why and improve."*
+- (05-19 15:41) *"reframe the typology detector as a bunch of binaries in a trenchcoat:
+  is it or is it not this kind of damage? Same as pristine."* → the **trenchcoat
+  decomposition** (Phase 11).
+- (05-19 19:07) *"Does accuracy improve if I judge the models only against the most
+  extreme cases? Beyond what point does the accuracy start to improve"* → the seed of the
+  **severity-stratified / DT-threshold** analysis that `015b788` later generalised.
+
+### The failure
+
+The last stretch is the session **breaking**: the council instruction
+(*"have a council of 5 agents, one very critical, one very adulatory…"*) appears **eight
+times in a row** on 05-20 (08:55 → 15:43) as the user re-sent it against a stuck session —
+the **2000px many-image limit** had wedged it. That is the exact failure `015b788` was
+created to assess and rescue, closing the loop with the master session above.
+
+---
+
+*All three target sessions are now documented in Part II. Together they trace the full
+ML arc: `01PJh21S` (genesis: dataset + pipeline + CFDAC + sweeps, May 10–13) →
+`015ja563` (sim-to-real diagnosis + P0–P2 fixes + vision + trenchcoat, May 18–20, until
+it hit the image-limit failure) → `015b788` (rescue + autonomous council-driven
+improvement through hi-res CFDAC, May 20 → June 3). Quoted user text is verbatim from the
+recovered event streams.*
