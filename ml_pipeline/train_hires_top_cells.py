@@ -280,7 +280,17 @@ def main():
         H_exp = (f["frf_real"][:] + 1j * f["frf_imag"][:]).astype(np.complex64)
     print(f"  exp FRFs shape {H_exp.shape}  ({time.time()-t0:.0f}s)", flush=True)
 
+    # Preserve previously-completed synth entries so a per-task invocation
+    # doesn't clobber the accumulated synth_test.json (cells are run one at a
+    # time for per-cell checkpoint/commit).
     synth_results = {}
+    _synth_path = a.out / "synth_test.json"
+    if _synth_path.exists():
+        try:
+            synth_results = json.loads(_synth_path.read_text())
+            print(f"loaded {len(synth_results)} prior synth entries")
+        except Exception:
+            synth_results = {}
     for task in a.tasks:
         if task not in TOP_CELLS:
             print(f"  skip {task}: not in TOP_CELLS"); continue
