@@ -34,5 +34,17 @@
     "synth_test_metric": 0.4577777777777778,
     "synth_test_macro_f1": 0.36170032455824014,
     "runtime_s": 1810.7539658546448
+  },
+  "severity_cnn2d_cfdac_realimag_hires1601": {
+    "task": "severity",
+    "model": "cnn2d",
+    "feature": "cfdac_realimag",
+    "n_target": 1601,
+    "kind": "reg",
+    "n_out": 1,
+    "synth_val": 0.09181571006774902,
+    "synth_test_metric": 0.07697206735610962,
+    "synth_test_macro_f1": null,
+    "runtime_s": 1862.1567919254303
   }
 }
