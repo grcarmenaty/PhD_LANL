@@ -83,7 +83,8 @@ MODELS   = {models_expr}
 TASKS    = ['binary','col_location','mass_location','severity','type',
             'is_bolt','is_crack','is_mass','is_hole','is_pristine']
 FEATURES = list(Z.CFDAC_FEATURES)          # all 7 CFDAC channel-features
-EPOCHS   = 25
+MAX_EPOCHS = 80        # safety cap; training stops early at convergence
+PATIENCE   = 8         # early-stop after this many epochs with no val gain
 SUBSAMPLE= 3000
 BATCH    = 16          # lower to 8 if CUDA OOM
 VISION_SIZE = 384      # conv vision backbones feed at this size (swin/vit fixed 224)
@@ -129,17 +130,22 @@ if AUTOSAVE_GITHUB and not GH_TOKEN:
     print('AUTOSAVE_GITHUB is on but no GH_TOKEN secret found -> results go to Drive/zip only.')
 
 def git_autosave(msg):
-    \"\"\"Force-push the full Drive snapshot of THIS family to its own results
-    branch. Per-family branch + subdir => never conflicts with main or other
-    families; always reflects the complete accumulated Drive state.\"\"\"
+    \"\"\"Force-push the JSON results of THIS family to its own results branch.
+    Only per_case/*.json + synth_test_zoo.json are pushed (NOT the model
+    .ckpt/.pt weights, which stay on Drive). Per-family branch => never
+    conflicts with main or other families; always the full accumulated state.\"\"\"
     if not (AUTOSAVE_GITHUB and GH_TOKEN): return
     repo='/content/PhD_LANL'; dst=os.path.join(repo,'results_hires_zoo',FAMILY)
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
-    shutil.copytree(str(OUT), dst, dirs_exist_ok=True)
+    os.makedirs(os.path.join(dst,'per_case'), exist_ok=True)
+    # copy ONLY the json artefacts (skip the large models/ dir)
+    for fn in os.listdir(os.path.join(OUT,'per_case')) if os.path.isdir(os.path.join(OUT,'per_case')) else []:
+        if fn.endswith('.json'): shutil.copy(os.path.join(OUT,'per_case',fn), os.path.join(dst,'per_case',fn))
+    if os.path.exists(os.path.join(OUT,'synth_test_zoo.json')):
+        shutil.copy(os.path.join(OUT,'synth_test_zoo.json'), os.path.join(dst,'synth_test_zoo.json'))
     cwd=os.getcwd(); os.chdir(repo)
     subprocess.run(['git','config','user.email','colab@gpu.run'])
     subprocess.run(['git','config','user.name','colab-gpu'])
-    subprocess.run(['git','add','-f',f'results_hires_zoo/{FAMILY}'])
+    subprocess.run(['git','add','-f',f'results_hires_zoo/{FAMILY}/per_case',f'results_hires_zoo/{FAMILY}/synth_test_zoo.json'])
     if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
         subprocess.run(['git','commit','-q','-m',msg])
         url=f'https://{GH_TOKEN}@github.com/grcarmenaty/phd_lanl.git'
@@ -154,8 +160,8 @@ for (task, model, feature) in CELLS:
         Z.run_cell(task, model, feature, syn_h5=SYN, exp_h5=EXP, out_dir=OUT, dev=DEV,
                    syn_tasks=syn_tasks, exp_tasks=exp_tasks, H_ref_syn=H_ref_syn,
                    H_ref_exp=H_ref_exp, H_exp=H_exp, exp_names=exp_names,
-                   make_split=make_split, epochs=EPOCHS, subsample=SUBSAMPLE,
-                   batch=BATCH, vision_size=VISION_SIZE)
+                   make_split=make_split, subsample=SUBSAMPLE, batch=BATCH,
+                   vision_size=VISION_SIZE, max_epochs=MAX_EPOCHS, patience=PATIENCE)
         git_autosave(f'colab autosave [{FAMILY}]: {task}/{model}/{feature}')
     except Exception as e:
         print('CELL FAILED', task, model, feature, '::', repr(e)[:200])

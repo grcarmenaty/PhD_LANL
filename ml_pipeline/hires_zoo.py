@@ -219,7 +219,19 @@ def _resize(x, size):
 def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Path,
              dev, syn_tasks, exp_tasks, H_ref_syn, H_ref_exp, H_exp, exp_names,
              make_split, epochs=25, subsample=3000, batch=16, lr=3e-4, warmup=2,
-             vision_size=384, seed=42, pretrained=True, force=False, log=print):
+             vision_size=384, seed=42, pretrained=True, force=False, log=print,
+             max_epochs=80, patience=8, min_delta=1e-3):
+    """One cell, trained ONCE to convergence with per-epoch checkpointing.
+
+    Resilience / convergence:
+      * skip-if-exists on the per-case JSON  -> a finished cell is never redone;
+      * a per-epoch checkpoint on Drive (out_dir/models/<tag>.ckpt)            ->
+        a session cut off mid-cell RESUMES from the last epoch, so each cell is
+        trained exactly once even across disconnects;
+      * early stopping (val macro-F1 / R2, `patience` epochs, `min_delta`) +
+        ReduceLROnPlateau, capped at `max_epochs`  -> trained to convergence,
+        not a fixed epoch count. (`epochs` kept only for back-compat; ignored.)
+    """
     import h5py
     from sklearn.metrics import (accuracy_score, f1_score, r2_score,
                                  balanced_accuracy_score)
@@ -256,14 +268,26 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
     except (AttributeError, TypeError):    # older torch fallback
         scaler = torch.cuda.amp.GradScaler(enabled=(dev.type == "cuda"))
 
-    # vision: freeze backbone for `warmup` epochs (head-only), then unfreeze.
-    def trainable_params():
-        return [p for p in net.parameters() if p.requires_grad]
-    if is_vision:
+    # vision: head-only for the first `warmup` epochs, then unfreeze backbone.
+    def set_frozen(frozen: bool):
+        if not is_vision:
+            return
         for n_, p in net.named_parameters():
-            p.requires_grad = ("fc" in n_ or "classifier" in n_ or "head" in n_ or "norm" in n_)
-    opt = torch.optim.AdamW(trainable_params(), lr=lr, weight_decay=1e-4)
-    sched = None
+            p.requires_grad = (not frozen) or any(
+                k in n_ for k in ("fc", "classifier", "head", "norm"))
+
+    def build_opt(ep):
+        """Optimizer/scheduler for the regime at epoch `ep` (rebuilt fresh on
+        resume; LR/momentum reset is acceptable for a rare disconnect)."""
+        unfrozen = (not is_vision) or (ep >= warmup)
+        set_frozen(frozen=not unfrozen)
+        base_lr = lr if not (is_vision and unfrozen) else lr * 0.1
+        params = [p for p in net.parameters() if p.requires_grad]
+        o = torch.optim.AdamW(params, lr=base_lr, weight_decay=1e-4)
+        mode = "max"   # macro-F1 and R2 are both higher-is-better
+        s = torch.optim.lr_scheduler.ReduceLROnPlateau(o, mode=mode, factor=0.5,
+                                                       patience=3, min_lr=1e-6)
+        return o, s
 
     def predict(Hsrc, ref, kk, bs=batch):
         net.eval(); preds = []; probs = []
@@ -280,15 +304,22 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
                     preds.append(out.squeeze(1) if out.ndim == 2 else out)
         return np.concatenate(preds), (np.concatenate(probs) if kk == "cls" else None)
 
-    best = -1e9; best_state = None; t0 = time.time()
-    for ep in range(epochs):
-        if is_vision and ep == warmup:
-            for p in net.parameters(): p.requires_grad = True
-            opt = torch.optim.AdamW(net.parameters(), lr=lr * 0.1, weight_decay=1e-4)
-            sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(1, epochs - warmup))
+    # ---- resume from a mid-cell checkpoint on Drive, if one exists ----
+    ckpt_path = out_dir / "models" / f"{tag}.ckpt"
+    best_path = out_dir / "models" / f"{tag}.best.pt"
+    start_ep = 0; best = -1e9; since = 0
+    if ckpt_path.exists():
+        ck = torch.load(ckpt_path, map_location=dev)
+        net.load_state_dict(ck["model"]); start_ep = ck["epoch"]
+        best = ck["best"]; since = ck["since"]
+        log(f"    {tag}: resume from epoch {start_ep} (best={best:+.4f}, since={since})")
+
+    opt, sched = build_opt(start_ep)
+    t0 = time.time()
+    for ep in range(start_ep, max_epochs):
+        if (is_vision and ep == warmup):
+            opt, sched = build_opt(ep)            # unfreeze regime
             log(f"    {tag} ep{ep+1}: unfreeze backbone")
-        elif (not is_vision) and ep == warmup:
-            sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(1, epochs - warmup))
         net.train(); perm = np.random.permutation(i_tr)
         for j in range(0, len(perm), batch):
             bi = perm[j:j + batch]
@@ -300,14 +331,27 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
                 out = net(x)
                 loss = lossf(out, yb.long()) if kind == "cls" else lossf(out, yb.float().unsqueeze(1))
             scaler.scale(loss).backward(); scaler.step(opt); scaler.update()
-        if sched is not None: sched.step()
         pv, _ = predict(H[i_va], H_ref_syn, kind)
         m = (f1_score(y[i_va], pv, labels=list(range(n_out)), average="macro", zero_division=0)
              if kind == "cls" else r2_score(y[i_va], pv))
-        log(f"    {tag} ep{ep+1}/{epochs} val={m:+.4f} ({time.time()-t0:.0f}s)")
-        if m > best: best = float(m); best_state = {k: v.detach().clone() for k, v in net.state_dict().items()}
-    if best_state: net.load_state_dict(best_state)
-    torch.save(best_state, out_dir / "models" / f"{tag}.pt")
+        sched.step(m)
+        improved = m > best + min_delta
+        if improved:
+            best = float(m); since = 0
+            torch.save({k: v.detach().clone() for k, v in net.state_dict().items()}, best_path)
+        else:
+            since += 1
+        # per-epoch checkpoint on Drive -> resume after a disconnect
+        torch.save({"model": {k: v.detach().clone() for k, v in net.state_dict().items()},
+                    "epoch": ep + 1, "best": best, "since": since}, ckpt_path)
+        log(f"    {tag} ep{ep+1}/{max_epochs} val={m:+.4f} best={best:+.4f} "
+            f"since={since} ({time.time()-t0:.0f}s)")
+        if ep >= warmup and since >= patience:
+            log(f"    {tag}: converged (no +{min_delta} in {patience} epochs)"); break
+    # restore best weights
+    if best_path.exists():
+        net.load_state_dict(torch.load(best_path, map_location=dev))
+    torch.save({k: v.cpu() for k, v in net.state_dict().items()}, out_dir / "models" / f"{tag}.pt")
 
     pt, _ = predict(H[i_te], H_ref_syn, kind)
     if kind == "cls":
@@ -328,16 +372,21 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         rows.append(r)
     meta = {"task": task, "model": model, "feature": feature, "n_target": 1601,
             "n_channels": n_in, "kind": e_kind, "n_out": int(n_out),
-            "epochs": epochs, "subsample": int(min(subsample, len(idx_pool))),
+            "max_epochs": max_epochs, "patience": patience,
+            "subsample": int(min(subsample, len(idx_pool))),
             "vision_feed_size": feed, "synth_val_best": best,
             "synth_test_metric": float(s_acc),
             "synth_test_macro_f1": (float(s_mf1) if s_mf1 is not None else None),
             "synth_test_bal_acc": (float(s_bal) if s_bal is not None else None),
-            "input_normalized": True}
+            "input_normalized": True, "trained_to_convergence": True}
     pc.write_text(json.dumps({"meta": meta, "rows": rows}, indent=2))
     sp = out_dir / "synth_test_zoo.json"
     allr = json.loads(sp.read_text()) if sp.exists() else {}
     allr[tag] = meta; sp.write_text(json.dumps(allr, indent=2))
+    # cell finished -> drop the resume checkpoint + best snapshot (per_case is the done flag)
+    for _p in (ckpt_path, best_path):
+        try: _p.unlink()
+        except FileNotFoundError: pass
     log(f"  DONE {tag}: synth {'mF1' if kind=='cls' else 'R2'}="
         f"{(s_mf1 if s_mf1 is not None else s_acc):.3f}  -> {pc.name}")
 
