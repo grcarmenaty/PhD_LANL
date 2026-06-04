@@ -82,5 +82,17 @@
     "synth_test_metric": 0.7955555555555556,
     "synth_test_macro_f1": 0.4430693069306931,
     "runtime_s": 939.1657264232635
+  },
+  "is_mass_convnext_tiny_cfdac_realimag_hires1601": {
+    "task": "is_mass",
+    "model": "convnext_tiny",
+    "feature": "cfdac_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "synth_val": 0.6661363636363636,
+    "synth_test_metric": 0.7022222222222222,
+    "synth_test_macro_f1": 0.5459474112225535,
+    "runtime_s": 931.0578627586365
   }
 }
