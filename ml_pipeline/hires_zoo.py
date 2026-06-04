@@ -239,7 +239,7 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
              dev, syn_tasks, exp_tasks, H_ref_syn, H_ref_exp, H_exp, exp_names,
              make_split, epochs=25, subsample=3000, batch=16, lr=3e-4, warmup=2,
              vision_size=384, seed=42, pretrained=True, force=False, log=print,
-             max_epochs=80, patience=8, min_delta=1e-3):
+             max_epochs=80, patience=8, min_delta=1e-3, ckpt_every=5):
     """One cell, trained ONCE to convergence with per-epoch checkpointing.
 
     Resilience / convergence:
@@ -369,9 +369,11 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
             torch.save({k: v.detach().clone() for k, v in net.state_dict().items()}, best_path)
         else:
             since += 1
-        # per-epoch checkpoint on Drive -> resume after a disconnect
-        torch.save({"model": {k: v.detach().clone() for k, v in net.state_dict().items()},
-                    "epoch": ep + 1, "best": best, "since": since}, ckpt_path)
+        # checkpoint to Drive every `ckpt_every` epochs (+ at stop) — not every
+        # epoch, so Drive I/O doesn't stall the GPU. Resume loses <= ckpt_every epochs.
+        if ((ep + 1) % ckpt_every == 0) or (ep >= warmup and since >= patience):
+            torch.save({"model": {k: v.detach().clone() for k, v in net.state_dict().items()},
+                        "epoch": ep + 1, "best": best, "since": since}, ckpt_path)
         log(f"    {tag} ep{ep+1}/{max_epochs} val={m:+.4f} best={best:+.4f} "
             f"since={since} ({time.time()-t0:.0f}s)")
         if ep >= warmup and since >= patience:

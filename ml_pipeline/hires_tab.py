@@ -210,7 +210,8 @@ def _metrics_cls(yt, yp, n_out):
 
 def run_tab_cell(task, model, feature, *, out_dir: Path, dev, syn_tasks, exp_tasks,
                  Xsyn, Xexp, exp_names, make_split, subsample=4000, batch=256, lr=1e-3,
-                 max_epochs=200, patience=15, min_delta=1e-3, seed=42, force=False, log=print):
+                 max_epochs=200, patience=15, min_delta=1e-3, seed=42, force=False, log=print,
+                 ckpt_every=5):
     """Xsyn/Xexp are the WHOLE-dataset cached feature arrays for `feature`."""
     from sklearn.preprocessing import StandardScaler
     from sklearn.metrics import r2_score
@@ -314,8 +315,9 @@ def run_tab_cell(task, model, feature, *, out_dir: Path, dev, syn_tasks, exp_tas
                 best = float(m_); since = 0
                 torch.save({k: v.detach().clone() for k, v in net.state_dict().items()}, bp)
             else: since += 1
-            torch.save({"model": {k: v.detach().clone() for k, v in net.state_dict().items()},
-                        "epoch": ep+1, "best": best, "since": since}, ck)
+            if ((ep+1) % ckpt_every == 0) or since >= patience:
+                torch.save({"model": {k: v.detach().clone() for k, v in net.state_dict().items()},
+                            "epoch": ep+1, "best": best, "since": since}, ck)
             if (ep+1) % 10 == 0 or since >= patience:
                 log(f"    {tag} ep{ep+1} val={m_:+.4f} best={best:+.4f} since={since} ({time.time()-t0:.0f}s)")
             if since >= patience: log(f"    {tag}: converged"); break
