@@ -94,5 +94,17 @@
     "synth_test_metric": 0.7022222222222222,
     "synth_test_macro_f1": 0.5459474112225535,
     "runtime_s": 931.0578627586365
+  },
+  "is_hole_resnet50_cfdac_realimag_hires1601": {
+    "task": "is_hole",
+    "model": "resnet50",
+    "feature": "cfdac_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "synth_val": 0.583793738489871,
+    "synth_test_metric": 0.7555555555555555,
+    "synth_test_macro_f1": 0.6081504702194358,
+    "runtime_s": 987.3306174278259
   }
 }
