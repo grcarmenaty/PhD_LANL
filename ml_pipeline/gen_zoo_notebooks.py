@@ -246,6 +246,15 @@ def make_nb(title, intro, models_expr, family_dir):
 
 
 NOTEBOOKS = {
+    "hires_cfdac_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — DeepCFDACNet focused run (GPU)",
+        "Focused run of the single resolution-appropriate net **`cnn2d_deep`** "
+        "(ResNet18-style, consumes the full 1601² grid — no 224 resize, no premature "
+        "global-pool) across all 7 CFDAC channel-features and all 10 tasks. Same engine "
+        "as the zoo notebooks: per-epoch checkpoint+resume, early-stop to convergence, "
+        "JSON-only GitHub autosave. This is the cleanest single-model test of *does a "
+        "resolution-appropriate, converged net close the sim-to-real gap?*",
+        "['cnn2d_deep']", "deepnet"),
     "hires_cnn_zoo_gpu.ipynb": (
         "Hi-res 1601² CFDAC — bespoke CNN zoo (GPU)",
         "Trains the bespoke CNN families on full-1601² CFDAC across all 7 CFDAC "
