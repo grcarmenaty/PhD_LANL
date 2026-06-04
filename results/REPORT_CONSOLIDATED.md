@@ -32,6 +32,12 @@
   any single variant. DT-stratification helps every classification axis
   *except* these two. The models can name a damage type when it is severe;
   they cannot reliably answer "is this damaged at all?".
+- **Full-resolution CFDAC does not help (new).** A 1601² native-grid sweep
+  (top CFDAC cell per task, synth regenerated at df = 0.0625 Hz) is **uniformly
+  at-or-below** the 128² baseline on experimental data and mostly collapses to
+  chance — see *§High-resolution 1601² CFDAC sweep*. The bottleneck is the
+  sim-to-real covariate shift, not CFDAC resolution. The best real-data
+  transfer is still the physics-grounded **`modal`-MLP** cells, not CFDAC images.
 
 ---
 ## Methodology
@@ -1559,6 +1565,109 @@ These results are **robust across the physics variant** — the positive
 signal in the study is not an artefact of one DR choice.
 
 ---
+## High-resolution 1601² CFDAC sweep — *does full resolution help?*
+
+**Motivation.** Every result above uses CFDAC decimated to **128²**. The
+experimental FRFs are natively **1601 bins** (0–100 Hz, df = 0.0625 Hz), so a
+natural question is whether computing CFDAC at the **full 1601² native grid**
+recovers signal that decimation throws away. To test it, the synthetic dataset
+was **regenerated at a 16 s simulation length** (N_T = 4096, fs = 256 →
+df = 0.0625 Hz, all 9 channels) so synth and experiment share the same FRF
+grid exactly, and for **each of the 10 tasks the single top-performing CFDAC
+cell** (by 128² synth ranking) was re-trained at 1601² and evaluated on
+held-out synth (in-domain) and the full 2 638-case experimental set (zero-shot).
+
+**Configuration (preliminary, single-seed).** 2-channel `cfdac_realimag`
+(real+imag); CFDAC recomputed per-sample at 1601²; synth subsample 1 500;
+4 epochs; seed 42; class-weighted loss; per-sample mean-subtract
+normalisation. Bespoke `cnn2d` for binary / col_location / mass_location /
+severity / type; ImageNet-pretrained **ConvNeXt-T** for is_bolt / is_crack /
+is_mass and **ResNet50** for is_hole / is_pristine (head-probe 2 epochs, then
+backbone unfreeze). Run on **CPU (no GPU available)**, ~25–50 min/cell.
+Metrics are **balanced accuracy / macro-F1**, never raw accuracy.
+
+![hi-res in-domain vs zero-shot](figures/hires/hires_synth_vs_exp.png)
+
+![hi-res 1601² vs 128² baseline](figures/hires/hires_vs_baseline.png)
+
+### Per-cell results (1601², seed 42)
+
+| task | cell (model / feature) | synth test (in-domain) | **exp macro-F1** | **exp bal-acc** | exp acc | class prior | collapse? | best 128² (v1) |
+|---|---|---|---|---|---|---|---|---|
+| binary | `cnn2d/cfdac_realimag` | mF1 0.447 | 0.452 | **0.500** | 0.825 | 0.825 | **yes** (all-damaged) | mlp/modal 0.480 |
+| is_pristine | `resnet50/cfdac_realimag` | mF1 0.791 | 0.454 | **0.501** | 0.825 | 0.825 | **yes** (all-damaged) | mlp/modal 0.494 |
+| is_bolt | `convnext_tiny/cfdac_realimag` | mF1 0.750 | 0.432 | 0.527 | 0.521 | 0.507 | no (marginal) | cnn2d/cfdac 0.626 |
+| is_crack | `convnext_tiny/cfdac_realimag` | mF1 0.443 | 0.468 | **0.500** | 0.879 | 0.879 | **yes** (all-negative) | mlp/modal 0.577 |
+| is_hole | `resnet50/cfdac_realimag` | mF1 0.608 | 0.472 | **0.500** | 0.894 | 0.894 | **yes** (all-negative) | mlp/modal 0.619 |
+| is_mass | `convnext_tiny/cfdac_realimag` | mF1 0.546 | 0.476 | **0.500** | 0.910 | 0.910 | **yes** (all-negative) | mlp/cfdac_mag 0.551 |
+| col_location | `cnn2d/cfdac_realimag` | mF1 0.070 | 0.114 | 0.237 | 0.221 | 0.377 | near (3/6 classes) | mlp/cfdac_realimag 0.179 |
+| mass_location | `cnn2d/cfdac_realimag` | mF1 0.362 | 0.130 | 0.197 | 0.315 | 0.408 | **yes** (<chance) | mlp/cfdac_imag 0.429 |
+| type | `cnn2d/cfdac_realimag` | mF1 0.173 | 0.140 | 0.158 | 0.313 | 0.507 | **yes** (<chance) | mlp/modal 0.278 |
+| severity | `cnn2d/cfdac_realimag` (reg) | R² 0.077 | R² **−0.941** | — | — | — | fails | mlp/cfdac_imag (MAE 0.23) |
+
+### Cell-by-cell reading
+
+- **binary** — class-collapses to all-damaged (exp bal-acc 0.500 = chance; acc
+  0.825 is just the 82.5 % damaged prior). Identical failure to the 128² study.
+- **is_pristine** (inverse of binary) — strongest in-domain learner of the
+  sweep (synth mF1 **0.791**) yet collapses to all-damaged on experimental
+  (bal-acc 0.501). The clearest illustration that in-domain skill ≠ transfer.
+- **is_bolt** — the **only** cell above chance on experimental (bal-acc 0.527,
+  macro-F1 0.432), but heavily "not-bolt"-biased (TPR 0.124) and **well below**
+  its own 128² baseline (cnn2d/cfdac 0.626). High synth skill (0.750) does not
+  carry over.
+- **is_crack / is_hole / is_mass** (vision one-vs-rest detectors) — all learn
+  on synth (0.44–0.61) but **collapse to all-negative on experimental**
+  (TPR ≈ 0.000, bal-acc 0.500). The pretrained backbones, fine-tuned on 1 500
+  synth CFDACs, predict the majority class on every real case.
+- **col_location / mass_location** — localization barely learns even in-domain
+  (col_location synth mF1 0.070 ≈ chance) and falls **below chance** on
+  experimental (mass_location bal-acc 0.197 < 0.250). Consistent with the
+  symmetric-damage degeneracy noted in §2/§8.
+- **type** (5-class) — best 128² transferrer in the DT study, here collapses to
+  exp bal-acc 0.158 (< 0.200 chance), predicting 4 of 5 classes.
+- **severity** — synth R² 0.077 (weak in-domain) and exp R² **−0.941** (worse
+  than predicting the mean): no transfer.
+
+### Verdict — full resolution does **not** help
+
+1. **Uniformly not better.** On every one of the 10 tasks the 1601² cell is
+   **at or below** the best 128² baseline cell on experimental data
+   (e.g. is_hole 0.500 vs 0.619; mass_location 0.197 vs 0.429; type 0.158 vs
+   0.278). There is **no task where full resolution recovers signal.**
+2. **The gap is sim-to-real, not resolution.** Cells learn perfectly well
+   in-domain at 1601² (is_pristine 0.79, is_bolt 0.75, is_hole 0.61) and still
+   collapse zero-shot — exactly the **absolute-magnitude covariate shift**
+   diagnosed in §"modal-gap". More pixels do not change the direction of the
+   shift.
+3. **The chosen architectures discard the resolution anyway** (an honest
+   confound). The bespoke `cnn2d` is a 4-layer net built for 128² — its strided
+   stem + global-average-pool collapse a 1601² input to a 64-vector; the vision
+   backbones **resize the CFDAC to 224²** internally. So "1601²" mostly never
+   reaches the classifier. Combined with a deliberately small budget (1 500
+   samples, 4 epochs, CPU), in-domain skill is also capped.
+4. **The best real-data transfer remains the physics-grounded `modal`-MLP
+   cells** at 128² (is_hole 0.619, is_crack 0.577, binary 0.480), **not** any
+   CFDAC-image model at any resolution.
+
+**Confirmatory follow-up (GPU).** Because (3) confounds "resolution" with
+"architecture + budget", a proper test needs a network that *consumes* the full
+grid, trained longer. That is exactly what `notebooks/hires_{cnn_zoo,transformer,
+vision}_gpu.ipynb` do (engine `ml_pipeline/hires_zoo.py`): a deep ResNet-style
+`DeepCFDACNet` (no 224 resize, no premature global-pool), a conv-tokenised
+Transformer, and timm backbones at higher feed size, with 25 epochs + cosine
+schedule and GPU CFDAC — across all 7 CFDAC channel-features. Those runs (results
+to the `colab-hires-*` branches) will tell us whether a resolution-appropriate
+model changes the verdict; the **preliminary answer from this single-seed CPU
+sweep is a clear negative.**
+
+> **Artefacts.** `results_hires/synth_test.json` (in-domain), per-case zero-shot
+> in `results_hires/per_case/*_hires1601.json`, rollup in
+> `results_hires/hires_summary.json`, code in
+> `ml_pipeline/{cfdac_runtime,train_hires_top_cells,build_hires_*,hires_summary,
+> plot_hires}.py`, figures in `results/figures/hires/`.
+
+---
 ## Vision-backbone status
 The pre-existing paper found strongest gains from ImageNet-pretrained
 vision backbones (ResNet50, EfficientNet-B0, ConvNeXt-T, Swin-T, ViT-B/16)
@@ -1604,10 +1713,18 @@ accelerator. No code changes required; the existing
    adaptation step *only on the pristine class*.
 5. **Complete the vision sweep** for v2 and v2a (15 cells × 3 seeds
    each).
+6. **Do not pursue higher CFDAC resolution as a transfer fix.** The 1601²
+   sweep is uniformly ≤ the 128² baseline. Spend the compute instead on the
+   **GPU resolution-appropriate confirmatory runs** (`notebooks/hires_*_gpu.ipynb`)
+   and, more importantly, on **pristine-class domain adaptation** (rec. 4).
 
 ---
 ## Artefact index
 ### Code
+- `ml_pipeline/cfdac_runtime.py` / `train_hires_top_cells.py` — hi-res 1601² CFDAC training driver
+- `ml_pipeline/build_hires_synth_features.py` / `build_hires_exp_features.py` — 1601-bin feature builders
+- `ml_pipeline/hires_summary.py` / `plot_hires.py` — hi-res honest rollup + figures
+- `ml_pipeline/hires_zoo.py` + `notebooks/hires_{cnn_zoo,transformer,vision}_gpu.ipynb` — GPU model-zoo (all CFDAC cells / transformer / vision), autosave to `colab-hires-*` branches
 - `ml_pipeline/cells_aggregate.py` — per-cell rollup → `results/cells_v1_v2_v2a.json`
 - `ml_pipeline/dt_compare_variants.py` — DT sweep → `results/dt_compare_v1_v2_v2a.json`
 - `ml_pipeline/dt_feature_sweep.py` — per-damage-axis sweep → `results/dt_feature_sweep.json`
@@ -1623,11 +1740,13 @@ accelerator. No code changes required; the existing
 - `results/cells_v1_v2_v2a.json` — derived
 - `results/dt_compare_v1_v2_v2a.json` — derived
 - `results/dt_feature_sweep.json` — derived
+- `results_hires/synth_test.json`, `results_hires/per_case/*_hires1601.json`, `results_hires/hires_summary.json` — hi-res 1601² sweep (10 cells, seed 42)
 
-### Figures (27 total)
+### Figures (29 total)
 - `results/figures/cell_zoo/{task}.png` (10)
 - `results/figures/dt_per_task/{task}.png` (10)
 - `results/figures/dt_3way/fig{1..7}_*.png` (7)
+- `results/figures/hires/hires_synth_vs_exp.png`, `hires_vs_baseline.png` (2)
 
 ### Canonical reports
 - `REPORT_CONSOLIDATED.md` (this file) — full cross-domain (experimental) study.
