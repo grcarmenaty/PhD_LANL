@@ -28,9 +28,11 @@ AUTOSAVE_GITHUB   = True
 FAMILY            = 'tabular'
 GH_RESULTS_BRANCH = 'colab-hires-tabular'
 # feature/model compatibility lives in T.TAB_MODEL_FEATURES:
-#   mlp: modal,indicators,frf_mag,frf_realimag | rf,xgb: modal,indicators
-#   cnn1d,transformer1d: frf_mag,frf_realimag
-# To run ONE cell: CELLS = [('is_hole','mlp','modal')]
+#   mlp: modal,indicators,frf_mag,frf_realimag,timeseries | rf,xgb: modal,indicators
+#   cnn1d,transformer1d: frf_mag,frf_realimag,timeseries
+# NB timeseries is reconstructed from the FRF (IFFT*chirp) identically for synth &
+# exp — the experimental set has no measured timeseries. To run ONE cell:
+#   CELLS = [('is_hole','cnn1d','timeseries')]
 CELLS = T.tab_cells(MODELS, TASKS)
 print(len(CELLS),'cells queued across', MODELS)
 # ===========================================================

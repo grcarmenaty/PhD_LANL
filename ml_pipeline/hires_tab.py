@@ -45,14 +45,14 @@ if torch.cuda.is_available():
 
 # feature -> kind ('vec' tabular | 'seq' (C,L))
 TAB_FEATURES = {"modal": "vec", "indicators": "vec",
-                "frf_mag": "seq", "frf_realimag": "seq"}
+                "frf_mag": "seq", "frf_realimag": "seq", "timeseries": "seq"}
 # model -> compatible features
 TAB_MODEL_FEATURES = {
-    "mlp":           ["modal", "indicators", "frf_mag", "frf_realimag"],
+    "mlp":           ["modal", "indicators", "frf_mag", "frf_realimag", "timeseries"],
     "rf":            ["modal", "indicators"],
     "xgb":           ["modal", "indicators"],
-    "cnn1d":         ["frf_mag", "frf_realimag"],
-    "transformer1d": ["frf_mag", "frf_realimag"],
+    "cnn1d":         ["frf_mag", "frf_realimag", "timeseries"],
+    "transformer1d": ["frf_mag", "frf_realimag", "timeseries"],
 }
 NN_MODELS = ("mlp", "cnn1d", "transformer1d")
 
@@ -71,6 +71,34 @@ def _seq_normalise(seq: np.ndarray) -> np.ndarray:
     """Per-sample, per-channel z-score over the frequency axis. seq:(n,C,L)."""
     mu = seq.mean(axis=2, keepdims=True); sd = seq.std(axis=2, keepdims=True) + 1e-6
     return ((seq - mu) / sd).astype(np.float32)
+
+
+def _chirp_spectrum(n_bins: int, n_t: int = 4096, fs: float = 256.0,
+                    f_lo: float = 2.0, f_hi: float = 100.0) -> np.ndarray:
+    """rfft of the deterministic excitation chirp, truncated to `n_bins`
+    (the stored 0–100 Hz band). Amplitude is irrelevant (per-sample z-score
+    removes scale), so we use amplitude 1. Matches generate_dataset.make_chirp
+    with the hires N_T=4096, fs=256 generation parameters."""
+    t = np.arange(n_t) / fs
+    k = (f_hi - f_lo) / (n_t / fs)
+    chirp = np.sin(2 * np.pi * (f_lo * t + 0.5 * k * t * t))
+    return np.fft.rfft(chirp)[:n_bins]            # (n_bins,) complex
+
+
+def _timeseries_from_frf(re: np.ndarray, im: np.ndarray, freqs: np.ndarray,
+                         n_t: int = 4096) -> np.ndarray:
+    """Reconstruct the band-limited time response from the stored 0–100 Hz FRF,
+    IDENTICALLY for synth and exp: ts = irfft(H · chirp_spectrum). Returns
+    (n, 9, n_t) per-sample-normalised. This is FRF-derived (the experimental set
+    has no measured timeseries), so synth and exp share the exact same pipeline
+    and the only difference is the FRF content itself."""
+    H = (re + 1j * im).astype(np.complex64)        # (n, nb, 9)
+    nb = H.shape[1]; n_full = n_t // 2 + 1
+    cs = _chirp_spectrum(nb).astype(np.complex64)  # (nb,)
+    resp = np.zeros((H.shape[0], n_full, H.shape[2]), dtype=np.complex64)
+    resp[:, :nb, :] = H * cs[None, :, None]
+    ts = np.fft.irfft(resp, n=n_t, axis=1)         # (n, n_t, 9)
+    return _seq_normalise(ts.transpose(0, 2, 1).astype(np.float32))   # (n,9,n_t)
 
 
 def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print):
@@ -93,6 +121,8 @@ def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print):
             re = f["frf_real"][:]; im = f["frf_imag"][:]
             X = np.concatenate([re, im], axis=2).transpose(0, 2, 1).astype(np.float32)  # (n,18,L)
             X = _seq_normalise(X)
+        elif feature == "timeseries":
+            X = _timeseries_from_frf(f["frf_real"][:], f["frf_imag"][:], freqs)  # (n,9,4096)
         elif feature == "modal":
             mag = f["frf_mag"]
             X = np.stack([modal_features(mag[i], freqs) for i in range(n)]).astype(np.float32)
@@ -232,10 +262,11 @@ def run_tab_cell(task, model, feature, *, out_dir: Path, dev, syn_tasks, exp_tas
         synth_val = None
     else:
         amp = _amp_dtype(dev); use_amp = dev.type == "cuda"
-        cin = Xs.shape[1] if not is_seq else Xs.shape[1]      # mlp: d_in; seq: C
-        d_or_c = Xs.shape[1] if (model == "mlp") else Xs.shape[1]
-        net = _build_tab_model(model, feature, d_or_c, n_out, kind,
-                               length=(Xs.shape[2] if is_seq else 1601)).to(dev)
+        # mlp: Xs is 2D (d_in = shape[1], possibly flattened seq); cnn1d/transformer1d:
+        # Xs is 3D (C = shape[1], L = shape[2]). length only used by transformer1d.
+        length = Xs.shape[2] if (is_seq and model != "mlp") else 1601
+        net = _build_tab_model(model, feature, Xs.shape[1], n_out, kind,
+                               length=length).to(dev)
         Xtr = torch.from_numpy(Xs).to(dev)
         yt_t = torch.from_numpy(y if kind == "cls" else y.astype(np.float32)).to(dev)
         cls_w = None
