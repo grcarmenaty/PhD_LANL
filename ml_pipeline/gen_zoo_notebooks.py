@@ -85,9 +85,9 @@ TASKS    = ['binary','col_location','mass_location','severity','type',
 FEATURES = list(Z.CFDAC_FEATURES)          # all 7 CFDAC channel-features
 MAX_EPOCHS = 80        # safety cap; training stops early at convergence
 PATIENCE   = 8         # early-stop after this many epochs with no val gain
-SUBSAMPLE= 3000
-BATCH    = 16          # lower to 8 if CUDA OOM
-VISION_SIZE = 384      # conv vision backbones feed at this size (swin/vit fixed 224)
+SUBSAMPLE= 4000        # A100 fits this easily; raise toward 10000 for more data
+BATCH    = 32          # tuned for A100 40GB (bf16). Drop to 16 on L4, 8 on T4 / if OOM
+VISION_SIZE = 384      # conv vision backbones feed size (swin/vit fixed 224); A100 can do 448-512
 # --- GitHub autosave (each finished cell -> a per-family results branch) ---
 FAMILY            = '{family_dir}'
 AUTOSAVE_GITHUB   = True                               # set False to disable
@@ -118,7 +118,9 @@ with h5py.File(EXP,'r') as f:
     H_ref_exp=torch.from_numpy(f['reference/frf_complex'][:].astype('complex64')).to(DEV)
 with h5py.File(EXP,'r') as f:
     H_exp=(f['frf_real'][:]+1j*f['frf_imag'][:]).astype('complex64')
-print('context ready; exp FRFs', H_exp.shape)"""
+print('context ready; exp FRFs', H_exp.shape)
+print('device', DEV, '| amp dtype', Z._amp_dtype(DEV),
+      '| (bfloat16 expected on A100/H100)')"""
 
 RUN = """import torch, os, shutil, subprocess
 def _tok():

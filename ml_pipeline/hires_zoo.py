@@ -25,6 +25,25 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 
+# A100-friendly defaults: TF32 matmul/conv (big speedup, negligible accuracy
+# loss on the CFDAC matmul + convs) and high-precision matmul path.
+if torch.cuda.is_available():
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    torch.backends.cudnn.benchmark = True
+    try: torch.set_float32_matmul_precision("high")
+    except Exception: pass
+
+
+def _amp_dtype(dev):
+    """bfloat16 on A100/H100 (no GradScaler needed); float16 elsewhere."""
+    if dev.type != "cuda":
+        return torch.float32
+    try:
+        return torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+    except Exception:
+        return torch.float16
+
 # --------------------------------------------------------------------------
 # CFDAC features (channel sets) and the GPU CFDAC transform
 # --------------------------------------------------------------------------
@@ -254,6 +273,10 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         re = f["frf_real"][sr]; im = f["frf_imag"][sr]
     H = np.empty_like(re, dtype=np.complex64); H[order] = (re + 1j * im).astype(np.complex64)
     i_tr, i_va, i_te = make_split(y, kind); n_out = (int(y.max()) + 1) if kind == "cls" else 1
+    # Keep the synth subsample FRFs resident on the GPU (≈0.35 GB) so no
+    # host->device copy happens per batch — the A100 then never waits on the host.
+    Hg = torch.from_numpy(H).to(dev)
+    yg = torch.from_numpy(y).to(dev) if kind == "cls" else torch.from_numpy(y.astype(np.float32)).to(dev)
 
     net, feed = build_model(model, n_in, n_out, kind, vision_size=vision_size,
                             pretrained=pretrained)
@@ -263,10 +286,14 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         cnt = np.bincount(y[i_tr], minlength=n_out).astype(np.float32)
         cls_w = torch.tensor(cnt.sum() / np.clip(cnt * n_out, 1e-6, None)).float().to(dev)
     lossf = nn.CrossEntropyLoss(weight=cls_w) if kind == "cls" else nn.MSELoss()
-    try:                                   # torch>=2.3 spelling
-        scaler = torch.amp.GradScaler("cuda", enabled=(dev.type == "cuda"))
-    except (AttributeError, TypeError):    # older torch fallback
-        scaler = torch.cuda.amp.GradScaler(enabled=(dev.type == "cuda"))
+    amp_dt = _amp_dtype(dev)
+    use_amp = (dev.type == "cuda")
+    # GradScaler only needed for fp16; bf16/fp32 run without it.
+    need_scaler = use_amp and amp_dt == torch.float16
+    try:
+        scaler = torch.amp.GradScaler("cuda", enabled=need_scaler)
+    except (AttributeError, TypeError):
+        scaler = torch.cuda.amp.GradScaler(enabled=need_scaler)
 
     # vision: head-only for the first `warmup` epochs, then unfreeze backbone.
     def set_frozen(frozen: bool):
@@ -290,12 +317,13 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         return o, s
 
     def predict(Hsrc, ref, kk, bs=batch):
+        """Hsrc is a GPU complex tensor (n, 1601, 9)."""
         net.eval(); preds = []; probs = []
         with torch.no_grad():
             for i in range(0, len(Hsrc), bs):
-                fb = torch.from_numpy(Hsrc[i:i + bs]).to(dev)
+                fb = Hsrc[i:i + bs]
                 x = _resize(cfdac_torch(ref, fb, channels), feed)
-                with torch.autocast("cuda", enabled=(dev.type == "cuda")):
+                with torch.autocast("cuda", dtype=amp_dt, enabled=use_amp):
                     out = net(x).float().cpu().numpy()
                 if kk == "cls":
                     preds.append(out.argmax(1))
@@ -323,15 +351,15 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         net.train(); perm = np.random.permutation(i_tr)
         for j in range(0, len(perm), batch):
             bi = perm[j:j + batch]
-            fb = torch.from_numpy(H[bi]).to(dev)
+            fb = Hg[bi]
             x = _resize(cfdac_torch(H_ref_syn, fb, channels), feed)
-            yb = torch.from_numpy(y[bi]).to(dev)
-            opt.zero_grad()
-            with torch.autocast("cuda", enabled=(dev.type == "cuda")):
+            yb = yg[bi]
+            opt.zero_grad(set_to_none=True)
+            with torch.autocast("cuda", dtype=amp_dt, enabled=use_amp):
                 out = net(x)
                 loss = lossf(out, yb.long()) if kind == "cls" else lossf(out, yb.float().unsqueeze(1))
             scaler.scale(loss).backward(); scaler.step(opt); scaler.update()
-        pv, _ = predict(H[i_va], H_ref_syn, kind)
+        pv, _ = predict(Hg[i_va], H_ref_syn, kind)
         m = (f1_score(y[i_va], pv, labels=list(range(n_out)), average="macro", zero_division=0)
              if kind == "cls" else r2_score(y[i_va], pv))
         sched.step(m)
@@ -353,7 +381,7 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         net.load_state_dict(torch.load(best_path, map_location=dev))
     torch.save({k: v.cpu() for k, v in net.state_dict().items()}, out_dir / "models" / f"{tag}.pt")
 
-    pt, _ = predict(H[i_te], H_ref_syn, kind)
+    pt, _ = predict(Hg[i_te], H_ref_syn, kind)
     if kind == "cls":
         s_acc = accuracy_score(y[i_te], pt)
         s_mf1 = f1_score(y[i_te], pt, labels=list(range(n_out)), average="macro", zero_division=0)
@@ -362,7 +390,10 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         s_acc = r2_score(y[i_te], pt); s_mf1 = None; s_bal = None
 
     mask_e, e_y, e_kind = exp_tasks[task]; idx_e = np.where(mask_e)[0]
-    pe, prob = predict(H_exp[idx_e], H_ref_exp, e_kind)
+    He = torch.from_numpy(H_exp[idx_e]).to(dev)            # exp FRFs -> GPU once
+    pe, prob = predict(He, H_ref_exp, e_kind)
+    del He
+    if dev.type == "cuda": torch.cuda.empty_cache()
     rows = []
     for i, ix in enumerate(idx_e):
         r = {"case": exp_names[ix],
