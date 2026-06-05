@@ -1648,5 +1648,20 @@
     "synth_test_bal_acc": 0.9534777410507068,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_mass_rf_modal_hires1601": {
+    "task": "is_mass",
+    "model": "rf",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.9833333333333333,
+    "synth_test_macro_f1": 0.9727426359688176,
+    "synth_test_bal_acc": 0.9576271186440678,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
