@@ -1858,5 +1858,20 @@
     "synth_test_bal_acc": 0.8742559395434704,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_mlp_timeseries_hires1601": {
+    "task": "is_hole",
+    "model": "mlp",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.8137560637560637,
+    "synth_test_metric": 0.8666666666666667,
+    "synth_test_macro_f1": 0.8206170772542454,
+    "synth_test_bal_acc": 0.8763436222157042,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
