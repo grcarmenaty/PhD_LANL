@@ -403,5 +403,20 @@
     "synth_test_bal_acc": 0.5146487075178107,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "col_location_transformer1d_frf_mag_hires1601": {
+    "task": "col_location",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 6,
+    "subsample": 4000,
+    "synth_val_best": 0.4720104527728451,
+    "synth_test_metric": 0.5033333333333333,
+    "synth_test_macro_f1": 0.4940251791075563,
+    "synth_test_bal_acc": 0.5052364917864335,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
