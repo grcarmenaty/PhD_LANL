@@ -883,5 +883,20 @@
     "synth_test_bal_acc": null,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "severity_transformer1d_timeseries_hires1601": {
+    "task": "severity",
+    "model": "transformer1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "reg",
+    "n_out": 1,
+    "subsample": 4000,
+    "synth_val_best": 0.49543774127960205,
+    "synth_test_metric": 0.4937795400619507,
+    "synth_test_macro_f1": null,
+    "synth_test_bal_acc": null,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
