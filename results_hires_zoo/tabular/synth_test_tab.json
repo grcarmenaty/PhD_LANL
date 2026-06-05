@@ -1918,5 +1918,20 @@
     "synth_test_bal_acc": 0.6959574871892199,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "is_hole_xgb_indicators_hires1601": {
+    "task": "is_hole",
+    "model": "xgb",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.805,
+    "synth_test_macro_f1": 0.6447206603539635,
+    "synth_test_bal_acc": 0.6277109680981383,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
