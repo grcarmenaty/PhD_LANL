@@ -1798,5 +1798,20 @@
     "synth_test_bal_acc": 0.6908537871861593,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_mlp_modal_hires1601": {
+    "task": "is_hole",
+    "model": "mlp",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.7993730407523512,
+    "synth_test_metric": 0.8733333333333333,
+    "synth_test_macro_f1": 0.8318559270785705,
+    "synth_test_bal_acc": 0.8959609379043807,
+    "standardized": true,
+    "trained_to_convergence": true
   }
 }
