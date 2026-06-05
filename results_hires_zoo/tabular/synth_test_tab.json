@@ -1708,5 +1708,20 @@
     "synth_test_bal_acc": 0.9194915254237288,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "is_mass_cnn1d_frf_mag_hires1601": {
+    "task": "is_mass",
+    "model": "cnn1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9584024699688942,
+    "synth_test_metric": 0.9666666666666667,
+    "synth_test_macro_f1": 0.9443413729128014,
+    "synth_test_bal_acc": 0.9216541247626415,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
