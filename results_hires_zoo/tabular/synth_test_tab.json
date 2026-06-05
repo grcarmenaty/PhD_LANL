@@ -2203,5 +2203,20 @@
     "synth_test_bal_acc": 0.8447916666666666,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_pristine_transformer1d_frf_mag_hires1601": {
+    "task": "is_pristine",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.6060592796608744,
+    "synth_test_metric": 0.72,
+    "synth_test_macro_f1": 0.6645188774695139,
+    "synth_test_bal_acc": 0.74375,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
