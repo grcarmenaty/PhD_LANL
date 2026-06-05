@@ -1663,5 +1663,20 @@
     "synth_test_bal_acc": 0.9576271186440678,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "is_mass_rf_indicators_hires1601": {
+    "task": "is_mass",
+    "model": "rf",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.9666666666666667,
+    "synth_test_macro_f1": 0.9435411020776874,
+    "synth_test_bal_acc": 0.9152542372881356,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
