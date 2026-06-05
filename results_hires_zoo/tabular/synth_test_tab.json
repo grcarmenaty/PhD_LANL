@@ -268,5 +268,20 @@
     "synth_test_bal_acc": 0.46981845856154236,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "col_location_mlp_frf_realimag_hires1601": {
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 6,
+    "subsample": 4000,
+    "synth_val_best": 0.47507777746715396,
+    "synth_test_metric": 0.5033333333333333,
+    "synth_test_macro_f1": 0.4999950132674673,
+    "synth_test_bal_acc": 0.5025914662544686,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
