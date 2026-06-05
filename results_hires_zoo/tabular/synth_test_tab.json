@@ -628,5 +628,20 @@
     "synth_test_bal_acc": 0.9766666666666667,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "mass_location_transformer1d_frf_mag_hires1601": {
+    "task": "mass_location",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 4,
+    "subsample": 2000,
+    "synth_val_best": 0.9966665185119339,
+    "synth_test_metric": 0.9866666666666667,
+    "synth_test_macro_f1": 0.9866633826761797,
+    "synth_test_bal_acc": 0.9866666666666667,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
