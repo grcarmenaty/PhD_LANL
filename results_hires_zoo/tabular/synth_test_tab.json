@@ -658,5 +658,20 @@
     "synth_test_bal_acc": 0.9700000000000001,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "mass_location_transformer1d_timeseries_hires1601": {
+    "task": "mass_location",
+    "model": "transformer1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 4,
+    "subsample": 2000,
+    "synth_val_best": 0.950399028299316,
+    "synth_test_metric": 0.94,
+    "synth_test_macro_f1": 0.9400278208814846,
+    "synth_test_bal_acc": 0.9400000000000001,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
