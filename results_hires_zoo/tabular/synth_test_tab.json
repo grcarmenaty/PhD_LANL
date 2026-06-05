@@ -1993,5 +1993,20 @@
     "synth_test_bal_acc": 0.5485515623112891,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_transformer1d_frf_realimag_hires1601": {
+    "task": "is_hole",
+    "model": "transformer1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.5691487651432062,
+    "synth_test_metric": 0.69,
+    "synth_test_macro_f1": 0.5730746277792229,
+    "synth_test_bal_acc": 0.5865698165944893,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
