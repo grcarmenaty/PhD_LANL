@@ -1198,5 +1198,20 @@
     "synth_test_bal_acc": 0.9150088855915388,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_bolt_rf_modal_hires1601": {
+    "task": "is_bolt",
+    "model": "rf",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.96,
+    "synth_test_macro_f1": 0.9345823263251621,
+    "synth_test_bal_acc": 0.9131800065563588,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
