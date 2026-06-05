@@ -778,5 +778,20 @@
     "synth_test_bal_acc": null,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "severity_xgb_modal_hires1601": {
+    "task": "severity",
+    "model": "xgb",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "reg",
+    "n_out": 1,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.5131758451461792,
+    "synth_test_macro_f1": null,
+    "synth_test_bal_acc": null,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
