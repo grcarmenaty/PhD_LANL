@@ -673,5 +673,20 @@
     "synth_test_bal_acc": 0.9400000000000001,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "severity_mlp_modal_hires1601": {
+    "task": "severity",
+    "model": "mlp",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "reg",
+    "n_out": 1,
+    "subsample": 4000,
+    "synth_val_best": 0.5181995630264282,
+    "synth_test_metric": 0.5143110156059265,
+    "synth_test_macro_f1": null,
+    "synth_test_bal_acc": null,
+    "standardized": true,
+    "trained_to_convergence": true
   }
 }
