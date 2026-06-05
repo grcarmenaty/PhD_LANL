@@ -538,5 +538,20 @@
     "synth_test_bal_acc": 0.9966666666666667,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "mass_location_rf_indicators_hires1601": {
+    "task": "mass_location",
+    "model": "rf",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 4,
+    "subsample": 2000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.9733333333333334,
+    "synth_test_macro_f1": 0.9734902552710772,
+    "synth_test_bal_acc": 0.9733333333333334,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
