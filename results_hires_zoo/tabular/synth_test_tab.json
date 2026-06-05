@@ -853,5 +853,20 @@
     "synth_test_bal_acc": null,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "severity_transformer1d_frf_mag_hires1601": {
+    "task": "severity",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "reg",
+    "n_out": 1,
+    "subsample": 4000,
+    "synth_val_best": 0.2396271824836731,
+    "synth_test_metric": 0.24898874759674072,
+    "synth_test_macro_f1": null,
+    "synth_test_bal_acc": null,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
