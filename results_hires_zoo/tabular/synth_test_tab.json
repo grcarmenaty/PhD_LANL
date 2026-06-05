@@ -868,5 +868,20 @@
     "synth_test_bal_acc": null,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "severity_transformer1d_frf_realimag_hires1601": {
+    "task": "severity",
+    "model": "transformer1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "reg",
+    "n_out": 1,
+    "subsample": 4000,
+    "synth_val_best": 0.0009483098983764648,
+    "synth_test_metric": -0.00021445751190185547,
+    "synth_test_macro_f1": null,
+    "synth_test_bal_acc": null,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
