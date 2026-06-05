@@ -1303,5 +1303,20 @@
     "synth_test_bal_acc": 0.9038717024103246,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_bolt_transformer1d_frf_mag_hires1601": {
+    "task": "is_bolt",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9305357651752637,
+    "synth_test_metric": 0.9433333333333334,
+    "synth_test_macro_f1": 0.9125454420742163,
+    "synth_test_bal_acc": 0.9150951534705567,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
