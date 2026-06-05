@@ -43,5 +43,20 @@
     "synth_test_bal_acc": 0.984375,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "binary_mlp_frf_realimag_hires1601": {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9626517273576096,
+    "synth_test_metric": 0.9566666666666667,
+    "synth_test_macro_f1": 0.935447563559322,
+    "synth_test_bal_acc": 0.9572916666666667,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
