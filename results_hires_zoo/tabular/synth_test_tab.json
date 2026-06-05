@@ -433,5 +433,20 @@
     "synth_test_bal_acc": 0.47383476092707305,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "col_location_transformer1d_timeseries_hires1601": {
+    "task": "col_location",
+    "model": "transformer1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 6,
+    "subsample": 4000,
+    "synth_val_best": 0.482625613642318,
+    "synth_test_metric": 0.48,
+    "synth_test_macro_f1": 0.4765750025536864,
+    "synth_test_bal_acc": 0.4805629766408013,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
