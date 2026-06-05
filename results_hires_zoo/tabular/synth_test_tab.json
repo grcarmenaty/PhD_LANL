@@ -958,5 +958,20 @@
     "synth_test_bal_acc": 0.8503098006256712,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "type_mlp_timeseries_hires1601": {
+    "task": "type",
+    "model": "mlp",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 5,
+    "subsample": 4000,
+    "synth_val_best": 0.8113697304981363,
+    "synth_test_metric": 0.8333333333333334,
+    "synth_test_macro_f1": 0.8355743876351684,
+    "synth_test_bal_acc": 0.8335721623009759,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
