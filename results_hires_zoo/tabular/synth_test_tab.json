@@ -1633,5 +1633,20 @@
     "synth_test_bal_acc": 0.9546029959912793,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_mass_mlp_timeseries_hires1601": {
+    "task": "is_mass",
+    "model": "mlp",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9641989984899322,
+    "synth_test_metric": 0.9766666666666667,
+    "synth_test_macro_f1": 0.9623487225459435,
+    "synth_test_bal_acc": 0.9534777410507068,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
