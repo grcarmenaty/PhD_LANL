@@ -2188,5 +2188,20 @@
     "synth_test_bal_acc": 0.7906249999999999,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_pristine_cnn1d_timeseries_hires1601": {
+    "task": "is_pristine",
+    "model": "cnn1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.8220946019756863,
+    "synth_test_metric": 0.8566666666666667,
+    "synth_test_macro_f1": 0.8016483178547266,
+    "synth_test_bal_acc": 0.8447916666666666,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
