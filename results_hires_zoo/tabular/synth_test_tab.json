@@ -1288,5 +1288,20 @@
     "synth_test_bal_acc": 0.9090477751514001,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_bolt_cnn1d_timeseries_hires1601": {
+    "task": "is_bolt",
+    "model": "cnn1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9327341691735644,
+    "synth_test_metric": 0.955,
+    "synth_test_macro_f1": 0.9261538461538461,
+    "synth_test_bal_acc": 0.9038717024103246,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
