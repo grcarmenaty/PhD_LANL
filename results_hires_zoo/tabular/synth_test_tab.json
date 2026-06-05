@@ -1948,5 +1948,20 @@
     "synth_test_bal_acc": 0.6041857174899498,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_cnn1d_frf_realimag_hires1601": {
+    "task": "is_hole",
+    "model": "cnn1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.6438674479692867,
+    "synth_test_metric": 0.6583333333333333,
+    "synth_test_macro_f1": 0.6047037045369088,
+    "synth_test_bal_acc": 0.6810072637554133,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
