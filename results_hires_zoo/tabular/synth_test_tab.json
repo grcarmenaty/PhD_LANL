@@ -1498,5 +1498,20 @@
     "synth_test_bal_acc": 0.6333333333333333,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_crack_cnn1d_frf_realimag_hires1601": {
+    "task": "is_crack",
+    "model": "cnn1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.5770538870394286,
+    "synth_test_metric": 0.7366666666666667,
+    "synth_test_macro_f1": 0.53702799320193,
+    "synth_test_bal_acc": 0.5354166666666667,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
