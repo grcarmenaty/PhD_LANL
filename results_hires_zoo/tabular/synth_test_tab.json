@@ -988,5 +988,20 @@
     "synth_test_bal_acc": 0.8090453845076342,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "type_rf_indicators_hires1601": {
+    "task": "type",
+    "model": "rf",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 5,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.735,
+    "synth_test_macro_f1": 0.7379243737825869,
+    "synth_test_bal_acc": 0.7357760190502871,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
