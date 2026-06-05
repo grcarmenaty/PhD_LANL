@@ -2233,5 +2233,20 @@
     "synth_test_bal_acc": 0.8447916666666666,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_pristine_transformer1d_timeseries_hires1601": {
+    "task": "is_pristine",
+    "model": "transformer1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.8964317111649025,
+    "synth_test_metric": 0.91,
+    "synth_test_macro_f1": 0.8766447368421053,
+    "synth_test_bal_acc": 0.934375,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
