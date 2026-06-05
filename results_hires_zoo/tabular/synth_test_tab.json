@@ -598,5 +598,20 @@
     "synth_test_bal_acc": 0.9933333333333334,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "mass_location_cnn1d_frf_realimag_hires1601": {
+    "task": "mass_location",
+    "model": "cnn1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 4,
+    "subsample": 2000,
+    "synth_val_best": 0.9866441471472807,
+    "synth_test_metric": 0.9733333333333334,
+    "synth_test_macro_f1": 0.9734550646762627,
+    "synth_test_bal_acc": 0.9733333333333334,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
