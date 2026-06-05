@@ -1933,5 +1933,20 @@
     "synth_test_bal_acc": 0.6277109680981383,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "is_hole_cnn1d_frf_mag_hires1601": {
+    "task": "is_hole",
+    "model": "cnn1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.6555059323111544,
+    "synth_test_metric": 0.7033333333333334,
+    "synth_test_macro_f1": 0.5894581462574574,
+    "synth_test_bal_acc": 0.6041857174899498,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
