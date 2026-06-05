@@ -1753,5 +1753,20 @@
     "synth_test_bal_acc": 0.9026302834235882,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_mass_transformer1d_frf_mag_hires1601": {
+    "task": "is_mass",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.7053302183402105,
+    "synth_test_metric": 0.8466666666666667,
+    "synth_test_macro_f1": 0.7509205111544293,
+    "synth_test_bal_acc": 0.7445671284900486,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
