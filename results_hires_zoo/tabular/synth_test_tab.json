@@ -1048,5 +1048,20 @@
     "synth_test_bal_acc": 0.7008572629219778,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "type_cnn1d_frf_realimag_hires1601": {
+    "task": "type",
+    "model": "cnn1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 5,
+    "subsample": 4000,
+    "synth_val_best": 0.6838054441806596,
+    "synth_test_metric": 0.68,
+    "synth_test_macro_f1": 0.6782336635452118,
+    "synth_test_bal_acc": 0.68074006630247,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
