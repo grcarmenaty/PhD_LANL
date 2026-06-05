@@ -223,5 +223,20 @@
     "synth_test_bal_acc": 0.9208333333333334,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "col_location_mlp_modal_hires1601": {
+    "task": "col_location",
+    "model": "mlp",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 6,
+    "subsample": 4000,
+    "synth_val_best": 0.48734355734013723,
+    "synth_test_metric": 0.4866666666666667,
+    "synth_test_macro_f1": 0.48006801362531126,
+    "synth_test_bal_acc": 0.4887290812414575,
+    "standardized": true,
+    "trained_to_convergence": true
   }
 }
