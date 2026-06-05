@@ -2023,5 +2023,20 @@
     "synth_test_bal_acc": 0.5452043686053935,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_pristine_mlp_modal_hires1601": {
+    "task": "is_pristine",
+    "model": "mlp",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9261198209398671,
+    "synth_test_metric": 0.945,
+    "synth_test_macro_f1": 0.9217610868096304,
+    "synth_test_bal_acc": 0.965625,
+    "standardized": true,
+    "trained_to_convergence": true
   }
 }
