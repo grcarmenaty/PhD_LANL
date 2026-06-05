@@ -1978,5 +1978,20 @@
     "synth_test_bal_acc": 0.6997532738660087,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_transformer1d_frf_mag_hires1601": {
+    "task": "is_hole",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.5531186612576064,
+    "synth_test_metric": 0.6983333333333334,
+    "synth_test_macro_f1": 0.5467275481967186,
+    "synth_test_bal_acc": 0.5485515623112891,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
