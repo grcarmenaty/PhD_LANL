@@ -39,6 +39,10 @@ clone('pymodal','master','/content/pymodal')   # sibling dir the scripts expect
 for p in ('/content/PhD_LANL','/content/pymodal'):
     if p not in sys.path: sys.path.insert(0,p)
 os.chdir('/content/PhD_LANL')
+# Harden git's HTTP transport against Drive-mounted-Colab flakiness (the 408s):
+for _k,_v in [('http.postBuffer','524288000'),('http.version','HTTP/1.1'),
+              ('http.lowSpeedLimit','1000'),('http.lowSpeedTime','300')]:
+    subprocess.run(['git','config','--global',_k,_v])
 {PIP}
 import torch
 print('torch',torch.__version__,'| cuda',torch.cuda.is_available(),'|',
@@ -152,10 +156,14 @@ def git_autosave(msg):
     if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
         subprocess.run(['git','commit','-q','-m',msg])
         url=f'https://{GH_TOKEN}@github.com/grcarmenaty/phd_lanl.git'
-        r=subprocess.run(['git','push','--force',url,f'HEAD:{GH_RESULTS_BRANCH}'],
-                         capture_output=True,text=True)
-        print('  autosave:', f'pushed -> {GH_RESULTS_BRANCH}' if r.returncode==0
-              else 'FAILED '+r.stderr[-160:])
+        import time as _t; ok=False
+        for _a in range(5):                       # retry the flaky push w/ backoff
+            r=subprocess.run(['git','push','--force',url,f'HEAD:{GH_RESULTS_BRANCH}'],
+                             capture_output=True,text=True)
+            if r.returncode==0: ok=True; break
+            _t.sleep(4*(2**_a))                    # 4,8,16,32,64s
+        print('  autosave:', f'pushed -> {GH_RESULTS_BRANCH}' if ok
+              else 'push failed after retries (results safe on Drive): '+r.stderr[-140:])
     os.chdir(cwd)
 
 for (task, model, feature) in CELLS:
@@ -199,25 +207,32 @@ try:
     from google.colab import files; files.download('/content/'+z+'.zip')
 except Exception as e: print('zip at /content/'+z+'.zip', e)"""
 
-PUSH = """# Optional: push the JSON results to the repo (needs a GH_TOKEN secret with write).
-import os, subprocess, shutil
+PUSH = """# Optional: force the full JSON snapshot to the results branch now (JSON only,
+# no model weights). Same robust path as the per-cell autosave; safe to re-run.
+import os, subprocess, shutil, glob, time as _t
 tok=None
 try:
     from google.colab import userdata; tok=userdata.get('GH_TOKEN')
 except Exception: tok=os.environ.get('GH_TOKEN')
 if not tok:
-    print('No GH_TOKEN - hand the downloaded zip to the agent instead.')
+    print('No GH_TOKEN - download the zip from the cell above and hand it to the agent.')
 else:
-    dst='/content/PhD_LANL/results_hires_zoo'; os.makedirs(dst, exist_ok=True)
-    if str(OUT)!=dst and (OUT/'per_case').exists():
-        shutil.copytree(OUT, dst, dirs_exist_ok=True)
-    os.chdir('/content/PhD_LANL')
-    subprocess.run(['git','config','user.email','colab@gpu.run'])
-    subprocess.run(['git','config','user.name','colab-gpu'])
-    subprocess.run(['git','add','results_hires_zoo'])
-    subprocess.run(['git','commit','-m','hires zoo (GPU): CFDAC cells synth+exp'])
-    url=f'https://{tok}@github.com/grcarmenaty/phd_lanl.git'
-    print(subprocess.run(['git','push',url,'HEAD:main'],capture_output=True,text=True).stderr[-400:])"""
+    repo='/content/PhD_LANL'; dst=os.path.join(repo,'results_hires_zoo',FAMILY)
+    os.makedirs(os.path.join(dst,'per_case'), exist_ok=True)
+    for fn in (os.listdir(os.path.join(OUT,'per_case')) if os.path.isdir(os.path.join(OUT,'per_case')) else []):
+        if fn.endswith('.json'): shutil.copy(os.path.join(OUT,'per_case',fn), os.path.join(dst,'per_case',fn))
+    for sj in glob.glob(os.path.join(OUT,'synth_test_*.json')):
+        shutil.copy(sj, os.path.join(dst, os.path.basename(sj)))
+    os.chdir(repo)
+    subprocess.run(['git','config','user.email','colab@gpu.run']); subprocess.run(['git','config','user.name','colab-gpu'])
+    subprocess.run(['git','add','-f',f'results_hires_zoo/{FAMILY}'])
+    subprocess.run(['git','commit','-q','-m',f'hires {FAMILY} (GPU): manual JSON snapshot'])
+    url=f'https://{tok}@github.com/grcarmenaty/phd_lanl.git'; ok=False
+    for _a in range(5):
+        r=subprocess.run(['git','push','--force',url,f'HEAD:{GH_RESULTS_BRANCH}'],capture_output=True,text=True)
+        if r.returncode==0: ok=True; break
+        _t.sleep(4*(2**_a))
+    print(f'pushed -> {GH_RESULTS_BRANCH}' if ok else 'push failed after retries: '+r.stderr[-200:])"""
 
 
 def md(s): return {"cell_type": "markdown", "metadata": {}, "source": s.splitlines(keepends=True)}

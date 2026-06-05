@@ -89,8 +89,12 @@ def git_autosave(msg):
     if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
         subprocess.run(['git','commit','-q','-m',msg])
         url=f'https://{GH_TOKEN}@github.com/grcarmenaty/phd_lanl.git'
-        r=subprocess.run(['git','push','--force',url,f'HEAD:{GH_RESULTS_BRANCH}'],capture_output=True,text=True)
-        print('  autosave:', f'pushed -> {GH_RESULTS_BRANCH}' if r.returncode==0 else 'FAILED '+r.stderr[-160:])
+        import time as _t; ok=False
+        for _a in range(5):
+            r=subprocess.run(['git','push','--force',url,f'HEAD:{GH_RESULTS_BRANCH}'],capture_output=True,text=True)
+            if r.returncode==0: ok=True; break
+            _t.sleep(4*(2**_a))
+        print('  autosave:', f'pushed -> {GH_RESULTS_BRANCH}' if ok else 'push failed after retries (Drive has results): '+r.stderr[-140:])
     os.chdir(cwd)
 
 for (task, model, feature) in CELLS:
