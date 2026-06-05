@@ -118,5 +118,20 @@
     "synth_test_bal_acc": 0.9177083333333333,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "binary_xgb_indicators_hires1601": {
+    "task": "binary",
+    "model": "xgb",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.8816666666666667,
+    "synth_test_macro_f1": 0.8133470036936261,
+    "synth_test_bal_acc": 0.8104166666666667,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
