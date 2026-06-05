@@ -102,11 +102,20 @@ def _timeseries_from_frf(re: np.ndarray, im: np.ndarray, freqs: np.ndarray,
 
 
 def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print):
-    """Compute `feature` for ALL samples in `h5_path` and save to .npy (once)."""
-    import h5py
+    """Compute `feature` for ALL samples in `h5_path`, cache to .npy, return it.
+
+    Robust to Google-Drive FUSE failures on large files: if the requested
+    (Drive) path can't be written, falls back to local /content/cache, and in
+    any case returns the in-memory array so the run never blocks. Checks both
+    the requested path and the local fallback before recomputing.
+    """
+    import h5py, shutil, tempfile, os
     cache_path = Path(cache_path)
-    if cache_path.exists():
-        return np.load(cache_path, mmap_mode="r")
+    local = Path("/content/cache") / cache_path.name
+    for p in (cache_path, local):
+        if p.exists():
+            try: return np.load(p, mmap_mode="r")
+            except Exception: pass
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from ml_pipeline.features import modal_features, indicator_features
@@ -135,8 +144,18 @@ def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print):
                 if (i + 1) % 500 == 0: log(f"  indicators {i+1}/{n}")
         else:
             raise ValueError(feature)
-    np.save(cache_path, X)
-    log(f"cached {feature} {X.shape} -> {cache_path.name}")
+    # save robustly: try the requested (Drive) path, fall back to local /content
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        np.save(cache_path, X)
+        log(f"cached {feature} {X.shape} -> {cache_path}")
+    except Exception as e:
+        local.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            np.save(local, X)
+            log(f"  Drive save failed ({type(e).__name__}); cached locally -> {local}")
+        except Exception as e2:
+            log(f"  cache save failed ({e2}); continuing with in-memory array only")
     return X
 
 
