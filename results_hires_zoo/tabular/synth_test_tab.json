@@ -1528,5 +1528,20 @@
     "synth_test_bal_acc": 0.6312500000000001,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_crack_transformer1d_frf_mag_hires1601": {
+    "task": "is_crack",
+    "model": "transformer1d",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.572760837037432,
+    "synth_test_metric": 0.5566666666666666,
+    "synth_test_macro_f1": 0.5149290021396615,
+    "synth_test_bal_acc": 0.5947916666666666,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
