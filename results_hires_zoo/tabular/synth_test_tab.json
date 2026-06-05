@@ -28,5 +28,20 @@
     "synth_test_bal_acc": 0.909375,
     "standardized": true,
     "trained_to_convergence": true
+  },
+  "binary_mlp_frf_mag_hires1601": {
+    "task": "binary",
+    "model": "mlp",
+    "feature": "frf_mag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9722920751136654,
+    "synth_test_metric": 0.975,
+    "synth_test_macro_f1": 0.9626517273576096,
+    "synth_test_bal_acc": 0.984375,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
