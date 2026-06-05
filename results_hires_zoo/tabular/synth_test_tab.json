@@ -1573,5 +1573,20 @@
     "synth_test_bal_acc": 0.53125,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_mass_mlp_modal_hires1601": {
+    "task": "is_mass",
+    "model": "mlp",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9893131946423482,
+    "synth_test_metric": 0.9916666666666667,
+    "synth_test_macro_f1": 0.9865975098173241,
+    "synth_test_bal_acc": 0.978813559322034,
+    "standardized": true,
+    "trained_to_convergence": true
   }
 }
