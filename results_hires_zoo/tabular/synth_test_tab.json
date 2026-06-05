@@ -1183,5 +1183,20 @@
     "synth_test_bal_acc": 0.9160527269276557,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_bolt_mlp_timeseries_hires1601": {
+    "task": "is_bolt",
+    "model": "mlp",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.8977348264048679,
+    "synth_test_metric": 0.9333333333333333,
+    "synth_test_macro_f1": 0.9001181934710591,
+    "synth_test_bal_acc": 0.9150088855915388,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
