@@ -1123,5 +1123,20 @@
     "synth_test_bal_acc": 0.8619234720082177,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_bolt_mlp_modal_hires1601": {
+    "task": "is_bolt",
+    "model": "mlp",
+    "feature": "modal",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9085117918134996,
+    "synth_test_metric": 0.9383333333333334,
+    "synth_test_macro_f1": 0.9068006162914202,
+    "synth_test_bal_acc": 0.9181404095998896,
+    "standardized": true,
+    "trained_to_convergence": true
   }
 }
