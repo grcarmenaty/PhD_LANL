@@ -2143,5 +2143,20 @@
     "synth_test_bal_acc": 0.940625,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "is_pristine_xgb_indicators_hires1601": {
+    "task": "is_pristine",
+    "model": "xgb",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.8733333333333333,
+    "synth_test_macro_f1": 0.8020833333333333,
+    "synth_test_bal_acc": 0.8020833333333333,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
