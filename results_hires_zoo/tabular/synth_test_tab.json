@@ -1543,5 +1543,20 @@
     "synth_test_bal_acc": 0.5947916666666666,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_crack_transformer1d_frf_realimag_hires1601": {
+    "task": "is_crack",
+    "model": "transformer1d",
+    "feature": "frf_realimag",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.7812467447432254,
+    "synth_test_metric": 0.8233333333333334,
+    "synth_test_macro_f1": 0.7566984437881593,
+    "synth_test_bal_acc": 0.7958333333333334,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
