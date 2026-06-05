@@ -1963,5 +1963,20 @@
     "synth_test_bal_acc": 0.6810072637554133,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_cnn1d_timeseries_hires1601": {
+    "task": "is_hole",
+    "model": "cnn1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.6507987085404752,
+    "synth_test_metric": 0.6833333333333333,
+    "synth_test_macro_f1": 0.6265282855682667,
+    "synth_test_bal_acc": 0.6997532738660087,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
