@@ -1438,5 +1438,20 @@
     "synth_test_bal_acc": 0.6833333333333333,
     "standardized": true,
     "trained_to_convergence": false
+  },
+  "is_crack_rf_indicators_hires1601": {
+    "task": "is_crack",
+    "model": "rf",
+    "feature": "indicators",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": null,
+    "synth_test_metric": 0.8516666666666667,
+    "synth_test_macro_f1": 0.7078119271827927,
+    "synth_test_bal_acc": 0.6729166666666666,
+    "standardized": true,
+    "trained_to_convergence": false
   }
 }
