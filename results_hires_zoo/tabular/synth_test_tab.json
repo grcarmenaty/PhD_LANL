@@ -1333,5 +1333,20 @@
     "synth_test_bal_acc": 0.8943477285667454,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_bolt_transformer1d_timeseries_hires1601": {
+    "task": "is_bolt",
+    "model": "transformer1d",
+    "feature": "timeseries",
+    "n_target": 1601,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 4000,
+    "synth_val_best": 0.9280993826311188,
+    "synth_test_metric": 0.9516666666666667,
+    "synth_test_macro_f1": 0.9201362274006177,
+    "synth_test_bal_acc": 0.8956072396004071,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
