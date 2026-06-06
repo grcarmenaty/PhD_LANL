@@ -101,15 +101,26 @@ def _timeseries_from_frf(re: np.ndarray, im: np.ndarray, freqs: np.ndarray,
     return _seq_normalise(ts.transpose(0, 2, 1).astype(np.float32))   # (n,9,n_t)
 
 
-def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print):
-    """Compute `feature` for ALL samples in `h5_path`, cache to .npy, return it.
+def _decf(a, res):
+    """Bin-average the frequency axis (axis=1) of a:(n,nfreq,...) down to `res`."""
+    n = a.shape[1]
+    if res >= n:
+        return a
+    edges = np.linspace(0, n, res + 1).astype(int); starts = edges[:-1]
+    s = np.add.reduceat(a, starts, axis=1)
+    sizes = np.maximum(np.diff(edges), 1).reshape((1, res) + (1,) * (a.ndim - 2))
+    return (s / sizes).astype(a.dtype)
+
+
+def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print, res=1601):
+    """Compute `feature` for ALL samples in `h5_path` at frequency resolution
+    `res` (<=1601), cache to .npy, return it.
 
     Robust to Google-Drive FUSE failures on large files: if the requested
     (Drive) path can't be written, falls back to local /content/cache, and in
-    any case returns the in-memory array so the run never blocks. Checks both
-    the requested path and the local fallback before recomputing.
+    any case returns the in-memory array so the run never blocks.
     """
-    import h5py, shutil, tempfile, os
+    import h5py, os
     cache_path = Path(cache_path)
     local = Path("/content/cache") / cache_path.name
     for p in (cache_path, local):
@@ -120,28 +131,29 @@ def build_feature_cache(h5_path, feature: str, cache_path: Path, log=print):
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from ml_pipeline.features import modal_features, indicator_features
     with h5py.File(h5_path, "r") as f:
-        freqs = f["freqs"][:].astype(np.float32)
-        H_ref = f["reference/frf_complex"][:]
+        freqs = _decf(f["freqs"][:].astype(np.float32)[None, :, None], res)[0, :, 0]
+        H_ref = _decf(f["reference/frf_complex"][:][None], res)[0]            # (res,9)
         n = f["frf_real"].shape[0]
         if feature == "frf_mag":
-            X = f["frf_mag"][:].transpose(0, 2, 1).astype(np.float32)        # (n,9,L)
-            X = _seq_normalise(np.log10(np.clip(X, 1e-12, None)))
+            mag = _decf(np.abs(f["frf_real"][:] + 1j * f["frf_imag"][:]).astype(np.float32), res)
+            X = _seq_normalise(np.log10(np.clip(mag.transpose(0, 2, 1), 1e-12, None)))
         elif feature == "frf_realimag":
-            re = f["frf_real"][:]; im = f["frf_imag"][:]
-            X = np.concatenate([re, im], axis=2).transpose(0, 2, 1).astype(np.float32)  # (n,18,L)
-            X = _seq_normalise(X)
+            re = _decf(f["frf_real"][:], res); im = _decf(f["frf_imag"][:], res)
+            X = _seq_normalise(np.concatenate([re, im], axis=2).transpose(0, 2, 1).astype(np.float32))
         elif feature == "timeseries":
-            X = _timeseries_from_frf(f["frf_real"][:], f["frf_imag"][:], freqs)  # (n,9,4096)
+            # reconstruct at full res, then decimate the TIME axis by the same ratio
+            ts = _timeseries_from_frf(f["frf_real"][:], f["frf_imag"][:], freqs)  # (n,9,4096)
+            tgt = max(64, int(round(ts.shape[2] * res / 1601)))
+            X = _seq_normalise(_decf(ts.transpose(0, 2, 1), tgt).transpose(0, 2, 1))
         elif feature == "modal":
-            mag = f["frf_mag"]
+            mag = _decf(np.abs(f["frf_real"][:] + 1j * f["frf_imag"][:]).astype(np.float32), res)
             X = np.stack([modal_features(mag[i], freqs) for i in range(n)]).astype(np.float32)
         elif feature == "indicators":
-            re = f["frf_real"]; im = f["frf_imag"]
+            reA = _decf(f["frf_real"][:], res); imA = _decf(f["frf_imag"][:], res)
             X = np.empty((n, 22), np.float32)
             for i in range(n):
-                H = (re[i] + 1j * im[i]).astype(np.complex64)
-                X[i] = indicator_features(H, H_ref)
-                if (i + 1) % 500 == 0: log(f"  indicators {i+1}/{n}")
+                X[i] = indicator_features((reA[i] + 1j * imA[i]).astype(np.complex64), H_ref)
+                if (i + 1) % 1000 == 0: log(f"  indicators {i+1}/{n}")
         else:
             raise ValueError(feature)
     # save robustly: try the requested (Drive) path, fall back to local /content
@@ -230,13 +242,13 @@ def _metrics_cls(yt, yp, n_out):
 def run_tab_cell(task, model, feature, *, out_dir: Path, dev, syn_tasks, exp_tasks,
                  Xsyn, Xexp, exp_names, make_split, subsample=4000, batch=256, lr=1e-3,
                  max_epochs=200, patience=15, min_delta=1e-3, seed=42, force=False, log=print,
-                 ckpt_every=5):
+                 ckpt_every=5, res=1601):
     """Xsyn/Xexp are the WHOLE-dataset cached feature arrays for `feature`."""
     from sklearn.preprocessing import StandardScaler
     from sklearn.metrics import r2_score
     out_dir = Path(out_dir); (out_dir / "per_case").mkdir(parents=True, exist_ok=True)
     (out_dir / "models").mkdir(exist_ok=True)
-    tag = f"{task}_{model}_{feature}_hires1601"
+    tag = f"{task}_{model}_{feature}_hires{res}"
     pc = out_dir / "per_case" / f"{tag}.json"
     if pc.exists() and not force:
         log(f"skip {tag} (exists)"); return
@@ -370,7 +382,7 @@ def run_tab_cell(task, model, feature, *, out_dir: Path, dev, syn_tasks, exp_tas
              "y_pred": (int(pe[i]) if e_kind == "cls" else float(pe[i]))}
         if e_kind == "cls" and prob_e is not None: r["proba"] = [float(p) for p in prob_e[i]]
         rows.append(r)
-    meta = {"task": task, "model": model, "feature": feature, "n_target": 1601,
+    meta = {"task": task, "model": model, "feature": feature, "n_target": res,
             "kind": e_kind, "n_out": int(n_out), "subsample": int(min(subsample, len(idx_pool))),
             "synth_val_best": synth_val, "synth_test_metric": float(s_acc),
             "synth_test_macro_f1": (float(s_mf1) if s_mf1 is not None else None),

@@ -230,6 +230,26 @@ def build_model(model: str, n_in: int, n_out: int, kind: str,
 # Train + evaluate one cell
 # --------------------------------------------------------------------------
 
+def _decim_mat(res, n, dev):
+    """(res, n) complex averaging matrix to decimate the frequency axis."""
+    edges = np.linspace(0, n, res + 1).astype(int)
+    D = torch.zeros(res, n, dtype=torch.complex64, device=dev)
+    for i in range(res):
+        lo, hi = edges[i], max(edges[i] + 1, edges[i + 1])
+        D[i, lo:hi] = 1.0 / (hi - lo)
+    return D
+
+
+def _decimate_frf(H, ref, res, dev):
+    """H:(k,n,9) complex, ref:(n,9) complex -> decimated to `res` bins."""
+    n = H.shape[-2]
+    if res >= n:
+        return H, ref
+    D = _decim_mat(res, n, dev)
+    H2 = torch.einsum("rf,kfc->krc", D, H)
+    ref2 = torch.einsum("rf,fc->rc", D, ref)
+    return H2, ref2
+
 def _resize(x, size):
     if size is None or x.shape[-1] == size: return x
     return nn.functional.interpolate(x, size=(size, size), mode="bilinear", align_corners=False)
@@ -239,7 +259,7 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
              dev, syn_tasks, exp_tasks, H_ref_syn, H_ref_exp, H_exp, exp_names,
              make_split, epochs=25, subsample=3000, batch=16, lr=3e-4, warmup=2,
              vision_size=384, seed=42, pretrained=True, force=False, log=print,
-             max_epochs=80, patience=8, min_delta=1e-3, ckpt_every=5):
+             max_epochs=80, patience=8, min_delta=1e-3, ckpt_every=5, res_bins=1601):
     """One cell, trained ONCE to convergence with per-epoch checkpointing.
 
     Resilience / convergence:
@@ -257,7 +277,7 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
     out_dir = Path(out_dir); (out_dir / "per_case").mkdir(parents=True, exist_ok=True)
     (out_dir / "models").mkdir(exist_ok=True)
     channels = CFDAC_FEATURES[feature]; n_in = len(channels)
-    tag = f"{task}_{model}_{feature}_hires1601"
+    tag = f"{task}_{model}_{feature}_hires{res_bins}"
     pc = out_dir / "per_case" / f"{tag}.json"
     if pc.exists() and not force:
         log(f"skip {tag} (exists)"); return
@@ -276,6 +296,9 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
     # Keep the synth subsample FRFs resident on the GPU (≈0.35 GB) so no
     # host->device copy happens per batch — the A100 then never waits on the host.
     Hg = torch.from_numpy(H).to(dev)
+    H_ref_syn = H_ref_syn.to(dev)
+    if res_bins < Hg.shape[1]:                       # reduced-resolution: decimate freq axis
+        Hg, H_ref_syn = _decimate_frf(Hg, H_ref_syn, res_bins, dev)
     yg = torch.from_numpy(y).to(dev) if kind == "cls" else torch.from_numpy(y.astype(np.float32)).to(dev)
 
     net, feed = build_model(model, n_in, n_out, kind, vision_size=vision_size,
@@ -393,7 +416,10 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
 
     mask_e, e_y, e_kind = exp_tasks[task]; idx_e = np.where(mask_e)[0]
     He = torch.from_numpy(H_exp[idx_e]).to(dev)            # exp FRFs -> GPU once
-    pe, prob = predict(He, H_ref_exp, e_kind)
+    ref_e = H_ref_exp.to(dev)
+    if res_bins < He.shape[1]:
+        He, ref_e = _decimate_frf(He, ref_e, res_bins, dev)
+    pe, prob = predict(He, ref_e, e_kind)
     del He
     if dev.type == "cuda": torch.cuda.empty_cache()
     rows = []
@@ -403,7 +429,7 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
              "y_pred": (int(pe[i]) if e_kind == "cls" else float(pe[i]))}
         if prob is not None: r["proba"] = [float(p) for p in prob[i]]
         rows.append(r)
-    meta = {"task": task, "model": model, "feature": feature, "n_target": 1601,
+    meta = {"task": task, "model": model, "feature": feature, "n_target": res_bins,
             "n_channels": n_in, "kind": e_kind, "n_out": int(n_out),
             "max_epochs": max_epochs, "patience": patience,
             "subsample": int(min(subsample, len(idx_pool))),
