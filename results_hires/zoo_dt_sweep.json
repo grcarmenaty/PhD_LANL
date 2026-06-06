@@ -1,0 +1,1623 @@
+{
+ "dt_grid": [
+  0,
+  20,
+  40,
+  60,
+  80
+ ],
+ "best_per_task": {
+  "type": {
+   "cell": "transformer/cfdac_realimag",
+   "exp_bal_acc": 0.3051032006769279,
+   "exp_macro_f1": 0.20314618033366058,
+   "chance": 0.2
+  },
+  "col_location": {
+   "cell": "cnn2d_deep/cfdac_mag",
+   "exp_bal_acc": 0.316488506792819,
+   "exp_macro_f1": 0.16251264146906982,
+   "chance": 0.16666666666666666
+  },
+  "is_hole": {
+   "cell": "transformer1d/frf_realimag",
+   "exp_bal_acc": 0.6667454259057313,
+   "exp_macro_f1": 0.599209966575509,
+   "chance": 0.5
+  },
+  "is_crack": {
+   "cell": "transformer/cfdac_mag",
+   "exp_bal_acc": 0.5873193485763589,
+   "exp_macro_f1": 0.5662402477010194,
+   "chance": 0.5
+  },
+  "is_bolt": {
+   "cell": "transformer1d/frf_realimag",
+   "exp_bal_acc": 0.6688875474301483,
+   "exp_macro_f1": 0.6537446541920595,
+   "chance": 0.5
+  },
+  "is_pristine": {
+   "cell": "mlp/timeseries",
+   "exp_bal_acc": 0.5567266679399032,
+   "exp_macro_f1": 0.555629879546309,
+   "chance": 0.5
+  },
+  "binary": {
+   "cell": "transformer1d/timeseries",
+   "exp_bal_acc": 0.5887943245480011,
+   "exp_macro_f1": 0.5818489569815126,
+   "chance": 0.5
+  },
+  "mass_location": {
+   "cell": "mlp/frf_realimag",
+   "exp_bal_acc": 0.5,
+   "exp_macro_f1": 0.3083275583275583,
+   "chance": 0.25
+  },
+  "is_mass": {
+   "cell": "cnn3d/cfdac_imag",
+   "exp_bal_acc": 0.6198721988795518,
+   "exp_macro_f1": 0.3992022168689394,
+   "chance": 0.5
+  },
+  "severity": {
+   "cell": "mlp/frf_mag",
+   "exp_r2": 0.03652112546686603
+  }
+ },
+ "dt_sweeps": {
+  "is_hole": {
+   "is_hole/mlp/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/rf/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/rf/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/mlp/frf_realimag": [
+    0.5885723373318793,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/xgb/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn1d/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn1d/timeseries": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/mlp/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/xgb/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/mlp/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/transformer1d/frf_mag": [
+    0.5052405185992972,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/transformer1d/timeseries": [
+    0.496607294317218,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn1d/frf_realimag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/transformer1d/frf_realimag": [
+    0.6667454259057313,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/mlp/timeseries": [
+    0.5501696352841391,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_shallow/cfdac_imag": [
+    0.4991518235793045,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_phase": [
+    0.5020916636374652,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_shallow/cfdac_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_imag": [
+    0.48324851569126376,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_all": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_realimag": [
+    0.5270992366412214,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_magphase": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_realimag": [
+    0.6093602326426755,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_imag": [
+    0.5790091481885375,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_phase": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_shallow/cfdac_realimag": [
+    0.4819005210226584,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_shallow/cfdac_real": [
+    0.48271537622682664,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_magphase": [
+    0.4897703865261117,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_real": [
+    0.4431721798134012,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_deep/cfdac_all": [
+    0.5877059857021689,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn3d/cfdac_real": [
+    0.49279050042408823,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_hole/cnn2d_shallow/cfdac_phase": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "is_crack": {
+   "is_crack/rf/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn1d/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn1d/frf_realimag": [
+    0.49374460742018983,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/mlp/frf_realimag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/xgb/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer1d/timeseries": [
+    0.48734091889559966,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/mlp/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/mlp/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer1d/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn1d/timeseries": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer1d/frf_realimag": [
+    0.4901828084555651,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/rf/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/xgb/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/mlp/timeseries": [
+    0.4900776531492666,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/mlp/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer/cfdac_imag": [
+    0.5159701251078516,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer/cfdac_real": [
+    0.4723657247627265,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer/cfdac_mag": [
+    0.5873193485763589,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/transformer/cfdac_phase": [
+    0.49762726488352027,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_realimag": [
+    0.49396031061259704,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_all": [
+    0.4928817946505608,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_realimag": [
+    0.4684911561691113,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_phase": [
+    0.4567852135461605,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_realimag": [
+    0.47174288179465057,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_real": [
+    0.42180489646246766,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_magphase": [
+    0.49201898188093185,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_imag": [
+    0.4769197584124245,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_imag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_phase": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_magphase": [
+    0.499137187230371,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_phase": [
+    0.45793787748058673,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_imag": [
+    0.46203623813632444,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_all": [
+    0.4934709339948231,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_deep/cfdac_real": [
+    0.4871777933563417,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_real": [
+    0.47066436583261434,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_all": [
+    0.27765045297670404,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn2d_shallow/cfdac_magphase": [
+    0.41630716134598794,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_crack/cnn3d/cfdac_mag": [
+    0.4188955996548749,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "is_bolt": {
+   "is_bolt/rf/indicators": [
+    0.503110842819363,
+    0.5294087256027555,
+    0.534061500846342,
+    0.46098227051758656,
+    0.46098227051758656
+   ],
+   "is_bolt/transformer1d/frf_realimag": [
+    0.6688875474301483,
+    0.7170436280137773,
+    0.7286938123001693,
+    0.814502430654847,
+    0.814502430654847
+   ],
+   "is_bolt/cnn1d/frf_mag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "is_bolt/mlp/frf_realimag": [
+    0.506993216051512,
+    0.5171920616696736,
+    0.5075268008275343,
+    0.4840062911066628,
+    0.4840062911066628
+   ],
+   "is_bolt/mlp/indicators": [
+    0.5085012073128665,
+    0.4975701164507135,
+    0.5015582095166448,
+    0.4703846153846154,
+    0.4703846153846154
+   ],
+   "is_bolt/transformer1d/timeseries": [
+    0.6407266873634586,
+    0.6494833524684271,
+    0.688621403046831,
+    0.7344581069488132,
+    0.7344581069488132
+   ],
+   "is_bolt/mlp/modal": [
+    0.5778722548005059,
+    0.6118591110382154,
+    0.6294536392702652,
+    0.691737203317129,
+    0.691737203317129
+   ],
+   "is_bolt/mlp/timeseries": [
+    0.4987984362423824,
+    0.5163277021485977,
+    0.5065920631935301,
+    0.49207892479267945,
+    0.49207892479267945
+   ],
+   "is_bolt/xgb/modal": [
+    0.5670179372197309,
+    0.6099893390191897,
+    0.6312591687041564,
+    0.6378624535315985,
+    0.6378624535315985
+   ],
+   "is_bolt/xgb/indicators": [
+    0.5593440266758652,
+    0.555250943086764,
+    0.5666287380101561,
+    0.501391192450672,
+    0.501391192450672
+   ],
+   "is_bolt/cnn1d/timeseries": [
+    0.5879728642060481,
+    0.6287682466786945,
+    0.6487869099116044,
+    0.7302259079210752,
+    0.7302259079210752
+   ],
+   "is_bolt/cnn1d/frf_realimag": [
+    0.5741571806370013,
+    0.6088969985238643,
+    0.625944141433139,
+    0.6952945381755791,
+    0.6952945381755791
+   ],
+   "is_bolt/mlp/frf_mag": [
+    0.5395142002989537,
+    0.6054051172707889,
+    0.5917726161369193,
+    0.6596096654275092,
+    0.6596096654275092
+   ],
+   "is_bolt/rf/modal": [
+    0.536138898470737,
+    0.5531900934886009,
+    0.5615572691367312,
+    0.5398341435516156,
+    0.5398341435516156
+   ],
+   "is_bolt/transformer1d/frf_mag": [
+    0.5023076923076923,
+    0.5023076923076923,
+    0.5023076923076923,
+    0.5023076923076923,
+    0.5023076923076923
+   ],
+   "is_bolt/transformer/cfdac_all": [
+    0.5928026905829596,
+    0.6195842217484009,
+    0.6172004889975551,
+    0.6573791821561339,
+    0.6573791821561339
+   ],
+   "is_bolt/transformer/cfdac_mag": [
+    0.6311779924111762,
+    0.7030679022470068,
+    0.7337605792740267,
+    0.8214483843294251,
+    0.8214483843294251
+   ],
+   "is_bolt/transformer/cfdac_imag": [
+    0.614210072438772,
+    0.6706224372642283,
+    0.6983044950159865,
+    0.7700271661424077,
+    0.7700271661424077
+   ],
+   "is_bolt/transformer/cfdac_real": [
+    0.5699223870300103,
+    0.5943685419058553,
+    0.6016578897874741,
+    0.6198498713182727,
+    0.6198498713182727
+   ],
+   "is_bolt/transformer/cfdac_phase": [
+    0.4410802575600782,
+    0.41611858290962767,
+    0.38895523791611814,
+    0.33359307978267083,
+    0.33359307978267083
+   ],
+   "is_bolt/transformer/cfdac_realimag": [
+    0.5652610095435208,
+    0.6012916188289322,
+    0.604302238104194,
+    0.6555833571632828,
+    0.6555833571632828
+   ],
+   "is_bolt/transformer/cfdac_magphase": [
+    0.5750379441186616,
+    0.6094972937510251,
+    0.6248175662967839,
+    0.6626694309408064,
+    0.6626694309408064
+   ],
+   "is_bolt/cnn2d_deep/cfdac_phase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "is_bolt/cnn3d/cfdac_realimag": [
+    0.49489996550534665,
+    0.4788248318845334,
+    0.4510710927214595,
+    0.4286231055190163,
+    0.4286231055190163
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_mag": [
+    0.3993411521214212,
+    0.3472314252911268,
+    0.3216607109272146,
+    0.21763511581355446,
+    0.21763511581355446
+   ],
+   "is_bolt/cnn2d_deep/cfdac_realimag": [
+    0.5568989306657468,
+    0.5532392980154174,
+    0.5508933609178108,
+    0.5599370889333715,
+    0.5599370889333715
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_real": [
+    0.5240513970334598,
+    0.5239749056913235,
+    0.5210033853676885,
+    0.5377251930225908,
+    0.5377251930225908
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_magphase": [
+    0.5102621593652984,
+    0.5064375922584878,
+    0.505783336467933,
+    0.4987846725764941,
+    0.4987846725764941
+   ],
+   "is_bolt/cnn2d_deep/cfdac_imag": [
+    0.4970104633781764,
+    0.4957356076759062,
+    0.49511002444987773,
+    0.5,
+    0.5
+   ],
+   "is_bolt/cnn2d_deep/cfdac_real": [
+    0.3793670231114177,
+    0.31111284238149906,
+    0.27725315027271014,
+    0.1757520732056048,
+    0.1757520732056048
+   ],
+   "is_bolt/cnn3d/cfdac_mag": [
+    0.39895653673680576,
+    0.3468468099065114,
+    0.32127609554259917,
+    0.2172505004289391,
+    0.2172505004289391
+   ],
+   "is_bolt/cnn2d_deep/cfdac_mag": [
+    0.3993411521214212,
+    0.3472314252911268,
+    0.3216607109272146,
+    0.21763511581355446,
+    0.21763511581355446
+   ],
+   "is_bolt/cnn3d/cfdac_magphase": [
+    0.5498056801195814,
+    0.5406609808102345,
+    0.5306112469437654,
+    0.5560223048327138,
+    0.5560223048327138
+   ],
+   "is_bolt/cnn3d/cfdac_all": [
+    0.47195584684373926,
+    0.4800065606035755,
+    0.4474045514387813,
+    0.4498427223334287,
+    0.4498427223334287
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_phase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "is_bolt/cnn3d/cfdac_real": [
+    0.45422042083477066,
+    0.4205929145481384,
+    0.38868817002068834,
+    0.3239505290248784,
+    0.3239505290248784
+   ],
+   "is_bolt/cnn2d_deep/cfdac_all": [
+    0.5686788547775095,
+    0.6112104313596851,
+    0.6288414519465864,
+    0.7169859879897054,
+    0.7169859879897054
+   ],
+   "is_bolt/cnn3d/cfdac_imag": [
+    0.6285713464413016,
+    0.641698376250615,
+    0.6374431070152342,
+    0.6817800972261938,
+    0.6817800972261938
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_realimag": [
+    0.4610923306887432,
+    0.4344956536001312,
+    0.38843708858378784,
+    0.36091507006005147,
+    0.36091507006005147
+   ],
+   "is_bolt/cnn3d/cfdac_phase": [
+    0.4760952052431873,
+    0.5193701820567492,
+    0.5263024261801768,
+    0.6009722619388047,
+    0.6009722619388047
+   ],
+   "is_bolt/cnn2d_deep/cfdac_magphase": [
+    0.5067862481315396,
+    0.5027505330490405,
+    0.5163569682151589,
+    0.5363940520446097,
+    0.5363940520446097
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_all": [
+    0.47265781303897897,
+    0.4865433819911432,
+    0.43901730299040814,
+    0.4495152988275665,
+    0.4495152988275665
+   ],
+   "is_bolt/cnn2d_shallow/cfdac_imag": [
+    0.42658330458778887,
+    0.4143422994915532,
+    0.3949492194846718,
+    0.390404632542179,
+    0.390404632542179
+   ]
+  },
+  "is_pristine": {
+   "is_pristine/rf/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/mlp/timeseries": [
+    0.5567266679399032,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/rf/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn1d/frf_realimag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/mlp/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/mlp/frf_realimag": [
+    0.542908072319837,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/transformer1d/timeseries": [
+    0.5225293242296919,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/xgb/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/transformer1d/frf_realimag": [
+    0.44411287242169595,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/transformer1d/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/xgb/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/mlp/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn1d/timeseries": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn1d/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/mlp/indicators": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn2d_shallow/cfdac_realimag": [
+    0.5039659329640948,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn2d_shallow/cfdac_phase": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn2d_shallow/cfdac_imag": [
+    0.5004894003055768,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn2d_shallow/cfdac_real": [
+    0.44348321715049654,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_pristine/cnn2d_shallow/cfdac_mag": [
+    0.4997702205882353,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "binary": {
+   "binary/rf/modal": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn1d/frf_mag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/mlp/frf_mag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn1d/frf_realimag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/mlp/modal": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/transformer1d/frf_mag": [
+    0.49471507352941174,
+    0.4994669509594883,
+    0.4993887530562347,
+    0.49907063197026025,
+    0.49907063197026025
+   ],
+   "binary/transformer1d/timeseries": [
+    0.5887943245480011,
+    0.6076597531821413,
+    0.6181982239439452,
+    0.6579724488646422,
+    0.6579724488646422
+   ],
+   "binary/mlp/frf_realimag": [
+    0.5616853275401069,
+    0.5867900755960458,
+    0.5978550789064236,
+    0.6177762757688408,
+    0.6177762757688408
+   ],
+   "binary/xgb/indicators": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/rf/indicators": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/mlp/indicators": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/mlp/timeseries": [
+    0.5162665918640184,
+    0.4426729986431479,
+    0.44725018258025595,
+    0.3927605851397673,
+    0.3927605851397673
+   ],
+   "binary/xgb/modal": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn1d/timeseries": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/transformer1d/frf_realimag": [
+    0.4977618888464477,
+    0.5059604574529948,
+    0.5058822595497412,
+    0.5064935064935064,
+    0.5064935064935064
+   ],
+   "binary/cnn2d_deep/cfdac_mag": [
+    0.5143885679271709,
+    0.5062189054726368,
+    0.5036383746652695,
+    0.4931403788281111,
+    0.4931403788281111
+   ],
+   "binary/cnn2d_deep/cfdac_phase": [
+    0.4683869286350904,
+    0.4424630096271887,
+    0.4337048444627907,
+    0.4464024203801155,
+    0.4464024203801155
+   ],
+   "binary/cnn2d_deep/cfdac_imag": [
+    0.4521919563279857,
+    0.4527847774116431,
+    0.44669185744980366,
+    0.4473076489805114,
+    0.4473076489805114
+   ],
+   "binary/cnn2d_deep/cfdac_real": [
+    0.4218033804430863,
+    0.3417813529753828,
+    0.31237894135204647,
+    0.2522449669289818,
+    0.2522449669289818
+   ],
+   "binary/convnext_tiny/cfdac_real": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/convnext_tiny/cfdac_mag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/convnext_tiny/cfdac_phase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/convnext_tiny/cfdac_imag": [
+    0.5295470460911638,
+    0.5313852813852814,
+    0.5313852813852814,
+    0.5313852813852814,
+    0.5313852813852814
+   ],
+   "binary/transformer/cfdac_imag": [
+    0.5619131175197352,
+    0.5633682238159851,
+    0.5581928259189873,
+    0.564709763594522,
+    0.564709763594522
+   ],
+   "binary/transformer/cfdac_phase": [
+    0.4928768382352941,
+    0.48507462686567165,
+    0.4828850855745721,
+    0.5,
+    0.5
+   ],
+   "binary/transformer/cfdac_all": [
+    0.5027434269162211,
+    0.495961749693093,
+    0.5114840334889235,
+    0.5095753069730765,
+    0.5095753069730765
+   ],
+   "binary/transformer/cfdac_mag": [
+    0.4588555592691622,
+    0.3861536473476772,
+    0.3672297547603171,
+    0.2902444519544891,
+    0.2902444519544891
+   ],
+   "binary/transformer/cfdac_realimag": [
+    0.502852845683728,
+    0.48565613490986626,
+    0.4722478010986568,
+    0.41708106020373675,
+    0.41708106020373675
+   ],
+   "binary/transformer/cfdac_real": [
+    0.5066795183982684,
+    0.5167991212767332,
+    0.5165645275669726,
+    0.5183982683982684,
+    0.5183982683982684
+   ],
+   "binary/transformer/cfdac_magphase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn2d_shallow/cfdac_realimag": [
+    0.4990808823529412,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn2d_shallow/cfdac_phase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn2d_shallow/cfdac_all": [
+    0.49152899796282146,
+    0.4867060799896621,
+    0.4268064860974396,
+    0.4414900465086338,
+    0.4414900465086338
+   ],
+   "binary/cnn2d_shallow/cfdac_magphase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn2d_deep/cfdac_realimag": [
+    0.47586619875222813,
+    0.4649318343348194,
+    0.45867600207453507,
+    0.4573898839698096,
+    0.4573898839698096
+   ],
+   "binary/cnn2d_shallow/cfdac_real": [
+    0.4902129886045327,
+    0.4009336434709569,
+    0.37696207622857986,
+    0.27293648111491975,
+    0.27293648111491975
+   ],
+   "binary/cnn3d/cfdac_realimag": [
+    0.5418417366946778,
+    0.5103056147832267,
+    0.49435324251950163,
+    0.4833598867056116,
+    0.4833598867056116
+   ],
+   "binary/cnn2d_shallow/cfdac_mag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn2d_shallow/cfdac_imag": [
+    0.5092737379042526,
+    0.5039897913032242,
+    0.5020348437218853,
+    0.4940818165725229,
+    0.4940818165725229
+   ],
+   "binary/cnn3d/cfdac_imag": [
+    0.5347285220906545,
+    0.532532144472443,
+    0.5319065612464146,
+    0.5302909605883583,
+    0.5302909605883583
+   ],
+   "binary/cnn3d/cfdac_phase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn3d/cfdac_real": [
+    0.48004997453526865,
+    0.388463526523228,
+    0.3628928121593158,
+    0.2588672170456557,
+    0.2588672170456557
+   ],
+   "binary/cnn3d/cfdac_magphase": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn3d/cfdac_all": [
+    0.5045975776674306,
+    0.4679847515668411,
+    0.45836640946665397,
+    0.4257430920999694,
+    0.4257430920999694
+   ],
+   "binary/cnn3d/cfdac_mag": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "binary/cnn2d_deep/cfdac_all": [
+    0.4977022058823529,
+    0.4946695095948827,
+    0.4938875305623472,
+    0.49070631970260226,
+    0.49070631970260226
+   ],
+   "binary/cnn2d_deep/cfdac_magphase": [
+    0.4856223739495798,
+    0.4888059701492537,
+    0.48192455466294093,
+    0.5078332448220925,
+    0.5078332448220925
+   ]
+  },
+  "is_mass": {
+   "is_mass/cnn1d/frf_mag": [
+    0.500625,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/xgb/modal": [
+    0.47028186274509803,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/rf/modal": [
+    0.4676260504201681,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/transformer1d/timeseries": [
+    0.6100682773109244,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/transformer1d/frf_realimag": [
+    0.5999579831932773,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn1d/frf_realimag": [
+    0.4203343837535014,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn1d/timeseries": [
+    0.500625,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/transformer1d/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/mlp/frf_mag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/mlp/indicators": [
+    0.5086799719887954,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/rf/indicators": [
+    0.3484488795518207,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/mlp/timeseries": [
+    0.5371130952380953,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/mlp/frf_realimag": [
+    0.5267471988795518,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/xgb/indicators": [
+    0.38112570028011206,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/mlp/modal": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_mag": [
+    0.5033333333333333,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_realimag": [
+    0.6177591036414566,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_imag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_phase": [
+    0.5571463585434173,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_phase": [
+    0.48201505602240896,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_magphase": [
+    0.5622916666666666,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_real": [
+    0.5651155462184874,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_imag": [
+    0.6198721988795518,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_all": [
+    0.4995833333333333,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_real": [
+    0.5029516806722689,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_all": [
+    0.40029586834733893,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_mag": [
+    0.5770833333333334,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_mag": [
+    0.5783333333333334,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_all": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_phase": [
+    0.4952083333333333,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_realimag": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_magphase": [
+    0.5,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_real": [
+    0.5891316526610645,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn3d/cfdac_realimag": [
+    0.5769887955182073,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_shallow/cfdac_magphase": [
+    0.3339758403361344,
+    null,
+    null,
+    null,
+    null
+   ],
+   "is_mass/cnn2d_deep/cfdac_imag": [
+    0.5651383053221288,
+    null,
+    null,
+    null,
+    null
+   ]
+  }
+ }
+}
