@@ -60,7 +60,7 @@ CFDAC_FEATURES: Dict[str, Tuple[str, ...]] = {
 
 VISION_BACKBONES = ("resnet50", "convnext_tiny", "efficientnet_b0",
                     "swin_tiny_patch4_window7_224", "vit_base_patch16_224")
-BESPOKE_MODELS   = ("cnn2d_deep", "cnn2d_shallow", "cnn3d", "transformer")
+BESPOKE_MODELS   = ("cnn2d_deep", "cnn2d_norm", "cnn2d_shallow", "cnn3d", "transformer")
 ALL_MODELS       = BESPOKE_MODELS + VISION_BACKBONES
 # Vision/Swin/ViT have a fixed input size; conv backbones can take any size.
 _FIXED_224 = ("swin_tiny_patch4_window7_224", "vit_base_patch16_224")
@@ -152,6 +152,24 @@ class ShallowCNN2D(nn.Module):
     def forward(self, x): return self.head(self.features(self.stem(x)))
 
 
+class MidCNN2D(nn.Module):
+    """Medium ("normal") plain 2-D CNN — between ShallowCNN2D and the deep
+    ResNet. stride-2 stem (keeps more resolution than shallow's stride-4) + 4
+    Conv/BN/GELU/MaxPool blocks (32->64->128->256), no residuals."""
+    def __init__(self, n_in=2, n_out=2, widths=(32, 64, 128, 256), regression=False):
+        super().__init__()
+        self.stem = nn.Sequential(nn.Conv2d(n_in, widths[0], 7, 2, 3),
+                                  nn.BatchNorm2d(widths[0]), nn.GELU(), nn.MaxPool2d(2))
+        c = widths[0]; layers = []
+        for w in widths:
+            layers += [nn.Conv2d(c, w, 3, padding=1), nn.BatchNorm2d(w), nn.GELU(), nn.MaxPool2d(2)]; c = w
+        self.features = nn.Sequential(*layers)
+        self.head = nn.Sequential(nn.AdaptiveAvgPool2d(1), nn.Flatten(),
+                                  nn.Linear(c, 128), nn.GELU(), nn.Dropout(0.3), nn.Linear(128, n_out))
+        self.regression = regression
+    def forward(self, x): return self.head(self.features(self.stem(x)))
+
+
 class CNN3D(nn.Module):
     """Treats CFDAC channels as a depth axis: input (B,C,N,N) -> (B,1,C,N,N)."""
     def __init__(self, n_in=2, n_out=2, widths=(16, 32, 64), regression=False):
@@ -211,6 +229,7 @@ def build_model(model: str, n_in: int, n_out: int, kind: str,
     model wants (None = use full input_size as-is)."""
     reg = (kind == "reg")
     if model == "cnn2d_deep":    return DeepCFDACNet(n_in, n_out, regression=reg), None
+    if model == "cnn2d_norm":    return MidCNN2D(n_in, n_out, regression=reg), None
     if model == "cnn2d_shallow": return ShallowCNN2D(n_in, n_out, regression=reg), None
     if model == "cnn3d":         return CNN3D(n_in, n_out, regression=reg), None
     if model == "transformer":   return CFDACTransformer(n_in, n_out, input_size, regression=reg), None

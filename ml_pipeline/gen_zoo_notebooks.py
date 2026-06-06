@@ -74,7 +74,7 @@ if not (REPO/'dataset'/'experimental_features_hires.h5').exists():
     run([sys.executable,'ml_pipeline/build_hires_exp_features.py'])
 print('features ready')"""
 
-def SETUP(models_expr, family_dir):
+def SETUP(models_expr, family_dir, batch=48):
     return f"""import torch, numpy as np, h5py
 from pathlib import Path
 from ml_pipeline import hires_zoo as Z
@@ -90,8 +90,7 @@ FEATURES = list(Z.CFDAC_FEATURES)          # all 7 CFDAC channel-features
 MAX_EPOCHS = 80        # safety cap; training stops early at convergence
 PATIENCE   = 8         # early-stop after this many epochs with no val gain
 SUBSAMPLE= 4000        # A100 fits this easily; raise toward 10000 for more data
-BATCH    = 48          # A100 40GB (bf16) ~half-full at 32 -> 48-64 fills it & finishes faster.
-                       #   Drop to 16 on L4, 8 on T4, or if a ViT/Swin cell OOMs.
+BATCH    = {batch}          # tuned to THIS model's memory footprint; drop on smaller GPUs / if OOM
 VISION_SIZE = 384      # conv vision backbones feed size (swin/vit fixed 224); A100 can do 448-512
 # --- GitHub autosave (each finished cell -> a per-family results branch) ---
 FAMILY            = '{family_dir}'
@@ -239,7 +238,7 @@ def md(s): return {"cell_type": "markdown", "metadata": {}, "source": s.splitlin
 def code(s): return {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": s.splitlines(keepends=True)}
 
 
-def make_nb(title, intro, models_expr, family_dir):
+def make_nb(title, intro, models_expr, family_dir, batch=48):
     cells = [
         md(f"# {title}\n\n{intro}\n\n"
            "**No GPU? Set Runtime → Change runtime type → GPU.** Private repos: add a Colab "
@@ -250,7 +249,7 @@ def make_nb(title, intro, models_expr, family_dir):
         md("## 2 · Regenerate the 1601-bin features (gitignored; rebuilt from committed sources)"),
         code(REGEN),
         md("## 3 · Config + context (edit the CONFIG block)"),
-        code(SETUP(models_expr, family_dir)),
+        code(SETUP(models_expr, family_dir, batch)),
         md("## 4 · Run the cell grid (skip-if-exists; resumes from Drive)"),
         code(RUN),
         md("## 5 · Honest summary (balanced-acc / macro-F1 / collapse) + zip download"),
@@ -264,42 +263,49 @@ def make_nb(title, intro, models_expr, family_dir):
 
 
 NOTEBOOKS = {
-    "hires_cfdac_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — DeepCFDACNet focused run (GPU)",
-        "Focused run of the single resolution-appropriate net **`cnn2d_deep`** "
-        "(ResNet18-style, consumes the full 1601² grid — no 224 resize, no premature "
-        "global-pool) across all 7 CFDAC channel-features and all 10 tasks. Same engine "
-        "as the zoo notebooks: per-epoch checkpoint+resume, early-stop to convergence, "
-        "JSON-only GitHub autosave. This is the cleanest single-model test of *does a "
-        "resolution-appropriate, converged net close the sim-to-real gap?*",
-        "['cnn2d_deep']", "deepnet"),
-    "hires_cnn_zoo_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — bespoke CNN zoo (GPU)",
-        "Trains the bespoke CNN families on full-1601² CFDAC across all 7 CFDAC "
-        "channel-features and all 10 tasks: `cnn2d_deep` (ResNet18-style, consumes the "
-        "full grid), `cnn2d_shallow` (the 128-baseline architecture, for parity), and "
-        "`cnn3d` (channels as a depth axis).",
-        "['cnn2d_deep','cnn2d_shallow','cnn3d']", "cnn"),
+    # --- CNN family split into one model per notebook (vastly different memory) ---
+    "hires_cnn_shallow_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — SHALLOW 2-D CNN (GPU)",
+        "The light **`cnn2d_shallow`** (128-baseline architecture: stride-4 stem + 3 "
+        "conv/pool, global-pool) on full-1601² CFDAC × 7 features × 10 tasks. Tiny memory "
+        "footprint — runs with a large batch on a small GPU.",
+        "['cnn2d_shallow']", "cnn-shallow", 128),
+    "hires_cnn_normal_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — NORMAL (medium) 2-D CNN (GPU)",
+        "The medium **`cnn2d_norm`** (stride-2 stem + 4 conv/pool blocks 32→256, no "
+        "residuals) — depth between shallow and deep. Full-1601² CFDAC × 7 features × 10 tasks.",
+        "['cnn2d_norm']", "cnn-normal", 64),
+    "hires_cnn_deep_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — DEEP 2-D CNN (GPU)",
+        "The heavy **`cnn2d_deep`** (`DeepCFDACNet`, ResNet18-style, consumes the full "
+        "1601² grid — no 224 resize, no premature global-pool). Highest VRAM of the CNNs. "
+        "Full-1601² CFDAC × 7 features × 10 tasks.",
+        "['cnn2d_deep']", "cnn-deep", 32),
+    "hires_cnn3d_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — 3-D CNN (GPU)",
+        "**`cnn3d`** treats the CFDAC channels as a volumetric depth axis (3-D conv). "
+        "Distinct (and heavy) memory profile. Full-1601² CFDAC × 7 features × 10 tasks.",
+        "['cnn3d']", "cnn3d", 16),
     "hires_transformer_gpu.ipynb": (
         "Hi-res 1601² CFDAC — Transformer (GPU)",
         "Trains a conv-tokenised Transformer (`CFDACTransformer`: strided-conv tokeniser "
         "→ Transformer encoder → cls head) on full-1601² CFDAC across all 7 features and "
         "10 tasks — tokenises the full resolution instead of resizing to 224.",
-        "['transformer']", "transformer"),
+        "['transformer']", "transformer", 48),
     "hires_vision_gpu.ipynb": (
         "Hi-res 1601² CFDAC — vision backbones (GPU)",
         "Trains ImageNet-pretrained timm backbones (ResNet50, ConvNeXt-T, EfficientNet-B0, "
         "Swin-T, ViT-B/16) on CFDAC across all 7 features and 10 tasks. Conv backbones feed "
         "at `VISION_SIZE` (default 384, >> the 224 baseline); Swin/ViT are fixed at 224. "
         "**Large grid (5×7×10) — pick one backbone or a few features per session.**",
-        "list(Z.VISION_BACKBONES)", "vision"),
+        "list(Z.VISION_BACKBONES)", "vision", 32),
 }
 
 
 def main():
     NB_DIR.mkdir(exist_ok=True)
-    for fname, (title, intro, models_expr, fdir) in NOTEBOOKS.items():
-        nb = make_nb(title, intro, models_expr, fdir)
+    for fname, (title, intro, models_expr, fdir, batch) in NOTEBOOKS.items():
+        nb = make_nb(title, intro, models_expr, fdir, batch)
         (NB_DIR / fname).write_text(json.dumps(nb, indent=1))
         print("wrote", NB_DIR / fname)
 
