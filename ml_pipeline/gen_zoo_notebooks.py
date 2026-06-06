@@ -110,6 +110,26 @@ except Exception:
     OUT=Path('results_hires_zoo_{family_dir}')
 OUT.mkdir(parents=True, exist_ok=True); print('OUT =', OUT)
 
+# Pick up cells already trained in a past run: seed OUT/per_case from the
+# results branch (so we never retrain past work, even on a fresh session/Drive).
+_BR = 'colab-hires-{family_dir}'
+import subprocess as _sp, os as _os
+try:
+    _sp.run(['git','-C','/content/PhD_LANL','fetch','--depth','1','origin',_BR], capture_output=True)
+    _ls = _sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','origin/'+_BR],
+                  capture_output=True, text=True).stdout
+    (OUT/'per_case').mkdir(parents=True, exist_ok=True); _n=0
+    for _l in _ls.splitlines():
+        if 'results_hires_zoo/{family_dir}/per_case/' in _l and _l.endswith('.json'):
+            _name=_os.path.basename(_l)
+            if not (OUT/'per_case'/_name).exists():
+                _b=_sp.run(['git','-C','/content/PhD_LANL','show','origin/'+_BR+':'+_l],
+                           capture_output=True, text=True).stdout
+                if _b: (OUT/'per_case'/_name).write_text(_b); _n+=1
+    print('picked up',_n,'already-trained cells from',_BR)
+except Exception as _e:
+    print('branch pickup skipped:', _e)
+
 SYN=Path('dataset/features_hires.h5'); EXP=Path('dataset/experimental_features_hires.h5')
 with h5py.File(SYN,'r') as f:
     syn_tasks=build_targets(f['type_code'][:].astype('int64'),f['storey'][:].astype('int64'),
@@ -263,29 +283,22 @@ def make_nb(title, intro, models_expr, family_dir, batch=48):
 
 
 NOTEBOOKS = {
-    # --- CNN family split into one model per notebook (vastly different memory) ---
+    # --- CNN family: shallow (light) split out from the rest (heavy) ---
     "hires_cnn_shallow_gpu.ipynb": (
         "Hi-res 1601² CFDAC — SHALLOW 2-D CNN (GPU)",
         "The light **`cnn2d_shallow`** (128-baseline architecture: stride-4 stem + 3 "
         "conv/pool, global-pool) on full-1601² CFDAC × 7 features × 10 tasks. Tiny memory "
-        "footprint — runs with a large batch on a small GPU.",
-        "['cnn2d_shallow']", "cnn-shallow", 128),
-    "hires_cnn_normal_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — NORMAL (medium) 2-D CNN (GPU)",
-        "The medium **`cnn2d_norm`** (stride-2 stem + 4 conv/pool blocks 32→256, no "
-        "residuals) — depth between shallow and deep. Full-1601² CFDAC × 7 features × 10 tasks.",
-        "['cnn2d_norm']", "cnn-normal", 64),
-    "hires_cnn_deep_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — DEEP 2-D CNN (GPU)",
-        "The heavy **`cnn2d_deep`** (`DeepCFDACNet`, ResNet18-style, consumes the full "
-        "1601² grid — no 224 resize, no premature global-pool). Highest VRAM of the CNNs. "
-        "Full-1601² CFDAC × 7 features × 10 tasks.",
-        "['cnn2d_deep']", "cnn-deep", 32),
-    "hires_cnn3d_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — 3-D CNN (GPU)",
-        "**`cnn3d`** treats the CFDAC channels as a volumetric depth axis (3-D conv). "
-        "Distinct (and heavy) memory profile. Full-1601² CFDAC × 7 features × 10 tasks.",
-        "['cnn3d']", "cnn3d", 16),
+        "footprint — runs with a large batch on a small/cheap GPU. Shares the `cnn` results "
+        "folder/branch with the 'rest' notebook (skip-if-exists reuses past runs).",
+        "['cnn2d_shallow']", "cnn", 128),
+    "hires_cnn_rest_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — the REST of the CNNs (deep + cnn3d) (GPU)",
+        "The heavy CNNs — **`cnn2d_deep`** (`DeepCFDACNet`, ResNet18-style, consumes the "
+        "full 1601² grid) and **`cnn3d`** (channels as a 3-D depth axis) — on full-1601² "
+        "CFDAC × 7 features × 10 tasks. Highest VRAM; lower `BATCH` if `cnn3d` OOMs. Shares "
+        "the `cnn` results folder/branch with the shallow notebook and picks up any cells "
+        "already trained in the earlier combined CNN run.",
+        "['cnn2d_deep','cnn3d']", "cnn", 16),
     "hires_transformer_gpu.ipynb": (
         "Hi-res 1601² CFDAC — Transformer (GPU)",
         "Trains a conv-tokenised Transformer (`CFDACTransformer`: strided-conv tokeniser "

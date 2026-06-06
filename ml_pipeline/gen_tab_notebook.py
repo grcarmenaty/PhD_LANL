@@ -44,6 +44,21 @@ except Exception:
     OUT = Path('results_hires_zoo_tabular')
 OUT.mkdir(parents=True, exist_ok=True); (OUT/'cache').mkdir(exist_ok=True)
 
+# Pick up cells already trained in a past run (seed from the results branch).
+import subprocess as _sp, os as _os
+try:
+    _sp.run(['git','-C','/content/PhD_LANL','fetch','--depth','1','origin',GH_RESULTS_BRANCH], capture_output=True)
+    _ls=_sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','origin/'+GH_RESULTS_BRANCH],capture_output=True,text=True).stdout
+    (OUT/'per_case').mkdir(parents=True, exist_ok=True); _n=0
+    for _l in _ls.splitlines():
+        if 'results_hires_zoo/'+FAMILY+'/per_case/' in _l and _l.endswith('.json'):
+            _name=_os.path.basename(_l)
+            if not (OUT/'per_case'/_name).exists():
+                _b=_sp.run(['git','-C','/content/PhD_LANL','show','origin/'+GH_RESULTS_BRANCH+':'+_l],capture_output=True,text=True).stdout
+                if _b: (OUT/'per_case'/_name).write_text(_b); _n+=1
+    print('picked up',_n,'already-trained cells from',GH_RESULTS_BRANCH)
+except Exception as _e: print('branch pickup skipped:', _e)
+
 SYN = 'dataset/features_hires.h5'; EXP = 'dataset/experimental_features_hires.h5'
 with h5py.File(SYN,'r') as f:
     syn_tasks = build_targets(f['type_code'][:].astype('int64'),f['storey'][:].astype('int64'),
