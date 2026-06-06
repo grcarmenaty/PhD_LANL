@@ -306,12 +306,14 @@ NOTEBOOKS = {
         "10 tasks — tokenises the full resolution instead of resizing to 224.",
         "['transformer']", "transformer", 48),
     "hires_vision_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — vision backbones (GPU)",
-        "Trains ImageNet-pretrained timm backbones (ResNet50, ConvNeXt-T, EfficientNet-B0, "
-        "Swin-T, ViT-B/16) on CFDAC across all 7 features and 10 tasks. Conv backbones feed "
-        "at `VISION_SIZE` (default 384, >> the 224 baseline); Swin/ViT are fixed at 224. "
-        "**Large grid (5×7×10) — pick one backbone or a few features per session.**",
-        "list(Z.VISION_BACKBONES)", "vision", 32),
+        "Hi-res 1601² CFDAC — vision backbones: ConvNeXt-T & ViT-B/16 (GPU)",
+        "The two most interesting ImageNet-pretrained backbones — **ConvNeXt-T** (strongest "
+        "modern *CNN*, fully-convolutional, fed at `VISION_SIZE`=384) and **ViT-B/16** (the "
+        "canonical *transformer*, global attention over 16×16 patches, fixed 224) — on CFDAC "
+        "across all 7 features and 10 tasks. One backbone per paradigm; vision transfer "
+        "learning is where the paper found its strongest gains. Grid = 2×7×10 = 140 cells. "
+        "(All 5 backbones remain available in `Z.VISION_BACKBONES` if you widen `MODELS`.)",
+        "['convnext_tiny','vit_base_patch16_224']", "vision", 32),
 }
 
 
