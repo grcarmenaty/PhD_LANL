@@ -20,14 +20,15 @@ DEV = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # ===================== CONFIG (edit me) =====================
 TASKS = ['binary','col_location','mass_location','severity','type',
          'is_bolt','is_crack','is_mass','is_hole','is_pristine']
-RESOLUTIONS = [1601, 400, 128]          # full + reduced -> 'does resolution help?'
+RESOLUTIONS = [128]                     # single reduced resolution (T4-friendly)
 IMG_MODELS  = list(A.IMG_MODELS)        # cnn2d_shallow/deep, cnn3d, transformer, convnext_tiny, resnet50
 TAB_MODELS  = list(A.TAB_MODELS)        # mlp, rf, xgb, cnn1d, transformer1d
 CFDAC_FEATURES = list(Z.CFDAC_FEATURES) # 7 CFDAC channel-features
-SUBSAMPLE = 4000
-IMG_BATCH = 16        # CFDAC-image/vision (lower if cnn3d/deep OOM at 1601)
+SUBSAMPLE = 3000
+IMG_BATCH = 16        # T4 15 GB at 128 bins; raise on bigger GPUs / lower if OOM
 TAB_BATCH = 256
-VISION_SIZE = 384
+VISION_SIZE = 224     # feed conv backbones at 224 (no upscaling a 128 grid)
+PICKUP_BRANCHES = ['colab-hires-all']   # resume this run only (128 cells); add others to reuse them
 FAMILY='all'; GH_RESULTS_BRANCH='colab-hires-all'; AUTOSAVE_GITHUB=True
 CELLS = A.all_cells(TASKS, RESOLUTIONS, IMG_MODELS, TAB_MODELS, CFDAC_FEATURES)
 print(len(CELLS),'cells queued across', len(RESOLUTIONS),'resolutions')
@@ -42,9 +43,9 @@ except Exception:
     OUT = Path('results_hires_zoo_all')
 OUT.mkdir(parents=True, exist_ok=True); (OUT/'cache').mkdir(exist_ok=True)
 
-# Pick up ALL already-trained cells (this branch + the per-family 1601 runs).
+# Pick up already-trained cells (from PICKUP_BRANCHES; default = this run only).
 import subprocess as _sp, os as _os
-for _BR in ['colab-hires-all','colab-hires-tabular','colab-hires-cnn','colab-hires-transformer','colab-hires-vision']:
+for _BR in PICKUP_BRANCHES:
     try:
         _sp.run(['git','-C','/content/PhD_LANL','fetch','--depth','1','origin',_BR], capture_output=True)
         _ls=_sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','origin/'+_BR],capture_output=True,text=True).stdout
@@ -149,16 +150,15 @@ except Exception as e: print('zip at /content/results_all.zip', e)"""
 
 def main():
     cells = [
-        md("# Hi-res CFDAC — THE WHOLE STUDY in one notebook (GPU)\n\n"
-           "Every feature family (modal / indicators / FRF / timeseries → CFDAC images), "
+        md("# CFDAC @128 — THE WHOLE STUDY in one notebook (T4-friendly)\n\n"
+           "Every feature family (modal / indicators / FRF / timeseries → CFDAC images) and "
            "every model (MLP / RF / XGB / 1-D CNN+transformer → 2-D CNN shallow/deep / 3-D CNN "
-           "/ CFDAC transformer / ConvNeXt-T / ResNet50), at **every resolution** "
-           "(1601 / 400 / 128 bins), across all 10 tasks. One unified grid, dispatched to the "
-           "right engine per cell. Trains to convergence with checkpoint/resume, skips finished "
-           "cells, **picks up everything already trained on the per-family branches**, and "
-           "autosaves JSON to `colab-hires-all`. Set a GPU runtime + `GH_TOKEN` secret. The full "
-           "grid is large — edit the CONFIG lists (or `CELLS`) to subset; reduced resolutions "
-           "are cheap, so the 400/128 passes add little time."),
+           "/ CFDAC transformer / ConvNeXt-T / ResNet50) at **128-bin resolution**, across all "
+           "10 tasks = **570 cells**. One unified grid dispatched to the right engine per cell. "
+           "Sized for a **T4 (15 GB)**: 128² CFDAC is small, `IMG_BATCH=16`, vision fed at 224. "
+           "Trains to convergence with checkpoint/resume, skips finished cells, autosaves JSON "
+           "to `colab-hires-all` (5× retry). Set a GPU runtime + `GH_TOKEN` secret. Edit the "
+           "CONFIG lists / `RESOLUTIONS` (e.g. add 400, 1601) to widen on a bigger GPU."),
         md("## 1 · Bootstrap"), code(BOOTSTRAP),
         md("## 2 · Regenerate the 1601-bin features"), code(REGEN),
         md("## 3 · Config + context + caches (edit the CONFIG block)"), code(SETUP),
