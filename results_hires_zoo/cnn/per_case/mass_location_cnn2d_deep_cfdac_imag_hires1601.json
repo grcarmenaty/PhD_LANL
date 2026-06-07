@@ -1,0 +1,2641 @@
+{
+  "meta": {
+    "task": "mass_location",
+    "model": "cnn2d_deep",
+    "feature": "cfdac_imag",
+    "n_target": 1601,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 4,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 2000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.9866666666666668,
+    "synth_test_metric": 0.99,
+    "synth_test_macro_f1": 0.9899991050653302,
+    "synth_test_bal_acc": 0.9900000000000001,
+    "input_normalized": true,
+    "trained_to_convergence": true
+  },
+  "rows": [
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        2.7465449900766415e-43,
+        5.841880794434077e-30,
+        1.0,
+        4.23184408005066e-31
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        2.474412828304762e-41,
+        1.3738786532792073e-31,
+        1.0,
+        4.795307893162517e-31
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        2.6078164421084846e-42,
+        7.984904797113095e-30,
+        1.0,
+        3.328603530794073e-30
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        2.802596928649634e-45,
+        7.828124695685168e-32,
+        1.0,
+        1.6408640419787877e-32
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        4.203895392974451e-45,
+        1.1389853770767086e-31,
+        1.0,
+        7.353842700234321e-32
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Base'",
+      "y_true": 0,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass First Floor'",
+      "y_true": 1,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Second Floor'",
+      "y_true": 2,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "case": "b'Mass Third Floor'",
+      "y_true": 3,
+      "y_pred": 2,
+      "proba": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  ]
+}
