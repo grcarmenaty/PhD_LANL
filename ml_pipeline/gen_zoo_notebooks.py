@@ -283,22 +283,16 @@ def make_nb(title, intro, models_expr, family_dir, batch=48):
 
 
 NOTEBOOKS = {
-    # --- CNN family: shallow (light) split out from the rest (heavy) ---
-    "hires_cnn_shallow_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — SHALLOW 2-D CNN (GPU)",
-        "The light **`cnn2d_shallow`** (128-baseline architecture: stride-4 stem + 3 "
-        "conv/pool, global-pool) on full-1601² CFDAC × 7 features × 10 tasks. Tiny memory "
-        "footprint — runs with a large batch on a small/cheap GPU. Shares the `cnn` results "
-        "folder/branch with the 'rest' notebook (skip-if-exists reuses past runs).",
-        "['cnn2d_shallow']", "cnn", 128),
-    "hires_cnn_rest_gpu.ipynb": (
-        "Hi-res 1601² CFDAC — the REST of the CNNs (deep + cnn3d) (GPU)",
-        "The heavy CNNs — **`cnn2d_deep`** (`DeepCFDACNet`, ResNet18-style, consumes the "
-        "full 1601² grid) and **`cnn3d`** (channels as a 3-D depth axis) — on full-1601² "
-        "CFDAC × 7 features × 10 tasks. Highest VRAM; lower `BATCH` if `cnn3d` OOMs. Shares "
-        "the `cnn` results folder/branch with the shallow notebook and picks up any cells "
-        "already trained in the earlier combined CNN run.",
-        "['cnn2d_deep','cnn3d']", "cnn", 16),
+    # --- CNN family united in one zoo (shallow + deep + cnn3d) ---
+    "hires_cnn_zoo_gpu.ipynb": (
+        "Hi-res 1601² CFDAC — CNN zoo (shallow + deep + cnn3d) (GPU)",
+        "All three CFDAC CNNs in one notebook — **`cnn2d_shallow`** (light, 128-baseline "
+        "architecture), **`cnn2d_deep`** (`DeepCFDACNet`, ResNet18-style, consumes the full "
+        "1601² grid), and **`cnn3d`** (channels as a 3-D depth axis) — on full-1601² CFDAC × "
+        "7 features × 10 tasks (3×7×10 = 210 cells). One shared `cnn` results folder/branch "
+        "with skip-if-exists + pickup, so it reuses anything already trained. `BATCH=16` is "
+        "sized for the heavy `cnn2d_deep`/`cnn3d` at 1601² — raise it for shallow-only runs.",
+        "['cnn2d_shallow','cnn2d_deep','cnn3d']", "cnn", 16),
     "hires_transformer_gpu.ipynb": (
         "Hi-res 1601² CFDAC — Transformer (GPU)",
         "Trains a conv-tokenised Transformer (`CFDACTransformer`: strided-conv tokeniser "
