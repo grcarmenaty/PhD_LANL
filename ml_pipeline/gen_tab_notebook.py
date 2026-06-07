@@ -93,6 +93,16 @@ def git_autosave(msg):
     if not (AUTOSAVE_GITHUB and GH_TOKEN): return
     repo='/content/PhD_LANL'; dst=os.path.join(repo,'results_hires_zoo',FAMILY)
     os.makedirs(os.path.join(dst,'per_case'), exist_ok=True)
+    if not getattr(git_autosave,'_merged',False):   # one-time: pull remote cells so a force-push never overwrites a fuller branch
+        subprocess.run(['git','-C',repo,'fetch','--depth','1','origin',GH_RESULTS_BRANCH],capture_output=True)
+        _rl=subprocess.run(['git','-C',repo,'ls-tree','-r','--name-only','origin/'+GH_RESULTS_BRANCH],capture_output=True,text=True).stdout
+        for _l in _rl.splitlines():
+            if '/per_case/' in _l and _l.endswith('.json'):
+                _fp=os.path.join(str(OUT),'per_case',os.path.basename(_l))
+                if not os.path.exists(_fp):
+                    _bb=subprocess.run(['git','-C',repo,'show','origin/'+GH_RESULTS_BRANCH+':'+_l],capture_output=True,text=True).stdout
+                    if _bb: open(_fp,'w').write(_bb)
+        git_autosave._merged=True
     for fn in (os.listdir(os.path.join(OUT,'per_case')) if os.path.isdir(os.path.join(OUT,'per_case')) else []):
         if fn.endswith('.json'): shutil.copy(os.path.join(OUT,'per_case',fn), os.path.join(dst,'per_case',fn))
     if os.path.exists(os.path.join(OUT,'synth_test_tab.json')):
