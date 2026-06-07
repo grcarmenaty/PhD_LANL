@@ -3885,5 +3885,24 @@
     "synth_test_bal_acc": 0.6895833333333333,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_hole_cnn2d_shallow_cfdac_magphase_hires1601": {
+    "task": "is_hole",
+    "model": "cnn2d_shallow",
+    "feature": "cfdac_magphase",
+    "n_target": 1601,
+    "n_channels": 2,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 4000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.5989583333333334,
+    "synth_test_metric": 0.715,
+    "synth_test_macro_f1": 0.5641294696908548,
+    "synth_test_bal_acc": 0.5651667558101416,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
