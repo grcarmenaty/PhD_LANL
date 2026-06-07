@@ -116,14 +116,14 @@ _BR = 'colab-hires-{family_dir}'
 import subprocess as _sp, os as _os
 try:
     _sp.run(['git','-C','/content/PhD_LANL','fetch','--depth','1','origin',_BR], capture_output=True)
-    _ls = _sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','origin/'+_BR],
+    _ls = _sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','FETCH_HEAD'],
                   capture_output=True, text=True).stdout
     (OUT/'per_case').mkdir(parents=True, exist_ok=True); _n=0
     for _l in _ls.splitlines():
         if 'results_hires_zoo/{family_dir}/per_case/' in _l and _l.endswith('.json'):
             _name=_os.path.basename(_l)
             if not (OUT/'per_case'/_name).exists():
-                _b=_sp.run(['git','-C','/content/PhD_LANL','show','origin/'+_BR+':'+_l],
+                _b=_sp.run(['git','-C','/content/PhD_LANL','show','FETCH_HEAD:'+_l],
                            capture_output=True, text=True).stdout
                 if _b: (OUT/'per_case'/_name).write_text(_b); _n+=1
     print('picked up',_n,'already-trained cells from',_BR)
@@ -165,12 +165,12 @@ def git_autosave(msg):
     os.makedirs(os.path.join(dst,'per_case'), exist_ok=True)
     if not getattr(git_autosave,'_merged',False):   # one-time: pull remote cells so a force-push never overwrites a fuller branch
         subprocess.run(['git','-C',repo,'fetch','--depth','1','origin',GH_RESULTS_BRANCH],capture_output=True)
-        _rl=subprocess.run(['git','-C',repo,'ls-tree','-r','--name-only','origin/'+GH_RESULTS_BRANCH],capture_output=True,text=True).stdout
+        _rl=subprocess.run(['git','-C',repo,'ls-tree','-r','--name-only','FETCH_HEAD'],capture_output=True,text=True).stdout
         for _l in _rl.splitlines():
             if '/per_case/' in _l and _l.endswith('.json'):
                 _fp=os.path.join(str(OUT),'per_case',os.path.basename(_l))
                 if not os.path.exists(_fp):
-                    _bb=subprocess.run(['git','-C',repo,'show','origin/'+GH_RESULTS_BRANCH+':'+_l],capture_output=True,text=True).stdout
+                    _bb=subprocess.run(['git','-C',repo,'show','FETCH_HEAD:'+_l],capture_output=True,text=True).stdout
                     if _bb: open(_fp,'w').write(_bb)
         git_autosave._merged=True
     # copy ONLY the json artefacts (skip the large models/ dir)

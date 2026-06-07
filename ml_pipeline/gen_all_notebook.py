@@ -48,13 +48,13 @@ import subprocess as _sp, os as _os
 for _BR in PICKUP_BRANCHES:
     try:
         _sp.run(['git','-C','/content/PhD_LANL','fetch','--depth','1','origin',_BR], capture_output=True)
-        _ls=_sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','origin/'+_BR],capture_output=True,text=True).stdout
+        _ls=_sp.run(['git','-C','/content/PhD_LANL','ls-tree','-r','--name-only','FETCH_HEAD'],capture_output=True,text=True).stdout
         (OUT/'per_case').mkdir(parents=True, exist_ok=True); _n=0
         for _l in _ls.splitlines():
             if '/per_case/' in _l and _l.endswith('.json'):
                 _name=_os.path.basename(_l)
                 if not (OUT/'per_case'/_name).exists():
-                    _b=_sp.run(['git','-C','/content/PhD_LANL','show','origin/'+_BR+':'+_l],capture_output=True,text=True).stdout
+                    _b=_sp.run(['git','-C','/content/PhD_LANL','show','FETCH_HEAD:'+_l],capture_output=True,text=True).stdout
                     if _b: (OUT/'per_case'/_name).write_text(_b); _n+=1
         if _n: print('picked up',_n,'cells from',_BR)
     except Exception as _e: print('pickup skip',_BR,_e)
@@ -99,12 +99,12 @@ def git_autosave(msg):
     os.makedirs(os.path.join(dst,'per_case'), exist_ok=True)
     if not getattr(git_autosave,'_merged',False):   # one-time: pull remote cells so a force-push never overwrites a fuller branch
         subprocess.run(['git','-C',repo,'fetch','--depth','1','origin',GH_RESULTS_BRANCH],capture_output=True)
-        _rl=subprocess.run(['git','-C',repo,'ls-tree','-r','--name-only','origin/'+GH_RESULTS_BRANCH],capture_output=True,text=True).stdout
+        _rl=subprocess.run(['git','-C',repo,'ls-tree','-r','--name-only','FETCH_HEAD'],capture_output=True,text=True).stdout
         for _l in _rl.splitlines():
             if '/per_case/' in _l and _l.endswith('.json'):
                 _fp=os.path.join(str(OUT),'per_case',os.path.basename(_l))
                 if not os.path.exists(_fp):
-                    _bb=subprocess.run(['git','-C',repo,'show','origin/'+GH_RESULTS_BRANCH+':'+_l],capture_output=True,text=True).stdout
+                    _bb=subprocess.run(['git','-C',repo,'show','FETCH_HEAD:'+_l],capture_output=True,text=True).stdout
                     if _bb: open(_fp,'w').write(_bb)
         git_autosave._merged=True
     for fn in (os.listdir(os.path.join(OUT,'per_case')) if os.path.isdir(os.path.join(OUT,'per_case')) else []):
