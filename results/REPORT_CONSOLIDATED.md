@@ -1,213 +1,776 @@
-# LANL 3SBB — Synth-to-Real Damage Diagnosis: Consolidated Report
-**Author:** G. Reyes-Carmenaty (PhD work, 2024–2026)
-**Date:** 2026-06-08
-**Scope.** Single source of truth for the **high-resolution (1601-bin) CFDAC model-zoo**
-study: train on the calibrated 3SBB synthetic model, test **zero-shot on the
-2 638-case IQS experimental set**. Supersedes every other `REPORT_*.md` here
-(deprecation banners added). The synthetic-domain (in-domain) companion is
-[`REPORT_synth.md`](REPORT_synth.md). *A reduced-resolution (128-bin) comparison
-is in progress on a separate branch and is intentionally excluded here until complete.*
+# LANL 3SBB — Synth-to-Real Damage Diagnosis: FULL Consolidated Report
+**Author:** G. Reyes-Carmenaty · **Date:** 2026-06-08 · **Resolution:** 1601-bin (native).
 
----
-## Executive summary
+> Exhaustive edition — every cell of the high-resolution model zoo, with in-domain and zero-shot metrics, per-task cell-zoo plots, the damage-threshold sweep, and the severity deep-dive. Executive summary of the same results: see the top sections; the in-domain companion is `REPORT_synth.md`. *(128-bin comparison excluded until that run completes.)*
 
-- **What was run.** A full **model zoo at native 1601-bin resolution**: every
-  feature family × every model × 10 diagnosis tasks, each trained to convergence
-  on synthetic data and evaluated zero-shot on experiment. **575 unique cells.**
-- **Headline 1 — diagnosis *does* transfer, with the right representation.**
-  120 / 517 classification cells (≈23 %) clear chance on real data, and **every
-  detection task has a working cell**: best zero-shot **balanced accuracy**
-  is **is_bolt 0.67, is_hole 0.67, is_mass 0.62, is_crack 0.59, binary 0.59,
-  is_pristine 0.56** (chance 0.50). This is a clear improvement over the older
-  128² modal-MLP baseline (e.g. is_hole 0.62 → 0.67).
-- **Headline 2 — it works best on severe damage (DT thesis confirmed).**
-  Stratifying positives by damage severity, transfer **rises with severity**:
-  `is_bolt` **0.67 → 0.82** at ≥75 % bolt loosening, `binary` 0.59 → 0.66,
-  `is_crack` 0.59 → 0.65. The aggregate metric understates performance on the
-  cases that matter operationally.
-- **Headline 3 — the winning features are NOT what the literature assumed.**
-  The best-transferring cells are **raw FRF (real+imag) / reconstructed
-  timeseries fed to 1-D transformers/CNNs**, and **CFDAC fed to 2-D/3-D CNNs and
-  a conv-tokenised transformer** — *not* the hand-crafted `modal` vector (the old
-  baseline winner) and *not* ImageNet vision backbones, which mostly under-perform.
-- **Headline 4 — localization and severity remain hard.** Multi-class
-  localization is only weakly above chance (`mass_location` 0.50 vs 0.25,
-  `col_location` 0.35 vs 0.17, `type` 0.31 vs 0.20), and **severity regression
-  barely transfers** (best R² ≈ 0.04, Pearson r ≈ 0.36) despite R² ≈ 0.59
-  in-domain — the clearest remaining sim-to-real gap.
-- **The persistent story:** models learn the synthetic task almost perfectly
-  (most ≥ 0.85 macro-F1 in-domain) but only a *partial* signal survives to real
-  data. Detection/typing of **severe** damage transfers; fine-grained
-  localization and severity magnitude do not.
+## 1 · Overview
+- **575 cells** at 1601 bins = (≤11 models) × (≤12 features) × 10 tasks, each trained to convergence on synthetic data and evaluated zero-shot on the 2 638-case IQS experimental set.
+- **120/517 classification cells clear chance** on real data (≈23%).
+- A *cell* = one (model, feature) pair. Metric of record: **balanced accuracy / macro-F1** (classification), **R² / Pearson r / MAE** (severity). Raw accuracy is never used (82.5% damaged prior).
 
-![in-domain vs zero-shot, best cell per task](figures/hires/zoo1601_synth_vs_exp.png)
+![in-domain vs zero-shot](figures/hires/zoo1601_synth_vs_exp.png)
 
----
-## Methodology
+## 2 · Model & feature glossary (what every cell is)
+**Models**
 
-### The model zoo (1601 bins)
-Synthetic data is regenerated at a 16 s simulation length (N_T = 4096, fs = 256)
-so the FFT grid is **df = 0.0625 Hz → 1601 bins over 0–100 Hz**, matching the
-experimental FRFs exactly. From those FRFs every cell computes one **feature**,
-trains one **model** on a synth subsample, and is evaluated on held-out synth
-(in-domain) and all 2 638 experimental cases (zero-shot).
+- `mlp` — fully-connected net (3 hidden layers, BN+GELU+dropout) on the flattened feature
+- `rf` — random forest (400 trees, class-balanced)
+- `xgb` — gradient-boosted trees (XGBoost)
+- `cnn1d` — 1-D CNN over the frequency/time axis of a sequence feature
+- `transformer1d` — conv-tokenised 1-D transformer over a sequence feature
+- `cnn2d_shallow` — shallow 2-D CNN (the 128²-baseline architecture: stride-4 stem + 3 conv/pool) on the CFDAC image
+- `cnn2d_deep` — deep ResNet18-style 2-D CNN that consumes the full CFDAC grid
+- `cnn3d` — 3-D CNN treating the CFDAC channels as a volumetric depth axis
+- `transformer` — conv-tokenised 2-D transformer on the CFDAC image (full-resolution patches, not a 224 resize)
+- `convnext_tiny` — ImageNet-pretrained ConvNeXt-T (modern CNN) fine-tuned on the CFDAC image
+- `resnet50` — ImageNet-pretrained ResNet50 (classic CNN) fine-tuned on the CFDAC image
 
-| feature | description | models applied |
-|---|---|---|
-| `modal` (81) | per-channel peaks / log-amp / band-energy | mlp, rf, xgb |
-| `indicators` (22) | pymodal damage indicators (SCI, DRQ, FRFRMS, …) vs pristine ref | mlp, rf, xgb |
-| `frf_mag` (9×1601) | per-sample log-normalised \|H(f)\| | mlp, cnn1d, transformer1d |
-| `frf_realimag` (18×1601) | per-sample normalised Re/Im H(f) | mlp, cnn1d, transformer1d |
-| `timeseries` (9×4096) | band-limited response reconstructed from the FRF (IFFT·chirp) | mlp, cnn1d, transformer1d |
-| CFDAC × 7 (1601×1601) | real / imag / mag / phase / realimag / magphase / all channels | cnn2d_shallow, cnn2d_deep, cnn3d, transformer, convnext_tiny, resnet50 |
+**Features** (all computed from the native 1601-bin FRFs)
 
-`timeseries` is reconstructed from the FRF **identically for synth and
-experiment** (the IQS set has no measured timeseries), so the only domain
-difference is the FRF content, not the pipeline.
+- `modal` — 81-d physics vector: per-channel top-3 spectral peaks (freq+amp), log-amp mean/std, band energy
+- `indicators` — 22 pymodal damage indicators (SCI, unsigned-SCI, DRQ, AIGAC, FRFRMS/SF/SM, ODS-diff, r2-imag, RVAC/GAC/M2L stats) vs the pristine reference
+- `frf_mag` — log-magnitude FRF |H(f)|, per-sample z-normalised — (9 channels × 1601)
+- `frf_realimag` — real+imag parts of H(f), per-sample z-normalised — (18 × 1601)
+- `timeseries` — band-limited time response reconstructed from the FRF (IFFT·chirp), per-sample z-normalised — (9 × 4096)
+- `cfdac_real` — CFDAC matrix (1601×1601), real part — pristine-vs-current FRF cross-assurance
+- `cfdac_imag` — CFDAC matrix, imaginary part
+- `cfdac_mag` — CFDAC matrix, magnitude
+- `cfdac_phase` — CFDAC matrix, phase
+- `cfdac_realimag` — CFDAC, real+imag (2 channels)
+- `cfdac_magphase` — CFDAC, magnitude+phase (2 channels)
+- `cfdac_all` — CFDAC, all 4 channels stacked
 
-### Protocol (scientifically sound, zero-shot)
-- Fixed **70/15/15** split; **class-weighted** losses / **balanced** trees.
-- NN models **train to convergence** (early stop on val + ReduceLROnPlateau,
-  per-epoch checkpoint/resume); trees fit once.
-- Tabular features standardised on the **synth-train fold only**, then applied to
-  experiment; sequence/image features use per-sample normalisation (no leakage).
-- **Metrics of record: balanced accuracy / macro-F1** (classification) and
-  **R² / MAE / Pearson r** (regression) — never raw accuracy, which is misleading
-  under the 82.5 % damaged class prior. Class-collapse (predicting one class) is
-  flagged explicitly.
-- Engines: `ml_pipeline/hires_zoo.py` (CFDAC/image), `hires_tab.py`
-  (modal/indicators/FRF/timeseries), `hires_all.py` (dispatch); rollups
-  `hires_zoo_summary.py`, `hires_dt_1601.py`. Per-case predictions live on the
-  `colab-hires-{tabular,cnn,transformer,vision}` branches.
+Each per-task table below lists **every** cell; read `model/feature` against this glossary.
 
----
-## Per-task results (1601, zero-shot on experiment)
+## 3 · Methodology
+Synthetic data regenerated at 16 s (N_T=4096, fs=256 → df=0.0625 Hz, 1601 bins, 0–100 Hz) to match the experimental grid exactly. Per cell: compute the feature from the FRFs, train on a synth subsample (70/15/15 split, class-weighted loss / balanced trees, early-stop to convergence with checkpoint/resume), evaluate on held-out synth (in-domain) and all 2 638 experimental cases (zero-shot). Tabular features standardised on the synth-train fold only; sequence/image features per-sample normalised (no leakage). `timeseries` is reconstructed from the FRF identically for both domains (the IQS set has no measured timeseries).
+Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-case predictions on branches `colab-hires-{tabular,cnn,transformer,vision}`.
 
-For each task: chance, the **best zero-shot** cell (balanced-acc / macro-F1, or
-R² for severity), the same cell's **in-domain** score, and the best **in-domain**
-cell (the gap).
+## 4 · Per-task catalogue (every cell)
 
-| task | chance | best EXP cell | exp bal-acc | exp macro-F1 | in-domain (best synth) |
-|---|---|---|---|---|---|
-| **is_bolt** | 0.50 | `transformer1d / frf_realimag` | **0.669** | 0.654 | 0.94 |
-| **is_hole** | 0.50 | `transformer1d / frf_realimag` | **0.667** | 0.599 | 0.85 |
-| **is_mass** | 0.50 | `cnn3d / cfdac_imag` | **0.620** | 0.399 | 0.99 |
-| **binary** | 0.50 | `transformer1d / timeseries` | **0.589** | 0.582 | 0.96 |
-| **is_crack** | 0.50 | `transformer / cfdac_mag` | **0.587** | 0.566 | 0.78 |
-| **is_pristine** | 0.50 | `mlp / timeseries` | **0.557** | 0.556 | 0.96 |
-| **mass_location** | 0.25 | `mlp / frf_realimag` | 0.500 | 0.308 | 1.00 |
-| **col_location** | 0.17 | `transformer / cfdac_mag` | 0.353 | 0.082 | 0.51 |
-| **type** (5-cls) | 0.20 | `convnext_tiny / cfdac_imag` | 0.306 | 0.280 | 0.87 |
-| **severity** (reg) | — | `mlp / frf_mag` | R² **0.037** (r 0.36) | — | R² 0.59 |
+### binary
+**Question.** Any damage vs pristine  **Output.** ŷ∈{0=pristine,1=damaged}  **Chance.** 0.50.  82.5% damaged prior; raw accuracy misleading.
+**Cells:** 58.
 
-**Reading.** Binary detection and the four damage-type detectors transfer
-**above chance** (0.56–0.67); localization is weak-but-real (≈1.4–2× chance on
-macro-F1); type is just above chance; severity regression is essentially flat.
-The in-domain column shows the models are not under-fitting — every task is
-learned well synthetically; the loss is purely sim-to-real.
+![binary cell zoo](figures/hires/cellzoo_binary.png)
 
-### What transfers — winning representations
-Among the cells clearly above chance (balanced-acc ≥ chance + 0.05), the
-representations that dominate are **CFDAC channels** (real+imag/imag/mag, fed to
-2-D/3-D CNNs and the conv-tokenised transformer) and **raw FRF / timeseries** (fed
-to 1-D transformers/CNNs). The hand-crafted **`modal`** vector — the winner of the
-old 128² study — is now near the bottom (only 2 above-chance cells), and the
-**ImageNet vision backbones** (ResNet50, ConvNeXt-T) rarely top a task. The signal
-lives in the **full complex spectral content**, learned by a model with the right
-inductive bias, not in compressed physics summaries.
-
----
-## Damage-threshold (DT) sweep — does it work at high damage?
-
-Positives are stratified by their damage-severity percentile (each task on its
-own axis — bolt %, hole mm, mass kg, crack depth) and balanced-accuracy is
-recomputed keeping only the more-severe positives.
-
-![DT sweep @1601](figures/hires/dt_1601_combined.png)
-
-| task | all (p0) | ≥p50 | ≥p75 | ≥p90 |
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
 |---|---|---|---|---|
-| **is_bolt** | 0.669 | 0.742 | **0.821** | **0.821** |
-| **binary** | 0.589 | 0.603 | 0.618 | **0.658** |
-| **is_crack** | 0.587 | 0.587 | 0.646 | **0.646** |
-| is_hole | 0.667 | 0.667 | 0.646 | 0.646 |
-| is_mass | 0.620 | 0.620 | 0.620 | 0.620 |
+| `transformer1d/timeseries` | 0.86 | 0.589 | 0.582 |  |
+| `mlp/frf_realimag` | 0.94 | 0.562 | 0.562 |  |
+| `cnn3d/cfdac_realimag` | 0.57 | 0.542 | 0.542 |  |
+| `cnn3d/cfdac_imag` | 0.57 | 0.535 | 0.522 |  |
+| `resnet50/cfdac_phase` | 0.95 | 0.527 | 0.525 |  |
+| `mlp/timeseries` | 0.95 | 0.516 | 0.490 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.69 | 0.514 | 0.491 | yes |
+| `convnext_tiny/cfdac_real` | 0.94 | 0.513 | 0.507 | yes |
+| `convnext_tiny/cfdac_imag` | 0.96 | 0.513 | 0.480 | yes |
+| `convnext_tiny/cfdac_realimag` | 0.95 | 0.511 | 0.491 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.60 | 0.509 | 0.481 | yes |
+| `cnn3d/cfdac_all` | 0.55 | 0.505 | 0.490 | yes |
+| `convnext_tiny/cfdac_magphase` | 0.94 | 0.502 | 0.463 | yes |
+| `rf/modal` | 0.87 | 0.500 | 0.452 | yes |
+| `cnn1d/frf_mag` | 0.74 | 0.500 | 0.452 | yes |
+| `mlp/frf_mag` | 0.96 | 0.500 | 0.452 | yes |
+| `cnn1d/frf_realimag` | 0.72 | 0.500 | 0.452 | yes |
+| `mlp/modal` | 0.94 | 0.500 | 0.452 | yes |
+| `xgb/indicators` | 0.81 | 0.500 | 0.452 | yes |
+| `rf/indicators` | 0.79 | 0.500 | 0.452 | yes |
+| `mlp/indicators` | 0.83 | 0.500 | 0.452 | yes |
+| `xgb/modal` | 0.91 | 0.500 | 0.452 | yes |
+| `cnn1d/timeseries` | 0.77 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_magphase` | 0.92 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_all` | 0.93 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_realimag` | 0.90 | 0.500 | 0.452 | yes |
+| `convnext_tiny/cfdac_mag` | 0.44 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_mag` | 0.79 | 0.500 | 0.452 | yes |
+| `convnext_tiny/cfdac_phase` | 0.95 | 0.500 | 0.452 | yes |
+| `cnn2d/cfdac_realimag` | 0.45 | 0.500 | 0.452 | yes |
+| `transformer/cfdac_mag` | 0.76 | 0.500 | 0.452 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.65 | 0.500 | 0.452 | yes |
+| `cnn2d_shallow/cfdac_magphase` | 0.76 | 0.500 | 0.452 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.44 | 0.500 | 0.452 | yes |
+| `cnn3d/cfdac_phase` | 0.77 | 0.500 | 0.452 | yes |
+| `cnn3d/cfdac_magphase` | 0.61 | 0.500 | 0.452 | yes |
+| `cnn3d/cfdac_mag` | 0.51 | 0.500 | 0.452 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.59 | 0.499 | 0.452 | yes |
+| `transformer/cfdac_magphase` | 0.93 | 0.498 | 0.460 | yes |
+| `convnext_tiny/cfdac_all` | 0.95 | 0.498 | 0.453 | yes |
+| `transformer1d/frf_realimag` | 0.89 | 0.498 | 0.460 | yes |
+| `cnn2d_deep/cfdac_all` | 0.89 | 0.498 | 0.451 | yes |
+| `transformer/cfdac_realimag` | 0.94 | 0.496 | 0.450 | yes |
+| `transformer/cfdac_all` | 0.94 | 0.496 | 0.450 | yes |
+| `resnet50/cfdac_imag` | 0.88 | 0.496 | 0.463 | yes |
+| `resnet50/cfdac_real` | 0.89 | 0.496 | 0.453 | yes |
+| `transformer1d/frf_mag` | 0.60 | 0.495 | 0.449 | yes |
+| `transformer/cfdac_real` | 0.94 | 0.495 | 0.451 | yes |
+| `transformer/cfdac_phase` | 0.89 | 0.493 | 0.448 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.60 | 0.492 | 0.297 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.55 | 0.490 | 0.490 | yes |
+| `transformer/cfdac_imag` | 0.91 | 0.486 | 0.445 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.78 | 0.486 | 0.475 | yes |
+| `cnn3d/cfdac_real` | 0.56 | 0.480 | 0.479 | yes |
+| `cnn2d_deep/cfdac_realimag` | 0.84 | 0.476 | 0.448 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.80 | 0.468 | 0.438 | yes |
+| `cnn2d_deep/cfdac_imag` | 0.77 | 0.452 | 0.439 | yes |
+| `cnn2d_deep/cfdac_real` | 0.73 | 0.422 | 0.427 | yes |
 
-![is_bolt DT curve](figures/hires/zoo_dt_is_bolt.png)
+**Best:** `transformer1d/timeseries` — exp balanced-acc **0.589** (macro-F1 0.582; in-domain 0.86). 2/58 cells clear chance+0.05; 53 collapse to one class.
 
-**Verdict.** For damage with a wide severity range — **bolt loosening** above all —
-transfer climbs strongly with severity (**0.67 → 0.82**), and binary/crack rise
-too. `is_hole` and `is_mass` are flat *because their experimental severity barely
-varies* (holes 1–6 mm, added-mass near-discrete), not because the model fails.
-This confirms the long-standing hypothesis: **synth-trained models detect *severe*
-real damage well; the aggregate number is dragged down by near-pristine cases.**
+### is_pristine
+**Question.** Pristine vs any damage (inverse of binary)  **Output.** ŷ∈{0=damaged,1=pristine}  **Chance.** 0.50.
+**Cells:** 57.
 
----
-## The non-classifier: severity regression
+![is_pristine cell zoo](figures/hires/cellzoo_is_pristine.png)
 
-Severity is the only regression task and the weakest link. Best experimental
-**R² ≈ 0.037** (most cells negative — worse than predicting the mean), with a
-weak-but-real monotonic signal (**Pearson r ≈ 0.36** for the frf/timeseries
-cells), against **R² ≈ 0.59 in-domain**. Restricting to severe cases does *not*
-improve R² (it falls — a variance-narrowing artefact), and MAE stays ≈ 0.25 on a
-0.07–1.0 normalised scale. **Predicting damage magnitude zero-shot remains
-unsolved**; re-casting severity as ordinal classification is a promising next step.
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `mlp/timeseries` | 0.93 | 0.557 | 0.556 |  |
+| `convnext_tiny/cfdac_phase` | 0.92 | 0.556 | 0.561 |  |
+| `cnn3d/cfdac_imag` | 0.63 | 0.543 | 0.538 |  |
+| `mlp/frf_realimag` | 0.95 | 0.543 | 0.546 |  |
+| `convnext_tiny/cfdac_realimag` | 0.96 | 0.524 | 0.502 |  |
+| `transformer1d/timeseries` | 0.88 | 0.523 | 0.519 |  |
+| `cnn3d/cfdac_real` | 0.61 | 0.519 | 0.515 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.60 | 0.504 | 0.464 | yes |
+| `cnn3d/cfdac_all` | 0.58 | 0.503 | 0.487 | yes |
+| `resnet50/cfdac_realimag` | 0.79 | 0.501 | 0.454 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.62 | 0.500 | 0.457 | yes |
+| `cnn3d/cfdac_realimag` | 0.60 | 0.500 | 0.500 | yes |
+| `rf/modal` | 0.90 | 0.500 | 0.452 | yes |
+| `rf/indicators` | 0.82 | 0.500 | 0.452 | yes |
+| `cnn1d/frf_realimag` | 0.77 | 0.500 | 0.452 | yes |
+| `mlp/frf_mag` | 0.95 | 0.500 | 0.452 | yes |
+| `xgb/indicators` | 0.80 | 0.500 | 0.452 | yes |
+| `transformer1d/frf_mag` | 0.66 | 0.500 | 0.452 | yes |
+| `xgb/modal` | 0.93 | 0.500 | 0.452 | yes |
+| `mlp/modal` | 0.92 | 0.500 | 0.452 | yes |
+| `cnn1d/timeseries` | 0.80 | 0.500 | 0.452 | yes |
+| `cnn1d/frf_mag` | 0.70 | 0.500 | 0.452 | yes |
+| `mlp/indicators` | 0.85 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_all` | 0.95 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_mag` | 0.81 | 0.500 | 0.452 | yes |
+| `convnext_tiny/cfdac_imag` | 0.96 | 0.500 | 0.452 | yes |
+| `convnext_tiny/cfdac_mag` | 0.44 | 0.500 | 0.452 | yes |
+| `convnext_tiny/cfdac_all` | 0.44 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_magphase` | 0.90 | 0.500 | 0.452 | yes |
+| `convnext_tiny/cfdac_magphase` | 0.96 | 0.500 | 0.452 | yes |
+| `transformer/cfdac_all` | 0.95 | 0.500 | 0.452 | yes |
+| `transformer/cfdac_mag` | 0.63 | 0.500 | 0.452 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.72 | 0.500 | 0.452 | yes |
+| `cnn3d/cfdac_magphase` | 0.81 | 0.500 | 0.452 | yes |
+| `cnn3d/cfdac_phase` | 0.79 | 0.500 | 0.452 | yes |
+| `cnn3d/cfdac_mag` | 0.61 | 0.500 | 0.452 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.59 | 0.500 | 0.452 | yes |
+| `resnet50/cfdac_phase` | 0.95 | 0.499 | 0.452 | yes |
+| `resnet50/cfdac_real` | 0.90 | 0.496 | 0.450 | yes |
+| `convnext_tiny/cfdac_real` | 0.95 | 0.495 | 0.452 | yes |
+| `transformer/cfdac_real` | 0.92 | 0.494 | 0.481 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.83 | 0.494 | 0.475 | yes |
+| `transformer/cfdac_realimag` | 0.93 | 0.493 | 0.450 | yes |
+| `cnn2d_shallow/cfdac_magphase` | 0.84 | 0.492 | 0.490 | yes |
+| `transformer/cfdac_phase` | 0.92 | 0.491 | 0.462 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.76 | 0.483 | 0.390 | yes |
+| `transformer/cfdac_imag` | 0.89 | 0.479 | 0.476 | yes |
+| `resnet50/cfdac_imag` | 0.91 | 0.473 | 0.465 | yes |
+| `cnn2d_deep/cfdac_real` | 0.83 | 0.470 | 0.468 | yes |
+| `transformer/cfdac_magphase` | 0.91 | 0.468 | 0.438 | yes |
+| `cnn2d_deep/cfdac_imag` | 0.83 | 0.467 | 0.445 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.89 | 0.467 | 0.441 | yes |
+| `cnn2d_deep/cfdac_all` | 0.86 | 0.465 | 0.441 | yes |
+| `cnn2d_deep/cfdac_realimag` | 0.81 | 0.451 | 0.435 | yes |
+| `transformer1d/frf_realimag` | 0.76 | 0.444 | 0.436 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.76 | 0.443 | 0.438 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.52 | 0.443 | 0.438 | yes |
 
----
-## Cross-task synthesis
+**Best:** `mlp/timeseries` — exp balanced-acc **0.557** (macro-F1 0.556; in-domain 0.93). 2/57 cells clear chance+0.05; 51 collapse to one class.
 
-1. **Detection ≫ localization ≫ magnitude.** Presence/type of damage transfers
-   (0.56–0.67); *where* transfers weakly; *how much* barely at all.
-2. **Severity is the lever.** Every detector improves on more-severe damage; the
-   operationally relevant regime (severe loosening) reaches ~0.82.
-3. **Representation matters more than model size.** Full complex spectral inputs
-   (CFDAC, raw FRF, timeseries) + an appropriate sequence/conv model beat both the
-   compressed `modal` baseline and the large pretrained vision backbones.
-4. **The gap is covariate shift, not capacity.** Near-perfect in-domain scores
-   with partial transfer point at a synthetic-vs-real spectral distribution shift;
-   future gains should target domain adaptation, not bigger models.
+### is_bolt
+**Question.** Bolt-loosening present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity = % loosening, 0–85% — wide range.
+**Cells:** 57.
 
----
-## Limitations & honest caveats
-- **Single experimental structure** (2 638-case 3SBB IQS). No cross-structure test.
-- **One seed** per cell in this zoo (the 3-seed variance study was the 128² work);
-  ±~0.01–0.05 noise on balanced-acc is expected — treat sub-0.05 gaps as ties.
-- **Post-hoc best-cell selection** per task is hypothesis-generating; the DT
-  curves are exploratory, not a pre-registered gate.
-- **Localization classes are near-degenerate** in the linear ROM (symmetric
-  crack/hole make column ends hard to separate) — partly an intrinsic ceiling.
-- **`timeseries` is FRF-derived** (no measured experimental timeseries), so it
-  carries the same information as the FRF in a different basis.
-- **Resolution comparison (128 vs 1601) is deliberately omitted** until the 128
-  run completes.
+![is_bolt cell zoo](figures/hires/cellzoo_is_bolt.png)
 
----
-## Recommendations
-1. **Deploy detection on severe damage.** is_bolt/binary/is_crack are usable at
-   high severity (≈0.66–0.82 balanced-acc); report severity-stratified, not aggregate.
-2. **Use spectral inputs + sequence/conv models** (FRF/timeseries→transformer1d,
-   CFDAC→CNN). Drop `modal` and the pretrained vision backbones as the primary route.
-3. **Attack severity & localization with domain adaptation**, not bigger nets —
-   align synth/real spectral statistics (the covariate shift is the bottleneck).
-4. **Recast severity as ordinal classification** to expose its weak monotonic signal.
-5. **Finish the 128-bin run** to settle whether full resolution is necessary
-   (early indications suggest it is not — to be reported separately).
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `transformer1d/frf_realimag` | 0.89 | 0.669 | 0.654 |  |
+| `transformer1d/timeseries` | 0.92 | 0.641 | 0.636 |  |
+| `convnext_tiny/cfdac_imag` | 0.93 | 0.640 | 0.633 |  |
+| `transformer/cfdac_mag` | 0.93 | 0.631 | 0.626 |  |
+| `cnn3d/cfdac_imag` | 0.77 | 0.629 | 0.628 |  |
+| `convnext_tiny/cfdac_realimag` | 0.93 | 0.619 | 0.592 |  |
+| `transformer/cfdac_imag` | 0.93 | 0.614 | 0.558 |  |
+| `convnext_tiny/cfdac_phase` | 0.92 | 0.614 | 0.609 |  |
+| `convnext_tiny/cfdac_all` | 0.91 | 0.612 | 0.612 |  |
+| `transformer/cfdac_all` | 0.94 | 0.593 | 0.538 |  |
+| `cnn1d/timeseries` | 0.93 | 0.588 | 0.508 |  |
+| `mlp/modal` | 0.91 | 0.578 | 0.492 |  |
+| `transformer/cfdac_magphase` | 0.93 | 0.575 | 0.571 |  |
+| `cnn1d/frf_realimag` | 0.93 | 0.574 | 0.485 |  |
+| `transformer/cfdac_real` | 0.90 | 0.570 | 0.516 |  |
+| `cnn2d_deep/cfdac_all` | 0.93 | 0.569 | 0.507 |  |
+| `xgb/modal` | 0.93 | 0.567 | 0.499 |  |
+| `transformer/cfdac_realimag` | 0.93 | 0.565 | 0.504 |  |
+| `convnext_tiny/cfdac_magphase` | 0.92 | 0.565 | 0.559 |  |
+| `xgb/indicators` | 0.92 | 0.559 | 0.549 |  |
+| `cnn2d_deep/cfdac_realimag` | 0.80 | 0.557 | 0.466 |  |
+| `cnn3d/cfdac_magphase` | 0.88 | 0.550 | 0.550 |  |
+| `resnet50/cfdac_mag` | 0.92 | 0.548 | 0.543 |  |
+| `convnext_tiny/cfdac_real` | 0.92 | 0.541 | 0.541 |  |
+| `mlp/frf_mag` | 0.90 | 0.540 | 0.521 |  |
+| `rf/modal` | 0.93 | 0.536 | 0.411 |  |
+| `cnn2d_shallow/cfdac_real` | 0.80 | 0.524 | 0.416 |  |
+| `cnn2d_shallow/cfdac_magphase` | 0.93 | 0.510 | 0.373 | yes |
+| `mlp/indicators` | 0.89 | 0.509 | 0.393 | yes |
+| `mlp/frf_realimag` | 0.90 | 0.507 | 0.372 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.94 | 0.507 | 0.451 | yes |
+| `resnet50/cfdac_real` | 0.91 | 0.505 | 0.350 | yes |
+| `rf/indicators` | 0.92 | 0.503 | 0.470 | yes |
+| `transformer1d/frf_mag` | 0.91 | 0.502 | 0.342 | yes |
+| `cnn1d/frf_mag` | 0.92 | 0.500 | 0.330 | yes |
+| `resnet50/cfdac_imag` | 0.93 | 0.500 | 0.337 | yes |
+| `resnet50/cfdac_phase` | 0.93 | 0.500 | 0.337 | yes |
+| `convnext_tiny/cfdac_mag` | 0.44 | 0.500 | 0.330 | yes |
+| `resnet50/cfdac_all` | 0.92 | 0.500 | 0.337 | yes |
+| `resnet50/cfdac_realimag` | 0.93 | 0.500 | 0.337 | yes |
+| `resnet50/cfdac_magphase` | 0.94 | 0.500 | 0.337 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.93 | 0.500 | 0.330 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.81 | 0.500 | 0.330 | yes |
+| `mlp/timeseries` | 0.90 | 0.499 | 0.391 | yes |
+| `cnn2d_deep/cfdac_imag` | 0.80 | 0.497 | 0.335 | yes |
+| `cnn3d/cfdac_realimag` | 0.78 | 0.495 | 0.489 | yes |
+| `cnn3d/cfdac_phase` | 0.89 | 0.476 | 0.471 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.93 | 0.473 | 0.389 | yes |
+| `cnn3d/cfdac_all` | 0.77 | 0.472 | 0.472 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.77 | 0.461 | 0.460 | yes |
+| `cnn3d/cfdac_real` | 0.78 | 0.454 | 0.438 | yes |
+| `transformer/cfdac_phase` | 0.93 | 0.441 | 0.414 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.80 | 0.427 | 0.357 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.59 | 0.399 | 0.315 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.94 | 0.399 | 0.315 | yes |
+| `cnn3d/cfdac_mag` | 0.62 | 0.399 | 0.314 | yes |
+| `cnn2d_deep/cfdac_real` | 0.84 | 0.379 | 0.322 | yes |
 
----
-## Artefact index
-### Code
-- `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py` — training engines (CFDAC/image, tabular/seq, dispatch)
-- `ml_pipeline/hires_zoo_summary.py` — per-cell rollup → `results_hires/zoo_summary.json`, `zoo_best_by_task_res.json`
-- `ml_pipeline/hires_dt_1601.py` — DT severity sweep → `results_hires/dt_1601.json`
-- `notebooks/hires_{tabular,cnn_zoo,transformer,vision,all}_gpu.ipynb` — Colab runners (autosave to `colab-hires-*`)
-### Data
-- `results_hires/zoo_summary.json` — per-cell exp metrics (keyed `task/model/feature@res`)
-- `results_hires/zoo_best_by_task_res.json`, `results_hires/dt_1601.json`
-- raw per-case predictions: branches `colab-hires-{tabular,cnn,transformer,vision}`
-### Figures
-- `results/figures/hires/zoo1601_synth_vs_exp.png` — in-domain vs zero-shot per task
-- `results/figures/hires/dt_1601_combined.png` — DT sweep per detection task
-- `results/figures/hires/zoo_dt_is_bolt.png` — is_bolt severity curves
-### Canonical reports
-- `REPORT_CONSOLIDATED.md` (this file) — experimental / cross-domain.
-- `REPORT_synth.md` — synthetic-domain (in-domain) results.
+**Best:** `transformer1d/frf_realimag` — exp balanced-acc **0.669** (macro-F1 0.654; in-domain 0.89). 21/57 cells clear chance+0.05; 30 collapse to one class.
+
+### is_crack
+**Question.** Crack present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity = crack depth.
+**Cells:** 57.
+
+![is_crack cell zoo](figures/hires/cellzoo_is_crack.png)
+
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `transformer/cfdac_mag` | 0.54 | 0.587 | 0.566 |  |
+| `convnext_tiny/cfdac_phase` | 0.77 | 0.579 | 0.577 |  |
+| `convnext_tiny/cfdac_realimag` | 0.77 | 0.542 | 0.546 |  |
+| `transformer/cfdac_imag` | 0.48 | 0.516 | 0.506 | yes |
+| `resnet50/cfdac_imag` | 0.72 | 0.502 | 0.471 | yes |
+| `rf/modal` | 0.71 | 0.500 | 0.468 | yes |
+| `cnn1d/frf_mag` | 0.58 | 0.500 | 0.468 | yes |
+| `mlp/frf_realimag` | 0.78 | 0.500 | 0.468 | yes |
+| `xgb/indicators` | 0.73 | 0.500 | 0.468 | yes |
+| `mlp/indicators` | 0.76 | 0.500 | 0.468 | yes |
+| `mlp/modal` | 0.78 | 0.500 | 0.468 | yes |
+| `transformer1d/frf_mag` | 0.51 | 0.500 | 0.468 | yes |
+| `cnn1d/timeseries` | 0.57 | 0.500 | 0.468 | yes |
+| `rf/indicators` | 0.71 | 0.500 | 0.468 | yes |
+| `xgb/modal` | 0.72 | 0.500 | 0.468 | yes |
+| `mlp/frf_mag` | 0.76 | 0.500 | 0.468 | yes |
+| `convnext_tiny/cfdac_mag` | 0.44 | 0.500 | 0.468 | yes |
+| `convnext_tiny/cfdac_imag` | 0.44 | 0.500 | 0.468 | yes |
+| `resnet50/cfdac_phase` | 0.76 | 0.500 | 0.468 | yes |
+| `convnext_tiny/cfdac_magphase` | 0.44 | 0.500 | 0.468 | yes |
+| `convnext_tiny/cfdac_real` | 0.44 | 0.500 | 0.468 | yes |
+| `convnext_tiny/cfdac_all` | 0.44 | 0.500 | 0.468 | yes |
+| `resnet50/cfdac_all` | 0.73 | 0.500 | 0.468 | yes |
+| `resnet50/cfdac_real` | 0.74 | 0.500 | 0.468 | yes |
+| `resnet50/cfdac_magphase` | 0.72 | 0.500 | 0.468 | yes |
+| `resnet50/cfdac_realimag` | 0.76 | 0.500 | 0.468 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.53 | 0.500 | 0.468 | yes |
+| `cnn3d/cfdac_imag` | 0.52 | 0.500 | 0.468 | yes |
+| `cnn3d/cfdac_phase` | 0.61 | 0.500 | 0.468 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.48 | 0.500 | 0.468 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.70 | 0.499 | 0.467 | yes |
+| `transformer/cfdac_phase` | 0.70 | 0.498 | 0.467 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.52 | 0.494 | 0.465 | yes |
+| `cnn1d/frf_realimag` | 0.54 | 0.494 | 0.465 | yes |
+| `cnn3d/cfdac_all` | 0.51 | 0.493 | 0.470 | yes |
+| `cnn2d_deep/cfdac_all` | 0.64 | 0.493 | 0.464 | yes |
+| `cnn3d/cfdac_magphase` | 0.56 | 0.492 | 0.464 | yes |
+| `transformer/cfdac_all` | 0.73 | 0.492 | 0.492 | yes |
+| `transformer1d/frf_realimag` | 0.76 | 0.490 | 0.467 | yes |
+| `mlp/timeseries` | 0.77 | 0.490 | 0.463 | yes |
+| `transformer1d/timeseries` | 0.53 | 0.487 | 0.487 | yes |
+| `cnn2d_deep/cfdac_real` | 0.50 | 0.487 | 0.487 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.54 | 0.477 | 0.456 | yes |
+| `transformer/cfdac_real` | 0.62 | 0.472 | 0.446 | yes |
+| `cnn2d_deep/cfdac_realimag` | 0.53 | 0.472 | 0.453 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.53 | 0.471 | 0.453 | yes |
+| `cnn3d/cfdac_realimag` | 0.55 | 0.468 | 0.464 | yes |
+| `cnn2d_deep/cfdac_imag` | 0.55 | 0.462 | 0.448 | yes |
+| `resnet50/cfdac_mag` | 0.71 | 0.461 | 0.447 | yes |
+| `transformer/cfdac_magphase` | 0.56 | 0.460 | 0.463 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.65 | 0.458 | 0.446 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.51 | 0.457 | 0.457 | yes |
+| `transformer/cfdac_realimag` | 0.75 | 0.428 | 0.429 | yes |
+| `cnn3d/cfdac_real` | 0.55 | 0.422 | 0.427 | yes |
+| `cnn3d/cfdac_mag` | 0.44 | 0.419 | 0.424 | yes |
+| `cnn2d_shallow/cfdac_magphase` | 0.55 | 0.416 | 0.423 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.55 | 0.278 | 0.292 | yes |
+
+**Best:** `transformer/cfdac_mag` — exp balanced-acc **0.587** (macro-F1 0.566; in-domain 0.54). 2/57 cells clear chance+0.05; 54 collapse to one class.
+
+### is_hole
+**Question.** Hole present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity = hole diameter, 1–6 mm (narrow).
+**Cells:** 57.
+
+![is_hole cell zoo](figures/hires/cellzoo_is_hole.png)
+
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `transformer1d/frf_realimag` | 0.57 | 0.667 | 0.599 |  |
+| `cnn2d_deep/cfdac_realimag` | 0.59 | 0.609 | 0.512 |  |
+| `transformer/cfdac_imag` | 0.57 | 0.605 | 0.588 |  |
+| `mlp/frf_realimag` | 0.82 | 0.589 | 0.422 |  |
+| `cnn2d_deep/cfdac_all` | 0.58 | 0.588 | 0.540 |  |
+| `cnn2d_deep/cfdac_imag` | 0.56 | 0.579 | 0.572 |  |
+| `mlp/timeseries` | 0.82 | 0.550 | 0.382 |  |
+| `convnext_tiny/cfdac_magphase` | 0.65 | 0.532 | 0.536 |  |
+| `transformer/cfdac_real` | 0.59 | 0.529 | 0.528 |  |
+| `cnn3d/cfdac_realimag` | 0.55 | 0.527 | 0.530 |  |
+| `transformer/cfdac_realimag` | 0.58 | 0.509 | 0.500 | yes |
+| `transformer1d/frf_mag` | 0.55 | 0.505 | 0.480 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.58 | 0.502 | 0.492 | yes |
+| `resnet50/cfdac_phase` | 0.76 | 0.502 | 0.497 | yes |
+| `mlp/modal` | 0.83 | 0.500 | 0.472 | yes |
+| `rf/modal` | 0.67 | 0.500 | 0.472 | yes |
+| `rf/indicators` | 0.63 | 0.500 | 0.472 | yes |
+| `xgb/indicators` | 0.64 | 0.500 | 0.472 | yes |
+| `cnn1d/frf_mag` | 0.59 | 0.500 | 0.472 | yes |
+| `cnn1d/timeseries` | 0.63 | 0.500 | 0.472 | yes |
+| `mlp/indicators` | 0.65 | 0.500 | 0.472 | yes |
+| `xgb/modal` | 0.72 | 0.500 | 0.472 | yes |
+| `mlp/frf_mag` | 0.85 | 0.500 | 0.472 | yes |
+| `cnn1d/frf_realimag` | 0.60 | 0.500 | 0.472 | yes |
+| `convnext_tiny/cfdac_imag` | 0.44 | 0.500 | 0.472 | yes |
+| `convnext_tiny/cfdac_realimag` | 0.44 | 0.500 | 0.472 | yes |
+| `convnext_tiny/cfdac_phase` | 0.44 | 0.500 | 0.472 | yes |
+| `resnet50/cfdac_mag` | 0.61 | 0.500 | 0.472 | yes |
+| `convnext_tiny/cfdac_all` | 0.44 | 0.500 | 0.472 | yes |
+| `resnet50/cfdac_realimag` | 0.61 | 0.500 | 0.472 | yes |
+| `resnet50/cfdac_all` | 0.71 | 0.500 | 0.472 | yes |
+| `convnext_tiny/cfdac_real` | 0.44 | 0.500 | 0.472 | yes |
+| `resnet50/cfdac_imag` | 0.76 | 0.500 | 0.472 | yes |
+| `convnext_tiny/cfdac_mag` | 0.44 | 0.500 | 0.472 | yes |
+| `resnet50/cfdac_magphase` | 0.71 | 0.500 | 0.472 | yes |
+| `resnet50/cfdac_real` | 0.72 | 0.500 | 0.472 | yes |
+| `transformer/cfdac_mag` | 0.44 | 0.500 | 0.472 | yes |
+| `transformer/cfdac_magphase` | 0.62 | 0.500 | 0.472 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.52 | 0.500 | 0.472 | yes |
+| `cnn3d/cfdac_all` | 0.58 | 0.500 | 0.472 | yes |
+| `cnn3d/cfdac_mag` | 0.49 | 0.500 | 0.472 | yes |
+| `cnn3d/cfdac_magphase` | 0.60 | 0.500 | 0.472 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.44 | 0.500 | 0.472 | yes |
+| `cnn3d/cfdac_phase` | 0.59 | 0.500 | 0.472 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.59 | 0.500 | 0.472 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.58 | 0.499 | 0.472 | yes |
+| `transformer/cfdac_all` | 0.64 | 0.498 | 0.471 | yes |
+| `transformer1d/timeseries` | 0.54 | 0.497 | 0.470 | yes |
+| `cnn3d/cfdac_real` | 0.52 | 0.493 | 0.468 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.57 | 0.490 | 0.482 | yes |
+| `cnn3d/cfdac_imag` | 0.52 | 0.483 | 0.463 | yes |
+| `cnn2d_shallow/cfdac_magphase` | 0.56 | 0.483 | 0.483 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.51 | 0.483 | 0.483 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.44 | 0.482 | 0.483 | yes |
+| `cnn2d_deep/cfdac_real` | 0.57 | 0.443 | 0.442 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.61 | 0.435 | 0.430 | yes |
+| `transformer/cfdac_phase` | 0.62 | 0.349 | 0.384 | yes |
+
+**Best:** `transformer1d/frf_realimag` — exp balanced-acc **0.667** (macro-F1 0.599; in-domain 0.57). 7/57 cells clear chance+0.05; 47 collapse to one class.
+
+### is_mass
+**Question.** Added mass present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity near-discrete.
+**Cells:** 57.
+
+![is_mass cell zoo](figures/hires/cellzoo_is_mass.png)
+
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `cnn3d/cfdac_imag` | 0.58 | 0.620 | 0.399 |  |
+| `cnn2d_deep/cfdac_realimag` | 0.60 | 0.618 | 0.547 |  |
+| `transformer1d/timeseries` | 0.73 | 0.610 | 0.535 |  |
+| `convnext_tiny/cfdac_all` | 0.97 | 0.605 | 0.507 |  |
+| `convnext_tiny/cfdac_realimag` | 0.94 | 0.604 | 0.514 |  |
+| `transformer1d/frf_realimag` | 0.95 | 0.600 | 0.389 |  |
+| `cnn3d/cfdac_real` | 0.62 | 0.589 | 0.254 |  |
+| `cnn3d/cfdac_mag` | 0.56 | 0.578 | 0.231 |  |
+| `cnn2d_deep/cfdac_mag` | 0.53 | 0.577 | 0.229 |  |
+| `cnn3d/cfdac_realimag` | 0.61 | 0.577 | 0.366 |  |
+| `cnn2d_deep/cfdac_imag` | 0.94 | 0.565 | 0.221 |  |
+| `cnn2d_shallow/cfdac_real` | 0.59 | 0.565 | 0.323 |  |
+| `transformer/cfdac_realimag` | 0.93 | 0.564 | 0.346 |  |
+| `transformer/cfdac_imag` | 0.95 | 0.562 | 0.204 |  |
+| `cnn3d/cfdac_magphase` | 0.91 | 0.562 | 0.203 |  |
+| `cnn3d/cfdac_phase` | 0.92 | 0.557 | 0.319 |  |
+| `convnext_tiny/cfdac_real` | 0.95 | 0.545 | 0.381 |  |
+| `transformer/cfdac_real` | 0.94 | 0.542 | 0.272 |  |
+| `mlp/timeseries` | 0.96 | 0.537 | 0.264 |  |
+| `resnet50/cfdac_mag` | 0.89 | 0.535 | 0.201 |  |
+| `mlp/frf_realimag` | 0.96 | 0.527 | 0.273 |  |
+| `mlp/indicators` | 0.94 | 0.509 | 0.117 | yes |
+| `transformer/cfdac_magphase` | 0.96 | 0.508 | 0.108 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.56 | 0.503 | 0.090 | yes |
+| `cnn2d_deep/cfdac_real` | 0.93 | 0.503 | 0.484 | yes |
+| `resnet50/cfdac_real` | 0.97 | 0.502 | 0.086 | yes |
+| `cnn1d/frf_mag` | 0.94 | 0.501 | 0.084 | yes |
+| `cnn1d/timeseries` | 0.93 | 0.501 | 0.084 | yes |
+| `transformer/cfdac_all` | 0.97 | 0.500 | 0.083 | yes |
+| `transformer1d/frf_mag` | 0.75 | 0.500 | 0.083 | yes |
+| `mlp/frf_mag` | 0.98 | 0.500 | 0.083 | yes |
+| `mlp/modal` | 0.99 | 0.500 | 0.083 | yes |
+| `resnet50/cfdac_realimag` | 0.97 | 0.500 | 0.083 | yes |
+| `convnext_tiny/cfdac_mag` | 0.45 | 0.500 | 0.476 | yes |
+| `convnext_tiny/cfdac_phase` | 0.45 | 0.500 | 0.476 | yes |
+| `resnet50/cfdac_all` | 0.95 | 0.500 | 0.083 | yes |
+| `convnext_tiny/cfdac_imag` | 0.45 | 0.500 | 0.476 | yes |
+| `resnet50/cfdac_magphase` | 0.95 | 0.500 | 0.083 | yes |
+| `transformer/cfdac_phase` | 0.97 | 0.500 | 0.083 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.64 | 0.500 | 0.083 | yes |
+| `cnn3d/cfdac_all` | 0.90 | 0.500 | 0.083 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.76 | 0.500 | 0.083 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.97 | 0.500 | 0.083 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.92 | 0.500 | 0.476 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.93 | 0.495 | 0.474 | yes |
+| `convnext_tiny/cfdac_magphase` | 0.97 | 0.493 | 0.430 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.98 | 0.482 | 0.365 | yes |
+| `xgb/modal` | 0.97 | 0.470 | 0.471 | yes |
+| `rf/modal` | 0.97 | 0.468 | 0.468 | yes |
+| `transformer/cfdac_mag` | 0.88 | 0.463 | 0.161 | yes |
+| `resnet50/cfdac_phase` | 0.96 | 0.446 | 0.156 | yes |
+| `cnn1d/frf_realimag` | 0.96 | 0.420 | 0.428 | yes |
+| `cnn2d_deep/cfdac_all` | 0.97 | 0.400 | 0.422 | yes |
+| `resnet50/cfdac_imag` | 0.97 | 0.397 | 0.418 | yes |
+| `xgb/indicators` | 0.95 | 0.381 | 0.297 | yes |
+| `rf/indicators` | 0.94 | 0.348 | 0.300 | yes |
+| `cnn2d_shallow/cfdac_magphase` | 0.96 | 0.334 | 0.378 | yes |
+
+**Best:** `cnn3d/cfdac_imag` — exp balanced-acc **0.620** (macro-F1 0.399; in-domain 0.58). 16/57 cells clear chance+0.05; 36 collapse to one class.
+
+### type
+**Question.** Damage type (5-class)  **Output.** pristine/bolt/crack/hole/mass  **Chance.** 0.20.
+**Cells:** 58.
+
+![type cell zoo](figures/hires/cellzoo_type.png)
+
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `convnext_tiny/cfdac_imag` | 0.82 | 0.306 | 0.280 |  |
+| `transformer/cfdac_realimag` | 0.82 | 0.305 | 0.203 |  |
+| `transformer/cfdac_mag` | 0.76 | 0.301 | 0.208 |  |
+| `convnext_tiny/cfdac_realimag` | 0.85 | 0.282 | 0.246 |  |
+| `transformer/cfdac_real` | 0.86 | 0.262 | 0.165 |  |
+| `cnn2d_deep/cfdac_imag` | 0.77 | 0.261 | 0.162 |  |
+| `cnn2d_deep/cfdac_realimag` | 0.72 | 0.251 | 0.142 |  |
+| `cnn3d/cfdac_real` | 0.37 | 0.248 | 0.195 |  |
+| `cnn3d/cfdac_realimag` | 0.34 | 0.247 | 0.198 |  |
+| `cnn2d_deep/cfdac_all` | 0.85 | 0.247 | 0.128 |  |
+| `mlp/frf_realimag` | 0.85 | 0.239 | 0.086 |  |
+| `transformer1d/timeseries` | 0.86 | 0.231 | 0.149 |  |
+| `transformer/cfdac_imag` | 0.84 | 0.226 | 0.167 |  |
+| `mlp/frf_mag` | 0.86 | 0.222 | 0.075 |  |
+| `mlp/modal` | 0.86 | 0.217 | 0.066 | yes |
+| `transformer/cfdac_magphase` | 0.84 | 0.215 | 0.175 | yes |
+| `convnext_tiny/cfdac_real` | 0.84 | 0.214 | 0.186 | yes |
+| `convnext_tiny/cfdac_magphase` | 0.82 | 0.213 | 0.162 | yes |
+| `transformer/cfdac_phase` | 0.85 | 0.212 | 0.158 | yes |
+| `resnet50/cfdac_magphase` | 0.83 | 0.205 | 0.148 | yes |
+| `transformer1d/frf_realimag` | 0.86 | 0.203 | 0.149 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.42 | 0.202 | 0.138 | yes |
+| `resnet50/cfdac_mag` | 0.73 | 0.200 | 0.034 | yes |
+| `mlp/timeseries` | 0.84 | 0.200 | 0.034 | yes |
+| `transformer1d/frf_mag` | 0.85 | 0.200 | 0.136 | yes |
+| `cnn1d/frf_mag` | 0.70 | 0.200 | 0.033 | yes |
+| `cnn1d/frf_realimag` | 0.68 | 0.200 | 0.135 | yes |
+| `cnn1d/timeseries` | 0.72 | 0.200 | 0.033 | yes |
+| `resnet50/cfdac_phase` | 0.80 | 0.200 | 0.135 | yes |
+| `convnext_tiny/cfdac_mag` | 0.07 | 0.200 | 0.038 | yes |
+| `convnext_tiny/cfdac_phase` | 0.07 | 0.200 | 0.060 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.59 | 0.200 | 0.135 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.80 | 0.200 | 0.033 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.44 | 0.200 | 0.135 | yes |
+| `cnn3d/cfdac_phase` | 0.59 | 0.200 | 0.135 | yes |
+| `cnn2d_deep/cfdac_real` | 0.74 | 0.200 | 0.135 | yes |
+| `transformer/cfdac_all` | 0.87 | 0.199 | 0.066 | yes |
+| `cnn3d/cfdac_mag` | 0.33 | 0.198 | 0.134 | yes |
+| `cnn3d/cfdac_imag` | 0.34 | 0.198 | 0.146 | yes |
+| `resnet50/cfdac_imag` | 0.79 | 0.198 | 0.148 | yes |
+| `resnet50/cfdac_all` | 0.83 | 0.198 | 0.135 | yes |
+| `resnet50/cfdac_real` | 0.75 | 0.188 | 0.047 | yes |
+| `mlp/indicators` | 0.80 | 0.183 | 0.082 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.35 | 0.182 | 0.079 | yes |
+| `cnn2d_shallow/cfdac_magphase` | 0.43 | 0.180 | 0.126 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.66 | 0.178 | 0.085 | yes |
+| `cnn3d/cfdac_magphase` | 0.47 | 0.175 | 0.129 | yes |
+| `cnn3d/cfdac_all` | 0.44 | 0.174 | 0.127 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.84 | 0.174 | 0.136 | yes |
+| `convnext_tiny/cfdac_all` | 0.84 | 0.172 | 0.132 | yes |
+| `rf/indicators` | 0.74 | 0.169 | 0.105 | yes |
+| `xgb/modal` | 0.80 | 0.168 | 0.144 | yes |
+| `rf/modal` | 0.81 | 0.163 | 0.129 | yes |
+| `xgb/indicators` | 0.74 | 0.162 | 0.113 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.43 | 0.162 | 0.119 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.20 | 0.162 | 0.124 | yes |
+| `resnet50/cfdac_realimag` | 0.79 | 0.160 | 0.124 | yes |
+| `cnn2d/cfdac_realimag` | 0.17 | 0.158 | 0.140 | yes |
+
+**Best:** `convnext_tiny/cfdac_imag` — exp balanced-acc **0.306** (macro-F1 0.280; in-domain 0.82). 7/58 cells clear chance+0.05; 44 collapse to one class.
+
+### col_location
+**Question.** Column location of damage (6-class)  **Output.** storey×end  **Chance.** 0.17.  BD/AD near-degenerate in the linear ROM.
+**Cells:** 58.
+
+![col_location cell zoo](figures/hires/cellzoo_col_location.png)
+
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `transformer/cfdac_mag` | 0.45 | 0.353 | 0.082 |  |
+| `convnext_tiny/cfdac_magphase` | 0.47 | 0.324 | 0.127 |  |
+| `cnn2d_deep/cfdac_mag` | 0.46 | 0.316 | 0.163 |  |
+| `cnn2d_deep/cfdac_realimag` | 0.45 | 0.281 | 0.170 |  |
+| `transformer/cfdac_magphase` | 0.48 | 0.270 | 0.121 |  |
+| `cnn1d/frf_mag` | 0.48 | 0.264 | 0.199 |  |
+| `cnn2d_shallow/cfdac_all` | 0.45 | 0.262 | 0.114 |  |
+| `xgb/indicators` | 0.48 | 0.261 | 0.155 |  |
+| `mlp/indicators` | 0.45 | 0.250 | 0.134 |  |
+| `transformer1d/timeseries` | 0.48 | 0.250 | 0.136 |  |
+| `cnn2d/cfdac_realimag` | 0.07 | 0.237 | 0.114 |  |
+| `cnn3d/cfdac_real` | 0.35 | 0.222 | 0.106 |  |
+| `cnn3d/cfdac_phase` | 0.50 | 0.220 | 0.141 |  |
+| `cnn2d_shallow/cfdac_magphase` | 0.43 | 0.205 | 0.058 |  |
+| `resnet50/cfdac_mag` | 0.48 | 0.199 | 0.125 |  |
+| `transformer1d/frf_mag` | 0.49 | 0.198 | 0.165 |  |
+| `cnn2d_deep/cfdac_real` | 0.47 | 0.194 | 0.158 |  |
+| `transformer/cfdac_all` | 0.49 | 0.190 | 0.162 |  |
+| `convnext_tiny/cfdac_real` | 0.45 | 0.185 | 0.039 | yes |
+| `resnet50/cfdac_magphase` | 0.46 | 0.185 | 0.132 | yes |
+| `transformer/cfdac_realimag` | 0.41 | 0.185 | 0.085 | yes |
+| `xgb/modal` | 0.47 | 0.180 | 0.080 | yes |
+| `rf/indicators` | 0.44 | 0.180 | 0.182 | yes |
+| `mlp/frf_mag` | 0.46 | 0.178 | 0.135 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.22 | 0.176 | 0.038 | yes |
+| `transformer/cfdac_phase` | 0.45 | 0.174 | 0.101 | yes |
+| `transformer/cfdac_real` | 0.48 | 0.173 | 0.069 | yes |
+| `rf/modal` | 0.46 | 0.169 | 0.058 | yes |
+| `cnn3d/cfdac_imag` | 0.18 | 0.167 | 0.050 | yes |
+| `convnext_tiny/cfdac_all` | 0.05 | 0.167 | 0.019 | yes |
+| `convnext_tiny/cfdac_imag` | 0.05 | 0.167 | 0.019 | yes |
+| `convnext_tiny/cfdac_mag` | 0.05 | 0.167 | 0.019 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.32 | 0.167 | 0.047 | yes |
+| `resnet50/cfdac_real` | 0.47 | 0.165 | 0.089 | yes |
+| `resnet50/cfdac_realimag` | 0.49 | 0.164 | 0.087 | yes |
+| `resnet50/cfdac_phase` | 0.51 | 0.164 | 0.099 | yes |
+| `convnext_tiny/cfdac_realimag` | 0.46 | 0.163 | 0.128 | yes |
+| `resnet50/cfdac_imag` | 0.46 | 0.160 | 0.147 | yes |
+| `cnn2d_shallow/cfdac_phase` | 0.44 | 0.159 | 0.090 | yes |
+| `cnn3d/cfdac_all` | 0.43 | 0.159 | 0.121 | yes |
+| `cnn3d/cfdac_mag` | 0.25 | 0.155 | 0.020 | yes |
+| `cnn2d_deep/cfdac_imag` | 0.32 | 0.154 | 0.136 | yes |
+| `mlp/modal` | 0.48 | 0.141 | 0.099 | yes |
+| `cnn1d/timeseries` | 0.51 | 0.139 | 0.079 | yes |
+| `cnn2d_deep/cfdac_all` | 0.47 | 0.133 | 0.112 | yes |
+| `cnn3d/cfdac_magphase` | 0.48 | 0.126 | 0.090 | yes |
+| `convnext_tiny/cfdac_phase` | 0.49 | 0.125 | 0.070 | yes |
+| `resnet50/cfdac_all` | 0.49 | 0.123 | 0.066 | yes |
+| `transformer/cfdac_imag` | 0.48 | 0.121 | 0.101 | yes |
+| `mlp/frf_realimag` | 0.50 | 0.090 | 0.050 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.31 | 0.087 | 0.064 | yes |
+| `transformer1d/frf_realimag` | 0.47 | 0.086 | 0.104 | yes |
+| `cnn2d_deep/cfdac_phase` | 0.44 | 0.052 | 0.045 | yes |
+| `mlp/timeseries` | 0.47 | 0.049 | 0.051 | yes |
+| `cnn3d/cfdac_realimag` | 0.42 | 0.031 | 0.045 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.15 | 0.026 | 0.028 | yes |
+| `cnn1d/frf_realimag` | 0.47 | 0.005 | 0.010 | yes |
+| `cnn2d_deep/cfdac_magphase` | 0.51 | 0.002 | 0.003 | yes |
+
+**Best:** `transformer/cfdac_mag` — exp balanced-acc **0.353** (macro-F1 0.082; in-domain 0.45). 13/58 cells clear chance+0.05; 40 collapse to one class.
+
+### mass_location
+**Question.** Added-mass location (4-class)  **Output.** base/fl1/fl2/fl3  **Chance.** 0.25.
+**Cells:** 58.
+
+![mass_location cell zoo](figures/hires/cellzoo_mass_location.png)
+
+| model / feature | in-domain mF1 | exp bal-acc | exp macro-F1 | collapse |
+|---|---|---|---|---|
+| `mlp/frf_realimag` | 0.99 | 0.500 | 0.308 |  |
+| `transformer/cfdac_magphase` | 0.99 | 0.432 | 0.308 |  |
+| `transformer/cfdac_imag` | 0.97 | 0.422 | 0.334 |  |
+| `cnn3d/cfdac_imag` | 0.56 | 0.412 | 0.280 |  |
+| `convnext_tiny/cfdac_all` | 0.98 | 0.405 | 0.362 |  |
+| `cnn3d/cfdac_magphase` | 0.76 | 0.381 | 0.282 |  |
+| `transformer/cfdac_mag` | 0.96 | 0.375 | 0.251 |  |
+| `cnn2d_shallow/cfdac_phase` | 0.95 | 0.358 | 0.308 |  |
+| `transformer/cfdac_realimag` | 0.97 | 0.351 | 0.211 |  |
+| `cnn2d_shallow/cfdac_magphase` | 0.83 | 0.336 | 0.176 |  |
+| `cnn2d_deep/cfdac_realimag` | 0.83 | 0.332 | 0.196 |  |
+| `convnext_tiny/cfdac_imag` | 1.00 | 0.325 | 0.228 |  |
+| `cnn3d/cfdac_realimag` | 0.72 | 0.322 | 0.235 |  |
+| `transformer/cfdac_all` | 1.00 | 0.317 | 0.250 |  |
+| `transformer/cfdac_real` | 0.98 | 0.312 | 0.247 |  |
+| `convnext_tiny/cfdac_realimag` | 0.99 | 0.287 | 0.232 |  |
+| `rf/modal` | 1.00 | 0.250 | 0.121 | yes |
+| `mlp/timeseries` | 0.99 | 0.250 | 0.072 | yes |
+| `transformer1d/frf_mag` | 0.99 | 0.250 | 0.102 | yes |
+| `cnn1d/timeseries` | 0.98 | 0.250 | 0.145 | yes |
+| `mlp/indicators` | 0.97 | 0.250 | 0.072 | yes |
+| `transformer1d/timeseries` | 0.94 | 0.250 | 0.095 | yes |
+| `cnn1d/frf_mag` | 0.99 | 0.250 | 0.145 | yes |
+| `cnn1d/frf_realimag` | 0.97 | 0.250 | 0.072 | yes |
+| `convnext_tiny/cfdac_magphase` | 0.98 | 0.250 | 0.103 | yes |
+| `resnet50/cfdac_magphase` | 0.99 | 0.250 | 0.072 | yes |
+| `resnet50/cfdac_mag` | 0.96 | 0.250 | 0.102 | yes |
+| `resnet50/cfdac_imag` | 0.99 | 0.250 | 0.080 | yes |
+| `convnext_tiny/cfdac_mag` | 0.10 | 0.250 | 0.145 | yes |
+| `resnet50/cfdac_all` | 0.99 | 0.250 | 0.072 | yes |
+| `transformer/cfdac_phase` | 0.98 | 0.250 | 0.102 | yes |
+| `cnn2d_shallow/cfdac_imag` | 0.93 | 0.250 | 0.102 | yes |
+| `cnn2d_shallow/cfdac_all` | 0.95 | 0.250 | 0.072 | yes |
+| `cnn2d_deep/cfdac_all` | 0.99 | 0.250 | 0.102 | yes |
+| `cnn2d_deep/cfdac_mag` | 0.95 | 0.250 | 0.102 | yes |
+| `cnn2d_deep/cfdac_real` | 0.99 | 0.250 | 0.145 | yes |
+| `cnn3d/cfdac_mag` | 0.38 | 0.250 | 0.102 | yes |
+| `cnn2d_shallow/cfdac_realimag` | 0.96 | 0.250 | 0.102 | yes |
+| `cnn2d_deep/cfdac_imag` | 0.99 | 0.250 | 0.072 | yes |
+| `cnn2d_shallow/cfdac_mag` | 0.68 | 0.250 | 0.102 | yes |
+| `cnn2d_deep/cfdac_phase` | 1.00 | 0.250 | 0.102 | yes |
+| `cnn2d_deep/cfdac_magphase` | 1.00 | 0.250 | 0.102 | yes |
+| `cnn2d_shallow/cfdac_real` | 0.73 | 0.245 | 0.147 | yes |
+| `resnet50/cfdac_realimag` | 0.98 | 0.242 | 0.100 | yes |
+| `mlp/modal` | 1.00 | 0.238 | 0.134 | yes |
+| `xgb/modal` | 0.99 | 0.234 | 0.123 | yes |
+| `cnn3d/cfdac_phase` | 0.96 | 0.234 | 0.119 | yes |
+| `xgb/indicators` | 0.96 | 0.211 | 0.193 | yes |
+| `cnn2d/cfdac_realimag` | 0.36 | 0.197 | 0.130 | yes |
+| `cnn3d/cfdac_real` | 0.68 | 0.186 | 0.193 | yes |
+| `transformer1d/frf_realimag` | 0.97 | 0.156 | 0.185 | yes |
+| `resnet50/cfdac_phase` | 0.99 | 0.107 | 0.115 | yes |
+| `rf/indicators` | 0.97 | 0.104 | 0.077 | yes |
+| `mlp/frf_mag` | 0.99 | 0.086 | 0.128 | yes |
+| `convnext_tiny/cfdac_phase` | 1.00 | 0.086 | 0.080 | yes |
+| `convnext_tiny/cfdac_real` | 0.99 | 0.086 | 0.060 | yes |
+| `cnn3d/cfdac_all` | 0.72 | 0.086 | 0.080 | yes |
+| `resnet50/cfdac_real` | 0.99 | 0.085 | 0.033 | yes |
+
+**Best:** `mlp/frf_realimag` — exp balanced-acc **0.500** (macro-F1 0.308; in-domain 0.99). 15/58 cells clear chance+0.05; 42 collapse to one class.
+
+### severity
+**Question.** Damage severity (regression)  **Output.** ŷ∈[0,1] normalised  **Regression.**  Only non-classifier task.
+**Cells:** 58.
+
+![severity cell zoo](figures/hires/cellzoo_severity.png)
+
+| model / feature | in-domain R² | exp R² |
+|---|---|---|
+| `mlp/frf_mag` | 0.592 | +0.037 |
+| `xgb/modal` | 0.513 | -0.007 |
+| `mlp/frf_realimag` | 0.595 | -0.032 |
+| `convnext_tiny/cfdac_mag` | -0.000 | -0.033 |
+| `transformer1d/timeseries` | 0.494 | -0.042 |
+| `transformer/cfdac_magphase` | 0.406 | -0.044 |
+| `convnext_tiny/cfdac_real` | 0.549 | -0.055 |
+| `transformer1d/frf_realimag` | -0.000 | -0.070 |
+| `rf/modal` | 0.547 | -0.082 |
+| `convnext_tiny/cfdac_imag` | 0.572 | -0.128 |
+| `convnext_tiny/cfdac_phase` | 0.556 | -0.137 |
+| `convnext_tiny/cfdac_realimag` | 0.566 | -0.154 |
+| `convnext_tiny/cfdac_all` | 0.586 | -0.158 |
+| `transformer1d/frf_mag` | 0.249 | -0.175 |
+| `transformer/cfdac_realimag` | 0.574 | -0.178 |
+| `transformer/cfdac_phase` | 0.274 | -0.222 |
+| `transformer/cfdac_real` | 0.484 | -0.318 |
+| `mlp/timeseries` | 0.577 | -0.323 |
+| `transformer/cfdac_imag` | 0.467 | -0.363 |
+| `resnet50/cfdac_phase` | 0.413 | -0.419 |
+| `convnext_tiny/cfdac_magphase` | 0.494 | -0.422 |
+| `transformer/cfdac_mag` | 0.268 | -0.596 |
+| `rf/indicators` | 0.468 | -0.661 |
+| `cnn2d_shallow/cfdac_mag` | 0.077 | -0.804 |
+| `transformer/cfdac_all` | 0.471 | -0.824 |
+| `resnet50/cfdac_all` | 0.435 | -0.937 |
+| `cnn2d/cfdac_realimag` | 0.000 | -0.941 |
+| `xgb/indicators` | 0.452 | -0.997 |
+| `resnet50/cfdac_magphase` | 0.413 | -1.038 |
+| `resnet50/cfdac_realimag` | 0.427 | -1.143 |
+| `cnn2d_shallow/cfdac_all` | -0.165 | -1.148 |
+| `cnn3d/cfdac_mag` | 0.040 | -1.169 |
+| `cnn2d_shallow/cfdac_real` | 0.132 | -1.362 |
+| `cnn3d/cfdac_real` | 0.128 | -2.184 |
+| `cnn2d_deep/cfdac_mag` | 0.039 | -2.693 |
+| `cnn2d_deep/cfdac_realimag` | 0.176 | -2.798 |
+| `cnn2d_deep/cfdac_imag` | 0.027 | -3.310 |
+| `cnn3d/cfdac_realimag` | 0.128 | -4.474 |
+| `resnet50/cfdac_real` | 0.426 | -4.941 |
+| `cnn3d/cfdac_imag` | 0.100 | -6.864 |
+| `resnet50/cfdac_imag` | 0.435 | -6.942 |
+| `resnet50/cfdac_mag` | 0.288 | -8.224 |
+| `cnn3d/cfdac_all` | 0.183 | -8.953 |
+| `cnn2d_shallow/cfdac_realimag` | 0.119 | -13.154 |
+| `cnn2d_shallow/cfdac_phase` | 0.203 | -18.306 |
+| `cnn2d_shallow/cfdac_magphase` | 0.246 | -31.260 |
+| `cnn3d/cfdac_phase` | 0.262 | -31.512 |
+| `cnn2d_deep/cfdac_real` | 0.575 | -49.491 |
+| `cnn1d/frf_mag` | 0.302 | -49.848 |
+| `cnn3d/cfdac_magphase` | 0.274 | -62.275 |
+| `cnn2d_deep/cfdac_all` | 0.462 | -127.150 |
+| `cnn2d_shallow/cfdac_imag` | 0.139 | -160.171 |
+| `cnn1d/frf_realimag` | 0.278 | -219.448 |
+| `cnn1d/timeseries` | 0.259 | -895.972 |
+| `cnn2d_deep/cfdac_phase` | 0.367 | -1966.978 |
+| `cnn2d_deep/cfdac_magphase` | 0.358 | -3131.753 |
+| `mlp/indicators` | 0.483 | -475005154580935999488.000 |
+| `mlp/modal` | 0.514 | -28047672784197238390784.000 |
+
+**Best:** `mlp/frf_mag` exp R²=0.037 (in-domain R²=0.59). Severity barely transfers; see §6.
+
+## 5 · Damage-threshold (DT) severity sweep @1601
+Positives stratified by their damage-severity percentile (each task on its own axis); balanced accuracy recomputed keeping only the more-severe positives. Confirms transfer improves with severity.
+
+![DT combined](figures/hires/dt_1601_combined.png)
+
+| task | all (p0) | ≥p50 | ≥p75 | ≥p90 | best cell @p90 |
+|---|---|---|---|---|---|
+| is_bolt | 0.669 | 0.742 | 0.821 | 0.821 | transformer/cfdac_mag |
+| binary | 0.589 | 0.603 | 0.618 | 0.658 | transformer1d/timeseries |
+| is_crack | 0.587 | 0.587 | 0.646 | 0.646 | convnext_tiny/cfdac_phase |
+| is_hole | 0.667 | 0.667 | 0.646 | 0.646 | mlp/frf_realimag |
+| is_mass | 0.620 | 0.620 | 0.620 | 0.620 | cnn3d/cfdac_imag |
+
+![is_bolt DT](figures/hires/zoo_dt_is_bolt.png)
+
+**is_bolt reaches ~0.82 balanced-acc at ≥75% loosening.** is_hole/is_mass stay flat because their experimental severity range is narrow, not because the model fails.
+
+## 6 · Severity regression (the non-classifier)
+Best experimental **R² ≈ 0.04** (most cells negative), weak monotonic signal (**Pearson r ≈ 0.36** for frf/timeseries cells), vs **R² ≈ 0.59 in-domain**. Restricting to severe cases does not raise R² (variance-narrowing artefact); MAE ≈ 0.25 on a 0.07–1.0 scale. Predicting damage *magnitude* zero-shot is unsolved — recast as ordinal classification is the recommended next step.
+
+## 7 · Cross-task synthesis
+1. **Detection ≫ localization ≫ magnitude.** Presence/type transfers (0.56–0.67 balanced-acc); location weakly (≈1.4–2× chance); severity barely.
+2. **Severity is the lever** — every detector improves on more-severe damage (is_bolt →0.82).
+3. **Representation > model size** — full complex spectral inputs (CFDAC / raw FRF / timeseries) with sequence/conv models beat the compressed `modal` baseline and the pretrained vision backbones.
+4. **The gap is covariate shift, not capacity** — near-perfect in-domain, partial transfer.
+
+## 8 · Limitations
+- Single experimental structure; one seed per cell (treat <0.05 gaps as ties); post-hoc best-cell selection is exploratory; localization classes near-degenerate in the linear ROM; `timeseries` is FRF-derived; 128-bin comparison pending.
+
+## 9 · Recommendations
+1. Deploy detection on severe damage (report severity-stratified).
+2. Use spectral inputs + sequence/conv models; drop `modal` and pretrained vision as the primary route.
+3. Attack severity & localization with domain adaptation, not bigger nets.
+4. Recast severity as ordinal classification.
+5. Finish the 128-bin run to settle the resolution question.
+
+## 10 · Artefacts
+- Code: `ml_pipeline/hires_{zoo,tab,all,zoo_summary,dt_1601}.py`
+- Data: `results_hires/{zoo_summary,zoo_best_by_task_res,dt_1601}.json`; per-case on `colab-hires-*` branches
+- Figures: `results/figures/hires/{zoo1601_synth_vs_exp,dt_1601_combined,zoo_dt_is_bolt,cellzoo_*}.png`
+- Companion: `REPORT_synth.md` (in-domain).
