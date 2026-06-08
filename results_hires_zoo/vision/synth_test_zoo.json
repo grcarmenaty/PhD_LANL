@@ -55,5 +55,24 @@
     "synth_test_bal_acc": 0.7803015925050467,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_hole_resnet50_cfdac_mag_hires1601": {
+    "task": "is_hole",
+    "model": "resnet50",
+    "feature": "cfdac_mag",
+    "n_target": 1601,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 4000,
+    "vision_feed_size": 384,
+    "synth_val_best": 0.6520561464677936,
+    "synth_test_metric": 0.7083333333333334,
+    "synth_test_macro_f1": 0.6136737419561353,
+    "synth_test_bal_acc": 0.64128953225556,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
