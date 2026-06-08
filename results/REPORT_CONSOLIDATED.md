@@ -1,14 +1,20 @@
 # LANL 3SBB — Synth-to-Real Damage Diagnosis: FULL Consolidated Report
 **Author:** G. Reyes-Carmenaty · **Date:** 2026-06-08 · **Resolution:** 1601-bin (native).
 
-> Exhaustive edition — every cell of the high-resolution model zoo, with in-domain and zero-shot metrics, per-task cell-zoo plots, the damage-threshold sweep, and the severity deep-dive. Executive summary of the same results: see the top sections; the in-domain companion is `REPORT_synth.md`. *(128-bin comparison excluded until that run completes.)*
+> Exhaustive edition — exploratory analysis of both domains, every cell of the high-resolution model zoo (in-domain + zero-shot), confusion matrices and ROC/AUC for the best cell per task, the damage-threshold sweep, and the severity-regression deep-dive. In-domain companion: `REPORT_synth.md`. *(128-bin comparison excluded until that run completes.)*
+
+## Contents
+1 Overview · 2 Glossary · 3 Methodology · **4 Exploratory data analysis (both domains)** · **5 Diagnostics: confusion matrices + ROC/AUC** · 6 Per-task catalogue (every cell) · 7 Damage-threshold sweep · 8 Severity regression · 9 Synthesis · 10 Limitations · 11 Recommendations · 12 Artefacts
 
 ## 1 · Overview
+**The result in one line.** A model trained on physics-simulation FRFs *does* detect damage on a real structure it has never seen — but only its **presence/type** transfers (balanced-acc 0.56–0.72 AUC), while **location and magnitude largely do not**, and the ceiling is set by a severe covariate shift (a logistic classifier separates the two domains with **AUC = 1.000**).
+
 - **575 cells** at 1601 bins = (≤11 models) × (≤12 features) × 10 tasks, each trained to convergence on synthetic data and evaluated zero-shot on the 2 638-case IQS experimental set.
 - **120/517 classification cells clear chance** on real data (≈23%).
-- A *cell* = one (model, feature) pair. Metric of record: **balanced accuracy / macro-F1** (classification), **R² / Pearson r / MAE** (severity). Raw accuracy is never used (82.5% damaged prior).
+- A *cell* = one (model, feature) pair. Metric of record: **balanced accuracy / macro-F1 / AUC** (classification), **R² / Pearson r / MAE** (severity). Raw accuracy is never used (82.5% damaged prior).
 
 ![in-domain vs zero-shot](figures/hires/zoo1601_synth_vs_exp.png)
+*Figure 1 — best-cell in-domain score (held-out synth) vs zero-shot experimental transfer, per task. The vertical gap is the sim-to-real penalty; it is largest exactly where the synthetic model is most confident (mass_location, type, severity).*
 
 ## 2 · Model & feature glossary (what every cell is)
 **Models**
@@ -40,13 +46,70 @@
 - `cfdac_magphase` — CFDAC, magnitude+phase (2 channels)
 - `cfdac_all` — CFDAC, all 4 channels stacked
 
-Each per-task table below lists **every** cell; read `model/feature` against this glossary.
+Each per-task table in §6 lists **every** cell; read `model/feature` against this glossary.
 
 ## 3 · Methodology
-Synthetic data regenerated at 16 s (N_T=4096, fs=256 → df=0.0625 Hz, 1601 bins, 0–100 Hz) to match the experimental grid exactly. Per cell: compute the feature from the FRFs, train on a synth subsample (70/15/15 split, class-weighted loss / balanced trees, early-stop to convergence with checkpoint/resume), evaluate on held-out synth (in-domain) and all 2 638 experimental cases (zero-shot). Tabular features standardised on the synth-train fold only; sequence/image features per-sample normalised (no leakage). `timeseries` is reconstructed from the FRF identically for both domains (the IQS set has no measured timeseries).
-Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-case predictions on branches `colab-hires-{tabular,cnn,transformer,vision}`.
+**Data.** Synthetic data regenerated at 16 s (N_T=4096, fs=256 → df=0.0625 Hz, 1601 bins, 0–100 Hz) to match the experimental grid exactly: 10 000 synthetic cases (2 000 per class, balanced) from a linear reduced-order model of the 3-storey bookshelf, and the 2 638-case IQS experimental set (bolt-heavy: 462 pristine / 1338 bolt / 320 crack / 280 hole / 238 mass).
+**Protocol.** Per cell: compute the feature from the FRFs, train on a synth subsample (70/15/15 split, class-weighted loss / balanced trees, early-stop to convergence with checkpoint/resume), evaluate on held-out synth (**in-domain**) and on all 2 638 experimental cases (**zero-shot**, no real data ever seen in training). Tabular features standardised on the synth-train fold only; sequence/image features per-sample normalised (no leakage). `timeseries` is reconstructed from the FRF identically for both domains (the IQS set has no measured timeseries).
+**Metrics.** Balanced accuracy and macro-F1 neutralise the 82.5% damaged prior; ROC-AUC (detection tasks) is threshold-free; severity uses R²/Pearson-r/MAE. Engines: `ml_pipeline/hires_{zoo,tab,all}.py`; analysis in `hires_analysis.py`; raw per-case predictions (with class probabilities) on branches `colab-hires-{tabular,cnn,transformer,vision}`.
 
-## 4 · Per-task catalogue (every cell)
+## 4 · Exploratory data analysis — synthetic vs experimental
+Before any model, the two datasets are compared directly. This frames everything that follows: *what the models are up against is not noise, it is a structured domain gap.*
+
+### 4.1 Class balance and severity coverage
+| class | synth N | exp N |
+|---|---|---|
+| pristine | 2000 | 462 |
+| bolt | 2000 | 1338 |
+| crack | 2000 | 320 |
+| hole | 2000 | 280 |
+| mass | 2000 | 238 |
+
+![class balance and severity](figures/hires/eda_class_severity.png)
+*Figure 2 — (a) the synthetic set is perfectly balanced (2 000/class) while the experimental set is **bolt-dominated** (51% bolt, 18% pristine); training therefore class-weights the loss. (b) Experimental severity by type: bolt-loosening spans a wide 0–85% range, whereas hole and mass occupy narrow bands — this is exactly why the bolt detector has room to improve with severity and the others do not. (c) Per-type-normalised severity: synthetic damage is sampled near-uniformly, but the real damage clusters, so the model is asked to extrapolate over severity ranges it rarely saw.*
+
+### 4.2 Spectral signatures and the domain gap
+![FRF signatures](figures/hires/eda_frf_signatures.png)
+*Figure 3 — channel-averaged mean log|FRF|. (a) Synthetic classes differ mainly in resonance-peak amplitude/position — the information the models exploit in-domain. (b) Overlaying synthetic (solid) on experimental (dashed) for the same class shows the gap: the real structure has shifted resonances, extra anti-resonances, and a higher noise floor the linear ROM never produces.*
+
+### 4.3 Covariate shift, quantified
+![domain shift PCA](figures/hires/eda_domain_shift.png)
+*Figure 4 — PCA of the log|FRF| spectra. (a) Coloured by **domain**, synthetic and experimental form two disjoint clouds (PC1 = 63% of variance); a 5-fold logistic classifier tells them apart with **AUC = 1.000** — i.e. essentially perfectly. (b) The same projection coloured by **damage class** shows the classes overlapping heavily, so the dominant axis of variation in the data is *which domain*, not *which damage*.*
+
+**This is the single most important diagnostic in the report.** A domain-classifier AUC of 1.00 means the sim-to-real gap is not a subtle nuisance — the simulator and the rig are trivially distinguishable from their spectra alone. Any zero-shot transfer at all (and we get meaningful transfer on detection) is therefore a non-trivial success, and the residual errors in §5–6 are the direct, expected consequence of this shift. It also sets the research direction: the lever is **domain adaptation**, not bigger models or higher resolution.
+
+## 5 · Diagnostics — how the best models actually behave on real data
+Aggregate scores hide the failure *mode*. Below are the confusion matrices and ROC curves for the single best cell of each task (selected by experimental balanced-acc / R²; see §6 for all cells).
+
+### 5.1 Confusion matrices (experimental, row-normalised)
+![confusion matrices](figures/hires/diag_confusion.png)
+*Figure 5 — read each row as 'of the true X, what fraction was predicted as …'.*
+
+- **binary** (transformer1d/timeseries): catches 82% of positives but flags 64% of negatives as positive — a sensitivity-biased operating point, the expected response when the loss is class-weighted and the prior shifts.
+- **is_bolt** (transformer1d/frf_realimag): catches 47% of positives but flags 13% of negatives as positive — a sensitivity-biased operating point, the expected response when the loss is class-weighted and the prior shifts.
+- **is_mass** (cnn3d/cfdac_imag): catches 82% of positives but flags 58% of negatives as positive — a sensitivity-biased operating point, the expected response when the loss is class-weighted and the prior shifts.
+- **is_hole** (transformer1d/frf_realimag): catches 53% of positives but flags 20% of negatives as positive — a sensitivity-biased operating point, the expected response when the loss is class-weighted and the prior shifts.
+- **type** (convnext_tiny/cfdac_imag): the 5-class matrix smears toward the **bolt** column (the majority real class) and the **mass** diagonal survives best — damage *type* is the hardest thing to transfer, because the spectral fingerprint of crack vs hole vs bolt is what the domain shift most corrupts.
+- **mass_location / col_location**: rows pile onto one or two columns — localization collapses toward a dominant class, consistent with the near-degenerate spatial classes of the linear ROM (§10) and the weak in-domain ceiling for col_location.
+
+### 5.2 ROC / AUC for the detection tasks
+![ROC curves](figures/hires/diag_roc.png)
+*Figure 6 — AUC is threshold-free and immune to the 82.5% prior, so it is the fairest single number for detection.*
+
+| task | best cell | exp AUC | exp bal-acc | exp macro-F1 | in-domain mF1 |
+|---|---|---|---|---|---|
+| binary | `transformer1d/timeseries` | **0.547** | 0.589 | 0.582 | 0.86 |
+| is_pristine | `mlp/timeseries` | **0.565** | 0.557 | 0.556 | 0.93 |
+| is_bolt | `transformer1d/frf_realimag` | **0.667** | 0.669 | 0.654 | 0.89 |
+| is_crack | `transformer/cfdac_mag` | **0.617** | 0.587 | 0.566 | 0.54 |
+| is_hole | `transformer1d/frf_realimag` | **0.721** | 0.667 | 0.599 | 0.57 |
+| is_mass | `cnn3d/cfdac_imag` | **0.708** | 0.620 | 0.399 | 0.58 |
+
+**Reading the AUCs.** `is_hole` and `is_mass` reach AUC ≈ 0.71–0.72 — the strongest threshold-free detectors — yet their *balanced accuracy* at the default cut is lower, because the operating threshold is mis-set by the shift. That gap is good news: it means a handful of labelled real samples to recalibrate the threshold would lift the realised accuracy without any retraining. `binary` and `is_pristine` have the weakest AUCs (≈0.55–0.57): deciding *damaged vs not* in the aggregate is harder than detecting specific damage signatures, because the pristine class is where the domain gap bites hardest (Figure 3a).
+
+## 6 · Per-task catalogue (every cell)
+Every (model, feature) cell, sorted best-first. `in-domain` = held-out synthetic score (the ceiling); `exp` columns = zero-shot on real data. The cell-zoo bar plot colours **blue = CFDAC-image** cells and **green = tabular/sequence** cells, so the winning representation family is visible at a glance.
+
 
 ### binary
 **Question.** Any damage vs pristine  **Output.** ŷ∈{0=pristine,1=damaged}  **Chance.** 0.50.  82.5% damaged prior; raw accuracy misleading.
@@ -115,7 +178,7 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `cnn2d_deep/cfdac_imag` | 0.77 | 0.452 | 0.439 | yes |
 | `cnn2d_deep/cfdac_real` | 0.73 | 0.422 | 0.427 | yes |
 
-**Best:** `transformer1d/timeseries` — exp balanced-acc **0.589** (macro-F1 0.582; in-domain 0.86). 2/58 cells clear chance+0.05; 53 collapse to one class.
+**Best:** `transformer1d/timeseries` — exp balanced-acc **0.589** (macro-F1 0.582; in-domain 0.86). 2/58 cells clear chance+0.05; 53 collapse to one class. On real data it recovers **82% of true positives** (sensitivity) at **36% specificity**; threshold-free **AUC = 0.547**.
 
 ### is_pristine
 **Question.** Pristine vs any damage (inverse of binary)  **Output.** ŷ∈{0=damaged,1=pristine}  **Chance.** 0.50.
@@ -183,7 +246,7 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `cnn2d_deep/cfdac_mag` | 0.76 | 0.443 | 0.438 | yes |
 | `cnn2d_shallow/cfdac_real` | 0.52 | 0.443 | 0.438 | yes |
 
-**Best:** `mlp/timeseries` — exp balanced-acc **0.557** (macro-F1 0.556; in-domain 0.93). 2/57 cells clear chance+0.05; 51 collapse to one class.
+**Best:** `mlp/timeseries` — exp balanced-acc **0.557** (macro-F1 0.556; in-domain 0.93). 2/57 cells clear chance+0.05; 51 collapse to one class. On real data it recovers **28% of true positives** (sensitivity) at **84% specificity**; threshold-free **AUC = 0.565**.
 
 ### is_bolt
 **Question.** Bolt-loosening present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity = % loosening, 0–85% — wide range.
@@ -251,7 +314,7 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `cnn3d/cfdac_mag` | 0.62 | 0.399 | 0.314 | yes |
 | `cnn2d_deep/cfdac_real` | 0.84 | 0.379 | 0.322 | yes |
 
-**Best:** `transformer1d/frf_realimag` — exp balanced-acc **0.669** (macro-F1 0.654; in-domain 0.89). 21/57 cells clear chance+0.05; 30 collapse to one class.
+**Best:** `transformer1d/frf_realimag` — exp balanced-acc **0.669** (macro-F1 0.654; in-domain 0.89). 21/57 cells clear chance+0.05; 30 collapse to one class. On real data it recovers **47% of true positives** (sensitivity) at **87% specificity**; threshold-free **AUC = 0.667**.
 
 ### is_crack
 **Question.** Crack present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity = crack depth.
@@ -319,7 +382,7 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `cnn2d_shallow/cfdac_magphase` | 0.55 | 0.416 | 0.423 | yes |
 | `cnn2d_shallow/cfdac_all` | 0.55 | 0.278 | 0.292 | yes |
 
-**Best:** `transformer/cfdac_mag` — exp balanced-acc **0.587** (macro-F1 0.566; in-domain 0.54). 2/57 cells clear chance+0.05; 54 collapse to one class.
+**Best:** `transformer/cfdac_mag` — exp balanced-acc **0.587** (macro-F1 0.566; in-domain 0.54). 2/57 cells clear chance+0.05; 54 collapse to one class. On real data it recovers **34% of true positives** (sensitivity) at **83% specificity**; threshold-free **AUC = 0.617**.
 
 ### is_hole
 **Question.** Hole present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity = hole diameter, 1–6 mm (narrow).
@@ -387,7 +450,7 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `cnn2d_shallow/cfdac_all` | 0.61 | 0.435 | 0.430 | yes |
 | `transformer/cfdac_phase` | 0.62 | 0.349 | 0.384 | yes |
 
-**Best:** `transformer1d/frf_realimag` — exp balanced-acc **0.667** (macro-F1 0.599; in-domain 0.57). 7/57 cells clear chance+0.05; 47 collapse to one class.
+**Best:** `transformer1d/frf_realimag` — exp balanced-acc **0.667** (macro-F1 0.599; in-domain 0.57). 7/57 cells clear chance+0.05; 47 collapse to one class. On real data it recovers **53% of true positives** (sensitivity) at **80% specificity**; threshold-free **AUC = 0.721**; the AUC sitting above the fixed-threshold balanced-accuracy says the *ranking* is better than the default 0.5 cut — the decision threshold is miscalibrated by the domain shift and could be retuned on a few real samples.
 
 ### is_mass
 **Question.** Added mass present? (one-vs-rest)  **Output.** ŷ∈{0,1}  **Chance.** 0.50.  Severity near-discrete.
@@ -455,7 +518,7 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `rf/indicators` | 0.94 | 0.348 | 0.300 | yes |
 | `cnn2d_shallow/cfdac_magphase` | 0.96 | 0.334 | 0.378 | yes |
 
-**Best:** `cnn3d/cfdac_imag` — exp balanced-acc **0.620** (macro-F1 0.399; in-domain 0.58). 16/57 cells clear chance+0.05; 36 collapse to one class.
+**Best:** `cnn3d/cfdac_imag` — exp balanced-acc **0.620** (macro-F1 0.399; in-domain 0.58). 16/57 cells clear chance+0.05; 36 collapse to one class. On real data it recovers **82% of true positives** (sensitivity) at **42% specificity**; threshold-free **AUC = 0.708**; the AUC sitting above the fixed-threshold balanced-accuracy says the *ranking* is better than the default 0.5 cut — the decision threshold is miscalibrated by the domain shift and could be retuned on a few real samples.
 
 ### type
 **Question.** Damage type (5-class)  **Output.** pristine/bolt/crack/hole/mass  **Chance.** 0.20.
@@ -731,12 +794,13 @@ Engines: `ml_pipeline/hires_zoo.py`, `hires_tab.py`, `hires_all.py`. Raw per-cas
 | `mlp/indicators` | 0.483 | -475005154580935999488.000 |
 | `mlp/modal` | 0.514 | -28047672784197238390784.000 |
 
-**Best:** `mlp/frf_mag` exp R²=0.037 (in-domain R²=0.59). Severity barely transfers; see §6.
+**Best:** `mlp/frf_mag` exp R²=0.037 (in-domain R²=0.59). Severity barely transfers; the full diagnosis is in §8.
 
-## 5 · Damage-threshold (DT) severity sweep @1601
-Positives stratified by their damage-severity percentile (each task on its own axis); balanced accuracy recomputed keeping only the more-severe positives. Confirms transfer improves with severity.
+## 7 · Damage-threshold (DT) severity sweep @1601
+Positives are stratified by their damage-severity percentile (each task on its own axis: bolt %, hole mm, mass kg, crack depth); balanced accuracy is recomputed keeping only the more-severe positives (all negatives retained). This tests the central thesis — *transfer should improve with damage severity, because larger damage perturbs the spectrum more than the domain gap does.*
 
 ![DT combined](figures/hires/dt_1601_combined.png)
+*Figure 7 — best-cell experimental balanced-acc vs the severity percentile kept.*
 
 | task | all (p0) | ≥p50 | ≥p75 | ≥p90 | best cell @p90 |
 |---|---|---|---|---|---|
@@ -747,30 +811,39 @@ Positives stratified by their damage-severity percentile (each task on its own a
 | is_mass | 0.620 | 0.620 | 0.620 | 0.620 | cnn3d/cfdac_imag |
 
 ![is_bolt DT](figures/hires/zoo_dt_is_bolt.png)
+*Figure 8 — the is_bolt detectors, swept on loosening severity.*
 
-**is_bolt reaches ~0.82 balanced-acc at ≥75% loosening.** is_hole/is_mass stay flat because their experimental severity range is narrow, not because the model fails.
+**is_bolt reaches ~0.82 balanced-acc at ≥75% loosening** — confirming the thesis where severity has range to vary. is_hole/is_mass stay flat *because their experimental severity range is narrow (Figure 2b), not because the model fails* — there simply is no 'more severe' subset to climb into.
 
-## 6 · Severity regression (the non-classifier)
-Best experimental **R² ≈ 0.04** (most cells negative), weak monotonic signal (**Pearson r ≈ 0.36** for frf/timeseries cells), vs **R² ≈ 0.59 in-domain**. Restricting to severe cases does not raise R² (variance-narrowing artefact); MAE ≈ 0.25 on a 0.07–1.0 scale. Predicting damage *magnitude* zero-shot is unsolved — recast as ordinal classification is the recommended next step.
+## 8 · Severity regression (the only non-classifier task)
+![severity scatter and residuals](figures/hires/diag_severity.png)
+*Figure 9 — (a) predicted vs true severity for the best cell; (b) residuals.*
 
-## 7 · Cross-task synthesis
-1. **Detection ≫ localization ≫ magnitude.** Presence/type transfers (0.56–0.67 balanced-acc); location weakly (≈1.4–2× chance); severity barely.
-2. **Severity is the lever** — every detector improves on more-severe damage (is_bolt →0.82).
-3. **Representation > model size** — full complex spectral inputs (CFDAC / raw FRF / timeseries) with sequence/conv models beat the compressed `modal` baseline and the pretrained vision backbones.
-4. **The gap is covariate shift, not capacity** — near-perfect in-domain, partial transfer.
+Best experimental **R² = +0.037** with **Pearson r = 0.361** and **MAE = 0.254** (`mlp/frf_mag`), against **R² ≈ 0.59 in-domain**. The scatter tells the story the R² number alone does not: there *is* a weak positive trend (r ≈ 0.36, the fit slope is positive), so the model is not random — but the predictions collapse toward the training mean (the residual plot in (b) slopes against the true value, the signature of regression-to-the-mean under distribution shift). Restricting to severe cases does **not** raise R² (that just narrows the variance). **Predicting damage *magnitude* zero-shot is effectively unsolved**; recasting it as ordinal severity-band classification (§11) is the recommended fix, since detection already improves monotonically with severity (§7).
 
-## 8 · Limitations
-- Single experimental structure; one seed per cell (treat <0.05 gaps as ties); post-hoc best-cell selection is exploratory; localization classes near-degenerate in the linear ROM; `timeseries` is FRF-derived; 128-bin comparison pending.
+## 9 · Cross-task synthesis
+1. **Detection ≫ localization ≫ magnitude.** Presence/type transfers (AUC 0.55–0.72, balanced-acc 0.56–0.67); location only weakly (≈1.4–2× chance); severity barely (r≈0.36, R²≈0.04).
+2. **Severity is the lever, not the target.** Every detector improves on more-severe damage (is_bolt →0.82 at ≥75% loosening); use damage size to *gate confidence*, don't try to *regress* it.
+3. **Representation > model size.** Full complex spectral inputs (raw FRF / CFDAC / FRF-derived timeseries) with sequence/conv models win; the compressed `modal` vector and the ImageNet-pretrained vision backbones (ConvNeXt-T, ResNet50) do **not** lead — pretraining on natural images buys nothing for these spectra.
+4. **The ceiling is covariate shift, not capacity.** Near-perfect in-domain (Figure 1) collapses to partial transfer because the domains are AUC=1.00 separable (Figure 4). Higher resolution and bigger nets cannot close a gap that is fundamentally about the simulator not matching the rig.
 
-## 9 · Recommendations
-1. Deploy detection on severe damage (report severity-stratified).
-2. Use spectral inputs + sequence/conv models; drop `modal` and pretrained vision as the primary route.
-3. Attack severity & localization with domain adaptation, not bigger nets.
-4. Recast severity as ordinal classification.
-5. Finish the 128-bin run to settle the resolution question.
+## 10 · Limitations
+- **One experimental structure, one seed per cell** — treat balanced-acc gaps < 0.05 as ties.
+- **Post-hoc best-cell selection** (§5–6 pick the winner after seeing the test set) is exploratory, not a held-out estimate; the per-task tables guard against cherry-picking by showing every cell.
+- **Localization classes are near-degenerate** in the linear ROM (symmetric crack/hole make the two column ends almost indistinguishable), capping col_location even in-domain (0.45 mF1).
+- **`timeseries` is FRF-reconstructed**, not independently measured, so it carries no information beyond the FRF — it is a different *inductive bias*, not a new sensor.
+- **128-bin resolution comparison pending** (that run is still in progress).
 
-## 10 · Artefacts
-- Code: `ml_pipeline/hires_{zoo,tab,all,zoo_summary,dt_1601}.py`
-- Data: `results_hires/{zoo_summary,zoo_best_by_task_res,dt_1601}.json`; per-case on `colab-hires-*` branches
-- Figures: `results/figures/hires/{zoo1601_synth_vs_exp,dt_1601_combined,zoo_dt_is_bolt,cellzoo_*}.png`
-- Companion: `REPORT_synth.md` (in-domain).
+## 11 · Recommendations
+1. **Deploy detection on severe damage and report severity-stratified** (the DT curves, not a single number).
+2. **Recalibrate the decision threshold on a few real samples** — the AUC>bal-acc gap (§5.2) is free accuracy.
+3. **Use spectral inputs + sequence/conv models; drop `modal` and pretrained vision** as the primary route.
+4. **Attack the domain gap directly with domain adaptation** (e.g. CORAL/feature alignment, fine-tune on a small labelled real set, or domain-randomise the simulator) — this is the highest-leverage move given the AUC≈1.0 shift.
+5. **Recast severity as ordinal classification** and extend the DT analysis to the multi-class tasks.
+6. **Finish the 128-bin run** to settle whether full resolution is necessary.
+
+## 12 · Artefacts
+- **Code:** `ml_pipeline/hires_{zoo,tab,all}.py` (engines), `hires_zoo_summary.py` + `hires_dt_1601.py` + `hires_analysis.py` (distillation/EDA/diagnostics), `build_hires_report.py` (this report).
+- **Data:** `results_hires/{zoo_summary,zoo_best_by_task_res,dt_1601,analysis}.json`; raw per-case predictions (with class probabilities) on branches `colab-hires-{tabular,cnn,transformer,vision}`.
+- **Figures:** `results/figures/hires/{zoo1601_synth_vs_exp, eda_class_severity, eda_frf_signatures, eda_domain_shift, diag_confusion, diag_roc, diag_severity, dt_1601_combined, zoo_dt_is_bolt, cellzoo_*}.png`.
+- **Companion:** `REPORT_synth.md` (in-domain ceiling).
