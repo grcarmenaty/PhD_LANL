@@ -511,5 +511,24 @@
     "synth_test_bal_acc": null,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_pristine_transformer_cfdac_all_hires1601": {
+    "task": "is_pristine",
+    "model": "transformer",
+    "feature": "cfdac_all",
+    "n_target": 1601,
+    "n_channels": 4,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 4000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.9467903158374824,
+    "synth_test_metric": 0.965,
+    "synth_test_macro_f1": 0.947103052489725,
+    "synth_test_bal_acc": 0.9625,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
