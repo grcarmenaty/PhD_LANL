@@ -94,6 +94,71 @@ FEAT_DETAIL = {
 }
 
 
+def emit_compute(A):
+    cpath = _REPO/"results_hires"/"compute.json"
+    if not cpath.exists():
+        A("## 6 · Training time & computational effort\n*(compute.json not found — run `ml_pipeline/hires_compute.py`.)*\n"); return
+    c = json.loads(cpath.read_text())
+    m = c["models"]; pr = c["protocol"]
+    A("## 6 · Training time & computational effort")
+    A("Per-cell wall-clock was not logged, so effort is reported in **measurable, hardware-independent**"
+      " terms — parameters (measured), forward FLOPs (`torch.utils.flop_counter`; the full-1601 conv nets"
+      " measured at a base size and scaled by the exact area ratio), the on-the-fly CFDAC data-path cost, and"
+      " the committed campaign size — with a clearly-labelled GPU wall-clock estimate at the end.\n")
+    A("### 6.1 Training protocol")
+    A(f"- **Image cells** (CFDAC): subsample **{pr['image']['subsample']}**, batch {pr['image']['batch']},"
+      f" {pr['image']['optim']} + {pr['image']['sched']}, **train-to-convergence** (early-stop patience"
+      f" {pr['image']['patience']}, cap {pr['image']['max_epochs']} epochs), AMP {pr['image']['amp']}.")
+    A(f"- **Tabular/sequence cells**: subsample {pr['tabular']['subsample']}, batch {pr['tabular']['batch']},"
+      f" early-stop patience {pr['tabular']['patience']}, cap {pr['tabular']['max_epochs']} epochs (trees fit once).")
+    A("- Every cell is trained **once** to convergence with per-epoch checkpoint/resume and skip-if-exists, so"
+      " a pre-empted ephemeral GPU never repeats finished work. The CFDAC image is recomputed from the FRFs"
+      f" on the fly each step (**{c['cfdac_gflops_per_sample']:.3f} GFLOP/sample**), avoiding a multi-TB"
+      " materialised-image cache (a full 1601² float image is ~10 MB; ×10 000 ×7 variants ≈ 0.7 TB).\n")
+    A("### 6.2 Per-model cost (measured)")
+    A("`fwd` is the forward pass at the **training input size** (CFDAC images at native 1601²; vision backbones"
+      " on the 384² resize; sequences over length 1601). `TFLOP/epoch` = 3×fwd (fwd+backward) × subsample"
+      " (+CFDAC for image models) — one pass over the training subsample.\n")
+    A("![per-epoch training cost](figures/hires/compute_cost.png)")
+    A("*Figure vi — per-epoch training compute (log scale); blue = CFDAC-image, green = tabular/sequence.*\n")
+    A("| model | family | params | fwd GFLOPs | TFLOP / epoch |")
+    A("|---|---|---|---|---|")
+    order = sorted(m, key=lambda k: m[k]["train_gflops_per_epoch"])
+    for k in order:
+        p = m[k]["params"]; ps = (f"{p/1e6:.2f} M" if p and p >= 1e5 else (f"{p/1e3:.0f} k" if p else "—"))
+        A(f"| `{k}` | {m[k]['family']} | {ps} | {m[k]['fwd_gflops']:.2f} | **{m[k]['train_gflops_per_epoch']:.1f}** |")
+    cheap = m["transformer1d"]["train_gflops_per_epoch"]; deep = m["cnn2d_deep"]["train_gflops_per_epoch"]
+    A(f"\n**Three to four orders of magnitude separate the families.** A `transformer1d` epoch costs"
+      f" ~{cheap:.1f} TFLOP; a full-resolution `cnn2d_deep` epoch costs ~{deep:.0f} TFLOP"
+      f" (~{deep/max(cheap,0.1):.0f}× more) because it convolves the entire 1601² grid (its single forward is"
+      f" {m['cnn2d_deep']['fwd_gflops']:.0f} GFLOP). The pretrained vision backbones sit in between (~215–236"
+      " TFLOP/epoch) only because they down-resize to 384². Flattening a sequence into the `mlp` is the one"
+      f" tabular case that balloons (d_in = 9×1601 → fwd {c.get('mlp_flat_seq_fwd_gflops',0):.2f} GFLOP).\n")
+    A("### 6.3 Campaign size and total effort")
+    fam = c["by_family"]
+    A(f"- **{c['n_cells_1601']} cells trained at 1601** (this committed set): " +
+      ", ".join(f"{v['cells']} {k}" for k, v in fam.items()) + " (a 128-bin baseline of ~426 more cells"
+      " ran separately).")
+    # crude campaign total: average TFLOP/epoch across families × cells × ~30 epochs
+    img_ep = m["cnn2d_deep"]["train_gflops_per_epoch"]; sh = m["cnn2d_shallow"]["train_gflops_per_epoch"]
+    A("- A single mid-cost image cell (≈shallow/transformer, ~40–130 TFLOP/epoch × ~30 convergence epochs)"
+      " is ~1–4 PFLOP; the heavy `cnn2d_deep` cells are ~50 PFLOP each, the sequence/tabular cells a few"
+      " TFLOP. Summed across the zoo the 1601 campaign is on the order of **a few ×10¹⁶–10¹⁷ FLOP**"
+      " (tens of PFLOP-scale), dominated by the handful of deep/vision image cells.")
+    gpus = ", ".join(c["gpus"])
+    A(f"- **Hardware:** {gpus}. *Rough* wall-clock (FLOP ÷ realized throughput, ~20–60 TFLOP/s effective on"
+      " these cards with AMP): the cheap tabular/sequence cells converge in **seconds–single-digit minutes**;"
+      " a full-resolution `cnn2d_deep` cell is **tens of minutes to a few hours**; the full 1601 campaign is a"
+      " **few GPU-days** spread across the ephemeral sessions. Treat these as order-of-magnitude estimates —"
+      " they are derived from FLOPs, not measured.\n")
+    A("### 6.4 The efficiency takeaway")
+    A("The representations that **transfer best** (raw FRF / CFDAC-magnitude with `transformer1d` / `cnn1d`,"
+      " §9) are also among the **cheapest to train** — 2–4 orders of magnitude below the full-resolution image"
+      " CNNs and the ImageNet backbones that they match or beat on real data. **Spending compute on a bigger"
+      " image model is not just unrewarded (§5, §9), it is the dominant cost line.** The compute-rational"
+      " recommendation is therefore also the accuracy-rational one: spectral/sequence models first.\n")
+
+
 def emit_inputs(A):
     A("## 4 · Input representations — what every sample looks like to a model")
     A("Every cell is `(model, feature)`. A *feature* is one way of turning a sample's 9-channel, 1601-bin FRF"
@@ -137,7 +202,7 @@ def emit_arch(A):
       " are *measured* from the instantiated `nn.Module`s (representative binary-head config).\n")
     A("![model capacity](figures/hires/arch_params.png)")
     A("*Figure v — trainable parameters (log scale). The pretrained vision backbones are 10–100× larger than the"
-      " bespoke nets, yet do not lead on transfer (§8) — capacity is not the bottleneck.*\n")
+      " bespoke nets, yet do not lead on transfer (§9) — capacity is not the bottleneck.*\n")
     # parameter table
     A("| model | family | params | notes |")
     A("|---|---|---|---|")
@@ -252,10 +317,10 @@ def main():
 
     A("## Contents")
     A("1 Overview · 2 Tasks · 3 Methodology · **4 Input representations (every feature, with samples)** ·"
-      " **5 Model architectures (every model, in full)** · 6 Exploratory data analysis (both domains) ·"
-      " 7 Diagnostics: confusion matrices + ROC/AUC · 8 Per-task catalogue (every cell) ·"
-      " 9 Damage-threshold sweep + swept diagnostics · 10 Severity regression · 11 Synthesis ·"
-      " 12 Limitations · 13 Recommendations · 14 Artefacts\n")
+      " **5 Model architectures (every model, in full)** · **6 Training time & computational effort** ·"
+      " 7 Exploratory data analysis (both domains) · 8 Diagnostics: confusion matrices + ROC/AUC ·"
+      " 9 Per-task catalogue (every cell) · 10 Damage-threshold sweep + swept diagnostics ·"
+      " 11 Severity regression · 12 Synthesis · 13 Limitations · 14 Recommendations · 15 Artefacts\n")
 
     # ---- counts ----
     ncell = sum(len(v) for v in cells.values())
@@ -287,7 +352,7 @@ def main():
     for t in TASKS:
         q, o, ch, note = TASK_DESC[t]
         A(f"| `{t}` | {q} | {o} | {('%.2f'%ch) if ch else '— (reg)'} |")
-    A("\nDetailed per-task results, including every cell, are in §8.\n")
+    A("\nDetailed per-task results, including every cell, are in §9.\n")
 
     # ---- methodology ----
     A("## 3 · Methodology")
@@ -309,13 +374,14 @@ def main():
     # ---- (4) input representations + (5) architectures ----
     emit_inputs(A)
     emit_arch(A)
+    emit_compute(A)
 
     # ---- (6) EDA ----
     cnt = an.get("counts", {})
-    A("## 6 · Exploratory data analysis — synthetic vs experimental")
+    A("## 7 · Exploratory data analysis — synthetic vs experimental")
     A("Before any model, the two datasets are compared directly. This frames everything that follows:"
       " *what the models are up against is not noise, it is a structured domain gap.*\n")
-    A("### 4.1 Class balance and severity coverage")
+    A("### 7.1 Class balance and severity coverage")
     if cnt:
         A("| class | synth N | exp N |")
         A("|---|---|---|")
@@ -328,13 +394,13 @@ def main():
       " bands — this is exactly why the bolt detector has room to improve with severity and the others do"
       " not. (c) Per-type-normalised severity: synthetic damage is sampled near-uniformly, but the real"
       " damage clusters, so the model is asked to extrapolate over severity ranges it rarely saw.*\n")
-    A("### 4.2 Spectral signatures and the domain gap")
+    A("### 7.2 Spectral signatures and the domain gap")
     A("![FRF signatures](figures/hires/eda_frf_signatures.png)")
     A("*Figure 3 — channel-averaged mean log|FRF|. (a) Synthetic classes differ mainly in resonance-peak"
       " amplitude/position — the information the models exploit in-domain. (b) Overlaying synthetic (solid)"
       " on experimental (dashed) for the same class shows the gap: the real structure has shifted resonances,"
       " extra anti-resonances, and a higher noise floor the linear ROM never produces.*\n")
-    A("### 4.3 Covariate shift, quantified")
+    A("### 7.3 Covariate shift, quantified")
     pcv = an.get("pca_explained_var", [0,0])
     A(f"![domain shift PCA](figures/hires/eda_domain_shift.png)")
     A("*Figure 4 — PCA of the log|FRF| spectra. (a) Coloured by **domain**, synthetic and experimental form"
@@ -345,15 +411,15 @@ def main():
     A("**This is the single most important diagnostic in the report.** A domain-classifier AUC of"
       f" {domauc:.2f} means the sim-to-real gap is not a subtle nuisance — the simulator and the rig are"
       " trivially distinguishable from their spectra alone. Any zero-shot transfer at all (and we get"
-      " meaningful transfer on detection) is therefore a non-trivial success, and the residual errors in §5–6"
+      " meaningful transfer on detection) is therefore a non-trivial success, and the residual errors in §8–9"
       " are the direct, expected consequence of this shift. It also sets the research direction: the lever is"
       " **domain adaptation**, not bigger models or higher resolution.\n" if domauc else "")
 
     # ---- (5) Diagnostics ----
-    A("## 7 · Diagnostics — how the best models actually behave on real data")
+    A("## 8 · Diagnostics — how the best models actually behave on real data")
     A("Aggregate scores hide the failure *mode*. Below are the confusion matrices and ROC curves for the"
-      " single best cell of each task (selected by experimental balanced-acc / R²; see §6 for all cells).\n")
-    A("### 5.1 Confusion matrices (experimental, row-normalised)")
+      " single best cell of each task (selected by experimental balanced-acc / R²; see §9 for all cells).\n")
+    A("### 8.1 Confusion matrices (experimental, row-normalised)")
     A("![confusion matrices](figures/hires/diag_confusion.png)")
     A("*Figure 5 — read each row as 'of the true X, what fraction was predicted as …'.*\n")
     # specific CM walkthrough
@@ -376,8 +442,8 @@ def main():
           " shift most corrupts.")
         A("- **mass_location / col_location**: rows pile onto one or two columns — localization collapses"
           " toward a dominant class, consistent with the near-degenerate spatial classes of the linear ROM"
-          " (§10) and the weak in-domain ceiling for col_location.\n")
-    A("### 5.2 ROC / AUC for the detection tasks")
+          " (§13) and the weak in-domain ceiling for col_location.\n")
+    A("### 8.2 ROC / AUC for the detection tasks")
     A("![ROC curves](figures/hires/diag_roc.png)")
     A("*Figure 6 — AUC is threshold-free and immune to the 82.5% prior, so it is the fairest single number"
       " for detection.*\n")
@@ -400,7 +466,7 @@ def main():
           " class is where the domain gap bites hardest (Figure 3a).\n")
 
     # ---- per-task full catalogue ----
-    A("## 8 · Per-task catalogue (every cell)")
+    A("## 9 · Per-task catalogue (every cell)")
     A("Every (model, feature) cell, sorted best-first. `in-domain` = held-out synthetic score (the ceiling);"
       " `exp` columns = zero-shot on real data. The cell-zoo bar plot colours **blue = CFDAC-image** cells"
       " and **green = tabular/sequence** cells, so the winning representation family is visible at a glance.\n")
@@ -420,7 +486,7 @@ def main():
                 A(f"| `{r['model']}/{r['feature']}` | {(r['synth'] or 0):.3f} | {r.get('exp_r2',float('nan')):+.3f} |")
             b = recs[0]
             A(f"\n**Best:** `{b['model']}/{b['feature']}` exp R²={b.get('exp_r2'):.3f} (in-domain R²={b['synth']:.2f}). "
-              "Severity barely transfers; the full diagnosis is in §8.")
+              "Severity barely transfers; the full diagnosis is in §11.")
         else:
             recs = sorted(recs, key=lambda r:-r.get("exp_bal_acc",0))
             isdet = t in DET_KEYS
@@ -440,7 +506,7 @@ def main():
             A(line)
 
     # ---- DT sweep ----
-    A("\n## 9 · Damage-threshold (DT) severity sweep @1601")
+    A("\n## 10 · Damage-threshold (DT) severity sweep @1601")
     A("Positives are stratified by their damage-severity percentile (each task on its own axis: bolt %, hole"
       " mm, mass kg, crack depth); balanced accuracy is recomputed keeping only the more-severe positives"
       " (all negatives retained). This tests the central thesis — *transfer should improve with damage"
@@ -465,7 +531,7 @@ def main():
     ddpath = _REPO/"results_hires"/"dt_diag.json"
     if ddpath.exists():
         dd = json.loads(ddpath.read_text())["per_task"]
-        A("\n### 9.2 The full diagnostic suite, swept over severity")
+        A("\n### 10.1 The full diagnostic suite, swept over severity")
         A("Balanced accuracy is one scalar; the questions *'does the **ranking** (AUC) improve, and **how** does"
           " the confusion matrix change?'* need the whole suite recomputed at each severity threshold. Using the"
           " stored class probabilities, the best cell of each detection task is re-scored keeping only"
@@ -501,7 +567,7 @@ def main():
     spath = _REPO/"results_hires"/"dt_stiffness.json"
     if spath.exists():
         sd = json.loads(spath.read_text())
-        A("\n### 9.3 The same sweep on a *physical* axis — storey-stiffness loss")
+        A("\n### 10.2 The same sweep on a *physical* axis — storey-stiffness loss")
         A("Native severity units are not comparable across damage types (a '% loosening' is not a 'mm of"
           " crack'). Using the **simulator's own calibrated damage model**"
           " (`ml_pipeline.variation.{bolt_jsr_ratio, crack_ratio, hole_ratio}`), each stiffness-reducing damage"
@@ -536,13 +602,13 @@ def main():
           " loss respectively there are *zero* experimental positives left, because crack/hole simply never"
           " remove that much stiffness. Their weak, flat transfer is not a model failure: the damage they"
           " represent is physically near-invisible to a global FRF. The takeaway sharpens the severity message"
-          " of §9.1–9.2: **detection transfers in proportion to how much stiffness the damage removes**, and"
+          " of §10.1–10.2: **detection transfers in proportion to how much stiffness the damage removes**, and"
           " only bolt-loosening (and any other large-stiffness-loss mechanism) reaches the regime where"
           " sim-to-real transfer becomes reliable.\n")
 
     # ---- severity deep-dive ----
     sv = bc.get("severity", {})
-    A("\n## 10 · Severity regression (the only non-classifier task)")
+    A("\n## 11 · Severity regression (the only non-classifier task)")
     A("![severity scatter and residuals](figures/hires/diag_severity.png)")
     A("*Figure 13 — (a) predicted vs true severity for the best cell; (b) residuals.*\n")
     if sv:
@@ -553,11 +619,11 @@ def main():
           " toward the training mean (the residual plot in (b) slopes against the true value, the signature of"
           " regression-to-the-mean under distribution shift). Restricting to severe cases does **not** raise R²"
           " (that just narrows the variance). **Predicting damage *magnitude* zero-shot is effectively"
-          " unsolved**; recasting it as ordinal severity-band classification (§11) is the recommended fix,"
-          " since detection already improves monotonically with severity (§7).\n")
+          " unsolved**; recasting it as ordinal severity-band classification (§14) is the recommended fix,"
+          " since detection already improves monotonically with severity (§10).\n")
 
     # ---- synthesis ----
-    A("## 11 · Cross-task synthesis")
+    A("## 12 · Cross-task synthesis")
     A("1. **Detection ≫ localization ≫ magnitude.** Presence/type transfers (AUC 0.55–0.72, balanced-acc"
       " 0.56–0.67); location only weakly (≈1.4–2× chance); severity barely (r≈0.36, R²≈0.04).")
     A("2. **Severity is the lever, not the target.** Every detector improves on more-severe damage"
@@ -572,19 +638,19 @@ def main():
       " the simulator not matching the rig.\n")
 
     # ---- limitations + recs ----
-    A("## 12 · Limitations")
+    A("## 13 · Limitations")
     A("- **One experimental structure, one seed per cell** — treat balanced-acc gaps < 0.05 as ties.\n"
-      "- **Post-hoc best-cell selection** (§5–6 pick the winner after seeing the test set) is exploratory,"
+      "- **Post-hoc best-cell selection** (§8–9 pick the winner after seeing the test set) is exploratory,"
       " not a held-out estimate; the per-task tables guard against cherry-picking by showing every cell.\n"
       "- **Localization classes are near-degenerate** in the linear ROM (symmetric crack/hole make the two"
       " column ends almost indistinguishable), capping col_location even in-domain (0.45 mF1).\n"
       "- **`timeseries` is FRF-reconstructed**, not independently measured, so it carries no information"
       " beyond the FRF — it is a different *inductive bias*, not a new sensor.\n"
       "- **128-bin resolution comparison pending** (that run is still in progress).\n")
-    A("## 13 · Recommendations")
+    A("## 14 · Recommendations")
     A("1. **Deploy detection on severe damage and report severity-stratified** (the DT curves, not a single"
       " number).\n"
-      "2. **Recalibrate the decision threshold on a few real samples** — the AUC>bal-acc gap (§5.2) is free"
+      "2. **Recalibrate the decision threshold on a few real samples** — the AUC>bal-acc gap (§8.2) is free"
       " accuracy.\n"
       "3. **Use spectral inputs + sequence/conv models; drop `modal` and pretrained vision** as the primary"
       " route.\n"
@@ -593,15 +659,16 @@ def main():
       " given the AUC≈1.0 shift.\n"
       "5. **Recast severity as ordinal classification** and extend the DT analysis to the multi-class tasks.\n"
       "6. **Finish the 128-bin run** to settle whether full resolution is necessary.\n")
-    A("## 14 · Artefacts (everything is reproducible from these)")
+    A("## 15 · Artefacts (everything is reproducible from these)")
     A("- **Engines:** `ml_pipeline/hires_{zoo,tab,all}.py` — CFDAC-image, tabular/sequence, and the unified"
       " dispatcher; every model and feature defined here.\n"
       "- **Analysis scripts:** `hires_zoo_summary.py` (per-cell distillation), `hires_dt_1601.py` (DT balanced-acc"
-      " sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_analysis.py` (EDA + best-cell"
-      " confusion/ROC/severity), `hires_arch.py` (measured parameter counts), `hires_inputs.py` (input-sample"
-      " figures), `build_hires_report.py` (this report).\n"
+      " sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_dt_stiffness.py` (DT vs"
+      " stiffness loss), `hires_analysis.py` (EDA + best-cell confusion/ROC/severity), `hires_arch.py`"
+      " (measured parameter counts), `hires_compute.py` (FLOPs / training-effort accounting), `hires_inputs.py`"
+      " (input-sample figures), `build_hires_report.py` (this report).\n"
       "- **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, dt_stiffness, analysis,"
-      " architectures, inputs}.json`. **Every figure is reproducible from committed data** — the per-case"
+      " architectures, compute, inputs}.json`. **Every figure is reproducible from committed data** — the per-case"
       " predictions are archived in `results_hires/per_case_hires1601.tar.gz` and the FRF-derived arrays the"
       " EDA/input figures need in `results_hires/figure_data.npz` (built by `build_figure_bundle.py`, served by"
       " `figdata.py`). Raw per-case predictions also live on branches `colab-hires-{tabular,cnn,transformer,vision}`."

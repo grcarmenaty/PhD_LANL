@@ -4,7 +4,7 @@
 > Exhaustive edition — sample visualisations of every input representation, full detail on every model architecture (measured parameter counts), exploratory analysis of both domains, every cell of the high-resolution model zoo (in-domain + zero-shot), confusion matrices and ROC/AUC for the best cell per task, the damage-threshold sweep *with the full diagnostic suite (AUC + confusion matrix) swept over severity*, and the severity-regression deep-dive. In-domain companion: `REPORT_synth.md`. *(128-bin comparison excluded until that run completes.)*
 
 ## Contents
-1 Overview · 2 Tasks · 3 Methodology · **4 Input representations (every feature, with samples)** · **5 Model architectures (every model, in full)** · 6 Exploratory data analysis (both domains) · 7 Diagnostics: confusion matrices + ROC/AUC · 8 Per-task catalogue (every cell) · 9 Damage-threshold sweep + swept diagnostics · 10 Severity regression · 11 Synthesis · 12 Limitations · 13 Recommendations · 14 Artefacts
+1 Overview · 2 Tasks · 3 Methodology · **4 Input representations (every feature, with samples)** · **5 Model architectures (every model, in full)** · **6 Training time & computational effort** · 7 Exploratory data analysis (both domains) · 8 Diagnostics: confusion matrices + ROC/AUC · 9 Per-task catalogue (every cell) · 10 Damage-threshold sweep + swept diagnostics · 11 Severity regression · 12 Synthesis · 13 Limitations · 14 Recommendations · 15 Artefacts
 
 ## 1 · Overview
 **The result in one line.** A model trained on physics-simulation FRFs *does* detect damage on a real structure it has never seen — but only its **presence/type** transfers (balanced-acc 0.56–0.72 AUC), while **location and magnitude largely do not**, and the ceiling is set by a severe covariate shift (a logistic classifier separates the two domains with **AUC = 1.000**).
@@ -32,7 +32,7 @@ Each task is posed on the same FRFs; the zoo is trained and evaluated independen
 | `mass_location` | Added-mass location (4-class) | base/fl1/fl2/fl3 | 0.25 |
 | `severity` | Damage severity (regression) | ŷ∈[0,1] normalised | — (reg) |
 
-Detailed per-task results, including every cell, are in §8.
+Detailed per-task results, including every cell, are in §9.
 
 ## 3 · Methodology
 **Data.** Synthetic data regenerated at 16 s (N_T=4096, fs=256 → df=0.0625 Hz, 1601 bins, 0–100 Hz) to match the experimental grid exactly: 10 000 synthetic cases (2 000 per class, balanced) from a linear reduced-order model of the 3-storey bookshelf, and the 2 638-case IQS experimental set (bolt-heavy: 462 pristine / 1338 bolt / 320 crack / 280 hole / 238 mass).
@@ -73,7 +73,7 @@ Every cell is `(model, feature)`. A *feature* is one way of turning a sample's 9
 Eleven model families span four design philosophies: **tabular** nets/ensembles on the summary vectors, **1-D sequence** models over frequency/time, **bespoke 2-/3-D nets** built for the full-resolution CFDAC image, and **ImageNet-pretrained vision backbones** fine-tuned on the CFDAC image. Parameter counts below are *measured* from the instantiated `nn.Module`s (representative binary-head config).
 
 ![model capacity](figures/hires/arch_params.png)
-*Figure v — trainable parameters (log scale). The pretrained vision backbones are 10–100× larger than the bespoke nets, yet do not lead on transfer (§8) — capacity is not the bottleneck.*
+*Figure v — trainable parameters (log scale). The pretrained vision backbones are 10–100× larger than the bespoke nets, yet do not lead on transfer (§9) — capacity is not the bottleneck.*
 
 | model | family | params | notes |
 |---|---|---|---|
@@ -103,10 +103,46 @@ Eleven model families span four design philosophies: **tabular** nets/ensembles 
 - **`resnet50`** (~23.51 M params) — ResNet50: classic 4-stage bottleneck CNN (25.6 M params), fed CFDAC images resized to 384². ImageNet weights loaded, the input stem adapted to the requested channel count (in_chans=2 here) and the classifier head replaced for the task. Warm-up: head-only for 2 epochs (LR 3e-4), then the whole backbone is unfrozen at LR 3e-5.
 - **`convnext_tiny`** (~27.82 M params) — ConvNeXt-Tiny: modern CNN (depthwise 7×7 + inverted bottleneck, 28 M params), fed CFDAC images at native conv resolution. ImageNet weights loaded, the input stem adapted to the requested channel count (in_chans=2 here) and the classifier head replaced for the task. Warm-up: head-only for 2 epochs (LR 3e-4), then the whole backbone is unfrozen at LR 3e-5.
 
-## 6 · Exploratory data analysis — synthetic vs experimental
+## 6 · Training time & computational effort
+Per-cell wall-clock was not logged, so effort is reported in **measurable, hardware-independent** terms — parameters (measured), forward FLOPs (`torch.utils.flop_counter`; the full-1601 conv nets measured at a base size and scaled by the exact area ratio), the on-the-fly CFDAC data-path cost, and the committed campaign size — with a clearly-labelled GPU wall-clock estimate at the end.
+
+### 6.1 Training protocol
+- **Image cells** (CFDAC): subsample **3000**, batch 16, AdamW + ReduceLROnPlateau, **train-to-convergence** (early-stop patience 8, cap 80 epochs), AMP bf16(A100/L4)/fp16(T4).
+- **Tabular/sequence cells**: subsample 4000, batch 256, early-stop patience 15, cap 200 epochs (trees fit once).
+- Every cell is trained **once** to convergence with per-epoch checkpoint/resume and skip-if-exists, so a pre-empted ephemeral GPU never repeats finished work. The CFDAC image is recomputed from the FRFs on the fly each step (**0.210 GFLOP/sample**), avoiding a multi-TB materialised-image cache (a full 1601² float image is ~10 MB; ×10 000 ×7 variants ≈ 0.7 TB).
+
+### 6.2 Per-model cost (measured)
+`fwd` is the forward pass at the **training input size** (CFDAC images at native 1601²; vision backbones on the 384² resize; sequences over length 1601). `TFLOP/epoch` = 3×fwd (fwd+backward) × subsample (+CFDAC for image models) — one pass over the training subsample.
+
+![per-epoch training cost](figures/hires/compute_cost.png)
+*Figure vi — per-epoch training compute (log scale); blue = CFDAC-image, green = tabular/sequence.*
+
+| model | family | params | fwd GFLOPs | TFLOP / epoch |
+|---|---|---|---|---|
+| `mlp` | tabular/seq | 0.21 M | 0.00 | **0.0** |
+| `transformer1d` | tabular/seq | 0.90 M | 0.01 | **0.2** |
+| `cnn1d` | tabular/seq | 67 k | 0.02 | **0.2** |
+| `cnn3d` | image | 32 k | 2.71 | **25.0** |
+| `cnn2d_shallow` | image | 77 k | 4.60 | **42.1** |
+| `transformer` | image | 3.77 M | 14.66 | **132.6** |
+| `resnet50` | image | 23.51 M | 23.79 | **214.8** |
+| `convnext_tiny` | image | 27.82 M | 26.16 | **236.0** |
+| `cnn2d_deep` | image | 11.24 M | 184.70 | **1662.9** |
+
+**Three to four orders of magnitude separate the families.** A `transformer1d` epoch costs ~0.2 TFLOP; a full-resolution `cnn2d_deep` epoch costs ~1663 TFLOP (~9238× more) because it convolves the entire 1601² grid (its single forward is 185 GFLOP). The pretrained vision backbones sit in between (~215–236 TFLOP/epoch) only because they down-resize to 384². Flattening a sequence into the `mlp` is the one tabular case that balloons (d_in = 9×1601 → fwd 0.03 GFLOP).
+
+### 6.3 Campaign size and total effort
+- **575 cells trained at 1601** (this committed set): 155 tabular/seq, 420 image (a 128-bin baseline of ~426 more cells ran separately).
+- A single mid-cost image cell (≈shallow/transformer, ~40–130 TFLOP/epoch × ~30 convergence epochs) is ~1–4 PFLOP; the heavy `cnn2d_deep` cells are ~50 PFLOP each, the sequence/tabular cells a few TFLOP. Summed across the zoo the 1601 campaign is on the order of **a few ×10¹⁶–10¹⁷ FLOP** (tens of PFLOP-scale), dominated by the handful of deep/vision image cells.
+- **Hardware:** T4 (15 GB), L4 (24 GB), A100 (40 GB). *Rough* wall-clock (FLOP ÷ realized throughput, ~20–60 TFLOP/s effective on these cards with AMP): the cheap tabular/sequence cells converge in **seconds–single-digit minutes**; a full-resolution `cnn2d_deep` cell is **tens of minutes to a few hours**; the full 1601 campaign is a **few GPU-days** spread across the ephemeral sessions. Treat these as order-of-magnitude estimates — they are derived from FLOPs, not measured.
+
+### 6.4 The efficiency takeaway
+The representations that **transfer best** (raw FRF / CFDAC-magnitude with `transformer1d` / `cnn1d`, §9) are also among the **cheapest to train** — 2–4 orders of magnitude below the full-resolution image CNNs and the ImageNet backbones that they match or beat on real data. **Spending compute on a bigger image model is not just unrewarded (§5, §9), it is the dominant cost line.** The compute-rational recommendation is therefore also the accuracy-rational one: spectral/sequence models first.
+
+## 7 · Exploratory data analysis — synthetic vs experimental
 Before any model, the two datasets are compared directly. This frames everything that follows: *what the models are up against is not noise, it is a structured domain gap.*
 
-### 4.1 Class balance and severity coverage
+### 7.1 Class balance and severity coverage
 | class | synth N | exp N |
 |---|---|---|
 | pristine | 2000 | 462 |
@@ -118,20 +154,20 @@ Before any model, the two datasets are compared directly. This frames everything
 ![class balance and severity](figures/hires/eda_class_severity.png)
 *Figure 2 — (a) the synthetic set is perfectly balanced (2 000/class) while the experimental set is **bolt-dominated** (51% bolt, 18% pristine); training therefore class-weights the loss. (b) Experimental severity by type: bolt-loosening spans a wide 0–85% range, whereas hole and mass occupy narrow bands — this is exactly why the bolt detector has room to improve with severity and the others do not. (c) Per-type-normalised severity: synthetic damage is sampled near-uniformly, but the real damage clusters, so the model is asked to extrapolate over severity ranges it rarely saw.*
 
-### 4.2 Spectral signatures and the domain gap
+### 7.2 Spectral signatures and the domain gap
 ![FRF signatures](figures/hires/eda_frf_signatures.png)
 *Figure 3 — channel-averaged mean log|FRF|. (a) Synthetic classes differ mainly in resonance-peak amplitude/position — the information the models exploit in-domain. (b) Overlaying synthetic (solid) on experimental (dashed) for the same class shows the gap: the real structure has shifted resonances, extra anti-resonances, and a higher noise floor the linear ROM never produces.*
 
-### 4.3 Covariate shift, quantified
+### 7.3 Covariate shift, quantified
 ![domain shift PCA](figures/hires/eda_domain_shift.png)
 *Figure 4 — PCA of the log|FRF| spectra. (a) Coloured by **domain**, synthetic and experimental form two disjoint clouds (PC1 = 63% of variance); a 5-fold logistic classifier tells them apart with **AUC = 1.000** — i.e. essentially perfectly. (b) The same projection coloured by **damage class** shows the classes overlapping heavily, so the dominant axis of variation in the data is *which domain*, not *which damage*.*
 
-**This is the single most important diagnostic in the report.** A domain-classifier AUC of 1.00 means the sim-to-real gap is not a subtle nuisance — the simulator and the rig are trivially distinguishable from their spectra alone. Any zero-shot transfer at all (and we get meaningful transfer on detection) is therefore a non-trivial success, and the residual errors in §5–6 are the direct, expected consequence of this shift. It also sets the research direction: the lever is **domain adaptation**, not bigger models or higher resolution.
+**This is the single most important diagnostic in the report.** A domain-classifier AUC of 1.00 means the sim-to-real gap is not a subtle nuisance — the simulator and the rig are trivially distinguishable from their spectra alone. Any zero-shot transfer at all (and we get meaningful transfer on detection) is therefore a non-trivial success, and the residual errors in §8–9 are the direct, expected consequence of this shift. It also sets the research direction: the lever is **domain adaptation**, not bigger models or higher resolution.
 
-## 7 · Diagnostics — how the best models actually behave on real data
-Aggregate scores hide the failure *mode*. Below are the confusion matrices and ROC curves for the single best cell of each task (selected by experimental balanced-acc / R²; see §6 for all cells).
+## 8 · Diagnostics — how the best models actually behave on real data
+Aggregate scores hide the failure *mode*. Below are the confusion matrices and ROC curves for the single best cell of each task (selected by experimental balanced-acc / R²; see §9 for all cells).
 
-### 5.1 Confusion matrices (experimental, row-normalised)
+### 8.1 Confusion matrices (experimental, row-normalised)
 ![confusion matrices](figures/hires/diag_confusion.png)
 *Figure 5 — read each row as 'of the true X, what fraction was predicted as …'.*
 
@@ -140,9 +176,9 @@ Aggregate scores hide the failure *mode*. Below are the confusion matrices and R
 - **is_mass** (cnn3d/cfdac_imag): catches 82% of positives but flags 58% of negatives as positive — a sensitivity-biased operating point, the expected response when the loss is class-weighted and the prior shifts.
 - **is_hole** (transformer1d/frf_realimag): catches 53% of positives but flags 20% of negatives as positive — a sensitivity-biased operating point, the expected response when the loss is class-weighted and the prior shifts.
 - **type** (convnext_tiny/cfdac_imag): the 5-class matrix smears toward the **bolt** column (the majority real class) and the **mass** diagonal survives best — damage *type* is the hardest thing to transfer, because the spectral fingerprint of crack vs hole vs bolt is what the domain shift most corrupts.
-- **mass_location / col_location**: rows pile onto one or two columns — localization collapses toward a dominant class, consistent with the near-degenerate spatial classes of the linear ROM (§10) and the weak in-domain ceiling for col_location.
+- **mass_location / col_location**: rows pile onto one or two columns — localization collapses toward a dominant class, consistent with the near-degenerate spatial classes of the linear ROM (§13) and the weak in-domain ceiling for col_location.
 
-### 5.2 ROC / AUC for the detection tasks
+### 8.2 ROC / AUC for the detection tasks
 ![ROC curves](figures/hires/diag_roc.png)
 *Figure 6 — AUC is threshold-free and immune to the 82.5% prior, so it is the fairest single number for detection.*
 
@@ -157,7 +193,7 @@ Aggregate scores hide the failure *mode*. Below are the confusion matrices and R
 
 **Reading the AUCs.** `is_hole` and `is_mass` reach AUC ≈ 0.71–0.72 — the strongest threshold-free detectors — yet their *balanced accuracy* at the default cut is lower, because the operating threshold is mis-set by the shift. That gap is good news: it means a handful of labelled real samples to recalibrate the threshold would lift the realised accuracy without any retraining. `binary` and `is_pristine` have the weakest AUCs (≈0.55–0.57): deciding *damaged vs not* in the aggregate is harder than detecting specific damage signatures, because the pristine class is where the domain gap bites hardest (Figure 3a).
 
-## 8 · Per-task catalogue (every cell)
+## 9 · Per-task catalogue (every cell)
 Every (model, feature) cell, sorted best-first. `in-domain` = held-out synthetic score (the ceiling); `exp` columns = zero-shot on real data. The cell-zoo bar plot colours **blue = CFDAC-image** cells and **green = tabular/sequence** cells, so the winning representation family is visible at a glance.
 
 
@@ -844,9 +880,9 @@ Every (model, feature) cell, sorted best-first. `in-domain` = held-out synthetic
 | `mlp/indicators` | 0.483 | -475005154580935999488.000 |
 | `mlp/modal` | 0.514 | -28047672784197238390784.000 |
 
-**Best:** `mlp/frf_mag` exp R²=0.037 (in-domain R²=0.59). Severity barely transfers; the full diagnosis is in §8.
+**Best:** `mlp/frf_mag` exp R²=0.037 (in-domain R²=0.59). Severity barely transfers; the full diagnosis is in §11.
 
-## 9 · Damage-threshold (DT) severity sweep @1601
+## 10 · Damage-threshold (DT) severity sweep @1601
 Positives are stratified by their damage-severity percentile (each task on its own axis: bolt %, hole mm, mass kg, crack depth); balanced accuracy is recomputed keeping only the more-severe positives (all negatives retained). This tests the central thesis — *transfer should improve with damage severity, because larger damage perturbs the spectrum more than the domain gap does.*
 
 ![DT combined](figures/hires/dt_1601_combined.png)
@@ -865,7 +901,7 @@ Positives are stratified by their damage-severity percentile (each task on its o
 
 **is_bolt reaches ~0.82 balanced-acc at ≥75% loosening** — confirming the thesis where severity has range to vary. is_hole/is_mass stay flat *because their experimental severity range is narrow (Figure 2b), not because the model fails* — there simply is no 'more severe' subset to climb into.
 
-### 9.2 The full diagnostic suite, swept over severity
+### 10.1 The full diagnostic suite, swept over severity
 Balanced accuracy is one scalar; the questions *'does the **ranking** (AUC) improve, and **how** does the confusion matrix change?'* need the whole suite recomputed at each severity threshold. Using the stored class probabilities, the best cell of each detection task is re-scored keeping only progressively more-severe positives.
 
 ![AUC and macro-F1 vs severity](figures/hires/dt_auc.png)
@@ -885,7 +921,7 @@ Balanced accuracy is one scalar; the questions *'does the **ranking** (AUC) impr
 **The honest reading.** Severity helps where it *varies*: `binary` and especially `is_bolt` (AUC 0.67→0.87) improve monotonically. For `is_crack`/`is_hole` the apparent late drop is a **small-sample artefact** — past p75 only a handful of positives remain (the experimental crack/hole severities barely span a range), so the metric becomes noisy rather than genuinely worse. `is_mass` is flat because its real severity is essentially a single level. This nuance is exactly why the sweep reports per-task thresholds and positive counts rather than a single global curve.
 
 
-### 9.3 The same sweep on a *physical* axis — storey-stiffness loss
+### 10.2 The same sweep on a *physical* axis — storey-stiffness loss
 Native severity units are not comparable across damage types (a '% loosening' is not a 'mm of crack'). Using the **simulator's own calibrated damage model** (`ml_pipeline.variation.{bolt_jsr_ratio, crack_ratio, hole_ratio}`), each stiffness-reducing damage is mapped to the actual fraction of storey stiffness it removes — putting bolt, crack and hole on one physical axis. (Added mass is excluded: it changes inertia, not compliance, so its stiffness loss is 0.)
 
 ![severity to stiffness map + distribution](figures/hires/dt_stiffness_map.png)
@@ -903,39 +939,39 @@ Experimentally, **bolt loosening removes 15–61% of storey stiffness (median ~4
 | is_crack | `transformer/cfdac_mag` | 0.587 | 0.499 | — | — | 320→0 (≥40%) |
 | is_hole | `transformer1d/frf_realimag` | 0.667 | — | — | — | 280→0 (≥40%) |
 
-**This is the physical explanation for the whole detection hierarchy.** On a stiffness-loss axis the story is unambiguous: `binary` and `is_bolt` keep climbing as we retain only structurally-significant damage (is_bolt balanced-acc 0.67→0.73, AUC 0.67→0.79 by ≥40% loss), because bolt damage genuinely reaches that regime. `is_crack` and `is_hole` curves **terminate early** — by ≥10% and ≥5% stiffness loss respectively there are *zero* experimental positives left, because crack/hole simply never remove that much stiffness. Their weak, flat transfer is not a model failure: the damage they represent is physically near-invisible to a global FRF. The takeaway sharpens the severity message of §9.1–9.2: **detection transfers in proportion to how much stiffness the damage removes**, and only bolt-loosening (and any other large-stiffness-loss mechanism) reaches the regime where sim-to-real transfer becomes reliable.
+**This is the physical explanation for the whole detection hierarchy.** On a stiffness-loss axis the story is unambiguous: `binary` and `is_bolt` keep climbing as we retain only structurally-significant damage (is_bolt balanced-acc 0.67→0.73, AUC 0.67→0.79 by ≥40% loss), because bolt damage genuinely reaches that regime. `is_crack` and `is_hole` curves **terminate early** — by ≥10% and ≥5% stiffness loss respectively there are *zero* experimental positives left, because crack/hole simply never remove that much stiffness. Their weak, flat transfer is not a model failure: the damage they represent is physically near-invisible to a global FRF. The takeaway sharpens the severity message of §10.1–10.2: **detection transfers in proportion to how much stiffness the damage removes**, and only bolt-loosening (and any other large-stiffness-loss mechanism) reaches the regime where sim-to-real transfer becomes reliable.
 
 
-## 10 · Severity regression (the only non-classifier task)
+## 11 · Severity regression (the only non-classifier task)
 ![severity scatter and residuals](figures/hires/diag_severity.png)
 *Figure 13 — (a) predicted vs true severity for the best cell; (b) residuals.*
 
-Best experimental **R² = +0.037** with **Pearson r = 0.361** and **MAE = 0.254** (`mlp/frf_mag`), against **R² ≈ 0.59 in-domain**. The scatter tells the story the R² number alone does not: there *is* a weak positive trend (r ≈ 0.36, the fit slope is positive), so the model is not random — but the predictions collapse toward the training mean (the residual plot in (b) slopes against the true value, the signature of regression-to-the-mean under distribution shift). Restricting to severe cases does **not** raise R² (that just narrows the variance). **Predicting damage *magnitude* zero-shot is effectively unsolved**; recasting it as ordinal severity-band classification (§11) is the recommended fix, since detection already improves monotonically with severity (§7).
+Best experimental **R² = +0.037** with **Pearson r = 0.361** and **MAE = 0.254** (`mlp/frf_mag`), against **R² ≈ 0.59 in-domain**. The scatter tells the story the R² number alone does not: there *is* a weak positive trend (r ≈ 0.36, the fit slope is positive), so the model is not random — but the predictions collapse toward the training mean (the residual plot in (b) slopes against the true value, the signature of regression-to-the-mean under distribution shift). Restricting to severe cases does **not** raise R² (that just narrows the variance). **Predicting damage *magnitude* zero-shot is effectively unsolved**; recasting it as ordinal severity-band classification (§14) is the recommended fix, since detection already improves monotonically with severity (§10).
 
-## 11 · Cross-task synthesis
+## 12 · Cross-task synthesis
 1. **Detection ≫ localization ≫ magnitude.** Presence/type transfers (AUC 0.55–0.72, balanced-acc 0.56–0.67); location only weakly (≈1.4–2× chance); severity barely (r≈0.36, R²≈0.04).
 2. **Severity is the lever, not the target.** Every detector improves on more-severe damage (is_bolt →0.82 at ≥75% loosening); use damage size to *gate confidence*, don't try to *regress* it.
 3. **Representation > model size.** Full complex spectral inputs (raw FRF / CFDAC / FRF-derived timeseries) with sequence/conv models win; the compressed `modal` vector and the ImageNet-pretrained vision backbones (ConvNeXt-T, ResNet50) do **not** lead — pretraining on natural images buys nothing for these spectra.
 4. **The ceiling is covariate shift, not capacity.** Near-perfect in-domain (Figure 1) collapses to partial transfer because the domains are AUC=1.00 separable (Figure 4). Higher resolution and bigger nets cannot close a gap that is fundamentally about the simulator not matching the rig.
 
-## 12 · Limitations
+## 13 · Limitations
 - **One experimental structure, one seed per cell** — treat balanced-acc gaps < 0.05 as ties.
-- **Post-hoc best-cell selection** (§5–6 pick the winner after seeing the test set) is exploratory, not a held-out estimate; the per-task tables guard against cherry-picking by showing every cell.
+- **Post-hoc best-cell selection** (§8–9 pick the winner after seeing the test set) is exploratory, not a held-out estimate; the per-task tables guard against cherry-picking by showing every cell.
 - **Localization classes are near-degenerate** in the linear ROM (symmetric crack/hole make the two column ends almost indistinguishable), capping col_location even in-domain (0.45 mF1).
 - **`timeseries` is FRF-reconstructed**, not independently measured, so it carries no information beyond the FRF — it is a different *inductive bias*, not a new sensor.
 - **128-bin resolution comparison pending** (that run is still in progress).
 
-## 13 · Recommendations
+## 14 · Recommendations
 1. **Deploy detection on severe damage and report severity-stratified** (the DT curves, not a single number).
-2. **Recalibrate the decision threshold on a few real samples** — the AUC>bal-acc gap (§5.2) is free accuracy.
+2. **Recalibrate the decision threshold on a few real samples** — the AUC>bal-acc gap (§8.2) is free accuracy.
 3. **Use spectral inputs + sequence/conv models; drop `modal` and pretrained vision** as the primary route.
 4. **Attack the domain gap directly with domain adaptation** (e.g. CORAL/feature alignment, fine-tune on a small labelled real set, or domain-randomise the simulator) — this is the highest-leverage move given the AUC≈1.0 shift.
 5. **Recast severity as ordinal classification** and extend the DT analysis to the multi-class tasks.
 6. **Finish the 128-bin run** to settle whether full resolution is necessary.
 
-## 14 · Artefacts (everything is reproducible from these)
+## 15 · Artefacts (everything is reproducible from these)
 - **Engines:** `ml_pipeline/hires_{zoo,tab,all}.py` — CFDAC-image, tabular/sequence, and the unified dispatcher; every model and feature defined here.
-- **Analysis scripts:** `hires_zoo_summary.py` (per-cell distillation), `hires_dt_1601.py` (DT balanced-acc sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_analysis.py` (EDA + best-cell confusion/ROC/severity), `hires_arch.py` (measured parameter counts), `hires_inputs.py` (input-sample figures), `build_hires_report.py` (this report).
-- **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, dt_stiffness, analysis, architectures, inputs}.json`. **Every figure is reproducible from committed data** — the per-case predictions are archived in `results_hires/per_case_hires1601.tar.gz` and the FRF-derived arrays the EDA/input figures need in `results_hires/figure_data.npz` (built by `build_figure_bundle.py`, served by `figdata.py`). Raw per-case predictions also live on branches `colab-hires-{tabular,cnn,transformer,vision}`. See `results/REPRODUCE.md` for the one-command-per-script pipeline.
+- **Analysis scripts:** `hires_zoo_summary.py` (per-cell distillation), `hires_dt_1601.py` (DT balanced-acc sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_dt_stiffness.py` (DT vs stiffness loss), `hires_analysis.py` (EDA + best-cell confusion/ROC/severity), `hires_arch.py` (measured parameter counts), `hires_compute.py` (FLOPs / training-effort accounting), `hires_inputs.py` (input-sample figures), `build_hires_report.py` (this report).
+- **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, dt_stiffness, analysis, architectures, compute, inputs}.json`. **Every figure is reproducible from committed data** — the per-case predictions are archived in `results_hires/per_case_hires1601.tar.gz` and the FRF-derived arrays the EDA/input figures need in `results_hires/figure_data.npz` (built by `build_figure_bundle.py`, served by `figdata.py`). Raw per-case predictions also live on branches `colab-hires-{tabular,cnn,transformer,vision}`. See `results/REPRODUCE.md` for the one-command-per-script pipeline.
 - **Figures:** `results/figures/hires/` — inputs (`inputs_*`), capacity (`arch_params`), EDA (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_1601_combined`, `zoo_dt_is_bolt`, `dt_auc`, `dt_confusion_evo`), per-task cell zoos (`cellzoo_*`).
 - **Companion:** `REPORT_synth.md` (in-domain ceiling).

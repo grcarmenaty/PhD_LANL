@@ -14,6 +14,7 @@ python ml_pipeline/hires_dt_diag.py          # DT-swept AUC/confusion  -> dt_dia
 python ml_pipeline/hires_dt_stiffness.py     # DT vs stiffness loss    -> dt_stiffness.json (+2 figs)
 python ml_pipeline/hires_analysis.py         # EDA + best-cell diagnostics (+6 figs)
 python ml_pipeline/hires_arch.py             # measured model sizes    -> architectures.json (+fig)
+python ml_pipeline/hires_compute.py          # FLOPs / training effort -> compute.json (+fig)
 python ml_pipeline/hires_inputs.py           # input-sample figures (+4 figs)
 python ml_pipeline/build_hires_report.py     # assembles the report + Figure 1 + cellzoo_* figs
 ```
