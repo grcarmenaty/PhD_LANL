@@ -30,7 +30,7 @@ from torch.utils.data import Dataset
 if torch.cuda.is_available():
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = False   # input shapes vary per feature/res; benchmark re-searches and can fail ("FIND no engine") on T4 ConvNeXt
     try: torch.set_float32_matmul_precision("high")
     except Exception: pass
 
@@ -192,7 +192,7 @@ class CFDACTransformer(nn.Module):
         nn.init.trunc_normal_(self.pos, std=0.02); nn.init.trunc_normal_(self.cls, std=0.02)
         enc = nn.TransformerEncoderLayer(dim, heads, dim * 4, dropout=0.1,
                                          activation="gelu", batch_first=True, norm_first=True)
-        self.enc = nn.TransformerEncoder(enc, depth)
+        self.enc = nn.TransformerEncoder(enc, depth, enable_nested_tensor=False)
         self.norm = nn.LayerNorm(dim)
         self.head = nn.Linear(dim, n_out)
         self.regression = regression
@@ -301,8 +301,8 @@ def run_cell(task: str, model: str, feature: str, *, syn_h5, exp_h5, out_dir: Pa
         Hg, H_ref_syn = _decimate_frf(Hg, H_ref_syn, res_bins, dev)
     yg = torch.from_numpy(y).to(dev) if kind == "cls" else torch.from_numpy(y.astype(np.float32)).to(dev)
 
-    net, feed = build_model(model, n_in, n_out, kind, vision_size=vision_size,
-                            pretrained=pretrained)
+    net, feed = build_model(model, n_in, n_out, kind, input_size=res_bins,
+                            vision_size=vision_size, pretrained=pretrained)
     net = net.to(dev)
     cls_w = None
     if kind == "cls":

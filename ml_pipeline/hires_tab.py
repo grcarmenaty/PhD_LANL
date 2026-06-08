@@ -212,7 +212,7 @@ class Transformer1D(nn.Module):
         nn.init.trunc_normal_(self.pos, std=0.02); nn.init.trunc_normal_(self.cls, std=0.02)
         enc = nn.TransformerEncoderLayer(dim, heads, dim * 4, dropout=0.1, activation="gelu",
                                          batch_first=True, norm_first=True)
-        self.enc = nn.TransformerEncoder(enc, depth); self.norm = nn.LayerNorm(dim)
+        self.enc = nn.TransformerEncoder(enc, depth, enable_nested_tensor=False); self.norm = nn.LayerNorm(dim)
         self.head = nn.Linear(dim, n_out); self.regression = regression
     def forward(self, x):
         t = self.tok(x).transpose(1, 2); b = t.shape[0]
