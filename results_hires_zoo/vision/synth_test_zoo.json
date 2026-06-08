@@ -150,5 +150,24 @@
     "synth_test_bal_acc": 0.9677083333333334,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_pristine_convnext_tiny_cfdac_imag_hires1601": {
+    "task": "is_pristine",
+    "model": "convnext_tiny",
+    "feature": "cfdac_imag",
+    "n_target": 1601,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 4000,
+    "vision_feed_size": 384,
+    "synth_val_best": 0.9668636438946263,
+    "synth_test_metric": 0.9716666666666667,
+    "synth_test_macro_f1": 0.9569254937732001,
+    "synth_test_bal_acc": 0.9697916666666666,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
