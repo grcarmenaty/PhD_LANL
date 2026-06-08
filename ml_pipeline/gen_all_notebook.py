@@ -25,7 +25,7 @@ IMG_MODELS  = list(A.IMG_MODELS)        # cnn2d_shallow/deep, cnn3d, transformer
 TAB_MODELS  = list(A.TAB_MODELS)        # mlp, rf, xgb, cnn1d, transformer1d
 CFDAC_FEATURES = list(Z.CFDAC_FEATURES) # 7 CFDAC channel-features
 SUBSAMPLE = 3000
-IMG_BATCH = 16        # T4 15 GB at 128 bins; raise on bigger GPUs / lower if OOM
+IMG_BATCH = 32        # L4 24 GB at 128 bins (bf16 auto on L4); lower to 16 on T4 / if OOM
 TAB_BATCH = 256
 VISION_SIZE = 224     # feed conv backbones at 224 (no upscaling a 128 grid)
 PICKUP_BRANCHES = ['colab-hires-all']   # resume this run only (128 cells); add others to reuse them
@@ -160,15 +160,16 @@ except Exception as e: print('zip at /content/results_all.zip', e)"""
 
 def main():
     cells = [
-        md("# CFDAC @128 — THE WHOLE STUDY in one notebook (T4-friendly)\n\n"
+        md("# CFDAC @128 — THE WHOLE STUDY in one notebook (L4-tuned)\n\n"
            "Every feature family (modal / indicators / FRF / timeseries → CFDAC images) and "
            "every model (MLP / RF / XGB / 1-D CNN+transformer → 2-D CNN shallow/deep / 3-D CNN "
            "/ CFDAC transformer / ConvNeXt-T / ResNet50) at **128-bin resolution**, across all "
            "10 tasks = **570 cells**. One unified grid dispatched to the right engine per cell. "
-           "Sized for a **T4 (15 GB)**: 128² CFDAC is small, `IMG_BATCH=16`, vision fed at 224. "
+           "Tuned for an **L4 (24 GB)**: bf16 auto-enables, `IMG_BATCH=32`, vision fed at 224. "
+           "The expensive cells are the vision backbones — L4 runs them ~2–3× faster than a T4. "
            "Trains to convergence with checkpoint/resume, skips finished cells, autosaves JSON "
-           "to `colab-hires-all` (5× retry). Set a GPU runtime + `GH_TOKEN` secret. Edit the "
-           "CONFIG lists / `RESOLUTIONS` (e.g. add 400, 1601) to widen on a bigger GPU."),
+           "to `colab-hires-all` (5× retry). Set an **L4 GPU** runtime + `GH_TOKEN` secret. "
+           "(On a T4: set `IMG_BATCH=16`. To go faster: drop `VISION_SIZE` 224→160.)"),
         md("## 1 · Bootstrap"), code(BOOTSTRAP),
         md("## 2 · Regenerate the 1601-bin features"), code(REGEN),
         md("## 3 · Config + context + caches (edit the CONFIG block)"), code(SETUP),
