@@ -6667,5 +6667,24 @@
     "synth_test_bal_acc": 0.766295862607338,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_crack_convnext_tiny_cfdac_all_hires128": {
+    "task": "is_crack",
+    "model": "convnext_tiny",
+    "feature": "cfdac_all",
+    "n_target": 128,
+    "n_channels": 4,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": 224,
+    "synth_val_best": 0.4479804161566707,
+    "synth_test_metric": 0.8133333333333334,
+    "synth_test_macro_f1": 0.4485294117647059,
+    "synth_test_bal_acc": 0.5,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
