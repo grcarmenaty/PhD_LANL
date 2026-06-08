@@ -5888,5 +5888,43 @@
     "synth_test_bal_acc": null,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "type_transformer_cfdac_real_hires128": {
+    "task": "type",
+    "model": "transformer",
+    "feature": "cfdac_real",
+    "n_target": 128,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 5,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.840957338618711,
+    "synth_test_metric": 0.8511111111111112,
+    "synth_test_macro_f1": 0.8496491228070175,
+    "synth_test_bal_acc": 0.8479088999639,
+    "input_normalized": true,
+    "trained_to_convergence": true
+  },
+  "type_transformer_cfdac_imag_hires128": {
+    "task": "type",
+    "model": "transformer",
+    "feature": "cfdac_imag",
+    "n_target": 128,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 5,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.826370523811504,
+    "synth_test_metric": 0.82,
+    "synth_test_macro_f1": 0.8203608891143895,
+    "synth_test_bal_acc": 0.8168284862998221,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
