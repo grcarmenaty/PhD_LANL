@@ -7218,5 +7218,43 @@
     "synth_test_bal_acc": 0.7142601004064069,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_pristine_transformer_cfdac_real_hires128": {
+    "task": "is_pristine",
+    "model": "transformer",
+    "feature": "cfdac_real",
+    "n_target": 128,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.9364114665657443,
+    "synth_test_metric": 0.9511111111111111,
+    "synth_test_macro_f1": 0.9271716101694916,
+    "synth_test_bal_acc": 0.9698630136986301,
+    "input_normalized": true,
+    "trained_to_convergence": true
+  },
+  "is_pristine_transformer_cfdac_imag_hires128": {
+    "task": "is_pristine",
+    "model": "transformer",
+    "feature": "cfdac_imag",
+    "n_target": 128,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.924194479563276,
+    "synth_test_metric": 0.9422222222222222,
+    "synth_test_macro_f1": 0.9145760929879385,
+    "synth_test_bal_acc": 0.9598710717163578,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
