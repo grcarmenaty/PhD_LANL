@@ -6686,5 +6686,24 @@
     "synth_test_bal_acc": 0.5,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_mass_transformer_cfdac_real_hires128": {
+    "task": "is_mass",
+    "model": "transformer",
+    "feature": "cfdac_real",
+    "n_target": 128,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.9590347583868233,
+    "synth_test_metric": 0.9711111111111111,
+    "synth_test_macro_f1": 0.9554153234103848,
+    "synth_test_bal_acc": 0.9431430689399556,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
