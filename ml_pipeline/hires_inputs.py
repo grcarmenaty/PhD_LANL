@@ -60,16 +60,18 @@ def cfdac_channels(ref, H, channels=("real", "imag", "mag", "phase")):
 
 
 def main():
-    S = pick(SYN); E = pick(EXP)
+    from ml_pipeline import figdata
+    samp = figdata.load_input_samples()
+    if samp is not None:                      # committed bundle (no HDF5 needed)
+        S, E = samp["synth"], samp["exp"]
+    else:                                     # fall back to the hi-res HDF5
+        S = pick(SYN); E = pick(EXP)
     fr = S["freqs"]
 
     # ---------- (1) tabular features: modal (81) + indicators (22) ----------
     fig, ax = plt.subplots(1, 2, figsize=(15, 4.6))
-    # modal for synth pristine vs synth bolt
-    import h5py
-    with h5py.File(SYN, "r") as f:
-        mag_p = np.abs(f["frf_real"][S["idx"][0]] + 1j*f["frf_imag"][S["idx"][0]]).astype(np.float32)
-        mag_b = np.abs(f["frf_real"][S["idx"][1]] + 1j*f["frf_imag"][S["idx"][1]]).astype(np.float32)
+    # modal from the bundled complex FRFs (synth pristine vs synth bolt)
+    mag_p = np.abs(S["H"][0]).astype(np.float32); mag_b = np.abs(S["H"][1]).astype(np.float32)
     mv_p = modal_features(mag_p, fr); mv_b = modal_features(mag_b, fr)
     x = np.arange(81)
     ax[0].plot(x, mv_p, ".-", ms=3, lw=.7, label="pristine", color="#7f7f7f")

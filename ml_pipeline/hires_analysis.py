@@ -91,8 +91,14 @@ def percase(root, task, model, feat):
 
 # ----------------------------------------------------------------------------- (A) EDA
 def eda(stats):
-    syn_tc, syn_sev, _, _ = load_meta_labels(SYN)
-    exp_tc, exp_sev, _, _ = load_meta_labels(EXP)
+    from ml_pipeline import figdata
+    B = figdata.load_eda_arrays()
+    if B is not None:                               # committed bundle (no HDF5 needed)
+        syn_tc = B["syn_tc"].astype(int); syn_sev = B["syn_sev"].astype(float)
+        exp_tc = B["exp_tc"].astype(int); exp_sev = B["exp_sev"].astype(float)
+    else:                                           # fall back to the hi-res HDF5
+        syn_tc, syn_sev, _, _ = load_meta_labels(SYN)
+        exp_tc, exp_sev, _, _ = load_meta_labels(EXP)
     stats["counts"] = {"synth": {TYPE_NAMES[i]: int((syn_tc == i).sum()) for i in range(5)},
                        "exp":   {TYPE_NAMES[i]: int((exp_tc == i).sum()) for i in range(5)}}
 
@@ -132,8 +138,12 @@ def eda(stats):
     plt.tight_layout(); plt.savefig(FIG/"eda_class_severity.png", dpi=130); plt.close(fig)
 
     # --- per-class FRF signatures + domain gap -------------------------------
-    syn_lm, syn_tc2, _, fr = logmag_chanmean(SYN, sub=4000)
-    exp_lm, exp_tc2, _, _ = logmag_chanmean(EXP)
+    if B is not None:
+        syn_lm = B["syn_lm"]; syn_tc2 = B["syn_lm_tc"].astype(int); fr = B["freqs"]
+        exp_lm = B["exp_lm"]; exp_tc2 = B["exp_tc"].astype(int)
+    else:
+        syn_lm, syn_tc2, _, fr = logmag_chanmean(SYN, sub=4000)
+        exp_lm, exp_tc2, _, _ = logmag_chanmean(EXP)
     fig, ax = plt.subplots(1, 2, figsize=(14, 4.6))
     for i in range(5):
         ax[0].plot(fr, syn_lm[syn_tc2 == i].mean(0), color=CFAM[TYPE_NAMES[i]], lw=1.4, label=TYPE_NAMES[i])
@@ -277,11 +287,13 @@ def diagnostics(root, summary, stats):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default="/tmp/allres"); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    from ml_pipeline import figdata
+    root = a.root or figdata.percase_root()
     summary = json.loads((_REPO/"results_hires"/"zoo_summary.json").read_text())
     stats = {}
     eda(stats)
-    diagnostics(a.root, summary, stats)
+    diagnostics(root, summary, stats)
     (_REPO/"results_hires"/"analysis.json").write_text(json.dumps(stats, indent=1))
     print("wrote results_hires/analysis.json + EDA/diagnostic figures")
 

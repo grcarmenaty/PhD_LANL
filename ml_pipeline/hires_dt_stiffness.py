@@ -69,11 +69,11 @@ def load_rows(root, task, model, feat):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default="/tmp/allres"); a = ap.parse_args()
-    import h5py
-    with h5py.File(_REPO/"dataset"/"experimental_features_hires.h5", "r") as f:
-        names = [str(s) for s in f["names"][:]]
-        tcs = f["type_code"][:].astype(int); svs = f["severity"][:].astype(float)
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    from ml_pipeline import figdata
+    root = a.root or figdata.percase_root()
+    names, tcs, svs = figdata.load_exp_labels()
+    tcs = tcs.astype(int); svs = svs.astype(float)
     tc_by = dict(zip(names, tcs)); sev_by = dict(zip(names, svs))
     sl_by = {n: 100.0 * stiffness_loss(tc_by[n], sev_by[n]) for n in names}   # percent
     cells = best_cells()
@@ -83,7 +83,7 @@ def main():
         if task not in cells:
             continue
         mo, fe = cells[task]
-        rows = load_rows(a.root, task, mo, fe)
+        rows = load_rows(root, task, mo, fe)
         if not rows:
             continue
         yt = np.array([r["y_true"] for r in rows])
@@ -150,7 +150,6 @@ def main():
     ax[0].set_title("(a) calibrated severity → stiffness-loss map\n(the simulator's own damage model)",
                     fontweight="bold", fontsize=10); ax[0].legend(fontsize=9); ax[0].grid(alpha=.3)
     # experimental distribution per type
-    import h5py
     data = []
     for c in range(1, 5):
         m = tcs == c

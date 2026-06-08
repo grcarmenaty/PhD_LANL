@@ -49,10 +49,11 @@ def load_rows(root, task, model, feat):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default="/tmp/allres"); a = ap.parse_args()
-    import h5py
-    with h5py.File(_REPO/"dataset"/"experimental_features_hires.h5", "r") as f:
-        sev = dict(zip([str(s) for s in f["names"][:]], f["severity"][:]))
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    from ml_pipeline import figdata
+    root = a.root or figdata.percase_root()
+    names, _tc, svs = figdata.load_exp_labels()
+    sev = dict(zip(names, svs))
     cells = best_detection_cells()
 
     out = {"percentiles": PCTS, "per_task": {}}
@@ -60,7 +61,7 @@ def main():
         if task not in cells:
             continue
         mo, fe = cells[task]
-        rows = load_rows(a.root, task, mo, fe)
+        rows = load_rows(root, task, mo, fe)
         if not rows or "proba" not in rows[0] or rows[0]["proba"] is None:
             continue
         yt = np.array([r["y_true"] for r in rows])

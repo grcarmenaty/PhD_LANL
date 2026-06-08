@@ -1,10 +1,5 @@
 {
  "binary": {
-  "128": {
-   "score": 0.5692541221033868,
-   "cell": "transformer1d/timeseries",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.5887943245480011,
    "cell": "transformer1d/timeseries",
@@ -12,11 +7,6 @@
   }
  },
  "col_location": {
-  "128": {
-   "score": 0.42743803933848007,
-   "cell": "transformer1d/frf_mag",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.3531292749658003,
    "cell": "transformer/cfdac_mag",
@@ -24,11 +14,6 @@
   }
  },
  "mass_location": {
-  "128": {
-   "score": 0.41393442622950816,
-   "cell": "rf/modal",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.5,
    "cell": "mlp/frf_realimag",
@@ -36,11 +21,6 @@
   }
  },
  "severity": {
-  "128": {
-   "score": 0.1812577680284082,
-   "cell": "cnn1d/frf_mag",
-   "kind": "reg"
-  },
   "1601": {
    "score": 0.03652112546686603,
    "cell": "mlp/frf_mag",
@@ -48,11 +28,6 @@
   }
  },
  "type": {
-  "128": {
-   "score": 0.3882699041703922,
-   "cell": "cnn2d_deep/cfdac_realimag",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.3064237090066356,
    "cell": "convnext_tiny/cfdac_imag",
@@ -60,11 +35,6 @@
   }
  },
  "is_bolt": {
-  "128": {
-   "score": 0.7079636656318271,
-   "cell": "cnn2d_shallow/cfdac_realimag",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.6688875474301483,
    "cell": "transformer1d/frf_realimag",
@@ -72,11 +42,6 @@
   }
  },
  "is_crack": {
-  "128": {
-   "score": 0.6183226380500432,
-   "cell": "cnn2d_deep/cfdac_realimag",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.5873193485763589,
    "cell": "transformer/cfdac_mag",
@@ -84,11 +49,6 @@
   }
  },
  "is_mass": {
-  "128": {
-   "score": 0.6530374649859944,
-   "cell": "cnn1d/timeseries",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.6198721988795518,
    "cell": "cnn3d/cfdac_imag",
@@ -96,11 +56,6 @@
   }
  },
  "is_hole": {
-  "128": {
-   "score": 0.6823730764570459,
-   "cell": "mlp/frf_realimag",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.6667454259057313,
    "cell": "transformer1d/frf_realimag",
@@ -108,11 +63,6 @@
   }
  },
  "is_pristine": {
-  "128": {
-   "score": 0.5816641997708174,
-   "cell": "transformer1d/timeseries",
-   "kind": "cls"
-  },
   "1601": {
    "score": 0.5567266679399032,
    "cell": "mlp/timeseries",

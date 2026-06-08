@@ -27,15 +27,18 @@ DET = ["binary","is_bolt","is_crack","is_hole","is_mass","is_pristine"]
 
 
 def load_sev():
-    import h5py
-    p = _REPO/"dataset"/"experimental_features_hires.h5"
-    if not p.exists(): return {}
-    with h5py.File(p,"r") as f:
-        return dict(zip([str(s) for s in f["names"][:]], f["severity"][:]))
+    try:
+        from ml_pipeline import figdata
+        names, _tc, svs = figdata.load_exp_labels()
+        return dict(zip(names, svs))
+    except Exception:
+        return {}
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default="/tmp/allres"); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    from ml_pipeline import figdata
+    a.root = a.root or figdata.percase_root()
     sev = load_sev()
     cells = {}                      # (task,model,feature,res) -> rec
     dt = defaultdict(dict)          # (task,res) -> {cell: curve}

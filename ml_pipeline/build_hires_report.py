@@ -168,6 +168,31 @@ def load_cells():
     return cells
 
 
+def synth_vs_exp_plot(cells):
+    """Figure 1: best-cell in-domain (held-out synth) vs zero-shot experimental
+    transfer, per task. Regenerated here so it is reproducible from zoo_summary.json."""
+    tasks = [t for t in TASKS if t in cells]
+    indom, exp, lab = [], [], []
+    for t in tasks:
+        recs = cells[t]; reg = recs[0]["kind"] == "reg"
+        key = (lambda r: r.get("exp_r2", -9)) if reg else (lambda r: r.get("exp_bal_acc", 0))
+        b = max(recs, key=key)
+        indom.append(b.get("synth") or 0.0)
+        exp.append(key(b)); lab.append(t + ("*" if reg else ""))
+    x = np.arange(len(tasks)); w = 0.4
+    fig, ax = plt.subplots(figsize=(12, 5))
+    ax.bar(x - w/2, indom, w, label="in-domain (held-out synth)", color="#ff7f0e", edgecolor="black", lw=.4)
+    ax.bar(x + w/2, exp, w, label="zero-shot (experimental)", color="#1f77b4", edgecolor="black", lw=.4)
+    ax.axhline(0.5, ls=":", color="grey", alpha=.6)
+    ax.set_xticks(x); ax.set_xticklabels(lab, rotation=35, ha="right", fontsize=9)
+    ax.set_ylabel("score (cls: macro-F1 / balanced-acc · reg*: R²)")
+    ax.set_title("In-domain ceiling vs zero-shot transfer, best cell per task @1601\n"
+                 "(the gap between the bars IS the sim-to-real penalty)", fontweight="bold", fontsize=11)
+    ax.legend(); ax.grid(axis="y", alpha=.3)
+    plt.tight_layout(); p = FIG/"zoo1601_synth_vs_exp.png"; plt.savefig(p, dpi=130); plt.close(fig)
+    return p.name
+
+
 def cellzoo_plot(task, recs):
     reg = recs[0]["kind"] == "reg"
     key = (lambda r: r.get("exp_r2", -9)) if reg else (lambda r: r.get("exp_bal_acc", 0))
@@ -248,7 +273,7 @@ def main():
     A(f"- **{nnc}/{ncls} classification cells clear chance** on real data (≈{100*nnc/ncls:.0f}%).")
     A("- A *cell* = one (model, feature) pair. Metric of record: **balanced accuracy / macro-F1 / AUC**"
       " (classification), **R² / Pearson r / MAE** (severity). Raw accuracy is never used (82.5% damaged prior).")
-    A("\n![in-domain vs zero-shot](figures/hires/zoo1601_synth_vs_exp.png)")
+    A(f"\n![in-domain vs zero-shot](figures/hires/{synth_vs_exp_plot(cells)})")
     A("*Figure 1 — best-cell in-domain score (held-out synth) vs zero-shot experimental transfer, per task."
       " The vertical gap is the sim-to-real penalty; it is largest exactly where the synthetic model is most"
       " confident (mass_location, type, severity).*\n")
@@ -575,9 +600,12 @@ def main():
       " sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_analysis.py` (EDA + best-cell"
       " confusion/ROC/severity), `hires_arch.py` (measured parameter counts), `hires_inputs.py` (input-sample"
       " figures), `build_hires_report.py` (this report).\n"
-      "- **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, analysis, architectures,"
-      " inputs}.json`; raw per-case predictions (with class probabilities) on branches"
-      " `colab-hires-{tabular,cnn,transformer,vision}`.\n"
+      "- **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, dt_stiffness, analysis,"
+      " architectures, inputs}.json`. **Every figure is reproducible from committed data** — the per-case"
+      " predictions are archived in `results_hires/per_case_hires1601.tar.gz` and the FRF-derived arrays the"
+      " EDA/input figures need in `results_hires/figure_data.npz` (built by `build_figure_bundle.py`, served by"
+      " `figdata.py`). Raw per-case predictions also live on branches `colab-hires-{tabular,cnn,transformer,vision}`."
+      " See `results/REPRODUCE.md` for the one-command-per-script pipeline.\n"
       "- **Figures:** `results/figures/hires/` — inputs (`inputs_*`), capacity (`arch_params`), EDA"
       " (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_1601_combined`, `zoo_dt_is_bolt`, `dt_auc`,"
       " `dt_confusion_evo`), per-task cell zoos (`cellzoo_*`).\n"

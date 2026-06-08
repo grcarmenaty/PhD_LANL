@@ -79,3 +79,6 @@ dataset/experimental_features_hires.h5
 results_hires/sweep.nohup
 results_hires/sweep.log
 results_hires/.sweep_complete
+
+# Hi-res figure reproducibility: keep the committed archive+bundle, ignore the extracted tree
+results_hires/per_case_all/

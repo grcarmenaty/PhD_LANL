@@ -26,14 +26,15 @@ PCTS = [0, 25, 50, 75, 90]
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default="/tmp/allres"); a = ap.parse_args()
-    import h5py
-    with h5py.File(_REPO/"dataset"/"experimental_features_hires.h5","r") as f:
-        sev = dict(zip([str(s) for s in f["names"][:]], f["severity"][:]))
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    from ml_pipeline import figdata
+    root = a.root or figdata.percase_root()
+    names, _tc, svs = figdata.load_exp_labels()
+    sev = dict(zip(names, svs))
 
     # collect 1601 detection cells, dedup by (task,model,feature)
     cells = {}
-    for p in glob.glob(f"{a.root}/**/per_case/*_hires1601.json", recursive=True):
+    for p in glob.glob(f"{root}/**/per_case/*_hires1601.json", recursive=True):
         try: d=json.load(open(p)); m=d["meta"]; rows=d["rows"]
         except Exception: continue
         if m["task"] not in DET or m["kind"]!="cls" or not rows: continue
