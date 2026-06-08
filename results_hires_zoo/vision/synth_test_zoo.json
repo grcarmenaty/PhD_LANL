@@ -321,5 +321,24 @@
     "synth_test_bal_acc": 0.8677083333333333,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_pristine_resnet50_cfdac_phase_hires1601": {
+    "task": "is_pristine",
+    "model": "resnet50",
+    "feature": "cfdac_phase",
+    "n_target": 1601,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 4000,
+    "vision_feed_size": 384,
+    "synth_val_best": 0.9417227268696235,
+    "synth_test_metric": 0.97,
+    "synth_test_macro_f1": 0.9542558959067498,
+    "synth_test_bal_acc": 0.965625,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
