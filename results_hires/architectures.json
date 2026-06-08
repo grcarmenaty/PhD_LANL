@@ -1,0 +1,117 @@
+{
+ "models": {
+  "cnn2d_shallow": {
+   "family": "CFDAC image (bespoke CNN)",
+   "params_total": 76642,
+   "params_trainable": 76642,
+   "by_module": {
+    "stem": 1616,
+    "features": 70736,
+    "head": 4290
+   },
+   "note": "Port of the 128\u00b2 baseline: 7\u00d77 stride-4 stem then 3\u00d7(5\u00d75 conv\u2192BN\u2192GELU\u21922\u00d7 maxpool), widths 16\u219232\u219264; global-avg-pool \u2192 64-d FC \u2192 logits. Deliberately shallow/cheap.",
+   "repr_cfg": "n_in=2, widths=(16,32,64)"
+  },
+  "cnn2d_deep": {
+   "family": "CFDAC image (bespoke CNN)",
+   "params_total": 11239298,
+   "params_trainable": 11239298,
+   "by_module": {
+    "stem": 6400,
+    "stages": 11166976,
+    "head": 65922
+   },
+   "note": "ResNet18-style: 7\u00d77 stride-2 stem + 3\u00d73 maxpool, then 4 stages of 2 residual BasicBlocks (two 3\u00d73 convs + GELU + 1\u00d71 projection shortcut), widths 64\u2192128\u2192256\u2192512, each stage /2; global-avg-pool \u2192 128-d FC (dropout 0.3) \u2192 logits. ~7 spatial downsamples digest the full 1601\u00b2 grid.",
+   "repr_cfg": "n_in=2, widths=(64,128,256,512)"
+  },
+  "cnn3d": {
+   "family": "CFDAC volume (bespoke 3-D CNN)",
+   "params_total": 31586,
+   "params_trainable": 31586,
+   "by_module": {
+    "stem": 1616,
+    "features": 25680,
+    "head": 4290
+   },
+   "note": "Treats the CFDAC channel axis as a depth dimension: input (B,C,N,N)\u2192(B,1,C,N,N). 3-D conv stem (kernel (min(3,C),7,7), spatial stride 4) then 3\u00d7(1,3,3) stride-(1,2,2) 3-D convs, widths 16\u219232\u219264; global-avg-pool3d \u2192 64-d FC \u2192 logits.",
+   "repr_cfg": "n_in=2, widths=(16,32,64)"
+  },
+  "transformer": {
+   "family": "CFDAC image (bespoke ViT)",
+   "params_total": 3767170,
+   "params_trainable": 3767170,
+   "by_module": {
+    "tok": 967040,
+    "enc": 2669184,
+    "norm": 384,
+    "head": 386
+   },
+   "note": "Conv tokeniser (5 strided convs, total /64: 1601\u2192~25) \u2192 ~625 tokens of dim 192; prepend a CLS token + learned positional embedding; 6-layer pre-norm TransformerEncoder (6 heads, MLP ratio 4, GELU, dropout 0.1); LayerNorm \u2192 linear head on the CLS token. Tokenises the full-res CFDAC rather than resizing to 224.",
+   "repr_cfg": "n_in=2, dim=192, depth=6, heads=6, input_size=1601"
+  },
+  "mlp": {
+   "family": "tabular / flattened (MLP)",
+   "params_total": 208258,
+   "params_trainable": 208258,
+   "by_module": {
+    "net": 208258
+   },
+   "note": "Fully-connected: 3 hidden layers 512\u2192256\u2192128, each Linear\u2192BatchNorm1d\u2192GELU\u2192Dropout(0.3), then a linear head. Shown for modal (d_in=81); d_in = feature length (22 for indicators, C\u00d7L for a flattened sequence, e.g. 9\u00d71601=14 409 for frf_mag).",
+   "repr_cfg": "d_in=81 (modal), hidden=(512,256,128)"
+  },
+  "cnn1d": {
+   "family": "sequence over frequency (1-D CNN)",
+   "params_total": 67490,
+   "params_trainable": 67490,
+   "by_module": {
+    "stem": 2112,
+    "features": 56992,
+    "head": 8386
+   },
+   "note": "1-D CNN over the frequency/time axis: 7-wide stride-2 stem then 3\u00d7(5-wide stride-2 conv\u2192BN\u2192GELU), widths 32\u219264\u2192128 (each /2); global-avg-pool1d \u2192 64-d FC \u2192 logits. Shown for a 9-channel input (frf_mag / timeseries); 18 channels for frf_realimag.",
+   "repr_cfg": "c_in=9, widths=(32,64,128)"
+  },
+  "transformer1d": {
+   "family": "sequence over frequency (1-D ViT)",
+   "params_total": 899842,
+   "params_trainable": 899842,
+   "by_module": {
+    "tok": 99456,
+    "enc": 793088,
+    "norm": 256,
+    "head": 258
+   },
+   "note": "Conv tokeniser (15-wide /8 then 5-wide /4, total /32) \u2192 tokens of dim 128; CLS + learned pos-embed; 4-layer pre-norm TransformerEncoder (4 heads, MLP ratio 4, GELU, dropout 0.1); LayerNorm \u2192 linear head on CLS. Shown for 9 channels \u00d7 length 1601.",
+   "repr_cfg": "c_in=9, dim=128, depth=4, heads=4, length=1601"
+  },
+  "resnet50": {
+   "family": "CFDAC image (ImageNet-pretrained backbone)",
+   "params_total": 23508994,
+   "params_trainable": 23508994,
+   "by_module": {},
+   "repr_cfg": "in_chans=2, num_classes=2, pretrained=ImageNet-1k",
+   "note": "ResNet50: classic 4-stage bottleneck CNN (25.6 M params), fed CFDAC images resized to 384\u00b2. ImageNet weights loaded, the input stem adapted to the requested channel count (in_chans=2 here) and the classifier head replaced for the task. Warm-up: head-only for 2 epochs (LR 3e-4), then the whole backbone is unfrozen at LR 3e-5."
+  },
+  "convnext_tiny": {
+   "family": "CFDAC image (ImageNet-pretrained backbone)",
+   "params_total": 27820130,
+   "params_trainable": 27820130,
+   "by_module": {},
+   "repr_cfg": "in_chans=2, num_classes=2, pretrained=ImageNet-1k",
+   "note": "ConvNeXt-Tiny: modern CNN (depthwise 7\u00d77 + inverted bottleneck, 28 M params), fed CFDAC images at native conv resolution. ImageNet weights loaded, the input stem adapted to the requested channel count (in_chans=2 here) and the classifier head replaced for the task. Warm-up: head-only for 2 epochs (LR 3e-4), then the whole backbone is unfrozen at LR 3e-5."
+  },
+  "rf": {
+   "family": "tabular (ensemble)",
+   "params_total": null,
+   "note": "RandomForest, 400 trees, class_weight='balanced' (cls) / plain (reg), all CPU cores. Non-parametric \u2014 'size' is the forest, not a weight count. On modal(81)/indicators(22) only.",
+   "repr_cfg": "n_estimators=400, class_weight='balanced'"
+  },
+  "xgb": {
+   "family": "tabular (gradient boosting)",
+   "params_total": null,
+   "note": "XGBoost, 600 trees, max_depth=6, lr=0.05, subsample=0.8, colsample_bytree=0.8; multi:softprob / binary:logistic. On modal(81)/indicators(22) only.",
+   "repr_cfg": "n_estimators=600, max_depth=6, lr=0.05"
+  }
+ },
+ "notes": {}
+}

@@ -57,6 +57,106 @@ FEATS = {
  "cfdac_magphase":"CFDAC, magnitude+phase (2 channels)","cfdac_all":"CFDAC, all 4 channels stacked",
 }
 
+# Long-form per-feature explanation for §4 (what it is, dims, how computed, transfer rationale).
+FEAT_DETAIL = {
+ "modal": ("**`modal` — 81-d physics summary vector.**", "(81,)", "tabular",
+   "For each of the 9 accelerometer channels: the frequency and log-amplitude of the top-3 |H(f)| peaks (6),"
+   " the mean and std of the log-magnitude spectrum (2), and the total band energy Σ|H|² (1) → 9×9 = 81. It"
+   " throws away all phase and most of the spectral shape, keeping only resonance locations/heights. Cheapest"
+   " representation; the 128-baseline's best transferer, but here it is out-classed once richer features are available."),
+ "indicators": ("**`indicators` — 22 pymodal damage indicators.**", "(22,)", "tabular",
+   "Classical SHM scalars computed from the *current* FRF against the pristine-mean reference: SCI & unsigned-SCI"
+   " (CFDAC shape-change), DRQ (from RVAC), AIGAC (from GAC), FRFRMS/FRFSF/FRFSM-6dB, ODS-difference, r²-imag, and"
+   " mean/std/min/max summaries of the RVAC, GAC and M2L curves (+ M2L abs-sum). Each is a hand-designed"
+   " damage-sensitivity metric; together they are a 22-d 'expert opinion' vector. Explicitly reference-relative,"
+   " so in principle robust to some additive bias — but it still encodes the simulator's notion of 'normal'."),
+ "frf_mag": ("**`frf_mag` — log-magnitude spectrum.**", "(9, 1601)", "sequence",
+   "log₁₀|H(f)| for all 9 channels over the 0–100 Hz / 1601-bin grid, per-sample per-channel z-normalised (so"
+   " absolute scale and channel gain are removed — the model sees spectral *shape* only). The most direct"
+   " spectral input; pairs naturally with 1-D CNN/transformer over frequency."),
+ "frf_realimag": ("**`frf_realimag` — complex spectrum (Re/Im).**", "(18, 1601)", "sequence",
+   "Real and imaginary parts of H(f) stacked into 18 channels, per-sample z-normalised. Unlike `frf_mag` it"
+   " keeps **phase**, i.e. the full complex response — which is exactly the information CFDAC is built from. It"
+   " is the single best transferer for is_bolt/is_hole in this study."),
+ "timeseries": ("**`timeseries` — reconstructed impulse/chirp response.**", "(9, 4096)", "sequence",
+   "The band-limited time response, irfft(H(f)·chirp-spectrum), 4096 samples at fs=256, per-sample z-normalised."
+   " It is FRF-derived (the IQS rig has no stored raw timeseries), reconstructed identically for both domains, so"
+   " it carries no information beyond the FRF — it is a different *inductive bias* (a temporal view) for the conv/"
+   "transformer models, not a new sensor."),
+ "cfdac_*": ("**`cfdac_*` — Complex FRF Assurance Criterion images (1601×1601).**", "(C, 1601, 1601)", "image",
+   "The CFDAC cross-assures the current FRF against the pristine reference at every pair of frequencies:"
+   " C[i,j] = (Hᵢ·conj(refⱼ))² / (‖Hᵢ‖²‖refⱼ‖²). A pristine structure gives a near-diagonal map; damage spreads"
+   " energy off-diagonal (Figure i). Each variant feeds a different channel set — `real`, `imag`, `mag`, `phase`"
+   " (1 channel each), `realimag`/`magphase` (2), or `all` (4) — normalised per the engine (real/imag/mag"
+   " mean-centred, phase ÷π). This is the representation the bespoke 2-D CNNs, the 3-D CNN, the CFDAC-Transformer"
+   " and the pretrained vision backbones consume."),
+}
+
+
+def emit_inputs(A):
+    A("## 4 · Input representations — what every sample looks like to a model")
+    A("Every cell is `(model, feature)`. A *feature* is one way of turning a sample's 9-channel, 1601-bin FRF"
+      " into a tensor. There are three families — **tabular vectors**, **frequency/time sequences**, and"
+      " **CFDAC images** — visualised below on real samples, exactly as the models receive them (same"
+      " normalisation).\n")
+    A("### 4.1 Tabular vectors — `modal`, `indicators`")
+    A("![tabular inputs](figures/hires/inputs_tabular.png)")
+    A("*Figure i — (a) the 81-d `modal` vector for a pristine vs a high-severity bolt case (vertical lines mark"
+      " the 9 per-channel blocks); (b) the 22 named `indicators` for a bolt vs a crack case, each computed"
+      " against the pristine reference.*\n")
+    for k in ("modal", "indicators"):
+        t, dim, fam, desc = FEAT_DETAIL[k]; A(f"{t} *{dim}, {fam}.* {desc}\n")
+    A("### 4.2 Sequences over frequency / time — `frf_mag`, `frf_realimag`, `timeseries`")
+    A("![sequence inputs](figures/hires/inputs_sequences.png)")
+    A("*Figure ii — (a) z-normed log|H(f)|; (b) z-normed Re/Im of H(f); (c) the FRF-reconstructed time"
+      " response. Shown for the drive-point channel; the models see all 9 (or 18) channels stacked.*\n")
+    for k in ("frf_mag", "frf_realimag", "timeseries"):
+        t, dim, fam, desc = FEAT_DETAIL[k]; A(f"{t} *{dim}, {fam}.* {desc}\n")
+    A("### 4.3 CFDAC images — `cfdac_{real,imag,mag,phase,realimag,magphase,all}`")
+    A("![CFDAC channels](figures/hires/inputs_cfdac_variants.png)")
+    A("*Figure iii — the four base CFDAC channels for one bolt case. The 7 feature variants are channel"
+      " subsets/stacks of these.*\n")
+    t, dim, fam, desc = FEAT_DETAIL["cfdac_*"]; A(f"{t} *{dim}, {fam}.* {desc}\n")
+    A("![CFDAC per class](figures/hires/inputs_cfdac_classes.png)")
+    A("*Figure iv — CFDAC-magnitude fingerprint of each damage class, synthetic (top) vs experimental (bottom)."
+      " Pristine is near-diagonal; each damage type spreads energy off-diagonal in a characteristic way — and"
+      " the synthetic and experimental patterns visibly differ, which is the domain gap the image models must"
+      " cross.*\n")
+
+
+def emit_arch(A):
+    apath = _REPO/"results_hires"/"architectures.json"
+    if not apath.exists():
+        A("## 5 · Model architectures\n*(architectures.json not found — run `ml_pipeline/hires_arch.py`.)*\n"); return
+    arch = json.loads(apath.read_text())["models"]
+    A("## 5 · Model architectures — every model, in full")
+    A("Eleven model families span four design philosophies: **tabular** nets/ensembles on the summary vectors,"
+      " **1-D sequence** models over frequency/time, **bespoke 2-/3-D nets** built for the full-resolution CFDAC"
+      " image, and **ImageNet-pretrained vision backbones** fine-tuned on the CFDAC image. Parameter counts below"
+      " are *measured* from the instantiated `nn.Module`s (representative binary-head config).\n")
+    A("![model capacity](figures/hires/arch_params.png)")
+    A("*Figure v — trainable parameters (log scale). The pretrained vision backbones are 10–100× larger than the"
+      " bespoke nets, yet do not lead on transfer (§8) — capacity is not the bottleneck.*\n")
+    # parameter table
+    A("| model | family | params | notes |")
+    A("|---|---|---|---|")
+    order = ["mlp","rf","xgb","cnn1d","transformer1d","cnn2d_shallow","cnn2d_deep","cnn3d",
+             "transformer","resnet50","convnext_tiny"]
+    for k in order:
+        v = arch.get(k)
+        if not v: continue
+        p = v.get("params_total")
+        ps = (f"{p/1e6:.2f} M" if p and p >= 1e5 else (f"{p/1e3:.0f} k" if p else "—"))
+        A(f"| `{k}` | {v['family']} | {ps} | {v.get('repr_cfg','')} |")
+    A("\n**Per-model detail.**\n")
+    for k in order:
+        v = arch.get(k)
+        if not v: continue
+        p = v.get("params_total")
+        ps = (f" (~{p/1e6:.2f} M params)" if p and p >= 1e5 else (f" (~{p/1e3:.0f} k params)" if p else ""))
+        A(f"- **`{k}`**{ps} — {v.get('note','')}")
+    A("")
+
 
 def load_cells():
     S = json.loads((_REPO/"results_hires"/"zoo_summary.json").read_text())
@@ -117,16 +217,19 @@ def main():
     A = out.append
     A("# LANL 3SBB — Synth-to-Real Damage Diagnosis: FULL Consolidated Report")
     A("**Author:** G. Reyes-Carmenaty · **Date:** 2026-06-08 · **Resolution:** 1601-bin (native).")
-    A("\n> Exhaustive edition — exploratory analysis of both domains, every cell of the high-resolution"
-      " model zoo (in-domain + zero-shot), confusion matrices and ROC/AUC for the best cell per task,"
-      " the damage-threshold sweep, and the severity-regression deep-dive. In-domain companion:"
-      " `REPORT_synth.md`. *(128-bin comparison excluded until that run completes.)*\n")
+    A("\n> Exhaustive edition — sample visualisations of every input representation, full detail on every"
+      " model architecture (measured parameter counts), exploratory analysis of both domains, every cell of"
+      " the high-resolution model zoo (in-domain + zero-shot), confusion matrices and ROC/AUC for the best cell"
+      " per task, the damage-threshold sweep *with the full diagnostic suite (AUC + confusion matrix) swept over"
+      " severity*, and the severity-regression deep-dive. In-domain companion: `REPORT_synth.md`. *(128-bin"
+      " comparison excluded until that run completes.)*\n")
 
     A("## Contents")
-    A("1 Overview · 2 Glossary · 3 Methodology · **4 Exploratory data analysis (both domains)** ·"
-      " **5 Diagnostics: confusion matrices + ROC/AUC** · 6 Per-task catalogue (every cell) ·"
-      " 7 Damage-threshold sweep · 8 Severity regression · 9 Synthesis · 10 Limitations ·"
-      " 11 Recommendations · 12 Artefacts\n")
+    A("1 Overview · 2 Tasks · 3 Methodology · **4 Input representations (every feature, with samples)** ·"
+      " **5 Model architectures (every model, in full)** · 6 Exploratory data analysis (both domains) ·"
+      " 7 Diagnostics: confusion matrices + ROC/AUC · 8 Per-task catalogue (every cell) ·"
+      " 9 Damage-threshold sweep + swept diagnostics · 10 Severity regression · 11 Synthesis ·"
+      " 12 Limitations · 13 Recommendations · 14 Artefacts\n")
 
     # ---- counts ----
     ncell = sum(len(v) for v in cells.values())
@@ -149,13 +252,16 @@ def main():
       " The vertical gap is the sim-to-real penalty; it is largest exactly where the synthetic model is most"
       " confident (mass_location, type, severity).*\n")
 
-    # ---- glossary ----
-    A("## 2 · Model & feature glossary (what every cell is)")
-    A("**Models**\n")
-    for m, d in MODELS.items(): A(f"- `{m}` — {d}")
-    A("\n**Features** (all computed from the native 1601-bin FRFs)\n")
-    for f, d in FEATS.items(): A(f"- `{f}` — {d}")
-    A("\nEach per-task table in §6 lists **every** cell; read `model/feature` against this glossary.\n")
+    # ---- tasks ----
+    A("## 2 · The ten diagnosis tasks")
+    A("Each task is posed on the same FRFs; the zoo is trained and evaluated independently per task. Chance is"
+      " the balanced-accuracy floor (1/#classes).\n")
+    A("| task | question | output | chance |")
+    A("|---|---|---|---|")
+    for t in TASKS:
+        q, o, ch, note = TASK_DESC[t]
+        A(f"| `{t}` | {q} | {o} | {('%.2f'%ch) if ch else '— (reg)'} |")
+    A("\nDetailed per-task results, including every cell, are in §8.\n")
 
     # ---- methodology ----
     A("## 3 · Methodology")
@@ -174,9 +280,13 @@ def main():
       " analysis in `hires_analysis.py`; raw per-case predictions (with class probabilities) on branches"
       " `colab-hires-{tabular,cnn,transformer,vision}`.\n")
 
-    # ---- (4) EDA ----
+    # ---- (4) input representations + (5) architectures ----
+    emit_inputs(A)
+    emit_arch(A)
+
+    # ---- (6) EDA ----
     cnt = an.get("counts", {})
-    A("## 4 · Exploratory data analysis — synthetic vs experimental")
+    A("## 6 · Exploratory data analysis — synthetic vs experimental")
     A("Before any model, the two datasets are compared directly. This frames everything that follows:"
       " *what the models are up against is not noise, it is a structured domain gap.*\n")
     A("### 4.1 Class balance and severity coverage")
@@ -214,7 +324,7 @@ def main():
       " **domain adaptation**, not bigger models or higher resolution.\n" if domauc else "")
 
     # ---- (5) Diagnostics ----
-    A("## 5 · Diagnostics — how the best models actually behave on real data")
+    A("## 7 · Diagnostics — how the best models actually behave on real data")
     A("Aggregate scores hide the failure *mode*. Below are the confusion matrices and ROC curves for the"
       " single best cell of each task (selected by experimental balanced-acc / R²; see §6 for all cells).\n")
     A("### 5.1 Confusion matrices (experimental, row-normalised)")
@@ -264,7 +374,7 @@ def main():
           " class is where the domain gap bites hardest (Figure 3a).\n")
 
     # ---- per-task full catalogue ----
-    A("## 6 · Per-task catalogue (every cell)")
+    A("## 8 · Per-task catalogue (every cell)")
     A("Every (model, feature) cell, sorted best-first. `in-domain` = held-out synthetic score (the ceiling);"
       " `exp` columns = zero-shot on real data. The cell-zoo bar plot colours **blue = CFDAC-image** cells"
       " and **green = tabular/sequence** cells, so the winning representation family is visible at a glance.\n")
@@ -304,7 +414,7 @@ def main():
             A(line)
 
     # ---- DT sweep ----
-    A("\n## 7 · Damage-threshold (DT) severity sweep @1601")
+    A("\n## 9 · Damage-threshold (DT) severity sweep @1601")
     A("Positives are stratified by their damage-severity percentile (each task on its own axis: bolt %, hole"
       " mm, mass kg, crack depth); balanced accuracy is recomputed keeping only the more-severe positives"
       " (all negatives retained). This tests the central thesis — *transfer should improve with damage"
@@ -325,11 +435,47 @@ def main():
       " range to vary. is_hole/is_mass stay flat *because their experimental severity range is narrow"
       " (Figure 2b), not because the model fails* — there simply is no 'more severe' subset to climb into.")
 
+    # ---- 9.2 swept diagnostics (AUC + confusion evolution) ----
+    ddpath = _REPO/"results_hires"/"dt_diag.json"
+    if ddpath.exists():
+        dd = json.loads(ddpath.read_text())["per_task"]
+        A("\n### 9.2 The full diagnostic suite, swept over severity")
+        A("Balanced accuracy is one scalar; the questions *'does the **ranking** (AUC) improve, and **how** does"
+          " the confusion matrix change?'* need the whole suite recomputed at each severity threshold. Using the"
+          " stored class probabilities, the best cell of each detection task is re-scored keeping only"
+          " progressively more-severe positives.\n")
+        A("![AUC and macro-F1 vs severity](figures/hires/dt_auc.png)")
+        A("*Figure 9 — ROC-AUC (a) and macro-F1 (b) vs the severity percentile kept.*\n")
+        A("![confusion-matrix evolution](figures/hires/dt_confusion_evo.png)")
+        A("*Figure 10 — the row-normalised confusion matrix at each severity threshold (rows = task, columns ="
+          " percentile). Watch the positive-row (bottom) darken on the diagonal as damage increases.*\n")
+        A("| task | AUC p0 → p90 | sensitivity p0 → p90 | reading |")
+        A("|---|---|---|---|")
+        notes = {
+         "binary":"climbs steadily — bigger damage is easier to call damaged (sens 0.82→0.96).",
+         "is_bolt":"the clean win: AUC and sensitivity both rise sharply with loosening %.",
+         "is_crack":"rises then **falls** at p75+ — the severe-crack subset is tiny, so the estimate is noisy, not better.",
+         "is_hole":"flat then **drops** at p75+ — same small-sample artefact; hole severity barely varies (1–6 mm).",
+         "is_mass":"perfectly flat — experimental mass severity is near-discrete, so there is no gradient to climb.",
+        }
+        for t in ["binary","is_bolt","is_crack","is_hole","is_mass"]:
+            r = dd.get(t)
+            if not r: continue
+            au = r["auc"]; se = r["sens"]
+            f = lambda v: ("%.2f"%v) if v is not None else "—"
+            A(f"| {t} `{r['cell']}` | {f(au[0])} → {f(au[-1])} | {f(se[0])} → {f(se[-1])} | {notes.get(t,'')} |")
+        A("\n**The honest reading.** Severity helps where it *varies*: `binary` and especially `is_bolt`"
+          " (AUC 0.67→0.87) improve monotonically. For `is_crack`/`is_hole` the apparent late drop is a"
+          " **small-sample artefact** — past p75 only a handful of positives remain (the experimental crack/hole"
+          " severities barely span a range), so the metric becomes noisy rather than genuinely worse. `is_mass`"
+          " is flat because its real severity is essentially a single level. This nuance is exactly why the"
+          " sweep reports per-task thresholds and positive counts rather than a single global curve.\n")
+
     # ---- severity deep-dive ----
     sv = bc.get("severity", {})
-    A("\n## 8 · Severity regression (the only non-classifier task)")
+    A("\n## 10 · Severity regression (the only non-classifier task)")
     A("![severity scatter and residuals](figures/hires/diag_severity.png)")
-    A("*Figure 9 — (a) predicted vs true severity for the best cell; (b) residuals.*\n")
+    A("*Figure 11 — (a) predicted vs true severity for the best cell; (b) residuals.*\n")
     if sv:
         A(f"Best experimental **R² = {sv.get('r2',0):+.3f}** with **Pearson r = {sv.get('pearson_r',0):.3f}**"
           f" and **MAE = {sv.get('mae',0):.3f}** (`{sv.get('cell','—')}`), against **R² ≈ 0.59 in-domain**."
@@ -342,7 +488,7 @@ def main():
           " since detection already improves monotonically with severity (§7).\n")
 
     # ---- synthesis ----
-    A("## 9 · Cross-task synthesis")
+    A("## 11 · Cross-task synthesis")
     A("1. **Detection ≫ localization ≫ magnitude.** Presence/type transfers (AUC 0.55–0.72, balanced-acc"
       " 0.56–0.67); location only weakly (≈1.4–2× chance); severity barely (r≈0.36, R²≈0.04).")
     A("2. **Severity is the lever, not the target.** Every detector improves on more-severe damage"
@@ -357,7 +503,7 @@ def main():
       " the simulator not matching the rig.\n")
 
     # ---- limitations + recs ----
-    A("## 10 · Limitations")
+    A("## 12 · Limitations")
     A("- **One experimental structure, one seed per cell** — treat balanced-acc gaps < 0.05 as ties.\n"
       "- **Post-hoc best-cell selection** (§5–6 pick the winner after seeing the test set) is exploratory,"
       " not a held-out estimate; the per-task tables guard against cherry-picking by showing every cell.\n"
@@ -366,7 +512,7 @@ def main():
       "- **`timeseries` is FRF-reconstructed**, not independently measured, so it carries no information"
       " beyond the FRF — it is a different *inductive bias*, not a new sensor.\n"
       "- **128-bin resolution comparison pending** (that run is still in progress).\n")
-    A("## 11 · Recommendations")
+    A("## 13 · Recommendations")
     A("1. **Deploy detection on severe damage and report severity-stratified** (the DT curves, not a single"
       " number).\n"
       "2. **Recalibrate the decision threshold on a few real samples** — the AUC>bal-acc gap (§5.2) is free"
@@ -378,14 +524,19 @@ def main():
       " given the AUC≈1.0 shift.\n"
       "5. **Recast severity as ordinal classification** and extend the DT analysis to the multi-class tasks.\n"
       "6. **Finish the 128-bin run** to settle whether full resolution is necessary.\n")
-    A("## 12 · Artefacts")
-    A("- **Code:** `ml_pipeline/hires_{zoo,tab,all}.py` (engines), `hires_zoo_summary.py` + `hires_dt_1601.py`"
-      " + `hires_analysis.py` (distillation/EDA/diagnostics), `build_hires_report.py` (this report).\n"
-      "- **Data:** `results_hires/{zoo_summary,zoo_best_by_task_res,dt_1601,analysis}.json`; raw per-case"
-      " predictions (with class probabilities) on branches `colab-hires-{tabular,cnn,transformer,vision}`.\n"
-      "- **Figures:** `results/figures/hires/{zoo1601_synth_vs_exp, eda_class_severity, eda_frf_signatures,"
-      " eda_domain_shift, diag_confusion, diag_roc, diag_severity, dt_1601_combined, zoo_dt_is_bolt,"
-      " cellzoo_*}.png`.\n"
+    A("## 14 · Artefacts (everything is reproducible from these)")
+    A("- **Engines:** `ml_pipeline/hires_{zoo,tab,all}.py` — CFDAC-image, tabular/sequence, and the unified"
+      " dispatcher; every model and feature defined here.\n"
+      "- **Analysis scripts:** `hires_zoo_summary.py` (per-cell distillation), `hires_dt_1601.py` (DT balanced-acc"
+      " sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_analysis.py` (EDA + best-cell"
+      " confusion/ROC/severity), `hires_arch.py` (measured parameter counts), `hires_inputs.py` (input-sample"
+      " figures), `build_hires_report.py` (this report).\n"
+      "- **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, analysis, architectures,"
+      " inputs}.json`; raw per-case predictions (with class probabilities) on branches"
+      " `colab-hires-{tabular,cnn,transformer,vision}`.\n"
+      "- **Figures:** `results/figures/hires/` — inputs (`inputs_*`), capacity (`arch_params`), EDA"
+      " (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_1601_combined`, `zoo_dt_is_bolt`, `dt_auc`,"
+      " `dt_confusion_evo`), per-task cell zoos (`cellzoo_*`).\n"
       "- **Companion:** `REPORT_synth.md` (in-domain ceiling).")
 
     (_REPO/"results"/"REPORT_CONSOLIDATED.md").write_text("\n".join(out)+"\n")
