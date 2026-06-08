@@ -302,5 +302,24 @@
     "synth_test_bal_acc": 0.94375,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_pristine_resnet50_cfdac_mag_hires1601": {
+    "task": "is_pristine",
+    "model": "resnet50",
+    "feature": "cfdac_mag",
+    "n_target": 1601,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 4000,
+    "vision_feed_size": 384,
+    "synth_val_best": 0.7991041533356151,
+    "synth_test_metric": 0.8533333333333334,
+    "synth_test_macro_f1": 0.8053068629330815,
+    "synth_test_bal_acc": 0.8677083333333333,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
