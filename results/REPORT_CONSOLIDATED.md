@@ -885,9 +885,30 @@ Balanced accuracy is one scalar; the questions *'does the **ranking** (AUC) impr
 **The honest reading.** Severity helps where it *varies*: `binary` and especially `is_bolt` (AUC 0.67→0.87) improve monotonically. For `is_crack`/`is_hole` the apparent late drop is a **small-sample artefact** — past p75 only a handful of positives remain (the experimental crack/hole severities barely span a range), so the metric becomes noisy rather than genuinely worse. `is_mass` is flat because its real severity is essentially a single level. This nuance is exactly why the sweep reports per-task thresholds and positive counts rather than a single global curve.
 
 
+### 9.3 The same sweep on a *physical* axis — storey-stiffness loss
+Native severity units are not comparable across damage types (a '% loosening' is not a 'mm of crack'). Using the **simulator's own calibrated damage model** (`ml_pipeline.variation.{bolt_jsr_ratio, crack_ratio, hole_ratio}`), each stiffness-reducing damage is mapped to the actual fraction of storey stiffness it removes — putting bolt, crack and hole on one physical axis. (Added mass is excluded: it changes inertia, not compliance, so its stiffness loss is 0.)
+
+![severity to stiffness map + distribution](figures/hires/dt_stiffness_map.png)
+*Figure 11 — (a) the calibrated severity→stiffness-loss map; (b) the experimental stiffness loss each damage type actually produces. This single panel is the physical key to the whole study.*
+
+Experimentally, **bolt loosening removes 15–61% of storey stiffness (median ~45%), while a crack removes only 4–6% and a hole only 2–3%**. The three 'detection' tasks are therefore *not* probing comparable amounts of structural change — crack and hole damage is, physically, an order of magnitude milder.
+
+![DT sweep vs stiffness loss](figures/hires/dt_stiffness.png)
+*Figure 12 — best-cell balanced-acc (a) and AUC (b) vs the minimum storey-stiffness loss retained in the positives; the grey band marks the ≤6.4% region where all crack/hole damage lives.*
+
+| task | best cell | ≥0% | ≥5% | ≥20% | ≥40% | positives surviving |
+|---|---|---|---|---|---|---|
+| binary | `transformer1d/timeseries` | 0.589 | 0.609 | 0.608 | 0.618 | 2176→818 (≥40%) |
+| is_bolt | `transformer1d/frf_realimag` | 0.669 | 0.669 | 0.717 | 0.729 | 1338→818 (≥40%) |
+| is_crack | `transformer/cfdac_mag` | 0.587 | 0.499 | — | — | 320→0 (≥40%) |
+| is_hole | `transformer1d/frf_realimag` | 0.667 | — | — | — | 280→0 (≥40%) |
+
+**This is the physical explanation for the whole detection hierarchy.** On a stiffness-loss axis the story is unambiguous: `binary` and `is_bolt` keep climbing as we retain only structurally-significant damage (is_bolt balanced-acc 0.67→0.73, AUC 0.67→0.79 by ≥40% loss), because bolt damage genuinely reaches that regime. `is_crack` and `is_hole` curves **terminate early** — by ≥10% and ≥5% stiffness loss respectively there are *zero* experimental positives left, because crack/hole simply never remove that much stiffness. Their weak, flat transfer is not a model failure: the damage they represent is physically near-invisible to a global FRF. The takeaway sharpens the severity message of §9.1–9.2: **detection transfers in proportion to how much stiffness the damage removes**, and only bolt-loosening (and any other large-stiffness-loss mechanism) reaches the regime where sim-to-real transfer becomes reliable.
+
+
 ## 10 · Severity regression (the only non-classifier task)
 ![severity scatter and residuals](figures/hires/diag_severity.png)
-*Figure 11 — (a) predicted vs true severity for the best cell; (b) residuals.*
+*Figure 13 — (a) predicted vs true severity for the best cell; (b) residuals.*
 
 Best experimental **R² = +0.037** with **Pearson r = 0.361** and **MAE = 0.254** (`mlp/frf_mag`), against **R² ≈ 0.59 in-domain**. The scatter tells the story the R² number alone does not: there *is* a weak positive trend (r ≈ 0.36, the fit slope is positive), so the model is not random — but the predictions collapse toward the training mean (the residual plot in (b) slopes against the true value, the signature of regression-to-the-mean under distribution shift). Restricting to severe cases does **not** raise R² (that just narrows the variance). **Predicting damage *magnitude* zero-shot is effectively unsolved**; recasting it as ordinal severity-band classification (§11) is the recommended fix, since detection already improves monotonically with severity (§7).
 

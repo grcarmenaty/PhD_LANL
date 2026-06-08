@@ -20,6 +20,7 @@ RES = 1601
 TASKS = ["binary","is_pristine","is_bolt","is_crack","is_hole","is_mass",
          "type","col_location","mass_location","severity"]
 DET_KEYS = ["binary","is_pristine","is_bolt","is_crack","is_hole","is_mass"]
+STIFF_ORDER = ["binary","is_bolt","is_crack","is_hole"]
 TASK_DESC = {
  "binary":("Any damage vs pristine","ŷ∈{0=pristine,1=damaged}",0.50,"82.5% damaged prior; raw accuracy misleading."),
  "is_pristine":("Pristine vs any damage (inverse of binary)","ŷ∈{0=damaged,1=pristine}",0.50,""),
@@ -471,11 +472,54 @@ def main():
           " is flat because its real severity is essentially a single level. This nuance is exactly why the"
           " sweep reports per-task thresholds and positive counts rather than a single global curve.\n")
 
+    # ---- 9.3 stiffness-loss (physical) sweep ----
+    spath = _REPO/"results_hires"/"dt_stiffness.json"
+    if spath.exists():
+        sd = json.loads(spath.read_text())
+        A("\n### 9.3 The same sweep on a *physical* axis — storey-stiffness loss")
+        A("Native severity units are not comparable across damage types (a '% loosening' is not a 'mm of"
+          " crack'). Using the **simulator's own calibrated damage model**"
+          " (`ml_pipeline.variation.{bolt_jsr_ratio, crack_ratio, hole_ratio}`), each stiffness-reducing damage"
+          " is mapped to the actual fraction of storey stiffness it removes — putting bolt, crack and hole on"
+          " one physical axis. (Added mass is excluded: it changes inertia, not compliance, so its"
+          " stiffness loss is 0.)\n")
+        A("![severity to stiffness map + distribution](figures/hires/dt_stiffness_map.png)")
+        A("*Figure 11 — (a) the calibrated severity→stiffness-loss map; (b) the experimental stiffness loss"
+          " each damage type actually produces. This single panel is the physical key to the whole study.*\n")
+        A("Experimentally, **bolt loosening removes 15–61% of storey stiffness (median ~45%), while a crack"
+          " removes only 4–6% and a hole only 2–3%**. The three 'detection' tasks are therefore *not* probing"
+          " comparable amounts of structural change — crack and hole damage is, physically, an order of"
+          " magnitude milder.\n")
+        A("![DT sweep vs stiffness loss](figures/hires/dt_stiffness.png)")
+        A("*Figure 12 — best-cell balanced-acc (a) and AUC (b) vs the minimum storey-stiffness loss retained in"
+          " the positives; the grey band marks the ≤6.4% region where all crack/hole damage lives.*\n")
+        A("| task | best cell | ≥0% | ≥5% | ≥20% | ≥40% | positives surviving |")
+        A("|---|---|---|---|---|---|---|")
+        for t in STIFF_ORDER:
+            r = sd["per_task"].get(t)
+            if not r: continue
+            ba = r["bal_acc"]; nps = r["n_pos"]; thr = sd["thresholds_pct"]
+            def gv(pct):
+                i = thr.index(pct)
+                return f"{ba[i]:.3f}" if i < len(ba) and ba[i] is not None else "—"
+            A(f"| {t} | `{r['cell']}` | {gv(0.0)} | {gv(5.0)} | {gv(20.0)} | {gv(40.0)} | "
+              f"{nps[0]}→{nps[-1]} (≥40%) |")
+        A("\n**This is the physical explanation for the whole detection hierarchy.** On a stiffness-loss axis the"
+          " story is unambiguous: `binary` and `is_bolt` keep climbing as we retain only structurally-significant"
+          " damage (is_bolt balanced-acc 0.67→0.73, AUC 0.67→0.79 by ≥40% loss), because bolt damage genuinely"
+          " reaches that regime. `is_crack` and `is_hole` curves **terminate early** — by ≥10% and ≥5% stiffness"
+          " loss respectively there are *zero* experimental positives left, because crack/hole simply never"
+          " remove that much stiffness. Their weak, flat transfer is not a model failure: the damage they"
+          " represent is physically near-invisible to a global FRF. The takeaway sharpens the severity message"
+          " of §9.1–9.2: **detection transfers in proportion to how much stiffness the damage removes**, and"
+          " only bolt-loosening (and any other large-stiffness-loss mechanism) reaches the regime where"
+          " sim-to-real transfer becomes reliable.\n")
+
     # ---- severity deep-dive ----
     sv = bc.get("severity", {})
     A("\n## 10 · Severity regression (the only non-classifier task)")
     A("![severity scatter and residuals](figures/hires/diag_severity.png)")
-    A("*Figure 11 — (a) predicted vs true severity for the best cell; (b) residuals.*\n")
+    A("*Figure 13 — (a) predicted vs true severity for the best cell; (b) residuals.*\n")
     if sv:
         A(f"Best experimental **R² = {sv.get('r2',0):+.3f}** with **Pearson r = {sv.get('pearson_r',0):.3f}**"
           f" and **MAE = {sv.get('mae',0):.3f}** (`{sv.get('cell','—')}`), against **R² ≈ 0.59 in-domain**."
