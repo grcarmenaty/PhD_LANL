@@ -6116,5 +6116,43 @@
     "synth_test_bal_acc": 0.82733394677312,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "type_convnext_tiny_cfdac_magphase_hires128": {
+    "task": "type",
+    "model": "convnext_tiny",
+    "feature": "cfdac_magphase",
+    "n_target": 128,
+    "n_channels": 2,
+    "kind": "cls",
+    "n_out": 5,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": 224,
+    "synth_val_best": 0.836938151531427,
+    "synth_test_metric": 0.8288888888888889,
+    "synth_test_macro_f1": 0.8273665666466771,
+    "synth_test_bal_acc": 0.8257072580237119,
+    "input_normalized": true,
+    "trained_to_convergence": true
+  },
+  "type_convnext_tiny_cfdac_all_hires128": {
+    "task": "type",
+    "model": "convnext_tiny",
+    "feature": "cfdac_all",
+    "n_target": 128,
+    "n_channels": 4,
+    "kind": "cls",
+    "n_out": 5,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 3000,
+    "vision_feed_size": 224,
+    "synth_val_best": 0.8138564688803515,
+    "synth_test_metric": 0.8155555555555556,
+    "synth_test_macro_f1": 0.8166485257843084,
+    "synth_test_bal_acc": 0.8142818860832224,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
