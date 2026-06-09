@@ -1,6 +1,6 @@
 {
  "resolution": 1601,
- "n_cells_1601": 575,
+ "n_cells": 575,
  "by_family": {
   "tabular/seq": {
    "cells": 155,

@@ -26,15 +26,17 @@ PCTS = [0, 25, 50, 75, 90]
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None)
+    ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res
     from ml_pipeline import figdata
     root = a.root or figdata.percase_root()
     names, _tc, svs = figdata.load_exp_labels()
     sev = dict(zip(names, svs))
 
-    # collect 1601 detection cells, dedup by (task,model,feature)
+    # collect detection cells at this resolution, dedup by (task,model,feature)
     cells = {}
-    for p in glob.glob(f"{root}/**/per_case/*_hires1601.json", recursive=True):
+    for p in glob.glob(f"{root}/**/per_case/*_hires{res}.json", recursive=True):
         try: d=json.load(open(p)); m=d["meta"]; rows=d["rows"]
         except Exception: continue
         if m["task"] not in DET or m["kind"]!="cls" or not rows: continue
@@ -67,10 +69,10 @@ def main():
         out["per_task"][task]={"sev_thresholds":[float(x) for x in thr],
                                 "best_per_pct":[{"pct":PCTS[i],"cell":best[i][0],"bal_acc":best[i][1]} for i in range(len(PCTS))],
                                 "all_cells":rows_by_cell}
-    (_REPO/"results_hires"/"dt_1601.json").write_text(json.dumps(out,indent=1))
+    (_REPO/"results_hires"/f"dt_{res}.json").write_text(json.dumps(out,indent=1))
 
     # ---- combined figure: best-cell balanced-acc vs severity percentile, per task ----
-    OUT=_REPO/"results"/"figures"/"hires"; OUT.mkdir(parents=True,exist_ok=True)
+    OUT=figdata.figdir(res)
     fig,ax=plt.subplots(figsize=(9.5,5.6))
     for task in DET:
         if task not in out["per_task"]: continue
@@ -81,11 +83,26 @@ def main():
     ax.axhline(0.5,ls=":",color="black",alpha=.5,label="chance")
     ax.set_xlabel("keep positives with severity ≥ this percentile (more-damaged →)")
     ax.set_ylabel("best-cell experimental balanced-acc")
-    ax.set_title("DT sweep @1601 — transfer vs damage severity (best cell per task)",fontweight="bold")
+    ax.set_title(f"DT sweep @{res} — transfer vs damage severity (best cell per task)",fontweight="bold")
     ax.legend(fontsize=9); ax.grid(alpha=.3); ax.set_ylim(0.45,1.0)
-    plt.tight_layout(); plt.savefig(OUT/"dt_1601_combined.png",dpi=130); plt.close(fig)
+    plt.tight_layout(); plt.savefig(OUT/"dt_combined.png",dpi=130); plt.close(fig)
 
-    print("=== DT sweep @1601 — best-cell balanced-acc vs severity percentile ===")
+    # ---- is_bolt DT curve, top cells (the Figure-8 companion) ----
+    bolt = out["per_task"].get("is_bolt", {}).get("all_cells", {})
+    if bolt:
+        fig,ax=plt.subplots(figsize=(9,5.2))
+        top=sorted(bolt.items(), key=lambda kv:-(kv[1][0] or 0))[:5]
+        for k,c in top:
+            xs=[PCTS[i] for i,v in enumerate(c) if v is not None]; ys=[v for v in c if v is not None]
+            if xs: ax.plot(xs,ys,"o-",lw=2,label=k)
+        ax.axhline(0.5,ls=":",color="black",alpha=.5)
+        ax.set_xlabel("keep positives with bolt-loosening severity ≥ this percentile")
+        ax.set_ylabel("exp balanced-acc")
+        ax.set_title(f"is_bolt — transfer improves with damage severity (top cells, @{res})",fontweight="bold")
+        ax.legend(fontsize=8); ax.grid(alpha=.3)
+        plt.tight_layout(); plt.savefig(OUT/"zoo_dt_is_bolt.png",dpi=130); plt.close(fig)
+
+    print(f"=== DT sweep @{res} — best-cell balanced-acc vs severity percentile ===")
     print("task".ljust(13)+"".join(f"p{p}".rjust(9) for p in PCTS))
     for task in DET:
         if task not in out["per_task"]: continue

@@ -1,5 +1,5 @@
 # LANL 3SBB — Synth-to-Real Damage Diagnosis: FULL Consolidated Report
-**Author:** G. Reyes-Carmenaty · **Date:** 2026-06-08 · **Resolution:** 1601-bin (native).
+**Author:** G. Reyes-Carmenaty · **Date:** 2026-06-09 · **Resolution:** 1601-bin (native).
 
 > Exhaustive edition — sample visualisations of every input representation, full detail on every model architecture (measured parameter counts), exploratory analysis of both domains, every cell of the high-resolution model zoo (in-domain + zero-shot), confusion matrices and ROC/AUC for the best cell per task, the damage-threshold sweep *with the full diagnostic suite (AUC + confusion matrix) swept over severity*, and the severity-regression deep-dive. In-domain companion: `REPORT_synth.md`. *(128-bin comparison excluded until that run completes.)*
 
@@ -13,7 +13,7 @@
 - **120/517 classification cells clear chance** on real data (≈23%).
 - A *cell* = one (model, feature) pair. Metric of record: **balanced accuracy / macro-F1 / AUC** (classification), **R² / Pearson r / MAE** (severity). Raw accuracy is never used (82.5% damaged prior).
 
-![in-domain vs zero-shot](figures/hires/zoo1601_synth_vs_exp.png)
+![in-domain vs zero-shot](figures/hires/zoo_synth_vs_exp.png)
 *Figure 1 — best-cell in-domain score (held-out synth) vs zero-shot experimental transfer, per task. The vertical gap is the sim-to-real penalty; it is largest exactly where the synthetic model is most confident (mass_location, type, severity).*
 
 ## 2 · The ten diagnosis tasks
@@ -132,7 +132,7 @@ Per-cell wall-clock was not logged, so effort is reported in **measurable, hardw
 **Three to four orders of magnitude separate the families.** A `transformer1d` epoch costs ~0.2 TFLOP; a full-resolution `cnn2d_deep` epoch costs ~1663 TFLOP (~9238× more) because it convolves the entire 1601² grid (its single forward is 185 GFLOP). The pretrained vision backbones sit in between (~215–236 TFLOP/epoch) only because they down-resize to 384². Flattening a sequence into the `mlp` is the one tabular case that balloons (d_in = 9×1601 → fwd 0.03 GFLOP).
 
 ### 6.3 Campaign size and total effort
-- **575 cells trained at 1601** (this committed set): 155 tabular/seq, 420 image (a 128-bin baseline of ~426 more cells ran separately).
+- **575 cells trained at 1601** (this committed set): 155 tabular/seq, 420 image (the companion 128-bin study is reported separately).
 - A single mid-cost image cell (≈shallow/transformer, ~40–130 TFLOP/epoch × ~30 convergence epochs) is ~1–4 PFLOP; the heavy `cnn2d_deep` cells are ~50 PFLOP each, the sequence/tabular cells a few TFLOP. Summed across the zoo the 1601 campaign is on the order of **a few ×10¹⁶–10¹⁷ FLOP** (tens of PFLOP-scale), dominated by the handful of deep/vision image cells.
 - **Hardware:** T4 (15 GB), L4 (24 GB), A100 (40 GB). *Rough* wall-clock (FLOP ÷ realized throughput, ~20–60 TFLOP/s effective on these cards with AMP): the cheap tabular/sequence cells converge in **seconds–single-digit minutes**; a full-resolution `cnn2d_deep` cell is **tens of minutes to a few hours**; the full 1601 campaign is a **few GPU-days** spread across the ephemeral sessions. Treat these as order-of-magnitude estimates — they are derived from FLOPs, not measured.
 
@@ -885,7 +885,7 @@ Every (model, feature) cell, sorted best-first. `in-domain` = held-out synthetic
 ## 10 · Damage-threshold (DT) severity sweep @1601
 Positives are stratified by their damage-severity percentile (each task on its own axis: bolt %, hole mm, mass kg, crack depth); balanced accuracy is recomputed keeping only the more-severe positives (all negatives retained). This tests the central thesis — *transfer should improve with damage severity, because larger damage perturbs the spectrum more than the domain gap does.*
 
-![DT combined](figures/hires/dt_1601_combined.png)
+![DT combined](figures/hires/dt_combined.png)
 *Figure 7 — best-cell experimental balanced-acc vs the severity percentile kept.*
 
 | task | all (p0) | ≥p50 | ≥p75 | ≥p90 | best cell @p90 |
@@ -973,5 +973,5 @@ Best experimental **R² = +0.037** with **Pearson r = 0.361** and **MAE = 0.254*
 - **Engines:** `ml_pipeline/hires_{zoo,tab,all}.py` — CFDAC-image, tabular/sequence, and the unified dispatcher; every model and feature defined here.
 - **Analysis scripts:** `hires_zoo_summary.py` (per-cell distillation), `hires_dt_1601.py` (DT balanced-acc sweep), `hires_dt_diag.py` (DT-swept AUC + confusion evolution), `hires_dt_stiffness.py` (DT vs stiffness loss), `hires_analysis.py` (EDA + best-cell confusion/ROC/severity), `hires_arch.py` (measured parameter counts), `hires_compute.py` (FLOPs / training-effort accounting), `hires_inputs.py` (input-sample figures), `build_hires_report.py` (this report).
 - **Data:** `results_hires/{zoo_summary, zoo_best_by_task_res, dt_1601, dt_diag, dt_stiffness, analysis, architectures, compute, inputs}.json`. **Every figure is reproducible from committed data** — the per-case predictions are archived in `results_hires/per_case_hires1601.tar.gz` and the FRF-derived arrays the EDA/input figures need in `results_hires/figure_data.npz` (built by `build_figure_bundle.py`, served by `figdata.py`). Raw per-case predictions also live on branches `colab-hires-{tabular,cnn,transformer,vision}`. See `results/REPRODUCE.md` for the one-command-per-script pipeline.
-- **Figures:** `results/figures/hires/` — inputs (`inputs_*`), capacity (`arch_params`), EDA (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_1601_combined`, `zoo_dt_is_bolt`, `dt_auc`, `dt_confusion_evo`), per-task cell zoos (`cellzoo_*`).
+- **Figures:** `results/figures/hires/` — inputs (`inputs_*`), capacity (`arch_params`), EDA (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_combined`, `zoo_dt_is_bolt`, `dt_auc`, `dt_confusion_evo`), per-task cell zoos (`cellzoo_*`).
 - **Companion:** `REPORT_synth.md` (in-domain ceiling).

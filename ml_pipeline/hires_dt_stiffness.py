@@ -51,11 +51,11 @@ def stiffness_loss(tc: int, sev: float) -> float:
     return 0.0
 
 
-def best_cells():
+def best_cells(res=1601):
     S = json.loads((_REPO/"results_hires"/"zoo_summary.json").read_text())
     best = {}
     for k, v in S.items():
-        if v.get("res") != 1601 or v["task"] not in STIFF_TASKS or v["kind"] != "cls":
+        if v.get("res") != res or v["task"] not in STIFF_TASKS or v["kind"] != "cls":
             continue
         s = v.get("exp_bal_acc", 0)
         if v["task"] not in best or s > best[v["task"]][0]:
@@ -63,27 +63,29 @@ def best_cells():
     return {t: (m, f) for t, (s, m, f) in best.items()}
 
 
-def load_rows(root, task, model, feat):
-    hits = glob.glob(f"{root}/**/per_case/{task}_{model}_{feat}_hires1601.json", recursive=True)
+def load_rows(root, task, model, feat, res=1601):
+    hits = glob.glob(f"{root}/**/per_case/{task}_{model}_{feat}_hires{res}.json", recursive=True)
     return json.load(open(hits[0]))["rows"] if hits else None
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None)
+    ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res
     from ml_pipeline import figdata
     root = a.root or figdata.percase_root()
     names, tcs, svs = figdata.load_exp_labels()
     tcs = tcs.astype(int); svs = svs.astype(float)
     tc_by = dict(zip(names, tcs)); sev_by = dict(zip(names, svs))
     sl_by = {n: 100.0 * stiffness_loss(tc_by[n], sev_by[n]) for n in names}   # percent
-    cells = best_cells()
+    cells = best_cells(res)
 
     out = {"thresholds_pct": THR, "per_task": {}}
     for task in STIFF_TASKS:
         if task not in cells:
             continue
         mo, fe = cells[task]
-        rows = load_rows(root, task, mo, fe)
+        rows = load_rows(root, task, mo, fe, res)
         if not rows:
             continue
         yt = np.array([r["y_true"] for r in rows])
@@ -104,9 +106,9 @@ def main():
             tp = int(((ytk == 1) & (ypk == 1)).sum()); rec["sens"].append(float(tp / npos))
             rec["auc"].append(float(roc_auc_score(ytk, sc[keep])) if sc is not None else None)
         out["per_task"][task] = rec
-    (_REPO/"results_hires"/"dt_stiffness.json").write_text(json.dumps(out, indent=1))
+    (_REPO/"results_hires"/f"dt_stiffness{figdata.sfx(res)}.json").write_text(json.dumps(out, indent=1))
 
-    OUT = _REPO/"results"/"figures"/"hires"
+    OUT = figdata.figdir(res)
     # ---- (1) balanced-acc + AUC vs min stiffness loss ----
     fig, ax = plt.subplots(1, 2, figsize=(14.5, 5.3))
     for task in STIFF_TASKS:
@@ -172,7 +174,7 @@ def main():
         print(task.ljust(10) + "".join((f"{ba[i]:.3f}" if i < len(ba) and ba[i] is not None else "  -- ").rjust(9)
                                         for i in range(len(THR))))
         print("   n_pos:".ljust(10) + "".join(f"{n}".rjust(9) for n in nP))
-    print("wrote results_hires/dt_stiffness.json + dt_stiffness.png + dt_stiffness_map.png")
+    print(f"wrote results_hires/dt_stiffness{figdata.sfx(res)}.json + dt_stiffness.png + dt_stiffness_map.png (res={res})")
 
 
 if __name__ == "__main__":

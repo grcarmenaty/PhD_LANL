@@ -28,12 +28,12 @@ DET = ["binary", "is_bolt", "is_crack", "is_hole", "is_mass"]
 PCTS = [0, 25, 50, 75, 90]
 
 
-def best_detection_cells():
-    """task -> (model, feature) chosen by experimental balanced-acc at 1601."""
+def best_detection_cells(res=1601):
+    """task -> (model, feature) chosen by experimental balanced-acc at `res`."""
     S = json.loads((_REPO/"results_hires"/"zoo_summary.json").read_text())
     best = {}
     for k, v in S.items():
-        if v.get("res") != 1601 or v["task"] not in DET or v["kind"] != "cls":
+        if v.get("res") != res or v["task"] not in DET or v["kind"] != "cls":
             continue
         s = v.get("exp_bal_acc", 0)
         if v["task"] not in best or s > best[v["task"]][0]:
@@ -41,27 +41,29 @@ def best_detection_cells():
     return {t: (m, f) for t, (s, m, f) in best.items()}
 
 
-def load_rows(root, task, model, feat):
-    hits = glob.glob(f"{root}/**/per_case/{task}_{model}_{feat}_hires1601.json", recursive=True)
+def load_rows(root, task, model, feat, res=1601):
+    hits = glob.glob(f"{root}/**/per_case/{task}_{model}_{feat}_hires{res}.json", recursive=True)
     if not hits:
         return None
     return json.load(open(hits[0]))["rows"]
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None)
+    ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res
     from ml_pipeline import figdata
     root = a.root or figdata.percase_root()
     names, _tc, svs = figdata.load_exp_labels()
     sev = dict(zip(names, svs))
-    cells = best_detection_cells()
+    cells = best_detection_cells(res)
 
     out = {"percentiles": PCTS, "per_task": {}}
     for task in DET:
         if task not in cells:
             continue
         mo, fe = cells[task]
-        rows = load_rows(root, task, mo, fe)
+        rows = load_rows(root, task, mo, fe, res)
         if not rows or "proba" not in rows[0] or rows[0]["proba"] is None:
             continue
         yt = np.array([r["y_true"] for r in rows])
@@ -90,9 +92,9 @@ def main():
             cmn = cm / cm.sum(1, keepdims=True).clip(min=1)
             rec["cm"].append([[round(float(x), 3) for x in r] for r in cmn])
         out["per_task"][task] = rec
-    (_REPO/"results_hires"/"dt_diag.json").write_text(json.dumps(out, indent=1))
+    (_REPO/"results_hires"/f"dt_diag{figdata.sfx(res)}.json").write_text(json.dumps(out, indent=1))
 
-    OUT = _REPO/"results"/"figures"/"hires"
+    OUT = figdata.figdir(res)
     # ---- (a) AUC + macro-F1 vs percentile ----
     fig, ax = plt.subplots(1, 2, figsize=(14.5, 5.2))
     cmap = plt.get_cmap("tab10")
@@ -149,7 +151,7 @@ def main():
         print(f"{task:9s} {r['cell']:28s} AUC " +
               " ".join((f"{v:.2f}" if v is not None else " -- ") for v in r["auc"]) +
               "  sens " + " ".join((f"{v:.2f}" if v is not None else " -- ") for v in r["sens"]))
-    print("wrote results_hires/dt_diag.json + dt_auc.png + dt_confusion_evo.png")
+    print(f"wrote results_hires/dt_diag{figdata.sfx(res)}.json + dt_auc.png + dt_confusion_evo.png (res={res})")
 
 
 if __name__ == "__main__":

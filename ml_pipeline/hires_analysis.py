@@ -38,8 +38,22 @@ CFAM = {"pristine":"#7f7f7f","bolt":"#1f77b4","crack":"#d62728","hole":"#2ca02c"
 
 
 # ----------------------------------------------------------------------------- helpers
-def logmag_chanmean(h5, key="frf_mag", sub=None):
-    """log10 channel-averaged FRF magnitude -> (N, 1601). Optionally subsample N."""
+def _decimate(a, res, axis=1):
+    """Bin-average `a` along `axis` to `res` bins (the same freq decimation the
+    training engines use). No-op if res >= current length."""
+    n = a.shape[axis]
+    if res is None or res >= n:
+        return a
+    edges = np.linspace(0, n, res + 1).astype(int); starts = edges[:-1]
+    s = np.add.reduceat(a, starts, axis=axis)
+    sizes = np.maximum(np.diff(edges), 1)
+    shape = [1] * a.ndim; shape[axis] = res
+    return (s / sizes.reshape(shape)).astype(a.dtype)
+
+
+def logmag_chanmean(h5, key="frf_mag", sub=None, res=1601):
+    """log10 channel-averaged FRF magnitude -> (N, res). Optionally subsample N
+    and decimate the frequency axis to `res` bins (for the 128-bin study)."""
     import h5py
     with h5py.File(h5, "r") as f:
         N = f[key].shape[0]
@@ -50,6 +64,7 @@ def logmag_chanmean(h5, key="frf_mag", sub=None):
         sev = f["severity"][:][idx]
         fr = f["freqs"][:]
     lm = np.log10(np.abs(mag) + 1e-9).mean(axis=2)   # (n,1601)
+    lm = _decimate(lm, res, axis=1); fr = _decimate(fr[None, :], res, axis=1)[0]
     return lm, tc.astype(int), sev.astype(float), fr
 
 
@@ -60,11 +75,11 @@ def load_meta_labels(h5):
                 f["storey"][:].astype(int), f["end"][:].astype(int))
 
 
-def best_cells(summary):
+def best_cells(summary, res=1601):
     """task -> (model, feature, rec) chosen by exp_bal_acc (cls) / exp_r2 (reg)."""
     by = {}
     for k, v in summary.items():
-        if v.get("res") != 1601:
+        if v.get("res") != res:
             continue
         t = v["task"]
         s = v.get("exp_bal_acc") if v["kind"] == "cls" else v.get("exp_r2")
@@ -75,8 +90,8 @@ def best_cells(summary):
     return {t: by[t][1] for t in by}
 
 
-def percase(root, task, model, feat):
-    p = f"{root}/**/per_case/{task}_{model}_{feat}_hires1601.json"
+def percase(root, task, model, feat, res=1601):
+    p = f"{root}/**/per_case/{task}_{model}_{feat}_hires{res}.json"
     hits = glob.glob(p, recursive=True)
     if not hits:
         return None
@@ -90,9 +105,9 @@ def percase(root, task, model, feat):
 
 
 # ----------------------------------------------------------------------------- (A) EDA
-def eda(stats):
+def eda(stats, res=1601):
     from ml_pipeline import figdata
-    B = figdata.load_eda_arrays()
+    B = figdata.load_eda_arrays(res)
     if B is not None:                               # committed bundle (no HDF5 needed)
         syn_tc = B["syn_tc"].astype(int); syn_sev = B["syn_sev"].astype(float)
         exp_tc = B["exp_tc"].astype(int); exp_sev = B["exp_sev"].astype(float)
@@ -142,8 +157,8 @@ def eda(stats):
         syn_lm = B["syn_lm"]; syn_tc2 = B["syn_lm_tc"].astype(int); fr = B["freqs"]
         exp_lm = B["exp_lm"]; exp_tc2 = B["exp_tc"].astype(int)
     else:
-        syn_lm, syn_tc2, _, fr = logmag_chanmean(SYN, sub=4000)
-        exp_lm, exp_tc2, _, _ = logmag_chanmean(EXP)
+        syn_lm, syn_tc2, _, fr = logmag_chanmean(SYN, sub=4000, res=res)
+        exp_lm, exp_tc2, _, _ = logmag_chanmean(EXP, res=res)
     fig, ax = plt.subplots(1, 2, figsize=(14, 4.6))
     for i in range(5):
         ax[0].plot(fr, syn_lm[syn_tc2 == i].mean(0), color=CFAM[TYPE_NAMES[i]], lw=1.4, label=TYPE_NAMES[i])
@@ -193,8 +208,8 @@ def eda(stats):
 
 
 # ----------------------------------------------------------------------------- (B) diagnostics
-def diagnostics(root, summary, stats):
-    bc = best_cells(summary)
+def diagnostics(root, summary, stats, res=1601):
+    bc = best_cells(summary, res)
     stats["best_cells"] = {}
 
     # ---- confusion-matrix grid for classification tasks ----
@@ -204,7 +219,7 @@ def diagnostics(root, summary, stats):
     n = len(cls_tasks); cols = 3; rows = int(np.ceil(n/cols))
     fig, axs = plt.subplots(rows, cols, figsize=(4.3*cols, 3.8*rows)); axs = np.array(axs).ravel()
     for ax, t in zip(axs, cls_tasks):
-        rec = bc[t]; pc = percase(root, t, rec["model"], rec["feature"])
+        rec = bc[t]; pc = percase(root, t, rec["model"], rec["feature"], res)
         if pc is None:
             ax.axis("off"); continue
         yt, yp, pr, _, _ = pc
@@ -234,7 +249,7 @@ def diagnostics(root, summary, stats):
     for t in DET:
         if t not in bc:
             continue
-        rec = bc[t]; pc = percase(root, t, rec["model"], rec["feature"])
+        rec = bc[t]; pc = percase(root, t, rec["model"], rec["feature"], res)
         if pc is None:
             continue
         yt, yp, pr, _, _ = pc
@@ -287,15 +302,19 @@ def diagnostics(root, summary, stats):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None); a = ap.parse_args()
+    global FIG
+    ap = argparse.ArgumentParser(); ap.add_argument("--root", default=None)
+    ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res
     from ml_pipeline import figdata
+    FIG = figdata.figdir(res)
     root = a.root or figdata.percase_root()
     summary = json.loads((_REPO/"results_hires"/"zoo_summary.json").read_text())
     stats = {}
-    eda(stats)
-    diagnostics(root, summary, stats)
-    (_REPO/"results_hires"/"analysis.json").write_text(json.dumps(stats, indent=1))
-    print("wrote results_hires/analysis.json + EDA/diagnostic figures")
+    eda(stats, res)
+    diagnostics(root, summary, stats, res)
+    (_REPO/"results_hires"/f"analysis{figdata.sfx(res)}.json").write_text(json.dumps(stats, indent=1))
+    print(f"wrote results_hires/analysis{figdata.sfx(res)}.json + EDA/diagnostic figures (res={res})")
 
 
 if __name__ == "__main__":

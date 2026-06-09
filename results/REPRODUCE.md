@@ -1,33 +1,46 @@
-# Reproducing every figure in `REPORT_CONSOLIDATED.md` / `REPORT_synth.md`
+# Reproducing every figure in the consolidated / synth reports
 
-Everything the two reports show can be regenerated **from data committed in this
-repo**, with one command per script. This file documents the chain and what each
-artefact depends on.
+Two resolution studies, each with a consolidated + in-domain report, all
+regenerable **from data committed in this repo** with one command per script:
 
-## TL;DR — regenerate all figures + the report
+| resolution | consolidated | in-domain companion |
+|---|---|---|
+| 1601-bin (native)    | `REPORT_CONSOLIDATED.md`     | `REPORT_synth.md`     |
+| 128-bin  (decimated) | `REPORT_CONSOLIDATED_128.md` | `REPORT_synth_128.md` |
+
+Every script takes `--res {1601,128}` (default 1601). 1601 figures live in
+`results/figures/hires/`, 128 figures in `results/figures/hires128/`; 128 data
+artefacts carry a `_128` suffix (`analysis_128.json`, …; DT uses `dt_{res}.json`).
+
+## TL;DR — regenerate both report sets
 
 ```bash
-# from the repo root
-python ml_pipeline/hires_zoo_summary.py      # per-cell distillation  -> zoo_summary.json (+2 figs)
-python ml_pipeline/hires_dt_1601.py          # DT balanced-acc sweep   -> dt_1601.json (+fig)
-python ml_pipeline/hires_dt_diag.py          # DT-swept AUC/confusion  -> dt_diag.json (+2 figs)
-python ml_pipeline/hires_dt_stiffness.py     # DT vs stiffness loss    -> dt_stiffness.json (+2 figs)
-python ml_pipeline/hires_analysis.py         # EDA + best-cell diagnostics (+6 figs)
-python ml_pipeline/hires_arch.py             # measured model sizes    -> architectures.json (+fig)
-python ml_pipeline/hires_compute.py          # FLOPs / training effort -> compute.json (+fig)
-python ml_pipeline/hires_inputs.py           # input-sample figures (+4 figs)
-python ml_pipeline/build_hires_report.py     # assembles the report + Figure 1 + cellzoo_* figs
+# from the repo root; run for RES=1601 then RES=128
+for RES in 1601 128; do
+  python ml_pipeline/hires_zoo_summary.py            # per-cell distillation (both res) -> zoo_summary.json
+  python ml_pipeline/hires_dt_1601.py        --res $RES   # DT balanced-acc sweep + is_bolt fig
+  python ml_pipeline/hires_dt_diag.py        --res $RES   # DT-swept AUC/confusion (+2 figs)
+  python ml_pipeline/hires_dt_stiffness.py   --res $RES   # DT vs stiffness loss (+2 figs)
+  python ml_pipeline/hires_arch.py           --res $RES   # measured model sizes (+fig)
+  python ml_pipeline/hires_compute.py        --res $RES   # FLOPs / training effort (+fig)
+  python ml_pipeline/hires_analysis.py       --res $RES   # EDA + best-cell diagnostics (+6 figs)
+  python ml_pipeline/hires_inputs.py         --res $RES   # input-sample figures (+4 figs)
+  python ml_pipeline/build_hires_synth_report.py --res $RES   # in-domain companion report
+  python ml_pipeline/build_hires_report.py   --res $RES   # consolidated report + Figure 1 + cellzoo_*
+done
 ```
 
-No GPU, no Google Drive, no `/tmp` state required. The scripts read the two
-committed artefacts below and auto-extract the prediction archive on first use.
+`hires_zoo_summary.py` distils ALL resolutions at once (it only needs running
+once). No GPU, no Google Drive, no `/tmp` state required: the scripts read the
+committed artefacts below and auto-extract the prediction archives on first use.
 
 ## Committed data the figures consume
 
 | artefact | what it is | built by |
 |---|---|---|
-| `results_hires/per_case_hires1601.tar.gz` | the 575 unique 1601-bin **per-case predictions** (`y_true`, `y_pred`, class probabilities) — the GPU training outputs | `build_figure_bundle.py` |
-| `results_hires/figure_data.npz` | compact cache of the FRF-derived arrays the EDA/input figures need (channel-mean log\|FRF\| for synth-4000 + all exp, full labels, and the complex FRFs of the sample cases) | `build_figure_bundle.py` |
+| `results_hires/per_case_hires1601.tar.gz` | 575 unique **1601-bin per-case predictions** (`y_true`, `y_pred`, class probabilities) | `build_figure_bundle.py --res 1601` |
+| `results_hires/per_case_hires128.tar.gz` | 570 unique **128-bin per-case predictions** | `build_figure_bundle.py --res 128` |
+| `results_hires/figure_data.npz` / `figure_data_128.npz` | compact cache of the FRF-derived arrays the EDA/input figures need, at each resolution (channel-mean log\|FRF\|, labels, sample complex FRFs) | `build_figure_bundle.py --res {1601,128}` |
 | `results_hires/*.json` | distilled per-cell metrics, DT sweeps, analysis stats | the analysis scripts above |
 
 `ml_pipeline/figdata.py` is the single access layer: it extracts the archive to

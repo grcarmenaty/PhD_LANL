@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 _REPO = Path(__file__).resolve().parent.parent
 FIG = _REPO/"results"/"figures"/"hires"; FIG.mkdir(parents=True, exist_ok=True)
 RES = 1601
+SFX = ""
 
 TASKS = ["binary","is_pristine","is_bolt","is_crack","is_hole","is_mass",
          "type","col_location","mass_location","severity"]
@@ -95,7 +96,7 @@ FEAT_DETAIL = {
 
 
 def emit_compute(A):
-    cpath = _REPO/"results_hires"/"compute.json"
+    cpath = _REPO/"results_hires"/f"compute{SFX}.json"
     if not cpath.exists():
         A("## 6 · Training time & computational effort\n*(compute.json not found — run `ml_pipeline/hires_compute.py`.)*\n"); return
     c = json.loads(cpath.read_text())
@@ -136,9 +137,9 @@ def emit_compute(A):
       f" tabular case that balloons (d_in = 9×1601 → fwd {c.get('mlp_flat_seq_fwd_gflops',0):.2f} GFLOP).\n")
     A("### 6.3 Campaign size and total effort")
     fam = c["by_family"]
-    A(f"- **{c['n_cells_1601']} cells trained at 1601** (this committed set): " +
-      ", ".join(f"{v['cells']} {k}" for k, v in fam.items()) + " (a 128-bin baseline of ~426 more cells"
-      " ran separately).")
+    A(f"- **{c['n_cells']} cells trained at {c['resolution']}** (this committed set): " +
+      ", ".join(f"{v['cells']} {k}" for k, v in fam.items()) +
+      f" (the companion {'128' if RES==1601 else '1601'}-bin study is reported separately).")
     # crude campaign total: average TFLOP/epoch across families × cells × ~30 epochs
     img_ep = m["cnn2d_deep"]["train_gflops_per_epoch"]; sh = m["cnn2d_shallow"]["train_gflops_per_epoch"]
     A("- A single mid-cost image cell (≈shallow/transformer, ~40–130 TFLOP/epoch × ~30 convergence epochs)"
@@ -191,7 +192,7 @@ def emit_inputs(A):
 
 
 def emit_arch(A):
-    apath = _REPO/"results_hires"/"architectures.json"
+    apath = _REPO/"results_hires"/f"architectures{SFX}.json"
     if not apath.exists():
         A("## 5 · Model architectures\n*(architectures.json not found — run `ml_pipeline/hires_arch.py`.)*\n"); return
     arch = json.loads(apath.read_text())["models"]
@@ -254,7 +255,7 @@ def synth_vs_exp_plot(cells):
     ax.set_title("In-domain ceiling vs zero-shot transfer, best cell per task @1601\n"
                  "(the gap between the bars IS the sim-to-real penalty)", fontweight="bold", fontsize=11)
     ax.legend(); ax.grid(axis="y", alpha=.3)
-    plt.tight_layout(); p = FIG/"zoo1601_synth_vs_exp.png"; plt.savefig(p, dpi=130); plt.close(fig)
+    plt.tight_layout(); p = FIG/"zoo_synth_vs_exp.png"; plt.savefig(p, dpi=130); plt.close(fig)
     return p.name
 
 
@@ -299,15 +300,20 @@ def detect_prose(t, b, an):
 
 
 def main():
+    global RES, SFX, FIG
+    import argparse
+    from ml_pipeline import figdata
+    ap = argparse.ArgumentParser(); ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    RES = a.res; SFX = figdata.sfx(RES); FIG = figdata.figdir(RES)
     cells = load_cells()
-    dt = json.loads((_REPO/"results_hires"/"dt_1601.json").read_text())
-    apath = _REPO/"results_hires"/"analysis.json"
+    dt = json.loads((_REPO/"results_hires"/f"dt_{RES}.json").read_text())
+    apath = _REPO/"results_hires"/f"analysis{SFX}.json"
     an = json.loads(apath.read_text()) if apath.exists() else {"best_cells": {}, "counts": {}}
     bc = an.get("best_cells", {})
     out = []
     A = out.append
     A("# LANL 3SBB — Synth-to-Real Damage Diagnosis: FULL Consolidated Report")
-    A("**Author:** G. Reyes-Carmenaty · **Date:** 2026-06-08 · **Resolution:** 1601-bin (native).")
+    A(f"**Author:** G. Reyes-Carmenaty · **Date:** 2026-06-09 · **Resolution:** {RES}-bin ({'native' if RES==1601 else 'decimated from the native high-resolution grid'}).")
     A("\n> Exhaustive edition — sample visualisations of every input representation, full detail on every"
       " model architecture (measured parameter counts), exploratory analysis of both domains, every cell of"
       " the high-resolution model zoo (in-domain + zero-shot), confusion matrices and ROC/AUC for the best cell"
@@ -356,10 +362,17 @@ def main():
 
     # ---- methodology ----
     A("## 3 · Methodology")
-    A("**Data.** Synthetic data regenerated at 16 s (N_T=4096, fs=256 → df=0.0625 Hz, 1601 bins, 0–100 Hz)"
-      " to match the experimental grid exactly: 10 000 synthetic cases (2 000 per class, balanced) from a"
-      " linear reduced-order model of the 3-storey bookshelf, and the 2 638-case IQS experimental set"
-      " (bolt-heavy: 462 pristine / 1338 bolt / 320 crack / 280 hole / 238 mass).")
+    if RES == 1601:
+        A("**Data.** Synthetic data regenerated at 16 s (N_T=4096, fs=256 → df=0.0625 Hz, 1601 bins, 0–100 Hz)"
+          " to match the experimental grid exactly: 10 000 synthetic cases (2 000 per class, balanced) from a"
+          " linear reduced-order model of the 3-storey bookshelf, and the 2 638-case IQS experimental set"
+          " (bolt-heavy: 462 pristine / 1338 bolt / 320 crack / 280 hole / 238 mass).")
+    else:
+        A(f"**Data.** Both domains' native high-resolution FRFs (16 s, df=0.0625 Hz, 0–100 Hz) are **decimated"
+          f" to {RES} bins by frequency-bin averaging** — the exact decimation the training engines apply — to"
+          " test whether full spectral resolution is necessary. 10 000 synthetic cases (2 000 per class,"
+          " balanced) from a linear reduced-order model of the 3-storey bookshelf, and the 2 638-case IQS"
+          " experimental set (bolt-heavy: 462 pristine / 1338 bolt / 320 crack / 280 hole / 238 mass).")
     A("**Protocol.** Per cell: compute the feature from the FRFs, train on a synth subsample (70/15/15 split,"
       " class-weighted loss / balanced trees, early-stop to convergence with checkpoint/resume), evaluate on"
       " held-out synth (**in-domain**) and on all 2 638 experimental cases (**zero-shot**, no real data ever"
@@ -511,7 +524,7 @@ def main():
       " mm, mass kg, crack depth); balanced accuracy is recomputed keeping only the more-severe positives"
       " (all negatives retained). This tests the central thesis — *transfer should improve with damage"
       " severity, because larger damage perturbs the spectrum more than the domain gap does.*\n")
-    A("![DT combined](figures/hires/dt_1601_combined.png)")
+    A("![DT combined](figures/hires/dt_combined.png)")
     A("*Figure 7 — best-cell experimental balanced-acc vs the severity percentile kept.*\n")
     A("| task | all (p0) | ≥p50 | ≥p75 | ≥p90 | best cell @p90 |")
     A("|---|---|---|---|---|---|")
@@ -528,7 +541,7 @@ def main():
       " (Figure 2b), not because the model fails* — there simply is no 'more severe' subset to climb into.")
 
     # ---- 9.2 swept diagnostics (AUC + confusion evolution) ----
-    ddpath = _REPO/"results_hires"/"dt_diag.json"
+    ddpath = _REPO/"results_hires"/f"dt_diag{SFX}.json"
     if ddpath.exists():
         dd = json.loads(ddpath.read_text())["per_task"]
         A("\n### 10.1 The full diagnostic suite, swept over severity")
@@ -564,7 +577,7 @@ def main():
           " sweep reports per-task thresholds and positive counts rather than a single global curve.\n")
 
     # ---- 9.3 stiffness-loss (physical) sweep ----
-    spath = _REPO/"results_hires"/"dt_stiffness.json"
+    spath = _REPO/"results_hires"/f"dt_stiffness{SFX}.json"
     if spath.exists():
         sd = json.loads(spath.read_text())
         A("\n### 10.2 The same sweep on a *physical* axis — storey-stiffness loss")
@@ -674,12 +687,15 @@ def main():
       " `figdata.py`). Raw per-case predictions also live on branches `colab-hires-{tabular,cnn,transformer,vision}`."
       " See `results/REPRODUCE.md` for the one-command-per-script pipeline.\n"
       "- **Figures:** `results/figures/hires/` — inputs (`inputs_*`), capacity (`arch_params`), EDA"
-      " (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_1601_combined`, `zoo_dt_is_bolt`, `dt_auc`,"
+      " (`eda_*`), best-cell diagnostics (`diag_*`), DT sweep (`dt_combined`, `zoo_dt_is_bolt`, `dt_auc`,"
       " `dt_confusion_evo`), per-task cell zoos (`cellzoo_*`).\n"
-      "- **Companion:** `REPORT_synth.md` (in-domain ceiling).")
+      f"- **Companion:** `REPORT_synth{SFX}.md` (in-domain ceiling).")
 
-    (_REPO/"results"/"REPORT_CONSOLIDATED.md").write_text("\n".join(out)+"\n")
-    print(f"wrote REPORT_CONSOLIDATED.md ({len(out)} blocks, {ncell} cells, {len(TASKS)} tasks)")
+    text = "\n".join(out)+"\n"
+    if RES != 1601:
+        text = text.replace("figures/hires/", f"figures/hires{RES}/").replace("1601", str(RES))
+    (_REPO/"results"/f"REPORT_CONSOLIDATED{SFX}.md").write_text(text)
+    print(f"wrote REPORT_CONSOLIDATED{SFX}.md ({len(out)} blocks, {ncell} cells, {len(TASKS)} tasks, res={RES})")
 
 
 if __name__ == "__main__":

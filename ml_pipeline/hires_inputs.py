@@ -31,14 +31,26 @@ EXP = _REPO/"dataset"/"experimental_features_hires.h5"
 TYPE_NAMES = ["pristine", "bolt", "crack", "hole", "mass"]
 
 
-def pick(h5):
-    """Return dict: freqs, ref(complex N,9), and for pristine + each damage a sample idx
-    plus its complex FRF. Damaged pick = highest-severity of that type."""
+def _decf(a, res, axis=0):
+    """Bin-average `a` along `axis` to `res` bins (freq decimation for 128-bin study)."""
+    n = a.shape[axis]
+    if res is None or res >= n:
+        return a
+    edges = np.linspace(0, n, res + 1).astype(int); starts = edges[:-1]
+    s = np.add.reduceat(a, starts, axis=axis)
+    sizes = np.maximum(np.diff(edges), 1)
+    shape = [1] * a.ndim; shape[axis] = res
+    return (s / sizes.reshape(shape)).astype(a.dtype)
+
+
+def pick(h5, res=1601):
+    """Return dict: freqs, ref(complex res,9), and for pristine + each damage a sample idx
+    plus its complex FRF decimated to `res` bins. Damaged pick = highest-severity of that type."""
     import h5py
     with h5py.File(h5, "r") as f:
         tc = f["type_code"][:].astype(int); sev = f["severity"][:].astype(float)
-        freqs = f["freqs"][:].astype(np.float32)
-        ref = f["reference/frf_complex"][:].astype(np.complex64)        # (N,9)
+        freqs = _decf(f["freqs"][:].astype(np.float32), res)
+        ref = _decf(f["reference/frf_complex"][:].astype(np.complex64), res)        # (res,9)
         idx = {}
         idx[0] = int(np.where(tc == 0)[0][0])
         for c in range(1, 5):
@@ -47,7 +59,7 @@ def pick(h5):
         H = {}
         for c, i in idx.items():
             if i is None: continue
-            H[c] = (f["frf_real"][i] + 1j * f["frf_imag"][i]).astype(np.complex64)   # (N,9)
+            H[c] = _decf((f["frf_real"][i] + 1j * f["frf_imag"][i]).astype(np.complex64), res)   # (res,9)
         sevv = {c: (float(sev[idx[c]]) if idx[c] is not None else None) for c in idx}
     return {"freqs": freqs, "ref": ref, "idx": idx, "H": H, "sev": sevv}
 
@@ -60,12 +72,16 @@ def cfdac_channels(ref, H, channels=("real", "imag", "mag", "phase")):
 
 
 def main():
+    global FIG
+    import argparse
     from ml_pipeline import figdata
-    samp = figdata.load_input_samples()
+    ap = argparse.ArgumentParser(); ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res; FIG = figdata.figdir(res)
+    samp = figdata.load_input_samples(res)
     if samp is not None:                      # committed bundle (no HDF5 needed)
         S, E = samp["synth"], samp["exp"]
     else:                                     # fall back to the hi-res HDF5
-        S = pick(SYN); E = pick(EXP)
+        S = pick(SYN, res=res); E = pick(EXP, res=res)
     fr = S["freqs"]
 
     # ---------- (1) tabular features: modal (81) + indicators (22) ----------
@@ -162,7 +178,7 @@ def main():
                  fontweight="bold", fontsize=12, y=1.02)
     plt.tight_layout(); plt.savefig(FIG/"inputs_cfdac_classes.png", dpi=130); plt.close(fig)
 
-    (_REPO/"results_hires"/"inputs.json").write_text(json.dumps(
+    (_REPO/"results_hires"/f"inputs{figdata.sfx(res)}.json").write_text(json.dumps(
         {"synth_idx": S["idx"], "synth_sev": S["sev"], "exp_idx": E["idx"], "exp_sev": E["sev"]}, indent=1))
     print("wrote inputs_{tabular,sequences,cfdac_variants,cfdac_classes}.png + results_hires/inputs.json")
     print("synth severities:", S["sev"], "\nexp severities:", E["sev"])

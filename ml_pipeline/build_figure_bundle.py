@@ -18,45 +18,41 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from ml_pipeline.hires_analysis import logmag_chanmean      # identical reduction the EDA uses
 from ml_pipeline.hires_inputs import pick                   # identical sample selection
+from ml_pipeline.figdata import sfx
 SYN = REPO / "dataset" / "features_hires.h5"
 EXP = REPO / "dataset" / "experimental_features_hires.h5"
-OUT_TGZ = REPO / "results_hires" / "per_case_hires1601.tar.gz"
-OUT_NPZ = REPO / "results_hires" / "figure_data.npz"
 
 
-def build_percase_archive(root):
-    """Dedupe the 1601-bin per-case JSONs (one per task/model/feature) into a
+def build_percase_archive(root, res):
+    """Dedupe the `res`-bin per-case JSONs (one per task/model/feature) into a
     flat gzip tarball. Keeps the first occurrence of each filename."""
+    out = REPO / "results_hires" / f"per_case_hires{res}.tar.gz"
     seen = {}
-    for p in glob.glob(f"{root}/**/per_case/*_hires1601.json", recursive=True):
+    for p in glob.glob(f"{root}/**/per_case/*_hires{res}.json", recursive=True):
         name = Path(p).name
         if name not in seen:
             seen[name] = p
-    OUT_TGZ.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(OUT_TGZ, "w:gz") as t:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(out, "w:gz") as t:
         for name, p in sorted(seen.items()):
             t.add(p, arcname=f"per_case/{name}")
-    mb = OUT_TGZ.stat().st_size / 1048576
-    print(f"per-case archive: {len(seen)} unique files -> {OUT_TGZ.name} ({mb:.1f} MB)")
+    print(f"per-case archive: {len(seen)} unique files -> {out.name} ({out.stat().st_size/1048576:.1f} MB)")
 
 
-def build_data_bundle():
+def build_data_bundle(res):
     """Compact cache of everything the EDA + input-sample figures read from the
-    1.2 GB hi-res HDF5 (so they regenerate without it)."""
+    1.2 GB hi-res HDF5 (so they regenerate without it), at frequency res `res`."""
     import h5py
-    # FRF-mean reductions (identical seed/subsample to hires_analysis.eda):
-    # synth uses a 4 000 subsample for signatures/PCA; exp uses all 2 638.
-    syn_lm, syn_lm_tc, syn_lm_sev, freqs = logmag_chanmean(SYN, sub=4000)
-    exp_lm, exp_tc, exp_sev, _ = logmag_chanmean(EXP, sub=None)
-    # full synth labels (10 000) for the class-balance + severity-distribution panels
+    out = REPO / "results_hires" / f"figure_data{sfx(res)}.npz"
+    syn_lm, syn_lm_tc, syn_lm_sev, freqs = logmag_chanmean(SYN, sub=4000, res=res)
+    exp_lm, exp_tc, exp_sev, _ = logmag_chanmean(EXP, sub=None, res=res)
     with h5py.File(SYN, "r") as f:
         syn_tc = f["type_code"][:].astype(np.int16); syn_sev = f["severity"][:].astype(np.float32)
-    # input-sample selections (identical to hires_inputs.pick)
-    S = pick(SYN); E = pick(EXP)
+    S = pick(SYN, res=res); E = pick(EXP, res=res)
     def packH(D):
         return {int(c): D["H"][c] for c in D["H"]}
     np.savez_compressed(
-        OUT_NPZ,
+        out,
         freqs=freqs.astype(np.float32),
         syn_tc=syn_tc, syn_sev=syn_sev,                                    # full (10 000)
         syn_lm=syn_lm.astype(np.float32), syn_lm_tc=syn_lm_tc.astype(np.int16),
@@ -66,8 +62,7 @@ def build_data_bundle():
         synth_ref=S["ref"], synth_idx=S["idx"], synth_sampH=packH(S), synth_sampsev=S["sev"],
         exp_ref=E["ref"], exp_idx=E["idx"], exp_sampH=packH(E), exp_sampsev=E["sev"],
     )
-    mb = OUT_NPZ.stat().st_size / 1048576
-    print(f"figure data bundle -> {OUT_NPZ.name} ({mb:.1f} MB)  "
+    print(f"figure data bundle -> {out.name} ({out.stat().st_size/1048576:.1f} MB)  "
           f"[syn_lm {syn_lm.shape}, exp_lm {exp_lm.shape}]")
 
 
@@ -78,10 +73,13 @@ def _names(h5):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--root", default="/tmp/allres"); a = ap.parse_args()
-    build_percase_archive(a.root)
-    build_data_bundle()
-    print("done — commit results_hires/per_case_hires1601.tar.gz + results_hires/figure_data.npz")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", default="/tmp/allres")
+    ap.add_argument("--res", type=int, default=1601)
+    a = ap.parse_args()
+    build_percase_archive(a.root, a.res)
+    build_data_bundle(a.res)
+    print(f"done — commit per_case_hires{a.res}.tar.gz + figure_data{sfx(a.res)}.npz")
 
 
 if __name__ == "__main__":

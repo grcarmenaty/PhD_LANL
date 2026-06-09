@@ -1,0 +1,103 @@
+{
+ "resolution": 128,
+ "n_cells": 570,
+ "by_family": {
+  "image": {
+   "cells": 420,
+   "median_subsample": 3000
+  },
+  "tabular/seq": {
+   "cells": 150,
+   "median_subsample": 3000
+  }
+ },
+ "cfdac_gflops_per_sample": 0.0013,
+ "mlp_flat_seq_fwd_gflops": 0.003,
+ "models": {
+  "mlp": {
+   "params": 208258,
+   "fwd_gflops": 0.001,
+   "family": "tabular/seq",
+   "train_gflops_per_epoch": 0.01,
+   "subsample": 4000
+  },
+  "cnn1d": {
+   "params": 67490,
+   "fwd_gflops": 0.002,
+   "family": "tabular/seq",
+   "train_gflops_per_epoch": 0.02,
+   "subsample": 4000
+  },
+  "transformer1d": {
+   "params": 899842,
+   "fwd_gflops": 0.001,
+   "family": "tabular/seq",
+   "train_gflops_per_epoch": 0.01,
+   "subsample": 4000
+  },
+  "cnn2d_shallow": {
+   "params": 76642,
+   "fwd_gflops": 0.029,
+   "family": "image",
+   "train_gflops_per_epoch": 0.27,
+   "subsample": 3000
+  },
+  "cnn2d_deep": {
+   "params": 11239298,
+   "fwd_gflops": 1.181,
+   "family": "image",
+   "train_gflops_per_epoch": 10.63,
+   "subsample": 3000
+  },
+  "cnn3d": {
+   "params": 31586,
+   "fwd_gflops": 0.017,
+   "family": "image",
+   "train_gflops_per_epoch": 0.16,
+   "subsample": 3000
+  },
+  "transformer": {
+   "params": 3638146,
+   "fwd_gflops": 0.092,
+   "family": "image",
+   "train_gflops_per_epoch": 0.83,
+   "subsample": 3000
+  },
+  "resnet50": {
+   "params": 23508994,
+   "fwd_gflops": 23.791,
+   "family": "image",
+   "train_gflops_per_epoch": 214.12,
+   "subsample": 3000
+  },
+  "convnext_tiny": {
+   "params": 27820130,
+   "fwd_gflops": 26.155,
+   "family": "image",
+   "train_gflops_per_epoch": 235.4,
+   "subsample": 3000
+  }
+ },
+ "protocol": {
+  "image": {
+   "subsample": 3000,
+   "batch": 16,
+   "max_epochs": 80,
+   "patience": 8,
+   "optim": "AdamW",
+   "sched": "ReduceLROnPlateau",
+   "amp": "bf16(A100/L4)/fp16(T4)"
+  },
+  "tabular": {
+   "subsample": 4000,
+   "batch": 256,
+   "max_epochs": 200,
+   "patience": 15
+  }
+ },
+ "gpus": [
+  "T4 (15 GB)",
+  "L4 (24 GB)",
+  "A100 (40 GB)"
+ ]
+}

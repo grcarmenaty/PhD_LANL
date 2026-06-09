@@ -51,6 +51,11 @@ def add(key, module, family, note, repr_cfg):
 
 
 def main():
+    import argparse
+    from ml_pipeline import figdata
+    global FIG
+    ap = argparse.ArgumentParser(); ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res; FIG = figdata.figdir(res)
     arch = {"models": {}, "notes": {}}
 
     # ---- bespoke CFDAC-image models (n_in=2, n_out=2, full 1601 grid) ----
@@ -68,12 +73,12 @@ def main():
         "3-D conv stem (kernel (min(3,C),7,7), spatial stride 4) then 3×(1,3,3) stride-(1,2,2) "
         "3-D convs, widths 16→32→64; global-avg-pool3d → 64-d FC → logits.",
         "n_in=2, widths=(16,32,64)")
-    add("transformer", CFDACTransformer(2, 2, input_size=1601), "CFDAC image (bespoke ViT)",
+    add("transformer", CFDACTransformer(2, 2, input_size=res), "CFDAC image (bespoke ViT)",
         "Conv tokeniser (5 strided convs, total /64: 1601→~25) → ~625 tokens of dim 192; prepend a "
         "CLS token + learned positional embedding; 6-layer pre-norm TransformerEncoder (6 heads, MLP "
         "ratio 4, GELU, dropout 0.1); LayerNorm → linear head on the CLS token. Tokenises the full-res "
         "CFDAC rather than resizing to 224.",
-        "n_in=2, dim=192, depth=6, heads=6, input_size=1601")
+        "n_in=2, dim=192, depth=6, heads=6, input_size=%d"%res)
 
     # ---- tabular / sequence models ----
     add("mlp", MLP(81, 2), "tabular / flattened (MLP)",
@@ -126,7 +131,7 @@ def main():
                 "multi:softprob / binary:logistic. On modal(81)/indicators(22) only.",
         "repr_cfg": "n_estimators=600, max_depth=6, lr=0.05"}
 
-    (_REPO/"results_hires"/"architectures.json").write_text(json.dumps(arch, indent=1))
+    (_REPO/"results_hires"/f"architectures{figdata.sfx(res)}.json").write_text(json.dumps(arch, indent=1))
 
     # ---- parameter-count figure (torch + timm models) ----
     items = [(k, v["params_total"]) for k, v in arch["models"].items() if v.get("params_total")]
@@ -144,7 +149,7 @@ def main():
                  "pretrained vision backbones are 10–100× larger yet do not win", fontweight="bold", fontsize=10)
     ax.grid(axis="x", alpha=.3)
     plt.tight_layout(); plt.savefig(FIG/"arch_params.png", dpi=130); plt.close(fig)
-    print("wrote results_hires/architectures.json + figures/hires/arch_params.png")
+    print(f"wrote results_hires/architectures{figdata.sfx(res)}.json + arch_params.png (res={res})")
 
 
 if __name__ == "__main__":

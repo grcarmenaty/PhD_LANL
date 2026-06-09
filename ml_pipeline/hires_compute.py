@@ -35,8 +35,8 @@ sys.path.insert(0, str(REPO))
 from ml_pipeline import figdata
 from ml_pipeline.hires_zoo import ShallowCNN2D, DeepCFDACNet, CNN3D, CFDACTransformer
 from ml_pipeline.hires_tab import MLP, CNN1D, Transformer1D
-FIG = REPO/"results"/"figures"/"hires"; FIG.mkdir(parents=True, exist_ok=True)
-N = 1601                       # full frequency resolution
+from ml_pipeline import figdata
+N = 1601                       # set in main() from --res
 IMG_FAMILY = {"cnn2d_shallow", "cnn2d_deep", "cnn3d", "transformer", "resnet50", "convnext_tiny"}
 
 
@@ -48,7 +48,7 @@ def fwd_gflops(net, shape):
     return fc.get_total_flops() / 1e9
 
 
-def measure():
+def measure(N):
     """forward GFLOPs at the actual training input size, per model (n_in=2 ch)."""
     g = {}
     # conv nets: measure at base, scale by area ratio to 1601²
@@ -75,7 +75,7 @@ def measure():
     return g
 
 
-def cfdac_gflops(channels=2):
+def cfdac_gflops(N, channels=2):
     """On-the-fly CFDAC per sample: cross = frf(N,9)·conj(ref(9,N)) -> N×N, then
     num/denom/normalise. Cross matmul dominates: N²·9 complex MACs (~8 FLOP each)."""
     cross = N*N*9*8
@@ -83,12 +83,12 @@ def cfdac_gflops(channels=2):
     return (cross + elementwise) / 1e9
 
 
-def campaign():
+def campaign(res):
     """cell count + subsample per family, from the committed per-case archive."""
     root = figdata.percase_root()
     fams = defaultdict(lambda: {"n": 0, "subs": []})
     seen = set()
-    for p in glob.glob(f"{root}/**/per_case/*_hires1601.json", recursive=True):
+    for p in glob.glob(f"{root}/**/per_case/*_hires{res}.json", recursive=True):
         name = Path(p).name
         if name in seen: continue
         seen.add(name)
@@ -102,10 +102,14 @@ def campaign():
 
 
 def main():
-    arch = json.loads((REPO/"results_hires"/"architectures.json").read_text())["models"]
-    g = measure()
-    fams, ncells = campaign()
-    cfdac = cfdac_gflops(2)
+    import argparse
+    global FIG
+    ap = argparse.ArgumentParser(); ap.add_argument("--res", type=int, default=1601); a = ap.parse_args()
+    res = a.res; FIG = figdata.figdir(res)
+    arch = json.loads((REPO/"results_hires"/f"architectures{figdata.sfx(res)}.json").read_text())["models"]
+    g = measure(res)
+    fams, ncells = campaign(res)
+    cfdac = cfdac_gflops(res, 2)
 
     # per-model record: params + fwd GFLOPs + training GFLOP/epoch (3× fwd × subsample)
     SUB = 3000          # image-model subsample (engine default / meta median)
@@ -123,7 +127,7 @@ def main():
                      "family": "image" if is_img else "tabular/seq",
                      "train_gflops_per_epoch": round(per_sample*sub/1e3, 2),   # TFLOP/epoch
                      "subsample": sub}
-    out = {"resolution": N, "n_cells_1601": ncells, "by_family": fams,
+    out = {"resolution": res, "n_cells": ncells, "by_family": fams,
            "cfdac_gflops_per_sample": round(cfdac, 4),
            "mlp_flat_seq_fwd_gflops": round(g.get("mlp_flat_seq", 0), 3),
            "models": models,
@@ -131,7 +135,7 @@ def main():
                                   "optim": "AdamW", "sched": "ReduceLROnPlateau", "amp": "bf16(A100/L4)/fp16(T4)"},
                         "tabular": {"subsample": SUB_TAB, "batch": 256, "max_epochs": 200, "patience": 15}},
            "gpus": ["T4 (15 GB)", "L4 (24 GB)", "A100 (40 GB)"]}
-    (REPO/"results_hires"/"compute.json").write_text(json.dumps(out, indent=1))
+    (REPO/"results_hires"/f"compute{figdata.sfx(res)}.json").write_text(json.dumps(out, indent=1))
 
     # ---- figure: training compute per epoch (TFLOP) + params, log scale ----
     order = sorted(models, key=lambda k: models[k]["train_gflops_per_epoch"])
@@ -157,7 +161,7 @@ def main():
         m = models[k]
         print(f"  {k:15s} {str(m['params']):>9} p  fwd {m['fwd_gflops']:8.2f} GFLOP  "
               f"{m['train_gflops_per_epoch']:8.1f} TFLOP/epoch")
-    print("wrote results_hires/compute.json + figures/hires/compute_cost.png")
+    print(f"wrote results_hires/compute{figdata.sfx(res)}.json + compute_cost.png (res={res})")
 
 
 if __name__ == "__main__":
