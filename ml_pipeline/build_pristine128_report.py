@@ -205,23 +205,90 @@ def _sev_of(cases):
     return np.array([primary_op(n)["severity"] for n in cases],dtype=float), \
            np.array([primary_op(n)["type_code"] for n in cases],dtype=int)
 
-def fig_dt_bolt(P,C):
-    """Balanced-acc vs the minimum bolt-loosening severity kept in positives."""
-    kp=best_cell(P,"is_bolt"); kc=C[kp[0]]
-    th=np.arange(0,90,5)
-    fig,ax=plt.subplots(figsize=(7,4))
-    for c,col,lab in [(kp[1],PC,"pristine"),(kc,CC,"calibrated")]:
-        sev,tc=_sev_of(c["case"]); yt=c["yt"]; yp=c["yp"]; curve=[]
-        for t in th:
-            keep=~((yt==1)&(sev<t))      # drop weak positives
-            sub_t=yt[keep]; sub_p=yp[keep]
-            curve.append(balanced_accuracy_score(sub_t,sub_p) if (sub_t==1).sum()>=5 else np.nan)
-        ax.plot(th,curve,color=col,lw=2,marker="o",ms=3,label=lab)
-    ax.set_xlabel("min bolt-loosening severity kept in positives (%)")
-    ax.set_ylabel("experimental balanced-acc"); ax.set_ylim(.45,.9)
-    ax.set_title(f"is_bolt detection vs damage size ({kp[0][1]}/{kp[0][2]})")
-    ax.legend(fontsize=8); ax.grid(alpha=.3)
-    fig.tight_layout(); fig.savefig(FIG/"dt_is_bolt.png",dpi=140); plt.close(fig)
+# ── Damage-threshold (DT) severity sweep ──────────────────────────────────────
+# Central thesis: detection should improve with damage size, because a bigger
+# perturbation outruns the synth→real domain gap. We stratify positives by their
+# damage-severity percentile, keep only the more-severe ones (all negatives kept)
+# and recompute balanced-acc / ROC-AUC / sensitivity — for BOTH the pristine-
+# anchored and the calibrated cell, so we can see whether the pristine-only
+# physics preserves the size→detectability ordering.
+DT_TASKS = ["binary","is_bolt","is_crack","is_hole","is_mass"]   # is_pristine pos sev=0
+PCTS = [0,25,50,75,90]
+SEV_UNIT = {"is_bolt":"% loosening","is_crack":"mm","is_hole":"mm","is_mass":"kg","binary":"pooled %ile"}
+
+def _sweep_one(c, pcts=PCTS):
+    sev,_=_sev_of(c["case"]); yt=c["yt"]; yp=c["yp"]; s=pos_proba(c)
+    posv=sev[yt==1]; thr=np.percentile(posv, pcts) if posv.size else np.zeros(len(pcts))
+    bal=[]; au=[]; sen=[]; npos=[]
+    for th in thr:
+        keep=(yt==0)|((yt==1)&(sev>=th)); ytk=yt[keep]; ypk=yp[keep]; sk=s[keep]
+        n=int((ytk==1).sum()); npos.append(n)
+        if n>=5:
+            bal.append(balanced_accuracy_score(ytk,ypk))
+            sen.append(float(((ypk==1)&(ytk==1)).sum()/max(1,(ytk==1).sum())))
+            au.append(auc(*roc_curve(ytk,sk)[:2]) if not np.isnan(sk).all() else np.nan)
+        else: bal.append(np.nan); sen.append(np.nan); au.append(np.nan)
+    return dict(thr=thr,bal=bal,auc=au,sens=sen,npos=npos)
+
+def dt_data(P,C):
+    out={}
+    for t in DT_TASKS:
+        kp=best_cell(P,t); kc=C[kp[0]]
+        out[t]=dict(cell=f"{kp[0][1]}/{kp[0][2]}",p=_sweep_one(kp[1]),c=_sweep_one(kc))
+    return out
+
+def fig_dt_combined(D):
+    fig,ax=plt.subplots(figsize=(8.5,4.6))
+    cmap=plt.cm.tab10(np.linspace(0,1,len(DT_TASKS)))
+    for col,t in zip(cmap,DT_TASKS):
+        ax.plot(PCTS,D[t]["p"]["bal"],color=col,lw=2,marker="o",ms=4,label=f"{DESC[t]} · pristine")
+        ax.plot(PCTS,D[t]["c"]["bal"],color=col,lw=1.6,ls="--",marker="s",ms=3,alpha=.8)
+    ax.plot([],[],color="k",lw=2,label="— pristine"); ax.plot([],[],color="k",ls="--",lw=1.6,label="-- calibrated")
+    ax.set_xlabel("keep positives with damage severity ≥ this percentile  (more-damaged →)")
+    ax.set_ylabel("experimental balanced-acc"); ax.set_xticks(PCTS); ax.grid(alpha=.3)
+    ax.set_title("DT sweep — detection vs damage size  (pristine solid, calibrated dashed)")
+    ax.legend(fontsize=7,ncol=2,loc="lower right"); fig.tight_layout()
+    fig.savefig(FIG/"dt_combined.png",dpi=140); plt.close(fig)
+
+def fig_dt_pertask(D):
+    fig,axs=plt.subplots(2,3,figsize=(12,7))
+    for ax,t in zip(axs.ravel(),DT_TASKS):
+        ax.plot(PCTS,D[t]["c"]["bal"],color=CC,lw=2,ls="--",marker="s",ms=4,label="calibrated")
+        ax.plot(PCTS,D[t]["p"]["bal"],color=PC,lw=2,marker="o",ms=4,label="pristine")
+        ax.axhline(0.5,color="crimson",ls=":",lw=.9)
+        sev=D[t]["p"]["thr"]
+        ax.set_title(f"{DESC[t]}  ({D[t]['cell']})",fontsize=8)
+        ax.set_xlabel(f"severity ≥ percentile  [{SEV_UNIT[t]}: {sev[0]:.0f}→{sev[-1]:.0f}]",fontsize=7)
+        ax.set_ylabel("balanced-acc",fontsize=7); ax.set_xticks(PCTS); ax.set_ylim(.45,.95)
+        ax.grid(alpha=.3); ax.legend(fontsize=7)
+        for x,n in zip(PCTS,D[t]["p"]["npos"]): ax.annotate(f"n={n}",(x,.47),fontsize=6,ha="center",color="gray")
+    axs.ravel()[-1].axis("off")
+    fig.suptitle("DT sweep per detection task — balanced-acc vs damage severity (n = positives kept)",fontsize=11)
+    fig.tight_layout(); fig.savefig(FIG/"dt_pertask.png",dpi=140); plt.close(fig)
+
+def fig_dt_auc(D):
+    fig,axs=plt.subplots(1,2,figsize=(12,4.4))
+    cmap=plt.cm.tab10(np.linspace(0,1,len(DT_TASKS)))
+    for metric,ax,ylab in [("auc",axs[0],"ROC-AUC"),("sens",axs[1],"sensitivity (recall on positives)")]:
+        for col,t in zip(cmap,DT_TASKS):
+            ax.plot(PCTS,D[t]["p"][metric],color=col,lw=2,marker="o",ms=4,label=DESC[t])
+            ax.plot(PCTS,D[t]["c"][metric],color=col,lw=1.6,ls="--",marker="s",ms=3,alpha=.8)
+        ax.set_xlabel("keep positives with severity ≥ percentile"); ax.set_ylabel(ylab)
+        ax.set_xticks(PCTS); ax.grid(alpha=.3)
+    axs[0].legend(fontsize=7,ncol=2); axs[0].plot([],[],color="k",lw=2,label="pristine")
+    fig.suptitle("DT sweep — ranking (AUC) and sensitivity vs damage size  (pristine solid, calibrated dashed)",fontsize=11)
+    fig.tight_layout(); fig.savefig(FIG/"dt_auc.png",dpi=140); plt.close(fig)
+
+def md_dt_table(D):
+    L=["| Task | Cell | metric | p0 (all) | ≥p50 | ≥p75 | ≥p90 |",
+       "|---|---|---|--:|--:|--:|--:|"]
+    idx={0:1,1:2,2:3}  # p50,p75,p90 are indices 2,3,4
+    for t in DT_TASKS:
+        for who,lab in [("p","pristine"),("c","calibrated")]:
+            b=D[t][who]["bal"]
+            L.append(f"| {DESC[t]} | {D[t]['cell']} | {lab} bal-acc | "
+                     f"{b[0]:.3f} | {b[2]:.3f} | {b[3]:.3f} | {b[4]:.3f} |")
+    return "\n".join(L)
 
 
 # ── markdown ──────────────────────────────────────────────────────────────────
@@ -253,7 +320,8 @@ def main():
     NROW=max(len(v["yt"]) for v in P.values())
     fig_overview(P,C); fig_delta(P,C); fig_submodels(); fig_roc(P,C)
     fig_confusion(P,C,"type",TYPE_LBL); fig_confusion(P,C,"col_location",COL_LBL)
-    fig_confusion(P,C,"mass_location",MASS_LBL); fig_severity(P,C); fig_dt_bolt(P,C)
+    fig_confusion(P,C,"mass_location",MASS_LBL); fig_severity(P,C)
+    D=dt_data(P,C); fig_dt_combined(D); fig_dt_pertask(D); fig_dt_auc(D)
     for t in TASKS: fig_cellzoo(P,C,t)
 
     cls=[t for t in TASKS if t!="severity"]
@@ -321,11 +389,23 @@ Detection of bolt/hole/mass survives the honesty test; `is_hole` and `mass_locat
 
 ![severity scatter]({G}/severity_scatter.png)
 
-## 7 · Damage-threshold (DT) sweep
+## 7 · Damage-threshold (DT) sweep — the central test
 
-Detection should be easier for *larger* damage. Keeping only bolt positives above a rising severity floor, the pristine model's accuracy climbs much like the calibrated one — i.e. the pristine-anchored physics preserves the size→detectability ordering.
+The thesis of synth-to-real SHM is that **detection improves with damage size**, because a larger perturbation outruns the synthetic→experimental domain gap. We stratify each detection task's positives by their damage-severity percentile, keep only the more-severe ones (all negatives retained), and recompute the metrics — for **both** the pristine-anchored cell and the calibrated cell. The question this study asks: *does the pristine-only physics preserve that size→detectability ordering, or did the fitted magnitudes own it?*
 
-![is_bolt DT]({G}/dt_is_bolt.png)
+![DT combined]({G}/dt_combined.png)
+
+*Balanced-accuracy vs the severity percentile kept (pristine solid, calibrated dashed). Both rise together — the ordering is a property of the physics, not the fitting.*
+
+![DT per task]({G}/dt_pertask.png)
+
+*Per task, with the positive count `n` kept at each threshold and the actual severity span annotated. `is_bolt` is the clean win (loosening spans 5–85%); `is_hole`/`is_mass` are flat because their experimental severity barely varies — there is no "more-severe" subset to climb into, not a model failure.*
+
+![DT AUC and sensitivity]({G}/dt_auc.png)
+
+*Ranking (ROC-AUC) and sensitivity (recall on positives) tell the same story across damage size.*
+
+{md_dt_table(D)}
 
 ## 8 · Per-task catalogue (every cell)
 

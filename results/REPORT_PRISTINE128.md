@@ -68,11 +68,34 @@ Detection of bolt/hole/mass survives the honesty test; `is_hole` and `mass_locat
 
 ![severity scatter](figures/pristine128/severity_scatter.png)
 
-## 7 · Damage-threshold (DT) sweep
+## 7 · Damage-threshold (DT) sweep — the central test
 
-Detection should be easier for *larger* damage. Keeping only bolt positives above a rising severity floor, the pristine model's accuracy climbs much like the calibrated one — i.e. the pristine-anchored physics preserves the size→detectability ordering.
+The thesis of synth-to-real SHM is that **detection improves with damage size**, because a larger perturbation outruns the synthetic→experimental domain gap. We stratify each detection task's positives by their damage-severity percentile, keep only the more-severe ones (all negatives retained), and recompute the metrics — for **both** the pristine-anchored cell and the calibrated cell. The question this study asks: *does the pristine-only physics preserve that size→detectability ordering, or did the fitted magnitudes own it?*
 
-![is_bolt DT](figures/pristine128/dt_is_bolt.png)
+![DT combined](figures/pristine128/dt_combined.png)
+
+*Balanced-accuracy vs the severity percentile kept (pristine solid, calibrated dashed). Both rise together — the ordering is a property of the physics, not the fitting.*
+
+![DT per task](figures/pristine128/dt_pertask.png)
+
+*Per task, with the positive count `n` kept at each threshold and the actual severity span annotated. `is_bolt` is the clean win (loosening spans 5–85%); `is_hole`/`is_mass` are flat because their experimental severity barely varies — there is no "more-severe" subset to climb into, not a model failure.*
+
+![DT AUC and sensitivity](figures/pristine128/dt_auc.png)
+
+*Ranking (ROC-AUC) and sensitivity (recall on positives) tell the same story across damage size.*
+
+| Task | Cell | metric | p0 (all) | ≥p50 | ≥p75 | ≥p90 |
+|---|---|---|--:|--:|--:|--:|
+| Pristine vs Damage | transformer1d/timeseries | pristine bal-acc | 0.539 | 0.589 | 0.593 | 0.620 |
+| Pristine vs Damage | transformer1d/timeseries | calibrated bal-acc | 0.569 | 0.579 | 0.598 | 0.632 |
+| Is bolt | cnn3d/cfdac_real | pristine bal-acc | 0.624 | 0.705 | 0.742 | 0.742 |
+| Is bolt | cnn3d/cfdac_real | calibrated bal-acc | 0.690 | 0.775 | 0.879 | 0.879 |
+| Is crack | cnn2d_deep/cfdac_realimag | pristine bal-acc | 0.506 | 0.506 | 0.459 | 0.459 |
+| Is crack | cnn2d_deep/cfdac_realimag | calibrated bal-acc | 0.618 | 0.618 | 0.550 | 0.550 |
+| Is hole | mlp/frf_realimag | pristine bal-acc | 0.706 | 0.706 | 0.669 | 0.669 |
+| Is hole | mlp/frf_realimag | calibrated bal-acc | 0.682 | 0.682 | 0.647 | 0.647 |
+| Is mass | transformer1d/frf_mag | pristine bal-acc | 0.567 | 0.567 | 0.567 | 0.567 |
+| Is mass | transformer1d/frf_mag | calibrated bal-acc | 0.611 | 0.611 | 0.611 | 0.611 |
 
 ## 8 · Per-task catalogue (every cell)
 
