@@ -208,5 +208,20 @@
     "synth_test_bal_acc": 0.8994505566728446,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_hole_mlp_frf_realimag_hires128": {
+    "task": "is_hole",
+    "model": "mlp",
+    "feature": "frf_realimag",
+    "n_target": 128,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 8000,
+    "synth_val_best": 0.6585467991063314,
+    "synth_test_metric": 0.6391666666666667,
+    "synth_test_macro_f1": 0.6106042154566744,
+    "synth_test_bal_acc": 0.7464221805215105,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
