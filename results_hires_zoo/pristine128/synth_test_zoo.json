@@ -150,5 +150,24 @@
     "synth_test_bal_acc": 0.766579604814899,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_bolt_cnn3d_cfdac_realimag_hires128": {
+    "task": "is_bolt",
+    "model": "cnn3d",
+    "feature": "cfdac_realimag",
+    "n_target": 128,
+    "n_channels": 2,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 8000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.675331171774343,
+    "synth_test_metric": 0.7591666666666667,
+    "synth_test_macro_f1": 0.6948254970305323,
+    "synth_test_bal_acc": 0.7580888904418316,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
