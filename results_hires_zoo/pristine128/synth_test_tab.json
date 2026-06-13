@@ -148,5 +148,20 @@
     "synth_test_bal_acc": 0.8364145344122569,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_crack_transformer1d_timeseries_hires128": {
+    "task": "is_crack",
+    "model": "transformer1d",
+    "feature": "timeseries",
+    "n_target": 128,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 8000,
+    "synth_val_best": 0.7869249394673123,
+    "synth_test_metric": 0.8383333333333334,
+    "synth_test_macro_f1": 0.7867936624232987,
+    "synth_test_bal_acc": 0.8462447592263497,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
