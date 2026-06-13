@@ -169,5 +169,24 @@
     "synth_test_bal_acc": 0.7580888904418316,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_crack_cnn2d_deep_cfdac_realimag_hires128": {
+    "task": "is_crack",
+    "model": "cnn2d_deep",
+    "feature": "cfdac_realimag",
+    "n_target": 128,
+    "n_channels": 2,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 8000,
+    "vision_feed_size": null,
+    "synth_val_best": 0.7696545908560919,
+    "synth_test_metric": 0.82,
+    "synth_test_macro_f1": 0.7791682002208318,
+    "synth_test_bal_acc": 0.8749115754240067,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
