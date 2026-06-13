@@ -163,5 +163,20 @@
     "synth_test_bal_acc": 0.8462447592263497,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "is_mass_cnn1d_timeseries_hires128": {
+    "task": "is_mass",
+    "model": "cnn1d",
+    "feature": "timeseries",
+    "n_target": 128,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 8000,
+    "synth_val_best": 0.9605662683859774,
+    "synth_test_metric": 0.9783333333333334,
+    "synth_test_macro_f1": 0.9658240992678471,
+    "synth_test_bal_acc": 0.9658240992678471,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
