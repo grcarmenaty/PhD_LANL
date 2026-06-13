@@ -207,5 +207,24 @@
     "synth_test_bal_acc": 0.6966353040547895,
     "input_normalized": true,
     "trained_to_convergence": true
+  },
+  "is_hole_convnext_tiny_cfdac_real_hires128": {
+    "task": "is_hole",
+    "model": "convnext_tiny",
+    "feature": "cfdac_real",
+    "n_target": 128,
+    "n_channels": 1,
+    "kind": "cls",
+    "n_out": 2,
+    "max_epochs": 80,
+    "patience": 8,
+    "subsample": 8000,
+    "vision_feed_size": 256,
+    "synth_val_best": 0.6286393345216874,
+    "synth_test_metric": 0.6316666666666667,
+    "synth_test_macro_f1": 0.599926381626785,
+    "synth_test_bal_acc": 0.724450210946582,
+    "input_normalized": true,
+    "trained_to_convergence": true
   }
 }
