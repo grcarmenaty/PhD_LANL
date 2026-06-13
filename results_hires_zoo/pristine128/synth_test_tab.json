@@ -13,5 +13,20 @@
     "synth_test_bal_acc": 0.9035427669936209,
     "standardized": false,
     "trained_to_convergence": true
+  },
+  "binary_transformer1d_frf_realimag_hires128": {
+    "task": "binary",
+    "model": "transformer1d",
+    "feature": "frf_realimag",
+    "n_target": 128,
+    "kind": "cls",
+    "n_out": 2,
+    "subsample": 8000,
+    "synth_val_best": 0.8228003942513317,
+    "synth_test_metric": 0.8616666666666667,
+    "synth_test_macro_f1": 0.8224447011509006,
+    "synth_test_bal_acc": 0.8994444063378833,
+    "standardized": false,
+    "trained_to_convergence": true
   }
 }
